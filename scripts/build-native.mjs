@@ -4,7 +4,7 @@
 // AXe everywhere, so a failed build stops the pack. SIMULATOR_USE_SKIP_NATIVE=1 packs without them (CI's check of
 // the package, a local tarball for testing AXe alone).
 import { execFileSync } from "node:child_process";
-import { existsSync, rmSync, statSync } from "node:fs";
+import { chmodSync, existsSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -37,5 +37,8 @@ for (const [name, platform] of [["simulator-use-engine", "macOS"], ["simulator-u
   const info = execFileSync("file", [path], { encoding: "utf8" });
   if (!/Mach-O/.test(info) || !/arm64/.test(info)) throw new Error(`${name} is not an arm64 Mach-O binary: ${info.trim()}`);
   execFileSync("codesign", ["--verify", path]);
+  // Executable by everyone whatever the umask: a host may install the package as root for other users to run
+  // (0.10.0, packed under umask 077, shipped them as 0700 and NoMac's phone users could not start the engine).
+  chmodSync(path, 0o755);
   console.log(`${name}: ${Math.round(statSync(path).size / 1024)} KB, for ${platform}, signed`);
 }
