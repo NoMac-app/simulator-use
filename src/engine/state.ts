@@ -71,13 +71,34 @@ export async function setCurrentApp(udid: string, app: CurrentApp): Promise<void
  * every app simulator-use launches gets it as TZ.
  */
 export async function deviceTimeZone(udid: string): Promise<string | undefined> {
-  try {
-    return (JSON.parse(await readFile(join(await deviceDir(udid), "settings.json"), "utf8")) as { timeZone?: string }).timeZone;
-  } catch {
-    return undefined;
-  }
+  return (await deviceSettings(udid)).timeZone;
 }
 
 export async function setDeviceTimeZone(udid: string, timeZone: string | undefined): Promise<void> {
-  await writeFile(join(await deviceDir(udid), "settings.json"), JSON.stringify(timeZone ? { timeZone } : {}));
+  await setDeviceSettings(udid, { timeZone });
+}
+
+/** The environment app_run gave the device's apps (env): every later launch passes it, as Xcode's scheme would. */
+export async function deviceEnv(udid: string): Promise<Record<string, string>> {
+  return (await deviceSettings(udid)).env ?? {};
+}
+
+export async function setDeviceEnv(udid: string, env: Record<string, string>): Promise<void> {
+  await setDeviceSettings(udid, { env: Object.keys(env).length ? env : undefined });
+}
+
+type DeviceSettings = { timeZone?: string; env?: Record<string, string> };
+
+async function deviceSettings(udid: string): Promise<DeviceSettings> {
+  try {
+    return JSON.parse(await readFile(join(await deviceDir(udid), "settings.json"), "utf8")) as DeviceSettings;
+  } catch {
+    return {};
+  }
+}
+
+async function setDeviceSettings(udid: string, change: DeviceSettings): Promise<void> {
+  const next: DeviceSettings = { ...(await deviceSettings(udid)), ...change };
+  for (const key of Object.keys(next) as (keyof DeviceSettings)[]) if (next[key] === undefined) delete next[key];
+  await writeFile(join(await deviceDir(udid), "settings.json"), JSON.stringify(next));
 }

@@ -1,7 +1,7 @@
 import { bundleIdOf, install } from "../engine/apps.ts";
 import { answer, claimProject, currentJob, startJob } from "../engine/jobs.ts";
 import { bootDevice, findDevice, listDevices, pickDevice, type Device } from "../engine/simctl.ts";
-import { heldDevice, holdDevice } from "../engine/state.ts";
+import { heldDevice, holdDevice, setDeviceEnv } from "../engine/state.ts";
 import { build, builtApp, formatIssue, knownFix, noDestination, projectFor, remember } from "../engine/xcode.ts";
 import { pickXcode } from "../engine/xcodes.ts";
 import { grantAll, setPermissionMode } from "../engine/prompts.ts";
@@ -30,21 +30,39 @@ export async function runDevice(wanted?: string): Promise<Device> {
   return target ?? pickDevice(devices, undefined, heldDevice());
 }
 
+/**
+ * app_run's env: "API_URL=http://127.0.0.1:20199 MODE=test" as the variables the app reads from its environment, as
+ * Xcode's scheme gives them; "" clears them. Undefined: the device keeps what it had.
+ */
+export function launchEnv(value: unknown): Record<string, string> | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") throw new ToolError("env must be text: KEY=VALUE pairs, space-separated.");
+  const env: Record<string, string> = {};
+  for (const pair of value.split(/\s+/).filter(Boolean)) {
+    const m = /^([A-Za-z_][A-Za-z0-9_]{0,63})=(\S{0,2048})$/.exec(pair);
+    if (!m) throw new ToolError(`env: "${pair.slice(0, 80)}" is not KEY=VALUE.`, 'Pass env like "API_URL=http://127.0.0.1:20199 MODE=test" (values without spaces).');
+    env[m[1]!] = m[2]!;
+  }
+  if (Object.keys(env).length > 20) throw new ToolError("env takes up to 20 variables.");
+  return env;
+}
+
 export const appRun: Tool = {
   name: "app_run",
   title: "Build and run the app",
   description:
-    "Build the Xcode project in a folder for the Simulator, install it, launch it, and answer with its first screen. Errors come back as file:line. A build past 40 s answers with a job for job_status. Later calls reuse the project.",
+    "Build the Xcode project in a folder for the Simulator, install and launch it, and answer with its first screen. Errors as file:line. A build past 40 s answers with a job for job_status. Later calls reuse the project.",
   inputSchema: {
     type: "object",
     properties: {
-      path: { type: "string", description: "Project folder, .xcodeproj or .xcworkspace; default: the current folder" },
-      scheme: { type: "string", description: "Default: the only scheme, or the one named like the project" },
+      path: { type: "string", description: "Project folder, .xcodeproj or .xcworkspace; default: here" },
+      scheme: { type: "string", description: "Default: the only scheme, or one named like the project" },
       configuration: { type: "string", enum: ["Debug", "Release"], description: "Default: Debug" },
       clean: { type: "boolean", description: "Build from scratch" },
       device: { type: "string", description: "Name or UDID; default: the one in use" },
-      permissions: { type: "string", enum: ["grant", "ask"], description: "grant (default): permissions granted, first-launch prompts answered; ask: iOS's prompts stay" },
-      xcode: { type: "string", description: "Xcode: 27.1, beta or default (kept)" },
+      permissions: { type: "string", enum: ["grant", "ask"], description: "grant (default) answers prompts; ask: iOS's prompts stay" },
+      xcode: { type: "string", description: "27.1, beta or default (kept)" },
+      env: { type: "string", description: "App env: \"K=V K2=V2\" (kept)" },
     },
     additionalProperties: false,
   },
@@ -52,6 +70,7 @@ export const appRun: Tool = {
   command: "run",
   positional: ["path"],
   async run(args, context) {
+    const env = launchEnv(args.env);
     // Finding the project (xcodebuild -list) and booting count toward the 40 s answer too: all of it is the job.
     const job = startJob("Build and run", async (progress) => {
       progress.step("finding the project");
@@ -109,6 +128,7 @@ export const appRun: Tool = {
       // Granted by default, so no prompt stops the agent; "ask" leaves iOS's prompts for a test of them.
       const refused = args.permissions === "ask" ? (await setPermissionMode(device.udid, bundleId, "ask"), undefined) : await grantAll(device.udid, bundleId);
       progress.step("launching");
+      if (env) await setDeviceEnv(device.udid, env);
       const look = await launchAndLook(device, bundleId);
       const made = project.generated ? ` (generated ${project.name}.xcodeproj with XcodeGen first)` : "";
       const grant = refused ? `\nIts permissions could not be granted (${refused}).` : "";

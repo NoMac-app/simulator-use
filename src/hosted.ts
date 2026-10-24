@@ -658,6 +658,34 @@ const STATE_NAME = /^[A-Za-z0-9._-]{1,64}$/;
 const KEEP_STATE_JOBS = 20;
 /** What iOS rebuilds by itself: left out of a saved state. */
 const REBUILT = ["Library/Caches", "Library/Logs", "tmp"];
+/**
+ * The system's own assets (Siri voices, ML models: 1.8 GB of a 3.7 GB phone), the same on every phone of a model and
+ * iOS: left out of a saved state, and a restore keeps the phone's own.
+ */
+const SYSTEM_ASSETS = "private/var/MobileAsset";
+
+/**
+ * Copies from into to with ditto (which keeps what iOS's files carry: extended attributes, permissions), leaving out
+ * the paths in skip (relative to from) without copying them first.
+ */
+export async function copyExcept(from: string, to: string, skip: string[]): Promise<void> {
+  await mkdir(to, { recursive: true });
+  for (const name of await readdir(from)) {
+    if (skip.includes(name)) continue;
+    const inside = skip.filter((p) => p.startsWith(`${name}/`)).map((p) => p.slice(name.length + 1));
+    if (inside.length) await copyExcept(join(from, name), join(to, name), inside);
+    else await run("/usr/bin/ditto", [join(from, name), join(to, name)], { timeoutMs: 10 * 60_000 });
+  }
+}
+
+/** Removes everything under root except keep (a path inside it) and the folders that lead to it. */
+export async function removeExcept(root: string, keep: string): Promise<void> {
+  const [first, ...rest] = keep.split("/");
+  for (const name of await readdir(root).catch(() => [] as string[])) {
+    if (name !== first) await rm(join(root, name), { recursive: true, force: true });
+    else if (rest.length) await removeExcept(join(root, name), rest.join("/"));
+  }
+}
 type SavedState = { name: string; bytes: number; saved_at: string; device: string; runtime: string };
 type StateJob = { state: "running" | "done" | "failed"; error?: string; bytes?: number; ms?: number; states?: SavedState[]; device?: string };
 const stateJobs = new Map<string, StateJob>();
@@ -713,9 +741,7 @@ async function saveState(name: string): Promise<StateJob> {
   try {
     await rm(saving, { recursive: true, force: true });
     await mkdir(saving, { recursive: true });
-    // ditto keeps what iOS's files carry (extended attributes, permissions); the caches go after.
-    await run("/usr/bin/ditto", [data, join(saving, "data")], { timeoutMs: 10 * 60_000 });
-    for (const rebuilt of REBUILT) await rm(join(saving, "data", rebuilt), { recursive: true, force: true });
+    await copyExcept(data, join(saving, "data"), [...REBUILT, SYSTEM_ASSETS]);
     const bytes = Number((await run("/usr/bin/du", ["-sk", saving], { timeoutMs: 60_000 })).stdout.split(/\s/)[0]) * 1024;
     const meta: SavedState = { name, bytes, saved_at: new Date().toISOString(), device: device.name, runtime: device.runtime };
     await writeFile(join(saving, "state.json"), JSON.stringify(meta));
@@ -742,7 +768,7 @@ async function restoreState(name: string): Promise<StateJob> {
   const data = await dataPathOf(device.udid);
   await shutDown(device.udid);
   try {
-    await rm(data, { recursive: true, force: true });
+    await removeExcept(data, SYSTEM_ASSETS);
     await run("/usr/bin/ditto", [join(dir, "data"), data], { timeoutMs: 10 * 60_000 });
     return { state: "done", bytes: meta.bytes, device: `${device.name} (${device.runtime})` };
   } finally {

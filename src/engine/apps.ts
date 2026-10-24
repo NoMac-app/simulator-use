@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { ToolError } from "../errors.ts";
 import { isOurs, run } from "./exec.ts";
-import { deviceDir, deviceTimeZone } from "./state.ts";
+import { deviceDir, deviceEnv, deviceTimeZone } from "./state.ts";
 
 const simctl = (args: string[], timeoutMs = 60_000) => run("xcrun", ["simctl", ...args], { timeoutMs });
 
@@ -76,12 +76,13 @@ export function freshFile(path: string): number {
 export async function launch(udid: string, bundleId: string): Promise<void> {
   const file = await consoleFile(udid, bundleId);
   const timeZone = await deviceTimeZone(udid);
+  const env = Object.fromEntries(Object.entries(await deviceEnv(udid)).map(([key, value]) => [`SIMCTL_CHILD_${key}`, value]));
   const fd = freshFile(file);
   const child = spawn("xcrun", ["simctl", "launch", "--console-pty", "--terminate-running-process", udid, bundleId], {
     detached: true,
     stdio: ["ignore", fd, fd],
-    // The time zone app_control set: iOS takes a process's TZ, and simctl hands SIMCTL_CHILD_ variables to the app.
-    env: { ...process.env, SIMCTL_CHILD_NSUnbufferedIO: "YES", ...(timeZone ? { SIMCTL_CHILD_TZ: timeZone } : {}) },
+    // The time zone app_control set (iOS takes a process's TZ) and app_run's env: simctl hands SIMCTL_CHILD_ variables to the app.
+    env: { ...process.env, ...env, SIMCTL_CHILD_NSUnbufferedIO: "YES", ...(timeZone ? { SIMCTL_CHILD_TZ: timeZone } : {}) },
   });
   closeSync(fd);
   // A launch that fails ends the launcher within moments; a running app keeps it alive.

@@ -11,6 +11,7 @@ import { persistHeld } from "./engine/state.ts";
 import { serve } from "./mcp.ts";
 import { callTool, toContent, TOOLS, VERSION } from "./registry.ts";
 import type { Tool } from "./tools/types.ts";
+import { relay, relayPorts } from "./tunnel-relay.ts";
 
 const flag = (name: string) => `--${name.replace(/_/g, "-")}`;
 
@@ -146,6 +147,16 @@ export async function main(argv: string[]): Promise<number> {
   if (command === "--version" || command === "-v") {
     console.log(VERSION);
     return 0;
+  }
+  // The host's tunnel relay for a NoMac phone (not for people): its stdout is the tunnel, so nothing else is printed.
+  if (command === "tunnel-relay") {
+    try {
+      await relay(process.stdin, process.stdout, relayPorts(process.env.SIMULATOR_USE_PORTS));
+    } catch (error) {
+      console.error(`tunnel-relay: ${(error as Error).message}`);
+      process.exit(1);
+    }
+    process.exit(0);
   }
   if (command === "mcp") {
     await serve();

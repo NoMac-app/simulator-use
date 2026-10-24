@@ -96,6 +96,7 @@ textfield "Email" #email @201,194
 - Each folder (each git worktree) builds into its own DerivedData, so rebuilds are incremental and worktrees never share products. `SIMULATOR_USE_CACHE_DIR` puts it on a disk you keep, so the next machine's build is incremental too.
 - An XcodeGen project is regenerated from `project.yml` before each build (skipped when nothing changed), so new files are always in it.
 - The next call in the same folder needs no arguments.
+- `env: "API_URL=http://127.0.0.1:8080 MODE=test"` gives the app those variables (it reads them from `ProcessInfo`), as an Xcode scheme does; they stay for its later launches, and `env: ""` clears them.
 - An MCP call answers within 40 s; a longer build answers with a job, and `job_status` waits for it. From the CLI, `simulator-use run` simply waits.
 - Two builds of one project never run at once, also from two processes: the second says which process is building it.
 - Expo, React Native, Flutter and Capacitor builds are not done yet; build them with their own tools, then `app_control install`.
@@ -192,6 +193,14 @@ simulator-use cloud run . --tests   # CI in one line: start, build, run, test, a
 Only the files the phone lacks are sent (a one-file change sends one file), into the account's own encrypted workspace, kept between sessions so builds stay incremental; build output and dependencies stay behind. The `cloud` tool does the same over MCP.
 
 `cloud start` answers a link for a person to watch the phone in a browser and one to use it. `cloud stop` answers the session's replay: the screen as a video beside every call (typed text left out), kept for 7 days.
+
+An app that talks to a backend on your machine reaches it through a tunnel (Node 22 or later):
+
+```
+simulator-use cloud tunnel 8080    # until Ctrl-C: the phone reaches localhost:8080 here, each request printed
+```
+
+The answer says the address the phone's apps use, such as `http://127.0.0.1:20199`; point the app there, for example with `run --env "API_URL=http://127.0.0.1:20199"`. Each request that passes is listed with its status and time (`cloud tunnel` without a port shows them over MCP). It lasts while the phone runs and comes back by itself after a dropped connection; `cloud tunnel` with port 0 closes it.
 
 On GitHub, from any runner, with the result posted on each pull request and the screenshot and recording kept as artifacts:
 

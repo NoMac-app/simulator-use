@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { account, cloudState, setCloudState, signIn } from "../cloud/account.ts";
 import { type CloudApi, CloudError } from "../cloud/api.ts";
 import { forward } from "../cloud/forward.ts";
+import { describeRequest, Tunnel } from "../cloud/tunnel.ts";
 import { randomKey } from "../cloud/sync.ts";
 import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
@@ -12,7 +13,7 @@ import type { CallContext, Tool, ToolResult } from "./types.ts";
 
 /** How long start waits for the phone before answering that it is still starting (an MCP call has about a minute). */
 const READY_WAIT_MS = 40_000;
-const ACTIONS = ["start", "status", "stop", "run"];
+const ACTIONS = ["start", "status", "stop", "run", "tunnel"];
 
 type Phone = { id: string; state: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean };
 /** A phone answer's links: view and control while it runs, its replay always. */
@@ -64,6 +65,58 @@ async function start(context: CallContext): Promise<ToolResult> {
   return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an iPhone Simulator on a NoMac Mac, $0.80 an hour by the minute.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
 }
 
+/** The phone's tunnel to a backend on this machine, while this process runs (one at a time). */
+let tunnel: Tunnel | undefined;
+
+const tunnelLine = (t: Tunnel) =>
+  t.state === "closed" ? `The tunnel closed${t.error ? `: ${t.error}` : ""}.` : `The phone reaches ${t.localHost}:${t.localPort} on this machine at http://127.0.0.1:${t.phonePort}${t.state === "connecting" ? " (reconnecting)" : ""}.`;
+
+/**
+ * tunnel with port: the phone's apps reach that port on this machine (a local backend) at http://127.0.0.1:<its port>
+ * on the phone; without port: what it carried; port 0: closes it. On the command line it runs until Ctrl-C, printing
+ * each request.
+ */
+async function openTunnel(args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
+  const state = await cloudState();
+  const api = await account();
+  if (args.port === 0) {
+    const had = tunnel;
+    tunnel?.stop();
+    tunnel = undefined;
+    return { text: had ? "Closed the phone's tunnel." : "No tunnel is open." };
+  }
+  const port = typeof args.port === "number" ? args.port : typeof args.path === "string" && /^\d+$/.test(args.path) ? Number(args.path) : undefined;
+  if (port === undefined) {
+    if (!tunnel) return { text: "No tunnel is open.\nNext: cloud tunnel with port, your backend's port on this machine." };
+    const recent = tunnel.requests.slice(-20).map((r) => describeRequest(r));
+    return { text: `${tunnelLine(tunnel)} ${tunnel.requests.length} requests so far${recent.length ? `, the last:\n${recent.join("\n")}` : "."}${tunnel.error && tunnel.state !== "closed" ? `\nLast problem: ${tunnel.error}.` : ""}` };
+  }
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new ToolError(`${port} is not a port.`, "Pass port: your backend's port on this machine, like 8080.");
+  if (!api || !state.on || !state.session) throw new ToolError("Cloud has no phone.", "Call cloud start first.");
+  if (tunnel && (tunnel.session !== state.session || tunnel.localPort !== port || tunnel.state === "closed")) {
+    tunnel.stop();
+    tunnel = undefined;
+  }
+  if (!tunnel) {
+    const opened = new Tunnel(api, state.session, port, "127.0.0.1", context.waitForJobs ? (r) => console.log(describeRequest(r, false)) : undefined);
+    await opened.start();
+    tunnel = opened;
+  }
+  const url = `http://127.0.0.1:${tunnel.phonePort}`;
+  const text = `${tunnelLine(tunnel)}\nPoint the app's backend there: app_run env "API_URL=${url}" for an app that reads it from ProcessInfo, or its Debug configuration. It works while the phone runs; cloud tunnel shows the requests it carried, cloud tunnel with port 0 closes it.`;
+  if (!context.waitForJobs) return { text };
+  // The command line keeps it open, printing each request, until Ctrl-C.
+  console.log(`${text}\nRequests as they pass (Ctrl-C closes it):`);
+  await new Promise<void>((resolve) => {
+    process.once("SIGINT", resolve);
+    process.once("SIGTERM", resolve);
+  });
+  const carried = tunnel.requests.length;
+  tunnel.stop();
+  tunnel = undefined;
+  return { text: `Closed the tunnel after ${carried} request${carried === 1 ? "" : "s"}.` };
+}
+
 async function status(): Promise<ToolResult> {
   const state = await cloudState();
   if (!state.on) return { text: "Cloud is off: the tools run on this machine. cloud start runs them on a NoMac phone." };
@@ -72,10 +125,12 @@ async function status(): Promise<ToolResult> {
   const phone = await phoneOf(api, state.session);
   const minutes = Math.ceil((phone.cost?.billable_seconds ?? 0) / 60);
   if (phone.state === "queued") return { text: `Cloud is on: phone ${phone.id} is waiting.${phone.message ? ` ${phone.message}` : ""}` };
-  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.` };
+  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${tunnel ? `\n${tunnelLine(tunnel)}` : ""}` };
 }
 
 async function stop(): Promise<ToolResult> {
+  tunnel?.stop();
+  tunnel = undefined;
   const state = await cloudState();
   const api = await account();
   await setCloudState({ on: false });
@@ -156,14 +211,15 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for a machine that can't run one (Linux, Windows, a cloud agent) or for CI. start signs in (a link for the person the first time; NOMAC_API_KEY for headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: the phone and its cost so far. stop: ends it. run: start, build and run path, its tests with tests, a screenshot and a recording, stop, in one call.",
+    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents and CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run: start, build and run path, its tests with tests, a screenshot and a recording, stop, in one call. tunnel: the phone reaches port on this machine.",
   inputSchema: {
     type: "object",
     properties: {
-      action: { type: "string", enum: ACTIONS, description: "start, status, stop, or run" },
-      path: { type: "string", description: "run: the project folder; default: the current folder" },
-      tests: { type: "boolean", description: "run: run the project's tests too" },
-      out: { type: "string", description: "run (command line): the folder for the screenshot; default: the temporary folder" },
+      action: { type: "string", enum: ACTIONS, description: "start, status, stop, run, or tunnel" },
+      port: { type: "number", description: "tunnel: a backend's port here; 0 closes it" },
+      path: { type: "string", description: "run: project folder; default: here" },
+      tests: { type: "boolean", description: "run: its tests too" },
+      out: { type: "string", description: "run (command line): screenshot folder; default: temp" },
     },
     required: ["action"],
     additionalProperties: false,
@@ -181,6 +237,8 @@ export const cloud: Tool = {
           return await stop();
         case "run":
           return await runOnce(args, context);
+        case "tunnel":
+          return await openTunnel(args, context);
       }
       throw new ToolError(`Unknown action "${String(args.action)}".`, `Actions: ${ACTIONS.join(", ")}.`);
     } catch (error) {

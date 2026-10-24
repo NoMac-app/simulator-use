@@ -3,10 +3,10 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { callSummary, gitEnv, gitUrl, hosted, hostedText, noteCall, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
+import { callSummary, copyExcept, gitEnv, gitUrl, hosted, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const project = "prj_" + "f".repeat(32);
@@ -341,6 +341,25 @@ test("the pool's first read asks the engine again until it reads, and says when 
   assert.equal(never.readable, false);
   assert.equal(never.error, "nilError");
   setFirstRead(undefined);
+});
+
+test("a saved state leaves out caches and the system's assets, and a restore keeps the phone's own assets", async () => {
+  const root = mkdtempSync(join(tmpdir(), "su-state-"));
+  const phone = join(root, "phone");
+  for (const [path, text] of [["Library/Preferences/app.plist", "prefs"], ["Library/Caches/big", "cache"], ["Containers/Data/Application/A/doc", "doc"],
+    ["private/var/MobileAsset/AssetsV2/voice", "voice"], ["private/var/db/keep", "db"], ["tmp/scratch", "tmp"]] as Array<[string, string]>) {
+    mkdirSync(join(phone, dirname(path)), { recursive: true });
+    writeFileSync(join(phone, path), text);
+  }
+  await copyExcept(phone, join(root, "state"), ["Library/Caches", "Library/Logs", "tmp", "private/var/MobileAsset"]);
+  const saved = (path: string) => existsSync(join(root, "state", path));
+  assert.ok(saved("Library/Preferences/app.plist") && saved("Containers/Data/Application/A/doc") && saved("private/var/db/keep"));
+  assert.ok(!saved("Library/Caches") && !saved("tmp") && !saved("private/var/MobileAsset"));
+  // The next phone: its own data and assets; a restore leaves only the assets before the state goes in.
+  writeFileSync(join(phone, "Containers/Data/Application/A/doc"), "the next phone's own");
+  await removeExcept(phone, "private/var/MobileAsset");
+  assert.ok(existsSync(join(phone, "private/var/MobileAsset/AssetsV2/voice")));
+  assert.ok(!existsSync(join(phone, "Library")) && !existsSync(join(phone, "Containers")) && !existsSync(join(phone, "private/var/db")) && !existsSync(join(phone, "tmp")));
 });
 
 test("saved phone states: checked names and ids, listed with their size, deleted, kept in the workspace only", async () => {
