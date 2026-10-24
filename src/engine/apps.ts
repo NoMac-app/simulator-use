@@ -73,7 +73,10 @@ export function freshFile(path: string): number {
  * simctl's --stdout wrote nothing on iOS 26.5, so a detached `simctl launch --console-pty` holds the app's
  * output instead, writing to a file until the app ends; NSUnbufferedIO is what Xcode sets so lines arrive at once.
  */
-export async function launch(udid: string, bundleId: string): Promise<void> {
+/** A launched app: with --console-pty its launcher lives as long as the app, so ended() says the app is gone. */
+export type Launched = { ended: () => boolean };
+
+export async function launch(udid: string, bundleId: string): Promise<Launched> {
   const file = await consoleFile(udid, bundleId);
   const timeZone = await deviceTimeZone(udid);
   const env = Object.fromEntries(Object.entries(await deviceEnv(udid)).map(([key, value]) => [`SIMCTL_CHILD_${key}`, value]));
@@ -85,6 +88,8 @@ export async function launch(udid: string, bundleId: string): Promise<void> {
     env: { ...process.env, ...env, SIMCTL_CHILD_NSUnbufferedIO: "YES", ...(timeZone ? { SIMCTL_CHILD_TZ: timeZone } : {}) },
   });
   closeSync(fd);
+  let ended = false;
+  child.once("exit", () => (ended = true));
   // A launch that fails ends the launcher within moments; a running app keeps it alive.
   const code = await new Promise<number | null | undefined>((resolve) => {
     const timer = setTimeout(() => resolve(undefined), 2_000);
@@ -99,6 +104,7 @@ export async function launch(udid: string, bundleId: string): Promise<void> {
     }
     throw new ToolError(`Could not launch ${bundleId}: ${output.split("\n").slice(-3).join(" ")}`);
   }
+  return { ended: () => ended };
 }
 
 /** The app's own system log lines, streamed to a file while simulator-use watches it. */

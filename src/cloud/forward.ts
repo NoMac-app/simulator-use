@@ -16,6 +16,10 @@ import { type CloudApi, CloudError } from "./api.ts";
 import { randomKey, syncFolder } from "./sync.ts";
 
 const JOB = /Next: job_status \{job_id: "([^"]+)"\}/;
+// job_status's answer while the job still runs (tools/jobs.ts): the same job is read again.
+const STILL_RUNNING = /\nNext: job_status again, or job_cancel\./;
+/** How long a call waits for a phone that is still starting (queued for a free one, or being prepared). */
+const STARTING_WAIT_MS = { cli: 5 * 60_000, mcp: 30_000 };
 
 /** The phone cloud mode uses, or why there is none. */
 export async function cloudPhone(): Promise<{ api: CloudApi; session: string }> {
@@ -51,8 +55,19 @@ async function projectRoot(path: string): Promise<{ folder: string; inside: stri
   return { folder, inside: relative(folder, realpathSync(local)).split(sep).join("/") };
 }
 
+/** Waits for a phone that is still starting, up to waitMs: its state as last read (ready, or not yet). */
+async function whenReady(api: CloudApi, session: string, waitMs: number): Promise<{ state: string; message?: string }> {
+  const deadline = Date.now() + waitMs;
+  for (;;) {
+    const phone = (await api.json("GET", `/api/v1/simulator/sessions/${session}`)).session as { state: string; message?: string };
+    if (phone.state !== "queued" && phone.state !== "provisioning") return phone;
+    if (Date.now() >= deadline) return phone;
+    await new Promise((r) => setTimeout(r, 2_000));
+  }
+}
+
 /** Runs one tool on the phone and answers as the local tool would. */
-export async function forward(name: string, args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
+export async function forward(name: string, args: Record<string, unknown>, context: CallContext, waited = false): Promise<ToolResult> {
   const { api, session } = await cloudPhone();
   let sent = args;
   let note = "";
@@ -71,14 +86,22 @@ export async function forward(name: string, args: Record<string, unknown>, conte
       sent = { ...args, app: `${synced.root}/${basename(app)}` };
     }
     let result = await call(api, session, name, sent);
-    // The command line waits for a long build, as it does on this Mac: job_status until the job ends.
-    for (let rounds = 0; context.waitForJobs && rounds < 60; rounds++) {
-      const job = JOB.exec(result.text)?.[1];
-      if (!job) break;
+    // The command line waits for a long build, as it does on this Mac: job_status until the job ends. A job named
+    // in an error (another build of the project running) is not this call's.
+    const job = context.waitForJobs && !result.isError ? JOB.exec(result.text)?.[1] : undefined;
+    for (let rounds = 0; job && rounds < 120; rounds++) {
       result = await call(api, session, "job_status", { job_id: job });
+      if (result.isError || !STILL_RUNNING.test(result.text)) break;
     }
     return note ? { ...result, text: `${note}${result.text}` } : result;
   } catch (error) {
+    // A phone still starting (waiting for a free one, or being prepared) is waited for, then the call goes again.
+    if (error instanceof CloudError && error.code === "session_not_ready" && error.details.starting === true) {
+      const phone = waited ? undefined : await whenReady(api, session, context.waitForJobs ? STARTING_WAIT_MS.cli : STARTING_WAIT_MS.mcp).catch(() => undefined);
+      if (phone?.state === "ready") return forward(name, args, context, true);
+      if (phone && !["queued", "provisioning"].includes(phone.state)) return ended(session);
+      return { text: `The cloud phone ${session} is still starting${phone?.message ? `: ${phone.message}` : "."}\nNext: ${name} again in a moment (nothing ran); cloud status shows its place.`, isError: true };
+    }
     if (error instanceof CloudError && (error.code === "session_not_found" || error.code === "session_not_ready" || error.code === "session_expired")) return ended(session);
     if (error instanceof CloudError) return { text: `NoMac: ${error.message}`, isError: true };
     throw error;

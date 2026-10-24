@@ -15,12 +15,15 @@ inputs:
   tests:
     description: Run the project's tests too
     default: "true"
+  scheme:
+    description: The scheme to build and test, when the project has several (default, the only one, or the one named like the project)
+    default: ""
   comment:
     description: Post the result as a comment on the pull request (needs pull-requests write permission)
     default: "true"
   version:
-    description: The simulator-use version from npm
-    default: "latest"
+    description: The simulator-use version from npm (default, the version of this action's own checkout, so v0.10 runs what that tag holds)
+    default: ""
 
 outputs:
   result:
@@ -40,11 +43,25 @@ runs:
         SIMULATOR_USE_STATE_DIR: ${{ runner.temp }}/simulator-use-state
         PROJECT: ${{ inputs.path }}
         TESTS: ${{ inputs.tests }}
+        SCHEME: ${{ inputs.scheme }}
         VERSION: ${{ inputs.version }}
       run: |
         mkdir -p "$RUNNER_TEMP/simulator-use"
+        # A fork's pull request gets no secrets: say so instead of starting a sign-in.
+        if [ -z "$NOMAC_API_KEY" ]; then
+          echo "simulator-use: the api-key input is empty (a pull request from a fork gets no secrets, or the secret is not set)." | tee "$RUNNER_TEMP/simulator-use/result.txt" >&2
+          echo "result=failed" >> "$GITHUB_OUTPUT"; echo "artifact=" >> "$GITHUB_OUTPUT"; exit 0
+        fi
+        # The version of this action's own checkout (its tag's package.json), when npm has it; else npm's latest.
+        if [ -z "$VERSION" ]; then
+          VERSION=$(node -p 'require(process.env.GITHUB_ACTION_PATH + "/package.json").version' 2>/dev/null || true)
+          if [ -z "$VERSION" ] || ! npm view "simulator-use@$VERSION" version >/dev/null 2>&1; then VERSION=latest; fi
+        fi
         args=(cloud run "$PROJECT" --out "$RUNNER_TEMP/simulator-use")
         [ "$TESTS" = "true" ] && args+=(--tests)
+        [ -n "$SCHEME" ] && args+=(--scheme "$SCHEME")
+        # Every job and attempt its own artifact (a matrix runs the action once per leg).
+        echo "artifact=simulator-use-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_JOB-$(od -An -N4 -tx4 /dev/urandom | tr -d ' ')" >> "$GITHUB_OUTPUT"
         set +e
         npx -y "simulator-use@$VERSION" "${args[@]}" > "$RUNNER_TEMP/simulator-use/result.txt" 2>&1
         code=$?
@@ -52,9 +69,10 @@ runs:
         cat "$RUNNER_TEMP/simulator-use/result.txt"
         echo "result=$([ $code = 0 ] && echo passed || echo failed)" >> "$GITHUB_OUTPUT"
         exit 0
-    - uses: actions/upload-artifact@v4
+    - if: steps.run.outputs.artifact != ''
+      uses: actions/upload-artifact@v4
       with:
-        name: simulator-use-${{ github.run_id }}-${{ github.job }}
+        name: ${{ steps.run.outputs.artifact }}
         path: ${{ runner.temp }}/simulator-use
     - if: inputs.comment == 'true' && github.event_name == 'pull_request'
       uses: actions/github-script@v7

@@ -70,6 +70,8 @@ const SIGN_IN_WAIT_MS = 25_000;
 export async function signIn(): Promise<{ api: CloudApi } | { link: string; code: string }> {
   const ready = await account();
   if (ready) return { api: ready };
+  // In CI nobody can open a sign-in link: no key is a missing secret (a fork's pull request gets none).
+  if (process.env.CI) throw new Error("No NOMAC_API_KEY: in CI, set it from a secret (a pull request from a fork gets no secrets).");
   const state = await cloudState();
   const base = (process.env.NOMAC_API_URL || DEFAULT_API).replace(/\/+$/, "");
   let pending = state.signIn && state.signIn.expires_at > Date.now() && state.signIn.base === base ? state.signIn : undefined;

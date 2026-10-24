@@ -214,6 +214,8 @@ steps:
       api-key: ${{ secrets.NOMAC_API_KEY }}
 ```
 
+It runs the simulator-use of its own tag (`@v0.10` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason.
+
 ## Privacy
 
 simulator-use sends nothing unless cloud mode is on. There is no telemetry and no network access at runtime: it runs `xcrun simctl`, the bundled AXe binary and `sips`, all on your Mac. With cloud on, it sends the project being run or tested, and the tools' calls, to NoMac, which keeps the session's replay for 7 days.

@@ -31,12 +31,23 @@ let latest: string | undefined;
 export function cancelAllJobs(): void {
   for (const job of jobs.values()) if (!job.result) job.cancel?.();
 }
-// Node runs no exit handler when a signal ends the process, so the signals stop the jobs themselves.
+/** Work that must end before a signal ends the process (a cloud phone to stop, a tunnel to close). */
+const beforeExit = new Set<() => Promise<unknown>>();
+/** Runs work when a signal ends the process, up to 15 s in all; answers how to take it back. */
+export function onSignalExit(work: () => Promise<unknown>): () => void {
+  beforeExit.add(work);
+  return () => beforeExit.delete(work);
+}
+// Node runs no exit handler when a signal ends the process, so the signals stop the jobs themselves. A second
+// signal while that work runs ends the process at once (the handler is gone by then).
 process.on("exit", cancelAllJobs);
 for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"] as const) {
   process.once(signal, () => {
     cancelAllJobs();
-    process.exit(128 + ({ SIGHUP: 1, SIGINT: 2, SIGTERM: 15 } as const)[signal]);
+    const code = 128 + ({ SIGHUP: 1, SIGINT: 2, SIGTERM: 15 } as const)[signal];
+    if (!beforeExit.size) process.exit(code);
+    const work = [...beforeExit].map((w) => w().catch(() => undefined));
+    void Promise.race([Promise.all(work), delay(15_000, undefined, { ref: false })]).finally(() => process.exit(code));
   });
 }
 

@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { answer, claimProject, currentJob, startJob } from "../engine/jobs.ts";
 import { holdDevice } from "../engine/state.ts";
-import { build, derivedDataFor, formatIssue, knownFix, noDestination, place, projectFor, remember, remembered } from "../engine/xcode.ts";
+import { build, derivedDataFor, formatIssue, keepNewest, knownFix, noDestination, place, projectFor, remember, remembered } from "../engine/xcode.ts";
 import { describeXcodes, listXcodes, pickXcode } from "../engine/xcodes.ts";
 import { locate, readTestReport } from "../engine/xcresult.ts";
 import { CaseTally, finishedCase } from "../engine/testcases.ts";
@@ -49,6 +49,8 @@ export const testsRun: Tool = {
       const only = ((args.only as string | undefined) ?? "").split(",").map((t) => t.trim()).filter(Boolean);
       const results = join(derivedDataFor(project, other), "Results");
       await mkdir(results, { recursive: true });
+      // The last few runs' bundles stay for a look; older ones go (each can be tens of MB).
+      await keepNewest(results, /^tests-\d+\.xcresult$/, 4);
       const bundle = join(results, `tests-${Date.now()}.xcresult`);
       const withXcode = other ? ` with Xcode ${other.version}${other.beta ? " beta" : ""}` : "";
       progress.step(`building and running the tests of ${scheme} on ${device.name}${withXcode}`);
@@ -106,6 +108,11 @@ export const testsRun: Tool = {
       const counts = `${report.passed} passed, ${report.failed} failed${report.skipped ? `, ${report.skipped} skipped` : ""} (${report.total} in ${seconds} s)`;
       const slowest = tally.slowest();
       const slow = slowest ? `\nSlowest: ${slowest}.` : "";
+      // No case failed, yet xcodebuild did (the runner crashed, a case never finished): that is not a pass either.
+      if (!report.failed && (!result.ok || report.result === "Failed")) {
+        const fix = knownFix(result.errors, result.tail);
+        return { text: `${note}The tests did not all finish: ${counts}, but the run failed after ${seconds} s. Result bundle: ${bundle}. Full log: ${result.log}\nIts end:\n${result.tail.slice(-8).join("\n")}${fix ? `\nNext: ${fix}` : ""}`, isError: true };
+      }
       if (!report.failed) return { text: `${note}Tests passed: ${counts}.${slow}` };
       const lines = report.failures.slice(0, MAX_FAILURES).map((f) => `${f.test}: ${f.file ? `${place(f.file, f.line, undefined, project.dir)}: ` : ""}${locate(f.message, project.dir)}`);
       const more = report.failures.length > MAX_FAILURES ? `\n… ${report.failures.length - MAX_FAILURES} more` : "";

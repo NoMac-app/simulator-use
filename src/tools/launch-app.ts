@@ -27,7 +27,7 @@ export async function launchAndLook(device: Device, bundleId: string): Promise<s
   if (!info) throw new ToolError(`${bundleId} is not installed on ${label}.`, 'Install it with app_control {action: "install", app: "path/to/App.app"}.');
   const started = Date.now();
   if (info.executable) await startLogStream(device.udid, bundleId, info.executable);
-  await launch(device.udid, bundleId);
+  let running = await launch(device.udid, bundleId);
   await setCurrentApp(device.udid, { bundleId, executable: info.executable, launchedAt: started });
   const name = info.name ?? info.executable ?? bundleId;
   // In front: the app itself, or the app under one of iOS's prompts ("Name · system alert"). Not "Name · system
@@ -42,13 +42,17 @@ export async function launchAndLook(device: Device, bundleId: string): Promise<s
     }
     return snap;
   };
+  // Not in front and its process gone: it quit right after launch, which is a crash (launching it again would too).
+  const quit = () => new ToolError(`${name} quit right after it launched (its process ended within ${((Date.now() - started) / 1000).toFixed(0)} s): most likely a crash.`, "app_logs {crashes: true} shows where it crashed (file and line), and app_logs its print output.");
   try {
     let snap = await inFront(started + FRONT_WAIT_MS);
+    if (!front(snap.app) && running.ended()) throw quit();
     let again = "";
     // Only while the call has time for it: a cold Simulator's first read alone can take 35 s.
     if (!front(snap.app) && Date.now() - started < LAUNCH_BUDGET_MS - RELAUNCH_WAIT_MS) {
-      await launch(device.udid, bundleId);
+      running = await launch(device.udid, bundleId);
       snap = await inFront(Date.now() + RELAUNCH_WAIT_MS);
+      if (!front(snap.app) && running.ended()) throw quit();
       again = " (launched twice: it was not in front after the first)";
     }
     // In front is not finished: right after launch a SwiftUI stepper's buttons joined the tree a read later.

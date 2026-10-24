@@ -8,11 +8,14 @@ import { VERSION } from "../registry.ts";
 export class CloudError extends Error {
   readonly code: string;
   readonly status: number;
+  /** The rest of NoMac's error: starting (a phone not ready yet), retry_after_seconds, next_action ... */
+  readonly details: Record<string, unknown>;
 
-  constructor(code: string, message: string, status: number) {
+  constructor(code: string, message: string, status: number, details: Record<string, unknown> = {}) {
     super(message);
     this.code = code;
     this.status = status;
+    this.details = details;
   }
 }
 
@@ -52,12 +55,13 @@ export class CloudApi {
         payload = {};
       }
       if (response.ok) return payload;
-      const error = (payload.error ?? {}) as { code?: string; message?: string };
+      const error = (payload.error ?? {}) as { code?: string; message?: string } & Record<string, unknown>;
       if (PASSING.has(response.status) && attempt < 4) {
         await pause(attempt, Number(response.headers.get("retry-after")));
         continue;
       }
-      throw new CloudError(error.code ?? `http_${response.status}`, error.message ?? `NoMac answered ${response.status}.`, response.status);
+      const { code: _code, message: _message, ...details } = error;
+      throw new CloudError(error.code ?? `http_${response.status}`, error.message ?? `NoMac answered ${response.status}.`, response.status, details);
     }
   }
 }

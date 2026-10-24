@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createWriteStream, existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
 import { ToolError } from "../errors.ts";
@@ -196,6 +196,16 @@ export function buildCommand(args: string[]): [string, string[]] {
   return ["xcodebuild", args];
 }
 
+/**
+ * Leaves the newest keep entries of a folder whose names match (each named with its time), deleting the older:
+ * every build adds a log and every test run a result bundle, and a host's workspace must not fill with them.
+ */
+export async function keepNewest(dir: string, pattern: RegExp, keep: number): Promise<void> {
+  const time = (name: string) => Number(/(\d+)\.\w+$/.exec(name)?.[1] ?? 0);
+  const names = readdirSync(dir).filter((name) => pattern.test(name)).sort((a, b) => time(b) - time(a));
+  for (const name of names.slice(keep)) await rm(join(dir, name), { recursive: true, force: true }).catch(() => undefined);
+}
+
 export async function build(
   project: Project,
   scheme: string,
@@ -204,6 +214,7 @@ export async function build(
 ): Promise<BuildResult> {
   const derived = derivedDataFor(project, options.xcode);
   await mkdir(derived, { recursive: true });
+  await keepNewest(derived, /^(build|test)-\d+\.log$/, 9);
   const log = join(derived, `${options.action ?? "build"}-${Date.now()}.log`);
   const args = [
     project.kind === "workspace" ? "-workspace" : "-project",

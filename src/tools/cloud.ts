@@ -7,6 +7,7 @@ import { type CloudApi, CloudError } from "../cloud/api.ts";
 import { forward } from "../cloud/forward.ts";
 import { describeRequest, Tunnel } from "../cloud/tunnel.ts";
 import { randomKey } from "../cloud/sync.ts";
+import { onSignalExit } from "../engine/jobs.ts";
 import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
 import type { CallContext, Tool, ToolResult } from "./types.ts";
@@ -20,7 +21,13 @@ type Phone = { id: string; state: string; message?: string; ready_at?: string | 
 type Links = { view?: string; control?: string; replay?: string };
 
 const dollars = (micro: string | undefined) => `$${(Number(micro ?? 0) / 1e6).toFixed(2)}`;
-const phoneOf = async (api: CloudApi, id: string) => (await api.json("GET", `/api/v1/simulator/sessions/${id}`)).session as Phone;
+const readPhone = async (api: CloudApi, id: string) => {
+  const read = await api.json("GET", `/api/v1/simulator/sessions/${id}`);
+  return { phone: read.session as Phone, links: (read.links ?? {}) as Links };
+};
+const phoneOf = async (api: CloudApi, id: string) => (await readPhone(api, id)).phone;
+const gone = (error: unknown) => error instanceof CloudError && (error.status === 404 || error.code === "session_not_found");
+const watchLine = (links: Links) => (links.view && links.control ? `\nA person can watch it at ${links.view} or use it at ${links.control}.` : "");
 
 /** Waits for a phone to be ready, up to the time given. Answers it as it last read. */
 async function untilReady(api: CloudApi, id: string, waitMs: number): Promise<Phone> {
@@ -40,10 +47,15 @@ async function start(context: CallContext): Promise<ToolResult> {
   const { api } = signed;
   const state = await cloudState();
   if (state.session) {
-    const phone = await phoneOf(api, state.session).catch(() => undefined);
+    // A phone NoMac no longer has is gone; any other failure (the network) is NoMac's answer, never a second phone.
+    const read = await readPhone(api, state.session).catch((error: unknown) => {
+      if (gone(error)) return undefined;
+      throw error;
+    });
+    const phone = read?.phone;
     if (phone && (phone.state === "ready" || phone.state === "queued" || phone.state === "provisioning")) {
       await setCloudState({ ...state, on: true });
-      return { text: `Cloud is on: phone ${phone.id} is ${phone.state}, ${dollars(phone.cost?.accrued_microunits)} so far. Every tool runs there; cloud stop ends it.` };
+      return { text: `Cloud is on: phone ${phone.id} is ${phone.state}, ${dollars(phone.cost?.accrued_microunits)} so far. Every tool runs there; cloud stop ends it.${watchLine(read.links)}` };
     }
   }
   const started = Date.now();
@@ -60,8 +72,7 @@ async function start(context: CallContext): Promise<ToolResult> {
     const why = phone.state === "queued" && phone.message ? ` ${phone.message}` : "";
     return { text: `The cloud phone ${id} is still starting after ${((Date.now() - started) / 1000).toFixed(0)} s.${why}\nNext: cloud status, or any tool: it waits for the phone.` };
   }
-  const links = (created.links ?? {}) as Links;
-  const watch = links.view && links.control ? `\nA person can watch it at ${links.view} or use it at ${links.control}.` : "";
+  const watch = watchLine((created.links ?? {}) as Links);
   return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an iPhone Simulator on a NoMac Mac, $0.80 an hour by the minute.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
 }
 
@@ -122,10 +133,10 @@ async function status(): Promise<ToolResult> {
   if (!state.on) return { text: "Cloud is off: the tools run on this machine. cloud start runs them on a NoMac phone." };
   const api = await account();
   if (!api || !state.session) return { text: "Cloud is on but has no phone yet. cloud start starts one." };
-  const phone = await phoneOf(api, state.session);
+  const { phone, links } = await readPhone(api, state.session);
   const minutes = Math.ceil((phone.cost?.billable_seconds ?? 0) / 60);
   if (phone.state === "queued") return { text: `Cloud is on: phone ${phone.id} is waiting.${phone.message ? ` ${phone.message}` : ""}` };
-  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${tunnel ? `\n${tunnelLine(tunnel)}` : ""}` };
+  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
 }
 
 async function stop(): Promise<ToolResult> {
@@ -133,20 +144,35 @@ async function stop(): Promise<ToolResult> {
   tunnel = undefined;
   const state = await cloudState();
   const api = await account();
+  if (!state.session || !api) {
+    await setCloudState({ on: false });
+    return { text: "Cloud is off: the tools run on this machine." };
+  }
+  // The phone is forgotten only once NoMac took the stop: a stop that did not reach it leaves the phone billing.
+  let stopped: Record<string, unknown> | undefined;
+  try {
+    stopped = await api.json("DELETE", `/api/v1/simulator/sessions/${state.session}`);
+  } catch (error) {
+    if (!gone(error)) {
+      return { text: `Could not stop the cloud phone ${state.session}: ${(error as Error).message.replace(/\.$/, "")}. It runs, and bills, until its idle stop.\nNext: cloud stop again.`, isError: true };
+    }
+  }
   await setCloudState({ on: false });
-  if (!state.session || !api) return { text: "Cloud is off: the tools run on this machine." };
-  const stopped = await api.json("DELETE", `/api/v1/simulator/sessions/${state.session}`).catch((error: unknown) => {
-    if (!(error instanceof CloudError && error.status === 404)) throw error;
-    return undefined;
-  });
   let phone = await phoneOf(api, state.session).catch(() => undefined);
   for (let i = 0; phone && !phone.cleanup_confirmed && i < 15; i++) {
     await new Promise((r) => setTimeout(r, 2_000));
     phone = await phoneOf(api, state.session).catch(() => undefined);
   }
-  const minutes = Math.ceil((phone?.cost?.billable_seconds ?? 0) / 60);
+  const cost = phone ? `after ${Math.ceil((phone.cost?.billable_seconds ?? 0) / 60)} min, ${dollars(phone.cost?.accrued_microunits)}` : "(its cost is on NoMac's dashboard)";
   const replay = ((stopped?.links ?? {}) as Links).replay;
-  return { text: `Stopped the cloud phone after ${minutes} min, ${dollars(phone?.cost?.accrued_microunits)}. The tools run on this machine again.${replay ? `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).` : ""}` };
+  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again.${replay ? `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).` : ""}` };
+}
+
+/** A phone stopped at once, as the process ends (a signal): no waiting for its cleanup. */
+async function stopNow(session: string): Promise<void> {
+  const api = await account();
+  await api?.json("DELETE", `/api/v1/simulator/sessions/${session}`).catch(() => undefined);
+  await setCloudState({ on: false });
 }
 
 /**
@@ -158,17 +184,35 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
   const lines: string[] = [];
   let failed = false;
   let image: ToolResult["image"];
-  const ensure = await start({ waitForJobs: true });
-  if (/^Sign in to NoMac/.test(ensure.text)) return { text: ensure.text, isError: true };
+  // The phone this run started: stopped at its end, and before the process ends on a signal (Ctrl-C, a cancelled
+  // CI job), so a run never leaves a phone billing.
+  let created: string | undefined;
+  let signingIn = false;
+  const startedHere = async () => {
+    const now = await cloudState().catch(() => undefined);
+    if (now?.session && now.session !== before.session) created = now.session;
+    return created;
+  };
+  const release = onSignalExit(async () => {
+    const session = (await startedHere()) ?? (before.on ? undefined : (await cloudState()).session);
+    if (session) await stopNow(session);
+  });
   try {
+    const ensure = await start({ waitForJobs: true });
+    // Not signed in yet: nothing started, and the pending sign-in is kept for the next call.
+    if (/^Sign in to NoMac/.test(ensure.text)) {
+      signingIn = true;
+      return { text: ensure.text, isError: true };
+    }
     const path = typeof args.path === "string" ? args.path : ".";
+    const scheme = typeof args.scheme === "string" && args.scheme ? { scheme: args.scheme } : {};
     // A video of the whole run for the person reviewing it (the phone records up to its own limit).
     const recording = await forward("screen_record", { action: "start" }, context);
-    const ran = await forward("app_run", { path }, { waitForJobs: true });
+    const ran = await forward("app_run", { path, ...scheme }, { waitForJobs: true });
     lines.push(ran.text);
     failed ||= Boolean(ran.isError);
     if (!ran.isError && args.tests === true) {
-      const tested = await forward("tests_run", { path }, { waitForJobs: true });
+      const tested = await forward("tests_run", { path, ...scheme }, { waitForJobs: true });
       lines.push(tested.text);
       failed ||= Boolean(tested.isError);
     }
@@ -199,7 +243,8 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
       }
     }
   } finally {
-    if (!before.on) lines.push((await stop()).text);
+    release();
+    if (!signingIn && ((await startedHere()) || !before.on)) lines.push((await stop()).text);
   }
   // The command line saved the screenshot above; an MCP client gets the picture itself.
   return { text: lines.join("\n\n"), ...(image && !context.waitForJobs ? { image } : {}), ...(failed ? { isError: true } : {}) };
@@ -211,15 +256,16 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents and CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run: start, build and run path, its tests with tests, a screenshot and a recording, stop, in one call. tunnel: the phone reaches port on this machine.",
+    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents, CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run: start, build and run path, its tests with tests, a screenshot and a recording, stop, in one call. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
       action: { type: "string", enum: ACTIONS, description: "start, status, stop, run, or tunnel" },
       port: { type: "number", description: "tunnel: a backend's port here; 0 closes it" },
-      path: { type: "string", description: "run: project folder; default: here" },
-      tests: { type: "boolean", description: "run: its tests too" },
-      out: { type: "string", description: "run (command line): screenshot folder; default: temp" },
+      path: { type: "string", description: "run: project folder" },
+      tests: { type: "boolean", description: "run: tests too" },
+      scheme: { type: "string", description: "run: scheme" },
+      out: { type: "string", description: "run (CLI): screenshot folder" },
     },
     required: ["action"],
     additionalProperties: false,

@@ -28,16 +28,20 @@ const CHUNK = 256 * 1024;
 const INLINE_MAX = 8 * 1024 * 1024;
 const ARCHIVE_MAX = 2 * 1024 ** 3;
 
-/** The project's files as the host is to have them: build output, dependencies and editor state left out. */
-export function listProject(folder: string): Entry[] {
+/**
+ * The project's files as the host is to have them: build output, dependencies and editor state left out. With
+ * only (a .app beside others in its folder), that one alone and all of it: a bundle's own folders (an app's
+ * node_modules or build) are part of the app.
+ */
+export function listProject(folder: string, only?: string): Entry[] {
   const out: Entry[] = [];
-  const walk = (dir: string) => {
+  const walk = (dir: string, whole: boolean) => {
     for (const name of readdirSync(dir).sort()) {
       if (SKIP_FILES(name)) continue;
       const path = join(dir, name);
       const st = lstatSync(path);
       if (st.isDirectory()) {
-        if (!SKIP_DIRS.has(name)) walk(path);
+        if (whole || !SKIP_DIRS.has(name)) walk(path, whole);
         continue;
       }
       const rel = relative(folder, path).split(sep).join("/");
@@ -49,7 +53,10 @@ export function listProject(folder: string): Entry[] {
       }
     }
   };
-  walk(folder);
+  if (only) {
+    const top = join(folder, only);
+    if (lstatSync(top, { throwIfNoEntry: false })?.isDirectory()) walk(top, true);
+  } else walk(folder, false);
   return out;
 }
 
@@ -127,7 +134,7 @@ export type SyncOptions = {
 export async function syncFolder(api: CloudApi, session: string, folder: string, options: SyncOptions = {}): Promise<Synced> {
   const { only, onStep } = options;
   const started = Date.now();
-  const entries = listProject(folder).filter((e) => !only || e.path === only || e.path.startsWith(`${only}/`));
+  const entries = listProject(folder, only);
   if (!entries.length) throw new Error(`${folder} has no files to send.`);
   const project = options.project ?? (await projectId(folder));
   const sync = `cli-${randomKey()}`;
