@@ -103,3 +103,15 @@ test("an app is sent whole, its own folders too, and nothing beside it is read",
   writeFileSync(join(dir, "elsewhere.zip"), "not read");
   assert.deepEqual(listProject(dir, "My.app").map((e) => e.path), ["My.app/My", "My.app/assets/node_modules/pkg/index.js", "My.app/build/main.js"]);
 });
+
+test("a phone's stop notice is said after the answer, in cloud mode's own way on", async () => {
+  await onPhone();
+  const limit = { minutes_left: 9, reason: "time_limit", next_action: "save_state", message: "This phone stops in about 9 minutes (21:40 UTC): it reaches its time limit, which a running phone cannot raise." };
+  const credit = { minutes_left: 9, reason: "credit", next_action: "buy_credit", message: "This phone stops in about 9 minutes (21:40 UTC): the account's credit runs out." };
+  script = { [`POST ${PHONE}/tools/ui_look`]: [{ status: 200, body: { state: "done", stop_notice: limit, result: { content: [{ type: "text", text: "Demo · Sign In" }] } } }] };
+  assert.equal((await callTool("ui_look", {})).text, "Demo · Sign In\nThe cloud phone stops in about 9 minutes: it reaches its time limit. Its apps and data go with it; the project's build stays, so cloud start then, and the next build is incremental.");
+  script = { [`POST ${PHONE}/tools/ui_look`]: [{ status: 200, body: { state: "done", stop_notice: credit, result: { content: [{ type: "text", text: "Demo · Sign In" }] } } }] };
+  assert.equal((await callTool("ui_look", {})).text, `Demo · Sign In\n${credit.message}`);
+  script = { [`POST ${PHONE}/tools/ui_look`]: [done("Demo · Sign In")] };
+  assert.equal((await callTool("ui_look", {})).text, "Demo · Sign In");
+});

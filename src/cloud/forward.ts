@@ -108,6 +108,18 @@ export async function forward(name: string, args: Record<string, unknown>, conte
   }
 }
 
+/**
+ * NoMac's stop notice, in the phone's last 15 minutes before a limit or the account's credit's end, as cloud mode can
+ * act on it: it keeps no saved states, so a new phone after this one is the way on (its build stays in the workspace).
+ */
+export function stopNotice(answer: Record<string, unknown>): string {
+  const notice = answer.stop_notice as { minutes_left?: number; reason?: string; message?: string } | undefined;
+  if (!notice?.message) return "";
+  if (notice.reason === "credit") return `\n${notice.message}`;
+  const when = (notice.minutes_left ?? 0) <= 1 ? "within a minute" : `in about ${notice.minutes_left} minutes`;
+  return `\nThe cloud phone stops ${when}: it reaches its ${notice.reason === "spend_cap" ? "spend cap" : "time limit"}. Its apps and data go with it; the project's build stays, so cloud start then, and the next build is incremental.`;
+}
+
 async function call(api: CloudApi, session: string, name: string, args: Record<string, unknown>): Promise<ToolResult> {
   let answer = await api.json("POST", `/api/v1/simulator/sessions/${session}/tools/${name}`, args, `cli-${name}-${randomKey()}`);
   while (answer.state === "running" && typeof answer.id === "string") {
@@ -121,7 +133,7 @@ async function call(api: CloudApi, session: string, name: string, args: Record<s
   const picture = (result.content ?? []).find((c) => c.type === "image" && c.data);
   const notices = (answer.notices as string[] | undefined)?.includes("phone_restarted") ? "\nThe phone restarted; its apps and data are kept." : "";
   return {
-    text: `${text}${notices}`,
+    text: `${text}${notices}${stopNotice(answer)}`,
     ...(picture ? { image: { data: Buffer.from(picture.data!, "base64"), mimeType: picture.mimeType === "image/png" ? "image/png" : "image/jpeg" } } : {}),
     ...(result.isError ? { isError: true } : {}),
   };
