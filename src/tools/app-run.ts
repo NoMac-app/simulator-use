@@ -2,7 +2,7 @@ import { bundleIdOf, install } from "../engine/apps.ts";
 import { answer, claimProject, currentJob, startJob } from "../engine/jobs.ts";
 import { bootDevice, findDevice, listDevices, pickDevice, type Device } from "../engine/simctl.ts";
 import { heldDevice, holdDevice, setDeviceEnv } from "../engine/state.ts";
-import { build, builtApp, formatIssue, knownFix, noDestination, projectFor, remember } from "../engine/xcode.ts";
+import { build, builtApp, formatIssue, knownFix, noDestination, projectFor, remember, targetTooNew } from "../engine/xcode.ts";
 import { pickXcode } from "../engine/xcodes.ts";
 import { grantAll, setPermissionMode } from "../engine/prompts.ts";
 import { ToolError } from "../errors.ts";
@@ -97,6 +97,13 @@ export const appRun: Tool = {
         onCancel: (cancel: () => void) => progress.setCancel(cancel),
       };
       let result = await build(project, scheme, device.udid, options);
+      // A deployment target later than the phone's iOS leaves no destination either, and no build would install.
+      const tooNew = !result.ok && noDestination(result) ? await targetTooNew(project, scheme, device, "app_run again", other) : undefined;
+      if (tooNew) {
+        progress.setCancel(undefined);
+        progress.setLog(result.log);
+        return { text: `${note}Build of ${scheme} failed: ${tooNew}`, isError: true };
+      }
       // An Xcode older than the phone's iOS cannot name it: it builds for any Simulator, and the app installs all the same.
       let anySimulator = false;
       if (!result.ok && other && noDestination(result)) {
@@ -122,7 +129,7 @@ export const appRun: Tool = {
       const app = builtApp(project, scheme, configuration, other);
       if (!app) return { text: `Built ${scheme} in ${seconds} s, but found no .app for the Simulator. Full log: ${result.log}`, isError: true };
       const bundleId = await bundleIdOf(app);
-      await install(device.udid, app);
+      await install(device.udid, app, device.runtime);
       const keep = asked && xcode && !xcode.default ? asked : undefined;
       await remember(dir, { project: project.path, scheme, bundleId, ...(keep ? { xcode: keep } : {}) });
       // Granted by default, so no prompt stops the agent; "ask" leaves iOS's prompts for a test of them.

@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { getJob, startJob, waitFor } from "../src/engine/jobs.ts";
-import { buildCommand, findProject, formatIssue, knownFix, parseIssue } from "../src/engine/xcode.ts";
+import { buildCommand, deploymentTarget, findProject, formatIssue, knownFix, laterVersion, parseIssue, targetTooNew } from "../src/engine/xcode.ts";
 import { ToolError } from "../src/errors.ts";
 
 test("xcodebuild lines become errors and warnings with their place", () => {
@@ -178,4 +179,30 @@ test("builds run under the host's clamp when one is set, and as plain xcodebuild
     if (saved === undefined) delete process.env.SIMULATOR_USE_BUILD_CLAMP;
     else process.env.SIMULATOR_USE_BUILD_CLAMP = saved;
   }
+});
+
+test("versions compare by their numbers", () => {
+  assert.equal(laterVersion("27.1", "27.0"), true);
+  assert.equal(laterVersion("27.0.1", "27.0"), true);
+  assert.equal(laterVersion("27.0", "27.0.0"), false);
+  assert.equal(laterVersion("26.10", "26.9"), true);
+  assert.equal(laterVersion("26.5", "27.0"), false);
+  assert.equal(laterVersion("$(inherited)", "27.0"), false);
+});
+
+const tools = process.platform === "darwin" && ["xcodebuild", "xcodegen"].every((t) => spawnSync("/usr/bin/which", [t]).status === 0);
+test("a project that targets a later iOS than the phone says so, and how to fix it", { skip: !tools }, async () => {
+  // Xcode leaves such a phone out of its destinations without a word: an iOS 26.5 phone and a target of 26.5.1
+  // (inside Xcode 26.5's range) gave only "Unable to find a destination matching" (October 24).
+  const dir = mkdtempSync(join(tmpdir(), "dl-target-"));
+  mkdirSync(join(dir, "Sources"));
+  writeFileSync(join(dir, "Sources/App.swift"), "import SwiftUI\n@main struct TargetApp: App { var body: some Scene { WindowGroup { Text(\"Hi\") } } }\n");
+  writeFileSync(join(dir, "project.yml"), "name: Target\ntargets:\n  Target:\n    type: application\n    platform: iOS\n    deploymentTarget: \"26.5.1\"\n    sources: [Sources]\n    settings:\n      GENERATE_INFOPLIST_FILE: YES\n      PRODUCT_BUNDLE_IDENTIFIER: test.target\n");
+  assert.equal(spawnSync("xcodegen", ["generate"], { cwd: dir }).status, 0);
+  const project = await findProject(join(dir, "Target.xcodeproj"));
+  assert.equal(await deploymentTarget(project, "Target"), "26.5.1");
+  assert.equal(await targetTooNew(project, "Target", { name: "iPhone 17", runtime: "iOS 26.5" }, "app_run again"),
+    "Target targets iOS 26.5.1 (its deployment target) and iPhone 17 runs iOS 26.5, so Xcode has no destination for it.\nNext: lower the deployment target to iOS 26.5 or earlier (IPHONEOS_DEPLOYMENT_TARGET; in Xcode, the target's General > Minimum Deployments), then app_run again.");
+  assert.equal(await targetTooNew(project, "Target", { name: "iPhone 17", runtime: "iOS 26.6" }, "app_run again"), undefined);
+  assert.equal(await targetTooNew(project, "Target", { name: "Apple TV", runtime: "tvOS 26.5" }, "app_run again"), undefined);
 });

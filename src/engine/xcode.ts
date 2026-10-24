@@ -180,8 +180,40 @@ export function derivedDataFor(project: Project, xcode?: Xcode): string {
 /** The environment a build with this Xcode runs in: its DEVELOPER_DIR, unless it is the default. */
 export const xcodeEnv = (xcode?: Xcode): NodeJS.ProcessEnv => (xcode && !xcode.default ? { ...process.env, DEVELOPER_DIR: xcode.developer } : process.env);
 
-/** An Xcode older than the phone's iOS cannot name the phone as a destination: it builds for any Simulator instead. */
-export const noDestination = (result: { tail: string[] }) => result.tail.some((line) => /Unable to find a destination matching/i.test(line));
+/**
+ * xcodebuild found no destination for the phone (an Xcode older than its iOS, or a deployment target later than it).
+ * Its errors too: the destinations it lists after the line can push it out of the last lines kept.
+ */
+export const noDestination = (result: { tail: string[]; errors?: Issue[] }) =>
+  [...(result.errors ?? []).map((e) => e.message), ...result.tail].some((line) => /Unable to find a destination matching/i.test(line));
+
+/** Whether version a is later than b: "27.1" than "27.0", "27.0.1" than "27.0"; false when either is not a version. */
+export function laterVersion(a: string, b: string): boolean {
+  if (!/^\d+(\.\d+)*$/.test(a) || !/^\d+(\.\d+)*$/.test(b)) return false;
+  const x = a.split(".").map(Number), y = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) > (y[i] ?? 0);
+  return false;
+}
+
+/** The latest iOS deployment target among a scheme's targets, as the Xcode that builds it reads them. */
+export async function deploymentTarget(project: Project, scheme: string, xcode?: Xcode): Promise<string | undefined> {
+  const args = [project.kind === "workspace" ? "-workspace" : "-project", project.path, "-scheme", scheme, "-showBuildSettings", "-json"];
+  const { stdout } = await run("xcodebuild", args, { timeoutMs: 60_000, env: xcodeEnv(xcode) });
+  const targets = (JSON.parse(stdout) as { buildSettings?: { IPHONEOS_DEPLOYMENT_TARGET?: string } }[]).map((t) => t.buildSettings?.IPHONEOS_DEPLOYMENT_TARGET).filter((v): v is string => Boolean(v));
+  return targets.reduce<string | undefined>((latest, v) => (!latest || laterVersion(v, latest) ? v : latest), undefined);
+}
+
+/**
+ * Why Xcode found no destination, when it is the project's deployment target: a phone on an earlier iOS is left out
+ * of xcodebuild's destinations without a word (Xcode 26.5, October 24: not even among the ineligible ones). Xcode
+ * 27.1's new projects target iOS 27.1, and NoMac's phones run 27.0. Undefined for any other reason.
+ */
+export async function targetTooNew(project: Project, scheme: string, device: { name: string; runtime: string }, again: string, xcode?: Xcode): Promise<string | undefined> {
+  const phone = /^iOS (\d+(?:\.\d+)*)$/.exec(device.runtime)?.[1];
+  const target = phone ? await deploymentTarget(project, scheme, xcode).catch(() => undefined) : undefined;
+  if (!phone || !target || !laterVersion(target, phone)) return undefined;
+  return `${scheme} targets iOS ${target} (its deployment target) and ${device.name} runs ${device.runtime}, so Xcode has no destination for it.\nNext: lower the deployment target to iOS ${phone} or earlier (IPHONEOS_DEPLOYMENT_TARGET; in Xcode, the target's General > Minimum Deployments), then ${again}.`;
+}
 
 export type BuildResult = { ok: boolean; errors: Issue[]; warnings: number; log: string; ms: number; tail: string[] };
 

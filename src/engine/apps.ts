@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { ToolError } from "../errors.ts";
 import { isOurs, run } from "./exec.ts";
+import { laterVersion } from "./xcode.ts";
 import { deviceDir, deviceEnv, deviceTimeZone } from "./state.ts";
 
 const simctl = (args: string[], timeoutMs = 60_000) => run("xcrun", ["simctl", ...args], { timeoutMs });
@@ -41,10 +42,16 @@ export async function bundleIdOf(appPath: string): Promise<string> {
   return stdout.trim();
 }
 
-export async function install(udid: string, appPath: string): Promise<void> {
+/** Installs a .app; runtime ("iOS 27.0", the Simulator's) lets a refusal say when the app needs a later iOS. */
+export async function install(udid: string, appPath: string, runtime?: string): Promise<void> {
   try {
     await simctl(["install", udid, appPath], 120_000);
   } catch (error) {
+    const phone = runtime && /^iOS (\d+(?:\.\d+)*)$/.exec(runtime)?.[1];
+    const needs = phone ? (await run("plutil", ["-extract", "MinimumOSVersion", "raw", join(appPath, "Info.plist")], { timeoutMs: 10_000 }).catch(() => undefined))?.stdout.trim() : undefined;
+    if (phone && needs && laterVersion(needs, phone)) {
+      throw new ToolError(`Could not install ${appPath}: it needs iOS ${needs} (its deployment target) and this Simulator runs ${runtime}.`, `Build it with a deployment target of iOS ${phone} or earlier (IPHONEOS_DEPLOYMENT_TARGET), then install it again.`);
+    }
     throw new ToolError(`Could not install ${appPath}: ${(error as Error).message}`, "Check it is built for the Simulator (iphonesimulator), not a device.");
   }
 }

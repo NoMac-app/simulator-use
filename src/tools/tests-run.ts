@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { answer, claimProject, currentJob, startJob } from "../engine/jobs.ts";
 import { holdDevice } from "../engine/state.ts";
-import { build, derivedDataFor, formatIssue, keepNewest, knownFix, noDestination, place, projectFor, remember, remembered } from "../engine/xcode.ts";
+import { build, derivedDataFor, formatIssue, keepNewest, knownFix, noDestination, place, projectFor, remember, remembered, targetTooNew } from "../engine/xcode.ts";
 import { describeXcodes, listXcodes, pickXcode } from "../engine/xcodes.ts";
 import { locate, readTestReport } from "../engine/xcresult.ts";
 import { CaseTally, finishedCase } from "../engine/testcases.ts";
@@ -75,6 +75,8 @@ export const testsRun: Tool = {
       progress.setCancel(undefined);
       progress.setLog(result.log);
       const seconds = (result.ms / 1000).toFixed(1);
+      const tooNew = !result.ok && noDestination(result) ? await targetTooNew(project, scheme, device, "tests_run again", other) : undefined;
+      if (tooNew) return { text: `The tests of ${scheme} did not run: ${tooNew}`, isError: true };
       // Tests need the phone itself as the destination: an Xcode older than its iOS cannot run them there.
       if (!result.ok && other && noDestination(result)) {
         const fallback = describeXcodes((await listXcodes()).filter((x) => x.default));

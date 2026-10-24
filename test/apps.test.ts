@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { closeSync, mkdtempSync, openSync, readFileSync, writeSync } from "node:fs";
+import { closeSync, mkdirSync, mkdtempSync, openSync, readFileSync, writeFileSync, writeSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { parseArgs } from "../src/cli.ts";
-import { freshFile, plistValue } from "../src/engine/apps.ts";
+import { freshFile, install, plistValue } from "../src/engine/apps.ts";
 import { cleanConsole, parseSystemLog, summarizeIps } from "../src/engine/logs.ts";
 import { appControl, pushJson } from "../src/tools/app-control.ts";
 import { parseSince } from "../src/tools/app-logs.ts";
@@ -98,4 +98,21 @@ test("a relaunch's console file holds only the new launch's lines, while the old
   const text = readFileSync(file, "utf8");
   assert.equal(text, "second launch\n");
   assert.equal(text.includes("\0"), false);
+});
+
+test("an install refused for an app that needs a later iOS says which, and how to fix it", { skip: process.platform !== "darwin" }, async () => {
+  const app = join(mkdtempSync(join(tmpdir(), "su-min-os-")), "Demo.app");
+  mkdirSync(app);
+  writeFileSync(join(app, "Info.plist"), '<?xml version="1.0" encoding="UTF-8"?>\n<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>test.demo</string><key>MinimumOSVersion</key><string>27.1</string></dict></plist>\n');
+  // No such Simulator, so simctl refuses at once and none is touched.
+  const none = "00000000-0000-0000-0000-000000000000";
+  await assert.rejects(install(none, app, "iOS 27.0"), (error: ToolError) => {
+    assert.equal(error.message, `Could not install ${app}: it needs iOS 27.1 (its deployment target) and this Simulator runs iOS 27.0.`);
+    assert.equal(error.next, "Build it with a deployment target of iOS 27.0 or earlier (IPHONEOS_DEPLOYMENT_TARGET), then install it again.");
+    return true;
+  });
+  // A phone on that iOS or later, or no runtime known: the refusal as simctl gave it.
+  for (const runtime of ["iOS 27.1", undefined]) {
+    await assert.rejects(install(none, app, runtime), (error: ToolError) => /^Could not install .*: xcrun simctl: /.test(error.message) && /iphonesimulator/.test(error.next ?? ""));
+  }
 });

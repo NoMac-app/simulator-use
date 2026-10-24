@@ -100,7 +100,7 @@ export const appControl: Tool = {
       const path = app ? resolvePath(app) : "";
       if (!path || !existsSync(path)) throw new ToolError("install needs app: the path to a .app built for the Simulator.", "Build with xcodebuild -sdk iphonesimulator; the .app is under Build/Products/Debug-iphonesimulator.");
       const bundleId = await bundleIdOf(path);
-      await install(device.udid, path);
+      await install(device.udid, path, device.runtime);
       const info = await appInfo(device.udid, bundleId);
       await setCurrentApp(device.udid, { bundleId, executable: info?.executable });
       const refused = await grantAll(device.udid, bundleId);
