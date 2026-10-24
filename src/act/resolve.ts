@@ -67,3 +67,16 @@ export function resolve(snap: Snapshot, target: Target): Resolved | Unresolved {
 }
 
 export const isResolved = (r: Resolved | Unresolved): r is Resolved => !("error" in r);
+
+const TEXT_FIELDS = new Set(["textfield", "securefield", "searchfield", "textview"]);
+
+/**
+ * The text field under a point, the smallest when fields nest: what `fill @x,y` aims at, so its kind is known
+ * (a secure field reads back as dots) even when the step named a point, not the field.
+ */
+export function fieldAt(elements: readonly Element[], point: { x: number; y: number }): Element | undefined {
+  const holding = elements.filter(
+    (e) => TEXT_FIELDS.has(e.kind) && point.x >= e.frame.x && point.x <= e.frame.x + e.frame.width && point.y >= e.frame.y && point.y <= e.frame.y + e.frame.height,
+  );
+  return holding.sort((a, b) => a.frame.width * a.frame.height - b.frame.width * b.frame.height)[0];
+}

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import { diff } from "../src/act/diff.ts";
-import { isResolved, resolve } from "../src/act/resolve.ts";
+import { fieldAt, isResolved, resolve } from "../src/act/resolve.ts";
 import { parseStep } from "../src/act/steps.ts";
 import { type AxNode, snapshot } from "../src/look/snapshot.ts";
 import { readBackVerdict } from "../src/tools/ui-act.ts";
@@ -123,6 +123,21 @@ test("typed text read back: exact, reformatted, or wrong", () => {
   assert.equal(readBackVerdict("securefield", "•••••••", "secret1"), "exact");
   assert.equal(readBackVerdict("securefield", "••••", "secret1"), "wrong");
   assert.equal(readBackVerdict("securefield", "Password", "Password"), "wrong");
+});
+
+test("fill at a point knows the field under it, the smallest when fields nest, and only text fields", () => {
+  const field = (kind: string, id: string, x: number, y: number, width: number, height: number) => ({ kind, id, x: x + width / 2, y: y + height / 2, frame: { x, y, width, height } });
+  const elements = [
+    field("textfield", "email", 20, 180, 362, 44),
+    field("securefield", "password", 20, 224, 362, 44),
+    field("textview", "notes", 0, 300, 402, 400),
+    field("searchfield", "inside", 20, 320, 362, 44),
+    field("button", "signIn", 20, 760, 362, 44),
+  ];
+  assert.equal(fieldAt(elements, { x: 201, y: 246 })?.id, "password");
+  assert.equal(fieldAt(elements, { x: 201, y: 340 })?.id, "inside");
+  assert.equal(fieldAt(elements, { x: 201, y: 600 })?.id, "notes");
+  assert.equal(fieldAt(elements, { x: 201, y: 782 }), undefined);
 });
 
 test("one id on several elements is ambiguous, not a silent tap on the first", () => {

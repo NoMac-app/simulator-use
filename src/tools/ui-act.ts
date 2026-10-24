@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { diff } from "../act/diff.ts";
-import { isResolved, resolve, type Resolved } from "../act/resolve.ts";
+import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
 import { describeTarget, KEYS, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
 import { setPasteboard } from "../engine/apps.ts";
@@ -237,7 +237,8 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       }
       case "fill": {
         const r = await locate(step.target);
-        const kind = r.element?.kind;
+        // A point names no element: the field under it says what kind it is (a secure one reads back as dots).
+        const kind = r.element?.kind ?? (step.target.by === "point" ? fieldAt(snap.elements, r)?.kind : undefined);
         // Typing at something that isn't a field sends the keys to whichever field still has focus.
         if (kind && !FIELDS.has(kind)) throw new StepFailure(`${describeTarget(step.target)} is a ${kind}, not a text field, so nothing was typed.`, "Fill a textfield, securefield, searchfield or textview from ui_look.");
         // Focus, select all, delete, type: one AXe process, so nothing else lands in between.
