@@ -678,6 +678,16 @@ export async function copyExcept(from: string, to: string, skip: string[]): Prom
   }
 }
 
+/**
+ * LaunchServices' databases name each app by its absolute path on the phone it was installed on: another pool user's
+ * phone, for a state saved there, so the app would not launch. A restore removes them (the .csstore files only) and
+ * iOS rebuilds them at boot from the apps installed.
+ */
+export async function forgetAppPaths(data: string): Promise<void> {
+  const dir = join(data, "var", "db", "lsd");
+  for (const name of await readdir(dir).catch(() => [] as string[])) if (name.endsWith(".csstore")) await rm(join(dir, name), { force: true });
+}
+
 /** Removes everything under root except keep (a path inside it) and the folders that lead to it. */
 export async function removeExcept(root: string, keep: string): Promise<void> {
   const [first, ...rest] = keep.split("/");
@@ -770,6 +780,7 @@ async function restoreState(name: string): Promise<StateJob> {
   try {
     await removeExcept(data, SYSTEM_ASSETS);
     await run("/usr/bin/ditto", [join(dir, "data"), data], { timeoutMs: 10 * 60_000 });
+    await forgetAppPaths(data);
     return { state: "done", bytes: meta.bytes, device: `${device.name} (${device.runtime})` };
   } finally {
     await bootAgain(device.udid);

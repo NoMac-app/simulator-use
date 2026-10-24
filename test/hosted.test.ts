@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { callSummary, copyExcept, gitEnv, gitUrl, hosted, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
+import { callSummary, copyExcept, forgetAppPaths, gitEnv, gitUrl, hosted, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const project = "prj_" + "f".repeat(32);
@@ -360,6 +360,16 @@ test("a saved state leaves out caches and the system's assets, and a restore kee
   await removeExcept(phone, "private/var/MobileAsset");
   assert.ok(existsSync(join(phone, "private/var/MobileAsset/AssetsV2/voice")));
   assert.ok(!existsSync(join(phone, "Library")) && !existsSync(join(phone, "Containers")) && !existsSync(join(phone, "private/var/db")) && !existsSync(join(phone, "tmp")));
+});
+
+test("a restore forgets LaunchServices' databases (apps by another phone's paths), keeping its journal and app protection", async () => {
+  const data = mkdtempSync(join(tmpdir(), "su-lsd-"));
+  const lsd = join(data, "var/db/lsd");
+  mkdirSync(join(lsd, "com.apple.LaunchServices.InstallJournal"), { recursive: true });
+  for (const name of ["com.apple.LaunchServices-33554481-v2.csstore", "SystemDataOnly-com.apple.LaunchServices-33554481-v2.csstore", "com.apple.LaunchServicesAppProtectionStore.plist"]) writeFileSync(join(lsd, name), "x");
+  await forgetAppPaths(data);
+  assert.deepEqual(readdirSync(lsd).sort(), ["com.apple.LaunchServices.InstallJournal", "com.apple.LaunchServicesAppProtectionStore.plist"]);
+  await forgetAppPaths(join(data, "none"));
 });
 
 test("saved phone states: checked names and ids, listed with their size, deleted, kept in the workspace only", async () => {
