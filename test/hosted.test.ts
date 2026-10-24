@@ -343,7 +343,8 @@ test("the pool's first read asks the engine again until it reads, and says when 
   setFirstRead(undefined);
 });
 
-test("a saved state leaves out caches and the system's assets, and a restore keeps the phone's own assets", async () => {
+// States are copied with ditto, a Mac's, as the phone's host does.
+test("a saved state leaves out caches and the system's assets, and a restore keeps the phone's own assets", { skip: process.platform !== "darwin" }, async () => {
   const root = mkdtempSync(join(tmpdir(), "su-state-"));
   const phone = join(root, "phone");
   for (const [path, text] of [["Library/Preferences/app.plist", "prefs"], ["Library/Caches/big", "cache"], ["Containers/Data/Application/A/doc", "doc"],
