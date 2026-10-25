@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { chmodSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 import { forCommandLine } from "../src/cli.ts";
 import { tryLock, withLock } from "../src/engine/lock.ts";
 import { pickDevice, type Device } from "../src/engine/simctl.ts";
+import { ownStateDir } from "../src/engine/state.ts";
 import { toContent } from "../src/registry.ts";
 
 const run = promisify(execFile);
@@ -130,4 +131,22 @@ test("settings: SIMULATOR_USE_* first, then SIMTAP_* as before the rename", asyn
   assert.equal(await read({ SIMTAP_STATE_DIR: "/tmp/old-name" }), "/tmp/old-name");
   assert.equal(await read({ SIMTAP_STATE_DIR: "/tmp/old-name", SIMULATOR_USE_STATE_DIR: "/tmp/new-name" }), "/tmp/new-name");
   assert.match(await read({}), /simulator-use$/);
+});
+
+test("the local state folder is the user's own: named for the user where the temporary folder is shared, 0700, never a link", () => {
+  const uid = process.getuid!();
+  const base = mkdtempSync(join(tmpdir(), "su-base-"));
+  const linux = ownStateDir(base, "linux");
+  assert.equal(linux, join(base, `simulator-use-${uid}`));
+  assert.equal(statSync(linux).mode & 0o777, 0o700);
+  chmodSync(linux, 0o777);
+  ownStateDir(base, "linux");
+  assert.equal(statSync(linux).mode & 0o777, 0o700, "a folder others could read is closed");
+  const mac = ownStateDir(base, "darwin");
+  assert.equal(mac, join(base, "simulator-use"), "macOS's temporary folder is the user's already: the name stays");
+  const other = mkdtempSync(join(tmpdir(), "su-base-"));
+  const elsewhere = mkdtempSync(join(tmpdir(), "su-elsewhere-"));
+  symlinkSync(elsewhere, join(other, `simulator-use-${uid}`));
+  assert.throws(() => ownStateDir(other, "linux"), /not this user's own folder/);
+  assert.ok(lstatSync(join(other, `simulator-use-${uid}`)).isSymbolicLink());
 });

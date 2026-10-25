@@ -11,7 +11,8 @@ import { existsSync } from "node:fs";
 
 import { parseArgs } from "../src/cli.ts";
 import { withSource } from "../src/cloud/account.ts";
-import { listProject, normalizeRemote, pages, projectId } from "../src/cloud/sync.ts";
+import { listProject, normalizeRemote, pages, projectId, syncFolder } from "../src/cloud/sync.ts";
+import type { CloudApi } from "../src/cloud/api.ts";
 import { callTool, TOOLS } from "../src/registry.ts";
 
 test("a project is listed without build output, dependencies or editor state, symlinks as symlinks", async () => {
@@ -59,6 +60,29 @@ test("a repository sends what git tracks or would, never what .gitignore leaves 
   writeFileSync(join(plain, "dist.mobileprovision"), "x");
   writeFileSync(join(plain, "id_ed25519"), "x");
   assert.deepEqual((await listProject(plain)).map((e) => e.path), ["App.swift"]);
+});
+
+test("a sync packs only the files its manifest listed, whatever the answer names", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "su-pack-"));
+  writeFileSync(join(dir, "App.swift"), "let a = 1\n");
+  writeFileSync(join(dir, ".env"), "API_KEY=x");
+  writeFileSync(join(dir, "notes.txt"), "x");
+  const outside = mkdtempSync(join(tmpdir(), "su-pack-out-"));
+  writeFileSync(join(outside, "other.txt"), "x");
+  let blob = Buffer.alloc(0);
+  const api = {
+    json: async (method: string, path: string, body?: unknown) => {
+      if (path.endsWith("/sync") && (body as { op: string }).op === "manifest") return { missing: ["App.swift", ".env", "../" + outside.split("/").pop() + "/other.txt", "/etc/hosts", 7] };
+      if (method === "PUT") { blob = Buffer.concat([blob, Buffer.from(body as Uint8Array)]); return { complete: true }; }
+      return { state: "done", root: "/Volumes/nmw-x/src/prj_x" };
+    },
+  } as unknown as CloudApi;
+  const synced = await syncFolder(api, "ses_phone", dir);
+  assert.equal(synced.sent, 1);
+  const archive = join(outside, "sent.tgz");
+  writeFileSync(archive, blob);
+  const members = execFileSync("tar", ["-tzf", archive], { encoding: "utf8" }).split("\n").filter(Boolean);
+  assert.deepEqual(members, ["App.swift"]);
 });
 
 test("a file changed in place, its size and mtime kept, is read again: its ctime moved", async () => {

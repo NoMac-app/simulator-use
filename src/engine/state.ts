@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,8 +14,28 @@ import { setting } from "../settings.ts";
 let held: string | undefined;
 let persist = false;
 
-/** Where simulator-use keeps its files: SIMULATOR_USE_STATE_DIR, else simulator-use in the user's temporary folder. */
-export const stateDir = () => setting("STATE_DIR") || join(tmpdir(), "simulator-use");
+/**
+ * Where simulator-use keeps its files: SIMULATOR_USE_STATE_DIR, else a folder of this user's in the temporary folder,
+ * readable by this user alone (ownStateDir).
+ */
+let own: string | undefined;
+export const stateDir = () => setting("STATE_DIR") || (own ??= ownStateDir(tmpdir()));
+
+/**
+ * simulator-use's folder in base, this user's alone: macOS gives each user a temporary folder of their own, but
+ * Linux's /tmp is shared, so there the folder is named for the user. Made 0700; one that is a link, or another
+ * user's, is refused, and one others can read is closed.
+ */
+export function ownStateDir(base: string, platform = process.platform): string {
+  const uid = process.getuid?.();
+  if (uid === undefined || platform === "win32") return join(base, "simulator-use");
+  const dir = join(base, platform === "darwin" ? "simulator-use" : `simulator-use-${uid}`);
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const st = lstatSync(dir);
+  if (!st.isDirectory() || st.uid !== uid) throw new Error(`${dir} is not this user's own folder (a link, or another user's). Set SIMULATOR_USE_STATE_DIR to a folder of yours.`);
+  if (st.mode & 0o077) chmodSync(dir, 0o700);
+  return dir;
+}
 const heldFile = () => join(stateDir(), "held-device.json");
 
 /** The CLI keeps the held device between its calls. */

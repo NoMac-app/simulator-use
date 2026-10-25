@@ -277,7 +277,9 @@ export async function syncFolder(api: CloudApi, session: string, folder: string,
   const answered: string[][] = new Array(book.length);
   await eachLimit(book, 4, async (entriesOfPage, page) => {
     const answer = await api.json("POST", `/api/v1/simulator/sessions/${session}/sync`, { op: "manifest", sync, project, page, pages: book.length, entries: entriesOfPage });
-    answered[page] = (answer.missing as string[] | undefined) ?? [];
+    // Only paths this page listed are packed: an answer naming any other file of the folder sends nothing more.
+    const listed = new Set(entriesOfPage.map((e) => e.path));
+    answered[page] = ((answer.missing as unknown[] | undefined) ?? []).filter((path): path is string => typeof path === "string" && listed.has(path));
   });
   const missing = answered.flat();
   let archive: Record<string, unknown> | undefined;

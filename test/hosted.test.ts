@@ -300,7 +300,7 @@ test("a sync, an upload and a download never act through a link left where a fol
   };
   try {
     const sha256 = createHash("sha256").update(data).digest("hex");
-    const one = await fetchOnce("6", sha256);
+    const one = await fetchOnce("a", sha256);
     assert.equal(one.state, "done", String(one.error));
     const uploadRoot = String(one.root);
     rmSync(join(uploadRoot, "Sources"), { recursive: true });
@@ -309,7 +309,7 @@ test("a sync, an upload and a download never act through a link left where a fol
     spawnSync("tar", [...(process.platform === "darwin" ? ["--no-mac-metadata"] : []), "-czf", tgz, "-C", project2, "Sources"], { env: { ...process.env, COPYFILE_DISABLE: "1" } });
     const data2 = readFileSync(tgz);
     body = new Uint8Array(data2);
-    const two = await fetchOnce("7", createHash("sha256").update(data2).digest("hex"));
+    const two = await fetchOnce("b", createHash("sha256").update(data2).digest("hex"));
     assert.equal(two.state, "done", String(two.error));
     assert.ok(lstatSync(join(uploadRoot, "Sources")).isDirectory(), "the link became a real folder");
     assert.equal(readFileSync(join(uploadRoot, "Sources/A.swift"), "utf8"), "let a = 2\n");
@@ -318,7 +318,7 @@ test("a sync, an upload and a download never act through a link left where a fol
     // A download past its limit stops, streamed: the file never lands.
     setDownloadLimit(1024);
     body = new Uint8Array(4096);
-    const big = await fetchOnce("8", "0".repeat(64));
+    const big = await fetchOnce("c", "0".repeat(64));
     assert.equal(big.state, "failed");
     assert.match(String(big.error), /upload_too_large/);
   } finally {
