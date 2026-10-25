@@ -186,6 +186,7 @@ Where this machine can't run the Simulator (Linux, Windows, a cloud agent), or f
 ```
 simulator-use cloud start      # signs in through a link the first time (or NOMAC_API_KEY), starts a phone (--device ipad for an iPad)
 simulator-use run              # every tool now runs there; run and test send the project first
+simulator-use cloud extend 30  # 30 minutes more (an hour by default), up to 8 hours in all
 simulator-use cloud stop       # ends it; the tools run on this machine again
 simulator-use cloud run . --tests   # CI in one line: start, build, run, test, a screenshot and a recording, stop
 ```

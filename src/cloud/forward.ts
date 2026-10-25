@@ -117,7 +117,7 @@ export function stopNotice(answer: Record<string, unknown>): string {
   if (!notice?.message) return "";
   if (notice.reason === "credit") return `\n${notice.message}`;
   const when = (notice.minutes_left ?? 0) <= 1 ? "within a minute" : `in about ${notice.minutes_left} minutes`;
-  return `\nThe cloud phone stops ${when}: it reaches its ${notice.reason === "spend_cap" ? "spend cap" : "time limit"}. Its apps and data go with it; the project's build stays, so cloud start then, and the next build is incremental.`;
+  return `\nThe cloud phone stops ${when}, at its ${notice.reason === "spend_cap" ? "spend cap" : "time limit"}: cloud extend keeps it running an hour longer. Once it stops, its apps and data go with it; the project's build stays, so the next cloud start builds incrementally.`;
 }
 
 async function call(api: CloudApi, session: string, name: string, args: Record<string, unknown>): Promise<ToolResult> {

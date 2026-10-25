@@ -111,7 +111,7 @@ test("a phone's stop notice is said after the answer, in cloud mode's own way on
   const limit = { minutes_left: 9, reason: "time_limit", next_action: "save_state", message: "This phone stops in about 9 minutes (21:40 UTC): it reaches its time limit, which a running phone cannot raise." };
   const credit = { minutes_left: 9, reason: "credit", next_action: "buy_credit", message: "This phone stops in about 9 minutes (21:40 UTC): the account's credit runs out." };
   script = { [`POST ${PHONE}/tools/ui_look`]: [{ status: 200, body: { state: "done", stop_notice: limit, result: { content: [{ type: "text", text: "Demo · Sign In" }] } } }] };
-  assert.equal((await callTool("ui_look", {})).text, "Demo · Sign In\nThe cloud phone stops in about 9 minutes: it reaches its time limit. Its apps and data go with it; the project's build stays, so cloud start then, and the next build is incremental.");
+  assert.equal((await callTool("ui_look", {})).text, "Demo · Sign In\nThe cloud phone stops in about 9 minutes, at its time limit: cloud extend keeps it running an hour longer. Once it stops, its apps and data go with it; the project's build stays, so the next cloud start builds incrementally.");
   script = { [`POST ${PHONE}/tools/ui_look`]: [{ status: 200, body: { state: "done", stop_notice: credit, result: { content: [{ type: "text", text: "Demo · Sign In" }] } } }] };
   assert.equal((await callTool("ui_look", {})).text, `Demo · Sign In\n${credit.message}`);
   script = { [`POST ${PHONE}/tools/ui_look`]: [done("Demo · Sign In")] };
@@ -180,4 +180,20 @@ test("cloud start takes a device: an iPad is asked for, and one asked for while 
   assert.equal(other.isError, true);
   assert.equal(other.text, "Cloud already has phone ses_pad, an iPad.\nNext: cloud stop, then cloud start with device iphone.");
   await setCloudState({ on: false });
+});
+
+test("cloud extend keeps the phone an hour longer, or the minutes the command line names; at its longest it says what then", async () => {
+  await onPhone();
+  const extended = { status: 200, body: { session: { id: "ses_p", state: "ready", ready_at: "2026-10-25T10:00:00.000Z", limits: { max_duration_seconds: 10_800 } }, links: {} } };
+  script = { [`POST ${PHONE}/extend`]: [extended] };
+  const answer = await callTool("cloud", { action: "extend" });
+  assert.equal(answer.isError, undefined, answer.text);
+  assert.equal(answer.text, "The cloud phone ses_p runs until 13:00 UTC at the latest, if the account's credit lasts. cloud extend again near then, up to 8 hours in all.");
+  assert.deepEqual(seen.at(-1)!.body, { minutes: 60 });
+  await callTool("cloud", { action: "extend", path: "30" }, { waitForJobs: true });
+  assert.deepEqual(seen.at(-1)!.body, { minutes: 30 });
+  script = { [`POST ${PHONE}/extend`]: [{ status: 409, body: { error: { code: "session_at_longest", message: "This phone already runs to the longest a session can, 8 hours." } } }] };
+  const longest = await callTool("cloud", { action: "extend" });
+  assert.equal(longest.isError, true);
+  assert.equal(longest.text, "NoMac: This phone already runs to the longest a session can, 8 hours.\nNext: When it stops, cloud start: the next build is incremental.");
 });

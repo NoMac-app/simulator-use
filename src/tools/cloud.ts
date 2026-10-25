@@ -7,7 +7,7 @@ import { pipeline } from "node:stream/promises";
 
 import { account, cloudState, setCloudState, signIn } from "../cloud/account.ts";
 import { type CloudApi, CloudError } from "../cloud/api.ts";
-import { forward } from "../cloud/forward.ts";
+import { forward, stopNotice } from "../cloud/forward.ts";
 import { describeRequest, Tunnel } from "../cloud/tunnel.ts";
 import { randomKey } from "../cloud/sync.ts";
 import { onSignalExit } from "../engine/jobs.ts";
@@ -17,7 +17,7 @@ import type { CallContext, Tool, ToolResult } from "./types.ts";
 
 /** How long start waits for the phone before answering that it is still starting (an MCP call has about a minute). */
 const READY_WAIT_MS = 40_000;
-const ACTIONS = ["start", "status", "stop", "run", "tunnel"];
+const ACTIONS = ["start", "status", "extend", "stop", "run", "tunnel"];
 
 type Phone = { id: string; state: string; device?: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean };
 /** A phone answer's links: view and control while it runs, its replay always. */
@@ -154,6 +154,30 @@ async function status(): Promise<ToolResult> {
   const minutes = Math.ceil((phone.cost?.billable_seconds ?? 0) / 60);
   if (phone.state === "queued") return { text: `Cloud is on: phone ${phone.id} is waiting.${phone.message ? ` ${phone.message}` : ""}` };
   return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
+}
+
+/**
+ * The phone kept running longer: its time limit (and its spend cap with it) up by minutes, an hour by default (the
+ * command line takes the minutes: cloud extend 30), up to 8 hours in all. The account's credit still decides.
+ */
+async function extend(args: Record<string, unknown>): Promise<ToolResult> {
+  const state = await cloudState();
+  const api = await account();
+  if (!api || !state.on || !state.session) throw new ToolError("Cloud has no phone to extend.", "cloud start.");
+  const minutes = typeof args.path === "string" && /^\d+$/.test(args.path) ? Number(args.path) : 60;
+  if (minutes < 1 || minutes > 480) throw new ToolError(`${minutes} minutes is not an extension.`, "cloud extend with 1 to 480 minutes.");
+  let answer: Record<string, unknown>;
+  try {
+    answer = await api.json("POST", `/api/v1/simulator/sessions/${state.session}/extend`, { minutes });
+  } catch (error) {
+    if (error instanceof CloudError && error.code === "session_at_longest") throw new ToolError(`NoMac: ${error.message}`, "When it stops, cloud start: the next build is incremental.");
+    if (error instanceof CloudError && error.code === "session_not_ready") throw new ToolError(`The cloud phone ${state.session} is not running, so it cannot be extended.`, "cloud status, or cloud start for a new one.");
+    throw error;
+  }
+  const phone = answer.session as Phone & { ready_at?: string | null; limits?: { max_duration_seconds?: number } };
+  const until = phone.ready_at && phone.limits?.max_duration_seconds ? new Date(Date.parse(phone.ready_at) + phone.limits.max_duration_seconds * 1000).toISOString().slice(11, 16) : undefined;
+  const runs = until ? `runs until ${until} UTC at the latest` : `has ${minutes} more minutes`;
+  return { text: `The cloud phone ${phone.id} ${runs}, if the account's credit lasts. cloud extend again near then, up to 8 hours in all.${stopNotice(answer)}` };
 }
 
 async function stop(): Promise<ToolResult> {
@@ -336,12 +360,12 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless) and starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. stop: ends it. run (CLI, CI): start, build and run path, tests with tests, screenshot, recording, stop. tunnel: the phone reaches port here.",
+    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless) and starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. extend: an hour more. stop: ends it. run (CLI, CI): start, build and run path, tests, screenshot, recording, stop. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
       action: { type: "string", enum: ACTIONS, description: "what to do" },
-      device: { type: "string", enum: ["iphone", "ipad"], description: "start, run: default iphone" },
+      device: { type: "string", enum: ["iphone", "ipad"], description: "start, run" },
       port: { type: "number", description: "tunnel: a local port; 0 closes it" },
       path: { type: "string", description: "run: project folder" },
       tests: { type: "boolean", description: "run: tests too" },
@@ -360,6 +384,8 @@ export const cloud: Tool = {
           return await start(args, context);
         case "status":
           return await status();
+        case "extend":
+          return await extend(args);
         case "stop":
           return await stop();
         case "run":
