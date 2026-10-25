@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { cloudState } from "./cloud/account.ts";
 import { forward } from "./cloud/forward.ts";
 import { ToolError } from "./errors.ts";
+import { simulatorMissing } from "./engine/simctl.ts";
 import { setting } from "./settings.ts";
 import { appControl } from "./tools/app-control.ts";
 import { appLogs } from "./tools/app-logs.ts";
@@ -18,6 +19,9 @@ import { uiAct } from "./tools/ui-act.ts";
 import { uiLook } from "./tools/ui-look.ts";
 
 export const VERSION: string = (createRequire(import.meta.url)("../package.json") as { version: string }).version;
+
+/** Tools that run without a Simulator on this machine: cloud mode itself, and following a job. */
+const NO_SIMULATOR_NEEDED = new Set(["cloud", "job_status", "job_cancel"]);
 
 /** Every tool, in the order clients list them. The MCP server and the CLI are both built from this. */
 export const TOOLS: Tool[] = [devices, deviceUse, appRun, uiLook, uiAct, appControl, appLogs, testsRun, jobStatus, jobCancel, screenRecord, cloud];
@@ -70,6 +74,11 @@ export async function callTool(name: string, args: Record<string, unknown> = {},
       const out = await forward(tool.name, args, context);
       const notice = tunnelNotice();
       return notice ? { ...out, text: `${out.text}\n${notice}` } : out;
+    }
+    // Where the Simulator can't run, every tool that needs it says so, and how to get a cloud phone.
+    if (!NO_SIMULATOR_NEEDED.has(tool.name) && !setting("HOSTED")) {
+      const missing = await simulatorMissing();
+      if (missing) throw missing;
     }
     return await tool.run(args, context);
   } catch (error) {

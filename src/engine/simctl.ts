@@ -1,4 +1,7 @@
-import { withCloudHint } from "../cloud-hint.ts";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+import { cloudFirst, withCloudHint } from "../cloud-hint.ts";
 import { ToolError } from "../errors.ts";
 import { run } from "./exec.ts";
 import { withLock } from "./lock.ts";
@@ -53,8 +56,29 @@ export function parseDevices(json: string): Device[] {
 const CACHE_MS = 5_000;
 let cached: { at: number; devices: Device[] } | undefined;
 
+/** The developer folder Xcode was found in (DEVELOPER_DIR, or none for xcode-select's): it does not go away. */
+let xcodeFound: string | undefined;
+
+/**
+ * Why this machine can't run the iOS Simulator at all, or nothing: not a Mac, or a Mac without Xcode (none, or only
+ * the Command Line Tools, which have no simctl). Checked before any tool that needs the Simulator, so the agent
+ * reads that and its way on, never a build tool's error. xcode-select -p never asks a person to install anything.
+ */
+export async function simulatorMissing(): Promise<ToolError | undefined> {
+  if (process.platform !== "darwin") return new ToolError("This machine can't run the iOS Simulator: it needs a Mac with Xcode.", cloudFirst("Run simulator-use on a Mac with Xcode."));
+  const asked = process.env.DEVELOPER_DIR ?? "";
+  if (xcodeFound === asked) return undefined;
+  const developer = asked || (await run("xcode-select", ["-p"], { timeoutMs: 10_000 }).then((r) => r.stdout.trim(), () => ""));
+  if (developer && existsSync(join(developer, "usr", "bin", "simctl"))) {
+    xcodeFound = asked;
+    return undefined;
+  }
+  return new ToolError("This Mac has no Xcode, so it can't run the iOS Simulator (the Command Line Tools alone have none).", cloudFirst("Install Xcode from the App Store and open it once."));
+}
+
 export async function listDevices(fresh = false): Promise<Device[]> {
-  if (process.platform !== "darwin") throw new ToolError(NO_SIMULATOR, withCloudHint("Run simulator-use on a Mac with Xcode."));
+  const missing = process.platform !== "darwin" ? await simulatorMissing() : undefined;
+  if (missing) throw missing;
   if (!fresh && cached && Date.now() - cached.at < CACHE_MS) return cached.devices;
   try {
     const { stdout } = await run("xcrun", ["simctl", "list", "devices", "--json"], { timeoutMs: 30_000 });

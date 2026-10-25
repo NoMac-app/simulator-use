@@ -145,3 +145,39 @@ test("the built tools.json lists the tools exactly as the MCP server does", asyn
   assert.deepEqual(json.tools, JSON.parse(JSON.stringify(listed)));
   assert.equal(json.instructions, INSTRUCTIONS);
 });
+
+test("where the iOS Simulator can't run, every tool that needs it says so and how to get a cloud phone; cloud and jobs still answer", async () => {
+  const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+  const hint = process.env.SIMULATOR_USE_NO_CLOUD_HINT;
+  delete process.env.SIMULATOR_USE_NO_CLOUD_HINT;
+  Object.defineProperty(process, "platform", { value: "linux" });
+  try {
+    const want = "This machine can't run the iOS Simulator: it needs a Mac with Xcode.\nNext: cloud start runs every tool on a NoMac cloud iPhone Simulator, $0.80 an hour by the minute (https://nomac.app/?utm_source=simulator-use); then call this again. Or: run simulator-use on a Mac with Xcode.";
+    for (const [name, args] of [["app_run", { path: "." }], ["tests_run", { path: "." }], ["ui_look", {}], ["devices", {}]] as const) {
+      const out = await callTool(name, args as Record<string, unknown>, { waitForJobs: true });
+      assert.equal(out.text, want, name);
+      assert.equal(out.isError, true);
+    }
+    assert.match((await callTool("cloud", { action: "status" })).text, /^Cloud is off/);
+    assert.doesNotMatch((await callTool("job_status", {})).text, /can't run the iOS Simulator/);
+    process.env.SIMULATOR_USE_NO_CLOUD_HINT = "1";
+    assert.equal((await callTool("app_run", { path: "." })).text, "This machine can't run the iOS Simulator: it needs a Mac with Xcode.\nNext: Run simulator-use on a Mac with Xcode.");
+  } finally {
+    Object.defineProperty(process, "platform", platform);
+    if (hint === undefined) delete process.env.SIMULATOR_USE_NO_CLOUD_HINT;
+    else process.env.SIMULATOR_USE_NO_CLOUD_HINT = hint;
+  }
+});
+
+test("a Mac without Xcode (or with the Command Line Tools alone) says so before a build tool's error", { skip: process.platform !== "darwin" }, async () => {
+  const developer = process.env.DEVELOPER_DIR;
+  process.env.DEVELOPER_DIR = "/Library/Developer/CommandLineTools-or-nothing";
+  try {
+    const out = await callTool("app_run", { path: "." }, { waitForJobs: true });
+    assert.match(out.text, /^This Mac has no Xcode, so it can't run the iOS Simulator \(the Command Line Tools alone have none\)\.\nNext: cloud start runs every tool on a NoMac cloud iPhone Simulator/);
+    assert.match(out.text, /Or: install Xcode from the App Store and open it once\.$/);
+  } finally {
+    if (developer === undefined) delete process.env.DEVELOPER_DIR;
+    else process.env.DEVELOPER_DIR = developer;
+  }
+});
