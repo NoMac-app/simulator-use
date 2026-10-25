@@ -190,7 +190,7 @@ simulator-use cloud stop       # ends it; the tools run on this machine again
 simulator-use cloud run . --tests   # CI in one line: start, build, run, test, a screenshot and a recording, stop
 ```
 
-Only the files the phone lacks are sent (a one-file change sends one file), into the account's own encrypted workspace, kept between sessions so builds stay incremental; build output and dependencies stay behind. The `cloud` tool does the same over MCP.
+Only the files the phone lacks are sent (a one-file change sends one file), into the account's own encrypted workspace, kept between sessions so builds stay incremental; build output and dependencies stay behind. Only files changed since the last send are read again (an index in simulator-use's state folder; `SIMULATOR_USE_SYNC_INDEX=0` reads every file). The `cloud` tool does the same over MCP.
 
 `cloud start` answers a link for a person to watch the phone in a browser and one to use it. `cloud stop` answers the session's replay: the screen as a video beside every call (typed text left out), kept for 7 days.
 

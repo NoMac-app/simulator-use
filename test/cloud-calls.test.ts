@@ -95,7 +95,7 @@ test("a stop that did not reach NoMac keeps the phone, says it still bills, and 
   assert.deepEqual(await cloudState(), { on: true, session: "ses_p" });
 });
 
-test("an app is sent whole, its own folders too, and nothing beside it is read", () => {
+test("an app is sent whole, its own folders too, and nothing beside it is read", async () => {
   const dir = mkdtempSync(join(tmpdir(), "su-app-"));
   mkdirSync(join(dir, "My.app/assets/node_modules/pkg"), { recursive: true });
   mkdirSync(join(dir, "My.app/build"), { recursive: true });
@@ -103,7 +103,7 @@ test("an app is sent whole, its own folders too, and nothing beside it is read",
   writeFileSync(join(dir, "My.app/assets/node_modules/pkg/index.js"), "x");
   writeFileSync(join(dir, "My.app/build/main.js"), "x");
   writeFileSync(join(dir, "elsewhere.zip"), "not read");
-  assert.deepEqual(listProject(dir, "My.app").map((e) => e.path), ["My.app/My", "My.app/assets/node_modules/pkg/index.js", "My.app/build/main.js"]);
+  assert.deepEqual((await listProject(dir, "My.app")).map((e) => e.path), ["My.app/My", "My.app/assets/node_modules/pkg/index.js", "My.app/build/main.js"]);
 });
 
 test("a phone's stop notice is said after the answer, in cloud mode's own way on", async () => {

@@ -3,17 +3,20 @@
  * workspace lacks. The manifest (each file's path, size, mtime and SHA-256) goes in pages; the host answers the
  * paths it lacks; those go as one gzip tar, in 256 KiB chunks up to 8 MiB, else to an upload link; place writes
  * them and every mtime (new mtimes alone make Xcode compile again), and removes what the folder no longer has.
- * Build output and dependencies are left out, and left alone on the host.
+ * Build output and dependencies are left out, and left alone on the host. A file's hash is kept in an index on
+ * this machine, so only files that changed since the last sync are read again.
  */
 
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
-import { lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync } from "node:fs";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { createReadStream, lstatSync, readdirSync, realpathSync, type Stats } from "node:fs";
+import { mkdir, mkdtemp, readFile, readlink, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative, sep } from "node:path";
 
 import { run } from "../engine/exec.ts";
+import { stateDir } from "../engine/state.ts";
+import { setting } from "../settings.ts";
 import type { CloudApi } from "./api.ts";
 
 export type Entry = { path: string; size: number; mtime_ms: number; sha256: string; kind: "file" | "executable" | "symlink" };
@@ -31,10 +34,11 @@ const ARCHIVE_MAX = 2 * 1024 ** 3;
 /**
  * The project's files as the host is to have them: build output, dependencies and editor state left out. With
  * only (a .app beside others in its folder), that one alone and all of it: a bundle's own folders (an app's
- * node_modules or build) are part of the app.
+ * node_modules or build) are part of the app. Files are hashed a few at a time, never blocking the process (a
+ * cloud tunnel runs in it), and a file whose size, mtime, ctime and inode match the index is not read again.
  */
-export function listProject(folder: string, only?: string): Entry[] {
-  const out: Entry[] = [];
+export async function listProject(folder: string, only?: string): Promise<Entry[]> {
+  const found: { rel: string; path: string; st: Stats }[] = [];
   const walk = (dir: string, whole: boolean) => {
     for (const name of readdirSync(dir).sort()) {
       if (SKIP_FILES(name)) continue;
@@ -44,20 +48,84 @@ export function listProject(folder: string, only?: string): Entry[] {
         if (whole || !SKIP_DIRS.has(name)) walk(path, whole);
         continue;
       }
-      const rel = relative(folder, path).split(sep).join("/");
-      if (st.isSymbolicLink()) {
-        const target = readlinkSync(path);
-        out.push({ path: rel, size: Buffer.byteLength(target), mtime_ms: Math.floor(st.mtimeMs), sha256: sha256(target), kind: "symlink" });
-      } else if (st.isFile()) {
-        out.push({ path: rel, size: st.size, mtime_ms: Math.floor(st.mtimeMs), sha256: sha256(readFileSync(path)), kind: st.mode & 0o111 ? "executable" : "file" });
-      }
+      if (st.isSymbolicLink() || st.isFile()) found.push({ rel: relative(folder, path).split(sep).join("/"), path, st });
     }
   };
   if (only) {
     const top = join(folder, only);
     if (lstatSync(top, { throwIfNoEntry: false })?.isDirectory()) walk(top, true);
   } else walk(folder, false);
+
+  const indexed = setting("SYNC_INDEX") !== "0";
+  const file = indexFile(folder, only);
+  const last = indexed ? await readIndex(file) : undefined;
+  const scanned = Date.now();
+  const next: Record<string, Indexed> = {};
+  const out: Entry[] = new Array(found.length);
+  await eachLimit(found, HASHING, async ({ rel, path, st }, i) => {
+    if (st.isSymbolicLink()) {
+      const target = await readlink(path);
+      out[i] = { path: rel, size: Buffer.byteLength(target), mtime_ms: Math.floor(st.mtimeMs), sha256: sha256(target), kind: "symlink" };
+      return;
+    }
+    const known = last?.files[rel];
+    // Git's rule for a racy entry: a file changed within RACY_MS of the last scan may have changed again since,
+    // with the same mtime, so it is read again.
+    const same = known && known.size === st.size && known.mtime_ms === st.mtimeMs && known.ctime_ms === st.ctimeMs && known.ino === st.ino && st.mtimeMs < last!.scanned_ms - RACY_MS;
+    const hash = same ? known.sha256 : await hashFile(path, st.size);
+    next[rel] = { size: st.size, mtime_ms: st.mtimeMs, ctime_ms: st.ctimeMs, ino: st.ino, sha256: hash };
+    out[i] = { path: rel, size: st.size, mtime_ms: Math.floor(st.mtimeMs), sha256: hash, kind: st.mode & 0o111 ? "executable" : "file" };
+  });
+  if (indexed) await writeIndex(file, { scanned_ms: scanned, files: next }).catch(() => undefined);
   return out;
+}
+
+// ---- The hash index: per folder on this machine, never sent --------------------------------------------------
+
+type Indexed = { size: number; mtime_ms: number; ctime_ms: number; ino: number; sha256: string };
+type SyncIndex = { scanned_ms: number; files: Record<string, Indexed> };
+
+/** Files hashed at once. */
+const HASHING = 8;
+/** A file changed within this long of a scan is read again at the next one (coarse mtimes on some file systems). */
+const RACY_MS = 2_000;
+
+const indexFile = (folder: string, only?: string) => join(stateDir(), "sync-index", `${sha256(`${realpathSync(folder)}\0${only ?? ""}`).slice(0, 32)}.json`);
+
+async function readIndex(file: string): Promise<SyncIndex | undefined> {
+  try {
+    const index = JSON.parse(await readFile(file, "utf8")) as SyncIndex;
+    return typeof index.scanned_ms === "number" && index.files && typeof index.files === "object" ? index : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function writeIndex(file: string, index: SyncIndex): Promise<void> {
+  await mkdir(join(stateDir(), "sync-index"), { recursive: true });
+  const tmp = `${file}.${process.pid}.tmp`;
+  await writeFile(tmp, JSON.stringify(index), { mode: 0o600 });
+  await rename(tmp, file);
+}
+
+/** A file's SHA-256: small files read at once, larger ones streamed. */
+async function hashFile(path: string, size: number): Promise<string> {
+  if (size < 1024 * 1024) return sha256(await readFile(path));
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(path)) hash.update(chunk as Buffer);
+  return hash.digest("hex");
+}
+
+/** Runs work on each item, at most limit at a time. */
+async function eachLimit<T>(items: T[], limit: number, work: (item: T, index: number) => Promise<void>): Promise<void> {
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      await work(items[i]!, i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
 }
 
 const sha256 = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
@@ -134,18 +202,20 @@ export type SyncOptions = {
 export async function syncFolder(api: CloudApi, session: string, folder: string, options: SyncOptions = {}): Promise<Synced> {
   const { only, onStep } = options;
   const started = Date.now();
-  const entries = listProject(folder, only);
+  const entries = await listProject(folder, only);
   if (!entries.length) throw new Error(`${folder} has no files to send.`);
   const project = options.project ?? (await projectId(folder));
   const sync = `cli-${randomKey()}`;
   const book = pages(entries);
   if (book.length > 256) throw new Error(`${folder} has ${entries.length} files: more than NoMac's sync takes (256 pages).`);
   onStep?.(`listing ${entries.length} files`);
-  const missing: string[] = [];
-  for (let page = 0; page < book.length; page++) {
-    const answer = await api.json("POST", `/api/v1/simulator/sessions/${session}/sync`, { op: "manifest", sync, project, page, pages: book.length, entries: book[page] });
-    missing.push(...((answer.missing as string[] | undefined) ?? []));
-  }
+  // Pages go 4 at a time: the host keeps each by its number, and places once it has them all.
+  const answered: string[][] = new Array(book.length);
+  await eachLimit(book, 4, async (entriesOfPage, page) => {
+    const answer = await api.json("POST", `/api/v1/simulator/sessions/${session}/sync`, { op: "manifest", sync, project, page, pages: book.length, entries: entriesOfPage });
+    answered[page] = (answer.missing as string[] | undefined) ?? [];
+  });
+  const missing = answered.flat();
   let archive: Record<string, unknown> | undefined;
   let bytes = 0;
   if (missing.length) {

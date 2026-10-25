@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -12,7 +13,7 @@ import { withSource } from "../src/cloud/account.ts";
 import { listProject, normalizeRemote, pages, projectId } from "../src/cloud/sync.ts";
 import { callTool, TOOLS } from "../src/registry.ts";
 
-test("a project is listed without build output, dependencies or editor state, symlinks as symlinks", () => {
+test("a project is listed without build output, dependencies or editor state, symlinks as symlinks", async () => {
   const dir = mkdtempSync(join(tmpdir(), "su-proj-"));
   mkdirSync(join(dir, "Sources"));
   mkdirSync(join(dir, "DerivedData/x"), { recursive: true });
@@ -25,9 +26,74 @@ test("a project is listed without build output, dependencies or editor state, sy
   writeFileSync(join(dir, "App.xcodeproj/xcuserdata/me.xcuserstate"), "x");
   writeFileSync(join(dir, ".DS_Store"), "x");
   symlinkSync("Sources/App.swift", join(dir, "link.swift"));
-  const listed = listProject(dir);
+  const listed = await listProject(dir);
   assert.deepEqual(listed.map((e) => `${e.path}:${e.kind}`), ["App.xcodeproj/project.pbxproj:file", "Sources/App.swift:file", "link.swift:symlink"]);
   assert.equal(listed[2]!.size, "Sources/App.swift".length);
+});
+
+test("a file changed in place, its size and mtime kept, is read again: its ctime moved", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "su-index-"));
+  const file = join(dir, "A.swift");
+  const past = new Date("2020-01-01T00:00:00Z");
+  writeFileSync(file, "let a = 1\n");
+  utimesSync(file, past, past);
+  const first = (await listProject(dir))[0]!;
+  writeFileSync(file, "let a = 2\n");
+  utimesSync(file, past, past);
+  const second = (await listProject(dir))[0]!;
+  assert.equal(second.mtime_ms, past.getTime());
+  assert.equal(second.size, first.size);
+  assert.equal(second.sha256, createHash("sha256").update("let a = 2\n").digest("hex"));
+});
+
+test("an unchanged file's hash comes from the index; SIMULATOR_USE_SYNC_INDEX=0 reads every file", async () => {
+  const state = process.env.SIMULATOR_USE_STATE_DIR;
+  process.env.SIMULATOR_USE_STATE_DIR = mkdtempSync(join(tmpdir(), "su-index-state-"));
+  try {
+    const dir = mkdtempSync(join(tmpdir(), "su-index-"));
+    const past = new Date("2020-01-01T00:00:00Z");
+    writeFileSync(join(dir, "A.swift"), "let a = 1\n");
+    utimesSync(join(dir, "A.swift"), past, past);
+    const real = (await listProject(dir))[0]!.sha256;
+    const folder = join(process.env.SIMULATOR_USE_STATE_DIR, "sync-index");
+    const [name] = readdirSync(folder);
+    const index = JSON.parse(readFileSync(join(folder, name!), "utf8"));
+    index.files["A.swift"].sha256 = "f".repeat(64);
+    writeFileSync(join(folder, name!), JSON.stringify(index));
+    assert.equal((await listProject(dir))[0]!.sha256, "f".repeat(64), "the index was read, not the file");
+    process.env.SIMULATOR_USE_SYNC_INDEX = "0";
+    assert.equal((await listProject(dir))[0]!.sha256, real);
+  } finally {
+    delete process.env.SIMULATOR_USE_SYNC_INDEX;
+    process.env.SIMULATOR_USE_STATE_DIR = state;
+  }
+});
+
+test("a warm listing of 20,000 files reads none of them: well under the time hashing them all takes", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "su-index-big-"));
+  const body = Buffer.alloc(4096, "x");
+  for (let d = 0; d < 200; d++) {
+    mkdirSync(join(dir, `Sources${d}`));
+    for (let f = 0; f < 100; f++) writeFileSync(join(dir, `Sources${d}`, `F${f}.swift`), body);
+  }
+  try {
+    // Past the racy window of the files just written, so the index can vouch for them.
+    await new Promise((resolve) => setTimeout(resolve, 2_100));
+    await listProject(dir);
+    let started = performance.now();
+    const warm = await listProject(dir);
+    const warmMs = performance.now() - started;
+    process.env.SIMULATOR_USE_SYNC_INDEX = "0";
+    started = performance.now();
+    const cold = await listProject(dir);
+    const coldMs = performance.now() - started;
+    assert.equal(warm.length, 20_000);
+    assert.deepEqual(warm.map((e) => e.sha256), cold.map((e) => e.sha256));
+    assert.ok(warmMs < 300 && warmMs * 3 < coldMs, `warm ${warmMs.toFixed(0)} ms, every file read ${coldMs.toFixed(0)} ms`);
+  } finally {
+    delete process.env.SIMULATOR_USE_SYNC_INDEX;
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("manifest pages hold at most 1000 entries and about 192 KiB, in order", () => {
@@ -37,6 +103,30 @@ test("manifest pages hold at most 1000 entries and about 192 KiB, in order", () 
   assert.ok(long.length >= 2 && long.every((p) => JSON.stringify(p).length < 200 * 1024));
   assert.equal(long.flat().length, 300);
   assert.deepEqual(pages([]), [[]]);
+});
+
+test("manifest pages go 4 at a time", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "su-pages-"));
+  for (let i = 0; i < 4500; i++) writeFileSync(join(dir, `F${String(i).padStart(4, "0")}.swift`), `// ${i}\n`);
+  let inFlight = 0, most = 0;
+  const pagesSeen: number[] = [];
+  const api = {
+    json: async (_method: string, _path: string, body: { op: string; page?: number; pages?: number }) => {
+      if (body.op === "place") return { state: "done", root: "/Volumes/nmw-x/src/prj_x" };
+      inFlight++;
+      most = Math.max(most, inFlight);
+      pagesSeen.push(body.page!);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      inFlight--;
+      return { missing: [] };
+    },
+  };
+  const { syncFolder } = await import("../src/cloud/sync.ts");
+  const synced = await syncFolder(api as never, "ses_x", dir);
+  assert.equal(synced.files, 4500);
+  assert.deepEqual([...pagesSeen].sort((a, b) => a - b), [0, 1, 2, 3, 4]);
+  assert.equal(most, 4);
+  rmSync(dir, { recursive: true, force: true });
 });
 
 test("a repository is one project whichever way it is cloned", async () => {
