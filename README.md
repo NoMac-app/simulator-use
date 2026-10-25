@@ -184,7 +184,7 @@ From a shell: `npx simulator-use look`.
 Where this machine can't run the Simulator (Linux, Windows, a cloud agent), or for CI, the same tools run on a cloud iPhone Simulator on [NoMac](https://nomac.app/?utm_source=simulator-use), a Mac with Xcode, $0.80 an hour by the minute:
 
 ```
-simulator-use cloud start      # signs in through a link the first time (or NOMAC_API_KEY), starts a phone
+simulator-use cloud start      # signs in through a link the first time (or NOMAC_API_KEY), starts a phone (--device ipad for an iPad)
 simulator-use run              # every tool now runs there; run and test send the project first
 simulator-use cloud stop       # ends it; the tools run on this machine again
 simulator-use cloud run . --tests   # CI in one line: start, build, run, test, a screenshot and a recording, stop

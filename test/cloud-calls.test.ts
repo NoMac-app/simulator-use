@@ -164,3 +164,20 @@ test("an MCP server stops the cloud phone it started when its client closes it",
   assert.equal(await exited, 0);
   assert.ok(seen.some((r) => r.method === "DELETE" && r.path === "/api/v1/simulator/sessions/ses_srv"), JSON.stringify(seen.map((r) => `${r.method} ${r.path}`)));
 });
+
+test("cloud start takes a device: an iPad is asked for, and one asked for while an iPhone runs says so", async () => {
+  seen.length = 0;
+  await setCloudState({ on: false });
+  script = {
+    "POST /api/v1/simulator/sessions": [{ status: 202, body: { session: { id: "ses_pad", state: "queued" }, links: {} } }],
+    "GET /api/v1/simulator/sessions/ses_pad": [{ status: 200, body: { session: { id: "ses_pad", state: "ready", device: "ipad" } } }],
+  };
+  const started = await callTool("cloud", { action: "start", device: "ipad" });
+  assert.match(started.text, /^Cloud phone ready in [\d.]+ s: an iPad Simulator on a NoMac Mac/);
+  assert.deepEqual(seen.find((r) => r.method === "POST")!.body, { device: "ipad" });
+  script = { "GET /api/v1/simulator/sessions/ses_pad": [{ status: 200, body: { session: { id: "ses_pad", state: "ready", device: "ipad" } } }] };
+  const other = await callTool("cloud", { action: "start", device: "iphone" });
+  assert.equal(other.isError, true);
+  assert.equal(other.text, "Cloud already has phone ses_pad, an iPad.\nNext: cloud stop, then cloud start with device iphone.");
+  await setCloudState({ on: false });
+});

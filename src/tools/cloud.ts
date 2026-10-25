@@ -19,7 +19,7 @@ import type { CallContext, Tool, ToolResult } from "./types.ts";
 const READY_WAIT_MS = 40_000;
 const ACTIONS = ["start", "status", "stop", "run", "tunnel"];
 
-type Phone = { id: string; state: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean };
+type Phone = { id: string; state: string; device?: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean };
 /** A phone answer's links: view and control while it runs, its replay always. */
 type Links = { view?: string; control?: string; replay?: string };
 
@@ -42,7 +42,10 @@ async function untilReady(api: CloudApi, id: string, waitMs: number): Promise<Ph
   return phone;
 }
 
-async function start(context: CallContext): Promise<ToolResult> {
+const DEVICE_NAMES: Record<string, string> = { iphone: "iPhone", ipad: "iPad" };
+
+async function start(args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
+  const device = typeof args.device === "string" ? args.device : undefined;
   const signed = await signIn();
   if ("link" in signed) {
     return { text: `Sign in to NoMac for a cloud phone: open ${signed.link} and approve code ${signed.code}.\nNext: cloud start again once it is approved (headless: set NOMAC_API_KEY instead).` };
@@ -57,12 +60,15 @@ async function start(context: CallContext): Promise<ToolResult> {
     });
     const phone = read?.phone;
     if (phone && (phone.state === "ready" || phone.state === "queued" || phone.state === "provisioning")) {
+      if (device && phone.device && phone.device !== device) {
+        throw new ToolError(`Cloud already has phone ${phone.id}, an ${DEVICE_NAMES[phone.device] ?? phone.device}.`, `cloud stop, then cloud start with device ${device}.`);
+      }
       await setCloudState({ ...state, on: true });
       return { text: `Cloud is on: phone ${phone.id} is ${phone.state}, ${dollars(phone.cost?.accrued_microunits)} so far. Every tool runs there; cloud stop ends it.${watchLine(read.links)}` };
     }
   }
   const started = Date.now();
-  const created = await api.json("POST", "/api/v1/simulator/sessions", {}, `cli-start-${randomKey()}`);
+  const created = await api.json("POST", "/api/v1/simulator/sessions", device ? { device } : {}, `cli-start-${randomKey()}`);
   const id = String((created.session as Phone).id);
   await setCloudState({ on: true, session: id });
   const phone = await untilReady(api, id, context.waitForJobs ? 5 * 60_000 : READY_WAIT_MS);
@@ -76,7 +82,7 @@ async function start(context: CallContext): Promise<ToolResult> {
     return { text: `The cloud phone ${id} is still starting after ${((Date.now() - started) / 1000).toFixed(0)} s.${why}\nNext: cloud status, or any tool: it waits for the phone.` };
   }
   const watch = watchLine((created.links ?? {}) as Links);
-  return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an iPhone Simulator on a NoMac Mac, $0.80 an hour by the minute.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
+  return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an ${DEVICE_NAMES[device ?? "iphone"]} Simulator on a NoMac Mac, $0.80 an hour by the minute.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
 }
 
 /** The phone's tunnel to a backend on this machine, while this process runs (one at a time). */
@@ -271,7 +277,7 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
     if (session) await stopNow(session);
   });
   try {
-    const ensure = await start({ waitForJobs: true });
+    const ensure = await start(args, { waitForJobs: true });
     // Not signed in yet: nothing started, and the pending sign-in is kept for the next call.
     if (/^Sign in to NoMac/.test(ensure.text)) {
       signingIn = true;
@@ -330,16 +336,17 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents, CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run (CLI, CI): start, build and run path, tests with tests, a screenshot and a recording, stop. tunnel: the phone reaches port here.",
+    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless) and starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. stop: ends it. run (CLI, CI): start, build and run path, tests with tests, screenshot, recording, stop. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
-      action: { type: "string", enum: ACTIONS, description: "start, status, stop, run, or tunnel" },
-      port: { type: "number", description: "tunnel: a backend's port here; 0 closes it" },
+      action: { type: "string", enum: ACTIONS, description: "what to do" },
+      device: { type: "string", enum: ["iphone", "ipad"], description: "start, run: default iphone" },
+      port: { type: "number", description: "tunnel: a local port; 0 closes it" },
       path: { type: "string", description: "run: project folder" },
       tests: { type: "boolean", description: "run: tests too" },
       scheme: { type: "string", description: "run: scheme" },
-      out: { type: "string", description: "run (CLI): screenshot folder" },
+      out: { type: "string", description: "run: output folder" },
     },
     required: ["action"],
     additionalProperties: false,
@@ -350,7 +357,7 @@ export const cloud: Tool = {
     try {
       switch (args.action) {
         case "start":
-          return await start(context);
+          return await start(args, context);
         case "status":
           return await status();
         case "stop":
