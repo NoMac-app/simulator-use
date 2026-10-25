@@ -36,23 +36,25 @@ test("the relay's ports: the user's range, highest first; anything else refused"
 });
 
 test("the relay takes the highest free port of its range and carries each connection", async () => {
-  const taken = await freePort();
+  // Two ports free a moment ago, as the range (another process may hold the port next to a free one); and whatever
+  // fails, the squatter and the relay are closed, so a failure is reported instead of keeping the test running.
+  const [taken, next] = [await freePort(), await freePort()];
   const squatter = createServer();
   await new Promise<void>((r) => squatter.listen(taken, "127.0.0.1", () => r()));
   const input = new PassThrough(), output = new PassThrough();
-  const done = relay(input, output, [taken, taken - 1]);
-  const reader = new FrameReader();
-  const frames: ReturnType<FrameReader["push"]> = [];
-  output.on("data", (chunk: Buffer) => frames.push(...reader.push(chunk)));
-  const until = async (n: number) => {
-    for (let i = 0; i < 200 && frames.length < n; i++) await new Promise((r) => setTimeout(r, 10));
-  };
-  await until(1);
-  // A tenant's own server on the highest port: the relay takes the next one.
-  assert.deepEqual(JSON.parse(frames[0]!.payload.toString()), { port: taken - 1 });
-  squatter.close();
-  input.end();
-  await done;
+  const done = relay(input, output, [taken, next]);
+  try {
+    const reader = new FrameReader();
+    const frames: ReturnType<FrameReader["push"]> = [];
+    output.on("data", (chunk: Buffer) => frames.push(...reader.push(chunk)));
+    for (let i = 0; i < 200 && frames.length < 1; i++) await new Promise((r) => setTimeout(r, 10));
+    // A tenant's own server on the highest port: the relay takes the next one.
+    assert.deepEqual(JSON.parse(frames[0]!.payload.toString()), { port: next });
+  } finally {
+    squatter.close();
+    input.end();
+    await done;
+  }
 });
 
 test("an app on the phone reaches the developer's backend through the tunnel, and the request is captured", async () => {
