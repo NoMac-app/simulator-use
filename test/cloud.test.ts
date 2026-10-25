@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -53,6 +53,9 @@ test("a repository is one project whichever way it is cloned", async () => {
 let server: Server;
 const seen: { method: string; path: string; body: unknown; key: string | undefined }[] = [];
 let phoneState = "ready";
+// A build log's link, as NoMac makes them: its payload names the file. It works while the phone runs.
+const LOG_TOKEN = `${Buffer.from(JSON.stringify({ n: "build.log" })).toString("base64url")}.sig`;
+const local = () => `http://127.0.0.1:${(server.address() as { port: number }).port}`;
 const read = (req: IncomingMessage) => new Promise<Buffer>((resolve) => { const parts: Buffer[] = []; req.on("data", (d: Buffer) => parts.push(d)); req.on("end", () => resolve(Buffer.concat(parts))); });
 
 before(async () => {
@@ -64,6 +67,12 @@ before(async () => {
     const send = (status: number, value: unknown) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(value)); };
     // A file link needs no key: the link is the permission.
     if (path === "/api/v1/simulator/files/rec.tok") { res.writeHead(200, { "content-type": "video/mp4" }); res.end("mp4"); return; }
+    if (path === `/api/v1/simulator/files/${LOG_TOKEN}`) {
+      if (phoneState === "stopped") return send(410, { error: { code: "file_gone", message: "That file is gone: the phone ended." } });
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.end("Demo.swift:3: error: cannot find 'x' in scope\n");
+      return;
+    }
     if (req.headers.authorization !== "Bearer nmk_test") return send(401, { error: { code: "unauthorized", message: "no" } });
     if (req.method === "POST" && path === "/api/v1/simulator/sessions") return send(202, { session: { id: "ses_phone", state: "queued" }, links: { view: "https://nomac.app/simulator-use/view/w.x", control: "https://nomac.app/simulator-use/view/c.x", expires_at: "2026-10-24T12:00:00.000Z", replay: "https://nomac.app/simulator-use/replay/r.x" } });
     if (req.method === "GET" && path === "/api/v1/simulator/sessions/ses_phone") {
@@ -85,7 +94,7 @@ before(async () => {
     if (path === "/api/v1/simulator/sessions/ses_phone/tools/tests_run") return send(200, { id: "call_2", state: "done", result: { content: [{ type: "text", text: "3 tests passed in 9.6 s." }] } });
     if (path === "/api/v1/simulator/sessions/ses_phone/tools/screen_record") return send(200, { id: "call_4", state: "done", result: { content: [{ type: "text", text: (body as { action: string }).action === "start" ? "Recording iPhone 17 Pro." : `Recorded 12 s (1 MB): http://127.0.0.1:${(server.address() as { port: number }).port}/api/v1/simulator/files/rec.tok` }] } });
     if (path === "/api/v1/simulator/sessions/ses_phone/tools/ui_look") return send(200, { id: "call_3", state: "done", result: { content: [{ type: "text", text: "Demo · Sign In" }, { type: "image", data: Buffer.from("jpeg").toString("base64"), mimeType: "image/jpeg" }] } });
-    if (path === "/api/v1/simulator/sessions/ses_phone/calls/call_1") return send(200, { id: "call_1", state: "done", result: { content: [{ type: "text", text: "Built Demo in 1.2 s, installed dev.simtap.demo.\nFull log: https://nomac.app/api/v1/simulator/files/x.y" }] } });
+    if (path === "/api/v1/simulator/sessions/ses_phone/calls/call_1") return send(200, { id: "call_1", state: "done", result: { content: [{ type: "text", text: `Built Demo in 1.2 s, installed dev.simtap.demo.\nFull log: ${local()}/api/v1/simulator/files/${LOG_TOKEN}` }] } });
     send(404, { error: { code: "not_found", message: path } });
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
@@ -110,7 +119,7 @@ test("cloud start, then every tool on the phone: app_run sends the project first
   const ran = await callTool("app_run", { path: project });
   assert.equal(ran.isError, undefined, ran.text);
   assert.match(ran.text, /^Sent 1 of 2 files \(1 KB\) in [\d.]+ s\.\nBuilt Demo in 1\.2 s/);
-  assert.match(ran.text, /Full log: https:\/\/nomac\.app\/api\/v1\/simulator\/files\/x\.y/, "links stay links");
+  assert.ok(ran.text.includes(`Full log: ${local()}/api/v1/simulator/files/${LOG_TOKEN}`), "links stay links");
   const call = seen.find((r) => r.path.endsWith("/tools/app_run"))!;
   assert.deepEqual(call.body, { path: "/Volumes/nmw-x/src/prj_x" });
   assert.match(call.key ?? "", /^cli-app_run-[a-f0-9]{32}$/);
@@ -157,6 +166,11 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   assert.ok(video && video.startsWith(out) && video.endsWith(".mp4") && existsSync(video), ran.text);
   assert.match(ran.text, /Stopped the cloud phone/);
   assert.match(ran.text, /Its replay, the screen and every call, opens at https:\/\/nomac\.app\/simulator-use\/replay\/r\.x/);
+  // The build log's link ends with the phone: the run kept the file, and names it instead.
+  assert.ok(ran.text.includes(`Full log: ${join(out, "build.log")}`), ran.text);
+  assert.ok(!ran.text.includes(LOG_TOKEN), "no dead link left");
+  assert.equal(readFileSync(join(out, "build.log"), "utf8"), "Demo.swift:3: error: cannot find 'x' in scope\n");
+  assert.equal((await fetch(`${local()}/api/v1/simulator/files/${LOG_TOKEN}`)).status, 410);
   assert.match((await callTool("cloud", { action: "status" })).text, /^Cloud is off/);
 });
 

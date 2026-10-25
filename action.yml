@@ -84,7 +84,7 @@ runs:
           const fs = require("fs");
           const text = fs.readFileSync(process.env.RESULT_FILE, "utf8").slice(-6000);
           const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-          const body = `**simulator-use on a NoMac iPhone Simulator: ${process.env.RESULT}**\n\n\`\`\`\n${text}\n\`\`\`\nThe screenshot and the recording are in [this run's artifacts](${run}).`;
+          const body = `**simulator-use on a NoMac iPhone Simulator: ${process.env.RESULT}**\n\n\`\`\`\n${text}\n\`\`\`\nThe screenshot, the recording and the logs are in [this run's artifacts](${run}).`;
           await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
     - if: steps.run.outputs.result != 'passed'
       shell: bash
