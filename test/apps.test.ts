@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { parseArgs } from "../src/cli.ts";
 import { freshFile, install, plistValue } from "../src/engine/apps.ts";
-import { cleanConsole, parseSystemLog, summarizeIps } from "../src/engine/logs.ts";
+import { cleanConsole, crashReports, parseSystemLog, summarizeIps } from "../src/engine/logs.ts";
 import { appControl, pushJson } from "../src/tools/app-control.ts";
 import { parseSince } from "../src/tools/app-logs.ts";
 import { ToolError } from "../src/errors.ts";
@@ -115,4 +115,23 @@ test("an install refused for an app that needs a later iOS says which, and how t
   for (const runtime of ["iOS 27.1", undefined]) {
     await assert.rejects(install(none, app, runtime), (error: ToolError) => /^Could not install .*: xcrun simctl: /.test(error.message) && /iphonesimulator/.test(error.next ?? ""));
   }
+});
+
+test("crash reports are the app's own on this Simulator: another app named the same, or another device, is left out", async () => {
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const dir = mkdtempSync(join(tmpdir(), "su-crashes-"));
+  const here = "B618F794-4904-462A-B413-DCB46824A2DE", other = "0D0C2E7A-1111-4222-8333-944455556666";
+  const report = (bundle: string, udid: string, symbol: string) =>
+    `${JSON.stringify({ app_name: "Demo", bundleID: bundle, bug_type: "309" })}\n${JSON.stringify({
+      captureTime: "2026-10-25 10:00:00.0000 +0000", procPath: `/Users/me/Library/Developer/CoreSimulator/Devices/${udid}/data/Containers/Bundle/Application/X/Demo.app/Demo`,
+      coalitionName: `com.apple.CoreSimulator.SimDevice.${udid}`, exception: { type: "EXC_BREAKPOINT", signal: "SIGTRAP" }, faultingThread: 0,
+      threads: [{ triggered: true, frames: [{ imageIndex: 0, symbol }] }], usedImages: [{ name: "Demo" }] })}`;
+  writeFileSync(join(dir, "Demo-2026-10-25-100001.ips"), report("dev.simtap.demo", here, "mine"));
+  writeFileSync(join(dir, "Demo-2026-10-25-100002.ips"), report("dev.deviceloop.demo", here, "another app's"));
+  writeFileSync(join(dir, "Demo-2026-10-25-100003.ips"), report("dev.simtap.demo", other, "another device's"));
+  const crashes = await crashReports("Demo", 0, { bundleId: "dev.simtap.demo", udid: here, dir });
+  assert.deepEqual(crashes.map((c) => c.file), [join(dir, "Demo-2026-10-25-100001.ips")]);
+  assert.ok(crashes[0]!.summary.some((l) => l.includes("mine")));
 });

@@ -69,10 +69,12 @@ export type Crash = { file: string; time: string; summary: string[] };
 
 /**
  * Crash reports of a Simulator app land on the Mac itself, in ~/Library/Logs/DiagnosticReports, named after
- * the app's executable. An .ips file is one JSON header line, then the report as JSON.
+ * the app's executable. An .ips file is one JSON header line, then the report as JSON. Another app with the same
+ * executable name, or the same app on another Simulator, writes reports there too: a report is this app's when its
+ * header's bundleID is the app's, and this device's when its process path (or coalition) names the device.
  */
-export async function crashReports(executable: string, since: number, limit = 3): Promise<Crash[]> {
-  const dir = join(homedir(), "Library", "Logs", "DiagnosticReports");
+export async function crashReports(executable: string, since: number, of: { bundleId?: string; udid?: string; dir?: string } = {}, limit = 3): Promise<Crash[]> {
+  const dir = of.dir ?? join(homedir(), "Library", "Logs", "DiagnosticReports");
   let names: string[];
   try {
     names = (await readdir(dir)).filter((n) => n.startsWith(`${executable}-`) && n.endsWith(".ips"));
@@ -80,15 +82,34 @@ export async function crashReports(executable: string, since: number, limit = 3)
     return [];
   }
   const files = await Promise.all(names.map(async (n) => ({ file: join(dir, n), at: (await stat(join(dir, n))).mtimeMs })));
-  const recent = files.filter((f) => f.at >= since).sort((a, b) => b.at - a.at).slice(0, limit);
-  return Promise.all(
-    recent.map(async (f) => {
-      const text = await readFile(f.file, "utf8");
-      // When it crashed, not when macOS finished writing the report (up to a minute later).
-      const time = /"captureTime"\s*:\s*"([^"]+)"/.exec(text)?.[1] ?? new Date(f.at).toISOString();
-      return { file: f.file, time, summary: summarizeIps(text, executable) };
-    }),
-  );
+  const recent = files.filter((f) => f.at >= since).sort((a, b) => b.at - a.at);
+  const out: Crash[] = [];
+  for (const f of recent) {
+    if (out.length >= limit) break;
+    const text = await readFile(f.file, "utf8");
+    if (!reportOf(text, of.bundleId, of.udid)) continue;
+    // When it crashed, not when macOS finished writing the report (up to a minute later).
+    const time = /"captureTime"\s*:\s*"([^"]+)"/.exec(text)?.[1] ?? new Date(f.at).toISOString();
+    out.push({ file: f.file, time, summary: summarizeIps(text, executable) });
+  }
+  return out;
+}
+
+/** Whether a report is this app's on this device; a report without the field to tell is kept. */
+function reportOf(text: string, bundleId?: string, udid?: string): boolean {
+  const newline = text.indexOf("\n");
+  let header: { bundleID?: unknown } = {};
+  let body: { procPath?: unknown; coalitionName?: unknown } = {};
+  try {
+    header = JSON.parse(text.slice(0, newline < 0 ? undefined : newline)) as typeof header;
+    body = JSON.parse(text.slice(newline + 1)) as typeof body;
+  } catch {
+    // An unreadable part tells nothing.
+  }
+  if (bundleId && typeof header.bundleID === "string" && header.bundleID !== bundleId) return false;
+  const where = [body.procPath, body.coalitionName].filter((v): v is string => typeof v === "string");
+  if (udid && where.length && !where.some((w) => w.includes(`/Devices/${udid}/`) || w.endsWith(`.${udid}`))) return false;
+  return true;
 }
 
 type Frame = { imageIndex?: number; symbol?: string; imageOffset?: number; sourceFile?: string; sourceLine?: number };

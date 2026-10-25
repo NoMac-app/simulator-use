@@ -66,9 +66,9 @@ export const appLogs: Tool = {
       // Swift's own message ("App.swift:64: Fatal error: ...") goes to stderr, not into the report: show both.
       const last = await readFile(await consoleFile(device.udid, bundleId), "utf8").then((t) => cleanConsole(t).slice(-5).map(clip), () => [] as string[]);
       const output = last.length ? `\nThe app's last output:\n${last.join("\n")}` : "";
-      const crashes = await crashReports(executable, Date.now() - Math.max(seconds, 3_600) * 1000);
+      const crashes = await crashReports(executable, Date.now() - Math.max(seconds, 3_600) * 1000, { bundleId, udid: device.udid });
       if (!crashes.length) {
-        return { text: `No crash report for ${executable} in the last hour. macOS writes one up to a minute after a crash (44 s measured).${output}\nNext: if the app just crashed, call app_logs {crashes: true} again in 30 s.` };
+        return { text: `No crash report for ${bundleId} on ${device.name} in the last hour. macOS writes one up to a minute after a crash (44 s measured).${output}\nNext: if the app just crashed, call app_logs {crashes: true} again in 30 s.` };
       }
       return { text: crashes.map((c) => [`crash at ${c.time} (${c.file})`, ...c.summary].join("\n")).join("\n\n") + output };
     }
