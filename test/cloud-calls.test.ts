@@ -115,3 +115,12 @@ test("a phone's stop notice is said after the answer, in cloud mode's own way on
   script = { [`POST ${PHONE}/tools/ui_look`]: [done("Demo · Sign In")] };
   assert.equal((await callTool("ui_look", {})).text, "Demo · Sign In");
 });
+
+test("cloud run over MCP answers at once with the steps to take instead, and starts nothing", async () => {
+  seen.length = 0;
+  await setCloudState({ on: false });
+  const answer = await callTool("cloud", { action: "run", path: "." });
+  assert.equal(answer.isError, true);
+  assert.equal(answer.text, "cloud run is for the command line and CI: it takes minutes, longer than a tool call waits. Nothing ran.\nNext: cloud start, then app_run (tests_run for the tests), then cloud stop.");
+  assert.deepEqual(seen, []);
+});

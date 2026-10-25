@@ -180,6 +180,11 @@ async function stopNow(session: string): Promise<void> {
  * the phone stopped (unless cloud was already on). Fails when the build or a test fails.
  */
 async function runOnce(args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
+  // A run waits for a phone, the build and the tests, which takes minutes, past what an MCP call waits for; and its
+  // steps are tools an agent already has.
+  if (!context.waitForJobs) {
+    throw new ToolError("cloud run is for the command line and CI: it takes minutes, longer than a tool call waits. Nothing ran.", "cloud start, then app_run (tests_run for the tests), then cloud stop.");
+  }
   const before = await cloudState();
   const lines: string[] = [];
   let failed = false;
@@ -256,7 +261,7 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents, CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run: start, build and run path, its tests with tests, a screenshot and a recording, stop, in one call. tunnel: the phone reaches port here.",
+    "A NoMac cloud iPhone Simulator on a Mac with Xcode, $0.80 an hour by the minute: for Linux, Windows, cloud agents, CI. start signs in (a link the first time; NOMAC_API_KEY headless) and starts a phone: until stop, every tool runs there and app_run and tests_run send the project first. status: phone and cost. stop: ends it. run (CLI, CI): start, build and run path, tests with tests, a screenshot and a recording, stop. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
