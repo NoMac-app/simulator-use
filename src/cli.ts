@@ -6,10 +6,14 @@
 import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 
+import { persistCloud } from "./cloud/account.ts";
+import { onSignalExit } from "./engine/jobs.ts";
 import { persistHeld } from "./engine/state.ts";
 import { serve } from "./mcp.ts";
 import { callTool, toContent, TOOLS, VERSION } from "./registry.ts";
+import { stopServerPhone } from "./tools/cloud.ts";
 import type { Tool } from "./tools/types.ts";
 import { relay, relayPorts } from "./tunnel-relay.ts";
 
@@ -159,12 +163,17 @@ export async function main(argv: string[]): Promise<number> {
     process.exit(0);
   }
   if (command === "mcp") {
+    // The server's cloud phone is its agent's own: stopped when the server ends, by a signal or below.
+    onSignalExit(stopServerPhone);
     await serve();
-    // The client closed stdin: answer what was in flight, then go, even if a child process still holds a pipe.
+    // The client closed stdin: answer what was in flight, stop the server's phone, then go, even if a child process
+    // still holds a pipe.
+    await Promise.race([stopServerPhone().catch(() => undefined), delay(15_000, undefined, { ref: false })]);
     process.exit(0);
   }
-  // From here on each command is its own process: the Simulator chosen with `use` is kept in a file.
+  // From here on each command is its own process: the Simulator chosen with `use` and cloud mode are kept in files.
   persistHeld();
+  persistCloud();
   if (command === "call") return call(rest);
   const tool = TOOLS.find((t) => t.command === command || t.name === command);
   if (!tool) {

@@ -1,7 +1,8 @@
 /**
  * Cloud mode's account and phone: the NoMac account it signs in to (NOMAC_API_KEY, else the NoMac CLI's
  * ~/.nomac/credentials.json, else NoMac's device sign-in, whose key is saved there for both tools), and the phone
- * it uses, kept in simulator-use's state folder so every CLI call reaches the same one.
+ * it uses: an MCP server's own, in its memory; the CLI's in simulator-use's state folder, so every CLI call reaches
+ * the same one.
  */
 
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
@@ -45,7 +46,22 @@ async function saveKey(key: string, base: string): Promise<void> {
 export type CloudState = { on: boolean; session?: string; signIn?: { device_code: string; user_code: string; url: string; expires_at: number; base: string } };
 const stateFile = () => join(stateDir(), "cloud.json");
 
+/**
+ * An MCP server keeps cloud mode in its memory, as it keeps its held Simulator: each agent runs its own server, so
+ * one agent's cloud start never sends another agent's tools to its phone, and one's cloud stop never ends another's.
+ * A CLI call is its own process, so the CLI keeps it in a file (persistCloud), and cloud start carries over to the
+ * next command.
+ */
+let memory: CloudState = { on: false };
+let persistent = false;
+
+/** The CLI keeps cloud mode between its calls. */
+export function persistCloud(): void {
+  persistent = true;
+}
+
 export async function cloudState(): Promise<CloudState> {
+  if (!persistent) return { ...memory };
   try {
     return JSON.parse(await readFile(stateFile(), "utf8")) as CloudState;
   } catch {
@@ -54,6 +70,10 @@ export async function cloudState(): Promise<CloudState> {
 }
 
 export async function setCloudState(state: CloudState): Promise<void> {
+  if (!persistent) {
+    memory = { ...state };
+    return;
+  }
   await mkdir(stateDir(), { recursive: true });
   await writeFile(stateFile(), JSON.stringify(state), { mode: 0o600 });
 }

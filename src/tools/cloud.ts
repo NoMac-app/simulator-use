@@ -176,6 +176,17 @@ async function stopNow(session: string): Promise<void> {
 }
 
 /**
+ * The phone an MCP server started, stopped as the server ends (its client closed it, or a signal): it was that
+ * agent's alone, and would otherwise bill until its idle stop. A CLI command keeps its phone for the next one.
+ */
+export async function stopServerPhone(): Promise<void> {
+  tunnel?.stop();
+  tunnel = undefined;
+  const { session } = await cloudState();
+  if (session) await stopNow(session);
+}
+
+/**
  * CI in one call: a phone, the project built and run, its tests with tests: true, a screenshot of its screen, and
  * the phone stopped (unless cloud was already on). Fails when the build or a test fails.
  */

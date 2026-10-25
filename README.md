@@ -126,7 +126,7 @@ DemoTests/rejectsAnEmailWithoutAt(): Tests/SignInTests.swift:18: Expectation fai
 
 ## Several agents, one Mac
 
-- Each agent runs its own MCP server and holds its own Simulator through `device_use`.
+- Each agent runs its own MCP server and holds its own Simulator through `device_use`, and its own cloud phone: one agent's `cloud start` never moves another's tools, its `cloud stop` never ends another's phone, and the phone stops when the agent's server ends. A `cloud start` typed in a terminal is the command line's own.
 - Boots never overlap, across every simulator-use process on the Mac: two Simulators booting at once on an 8 GB Mac pushed it into swap for minutes.
 - `SIMULATOR_USE_MAX_BOOTED` caps how many run at once; asking for another shuts down the others first.
 - Steps on one Simulator run one at a time, across every simulator-use process on the Mac, so two agents' or two commands' taps never interleave.

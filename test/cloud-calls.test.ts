@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { execFile, spawn } from "node:child_process";
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
+import { promisify } from "node:util";
 
 import { cloudState, setCloudState } from "../src/cloud/account.ts";
 import { listProject } from "../src/cloud/sync.ts";
@@ -123,4 +125,42 @@ test("cloud run over MCP answers at once with the steps to take instead, and sta
   assert.equal(answer.isError, true);
   assert.equal(answer.text, "cloud run is for the command line and CI: it takes minutes, longer than a tool call waits. Nothing ran.\nNext: cloud start, then app_run (tests_run for the tests), then cloud stop.");
   assert.deepEqual(seen, []);
+});
+
+const ROOT = new URL("..", import.meta.url).pathname;
+const CLI = join(ROOT, "test/fixtures/cli-main.ts");
+
+test("an MCP server's cloud phone is its own: another process on the machine does not see it", async () => {
+  await setCloudState({ on: true, session: "ses_mine" });
+  const other = await promisify(execFile)(process.execPath, ["--input-type=module", "-e",
+    `const m = await import(${JSON.stringify(join(ROOT, "src/cloud/account.ts"))}); console.log(JSON.stringify(await m.cloudState()));`]);
+  assert.deepEqual(JSON.parse(other.stdout), { on: false });
+  assert.deepEqual(await cloudState(), { on: true, session: "ses_mine" });
+  await setCloudState({ on: false });
+});
+
+test("the CLI keeps cloud mode between its commands", async () => {
+  seen.length = 0;
+  const state = mkdtempSync(join(tmpdir(), "su-cli-cloud-"));
+  writeFileSync(join(state, "cloud.json"), JSON.stringify({ on: true, session: "ses_cli" }));
+  script = { "GET /api/v1/simulator/sessions/ses_cli": [{ status: 200, body: { session: { id: "ses_cli", state: "ready", cost: { accrued_microunits: "40000", billable_seconds: 180 } } } }] };
+  const status = await promisify(execFile)(process.execPath, [CLI, "cloud", "status"], { env: { ...process.env, SIMULATOR_USE_STATE_DIR: state } });
+  assert.match(status.stdout, /^Cloud is on: phone ses_cli is ready; 3 min so far, \$0\.04/);
+});
+
+test("an MCP server stops the cloud phone it started when its client closes it", async () => {
+  seen.length = 0;
+  script = {
+    "POST /api/v1/simulator/sessions": [{ status: 201, body: { session: { id: "ses_srv", state: "queued" }, links: {} } }],
+    "GET /api/v1/simulator/sessions/ses_srv": [{ status: 200, body: { session: { id: "ses_srv", state: "ready" } } }],
+    "DELETE /api/v1/simulator/sessions/ses_srv": [{ status: 202, body: { session: { id: "ses_srv", state: "stopping" } } }],
+  };
+  const server = spawn(process.execPath, [CLI, "mcp"], { env: { ...process.env, SIMULATOR_USE_STATE_DIR: mkdtempSync(join(tmpdir(), "su-mcp-cloud-")) }, stdio: ["pipe", "pipe", "inherit"] });
+  const answered = new Promise<string>((resolve) => server.stdout.once("data", (d: Buffer) => resolve(d.toString())));
+  server.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "cloud", arguments: { action: "start" } } })}\n`);
+  assert.match(await answered, /Cloud phone ready/);
+  const exited = new Promise<number | null>((resolve) => server.once("exit", resolve));
+  server.stdin.end();
+  assert.equal(await exited, 0);
+  assert.ok(seen.some((r) => r.method === "DELETE" && r.path === "/api/v1/simulator/sessions/ses_srv"), JSON.stringify(seen.map((r) => `${r.method} ${r.path}`)));
 });
