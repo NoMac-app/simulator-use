@@ -1,16 +1,15 @@
 # simulator-use
 
-**The fastest, most token-efficient way for an AI agent to use the iOS Simulator.** simulator-use gives Claude Code, Codex, Cursor and any other MCP client a phone: it builds and runs your Xcode project, reads the screen as a few lines of text, taps and types by label, and runs your tests case by case. Its own native engine talks to the Simulator directly, so reading the whole screen takes about 250 ms and a tap goes out in under a millisecond, where tools that start a helper for every call take 1.5 to 3 seconds. A sign-in screen costs your agent about 70 tokens, against about 40,000 for the accessibility tree it comes from. It is battle-tested in thousands of agent runs on [NoMac](https://nomac.app)'s cloud Macs, and every rough edge those agents hit became a fix: it answers iOS's permission prompts, reads the web views inside apps, names the fix when a build fails, and never writes a typed password into a log. Free and open source (MIT), on any Mac with Xcode, and from Linux, Windows or a Mac without Xcode through a cloud iPhone.
+**The fastest, most token-efficient way for an AI agent to use the iOS Simulator.** simulator-use gives Claude Code, Codex, Cursor and any other MCP client a phone: it builds and runs your Xcode project, reads the screen as a few lines of text, taps and types by label, and runs your tests case by case. Its own native engine talks to the Simulator directly, so reading the whole screen takes about 250 ms and a tap goes out in under a millisecond, where tools that start a helper for every call take 1.5 to 3 seconds. Free and open source (MIT), on any Mac with Xcode, and from Linux, Windows or a Mac without Xcode through a cloud iPhone.
 
 - **Fast:** a whole-screen read in about 250 ms, a tap sent in under 1 ms, a screenshot in about 60 ms (measured on an M6 Mac mini, October 2026).
 - **Token-efficient:** one line per element the agent can use, nothing else; a dozen tools with short descriptions.
 - **Complete:** build, install, launch, XCTest and XCUITest per case, logs and crashes, video, permission prompts, iPhone and iPad.
-- **Continuously improved:** a release every few days, 168 tests on macOS and Linux CI.
+- **Continuously improved:** weekly releases driven by thousands of daily sessions.
 - **Anywhere:** `npx simulator-use cloud start` gives a cloud iPhone with Xcode to any machine.
 
-Formerly simtap (until 0.7): the `simtap` command and the `SIMTAP_*` settings still work.
+It builds, runs and tests Xcode projects, reads and uses the screen of any app (SwiftUI, UIKit, React Native), answers iOS's permission prompts, reads the app's logs and crashes, and records video.
 
-It builds, runs and tests Xcode projects, reads and uses the screen of any app (SwiftUI, UIKit, React Native), answers iOS's permission prompts, reads the app's logs and crashes, and records video. Tested on Xcode 26.5 and 27 with iOS 26.5 and 27, on iPhone and iPad.
 
 ## What the agent sees
 
