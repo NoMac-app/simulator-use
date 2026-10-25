@@ -105,6 +105,24 @@ test("manifest pages hold at most 1000 entries and about 192 KiB, in order", () 
   assert.deepEqual(pages([]), [[]]);
 });
 
+test("on Windows, a script git tracks as executable is sent as one: Windows keeps no executable bit", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const dir = mkdtempSync(join(tmpdir(), "su-win-"));
+  writeFileSync(join(dir, "build.sh"), "#!/bin/sh\necho ok\n", { mode: 0o644 });
+  writeFileSync(join(dir, "App.swift"), "import SwiftUI\n", { mode: 0o644 });
+  execFileSync("git", ["-C", dir, "init", "-q"]);
+  execFileSync("git", ["-C", dir, "add", "App.swift"]);
+  execFileSync("git", ["-C", dir, "update-index", "--add", "--chmod=+x", "build.sh"]);
+  const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+  Object.defineProperty(process, "platform", { value: "win32" });
+  try {
+    const kinds = Object.fromEntries((await listProject(dir)).map((e) => [e.path, e.kind]));
+    assert.deepEqual(kinds, { "App.swift": "file", "build.sh": "executable" });
+  } finally {
+    Object.defineProperty(process, "platform", platform);
+  }
+});
+
 test("manifest pages go 4 at a time", async () => {
   const dir = mkdtempSync(join(tmpdir(), "su-pages-"));
   for (let i = 0; i < 4500; i++) writeFileSync(join(dir, `F${String(i).padStart(4, "0")}.swift`), `// ${i}\n`);

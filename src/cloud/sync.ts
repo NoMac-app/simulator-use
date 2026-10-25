@@ -56,6 +56,8 @@ export async function listProject(folder: string, only?: string): Promise<Entry[
     if (lstatSync(top, { throwIfNoEntry: false })?.isDirectory()) walk(top, true);
   } else walk(folder, false);
 
+  // Windows keeps no executable bit: git's index has it for the files it tracks (a build phase's script).
+  const gitExecutable = process.platform === "win32" ? await executablesInGit(folder) : undefined;
   const indexed = setting("SYNC_INDEX") !== "0";
   const file = indexFile(folder, only);
   const last = indexed ? await readIndex(file) : undefined;
@@ -74,10 +76,22 @@ export async function listProject(folder: string, only?: string): Promise<Entry[
     const same = known && known.size === st.size && known.mtime_ms === st.mtimeMs && known.ctime_ms === st.ctimeMs && known.ino === st.ino && st.mtimeMs < last!.scanned_ms - RACY_MS;
     const hash = same ? known.sha256 : await hashFile(path, st.size);
     next[rel] = { size: st.size, mtime_ms: st.mtimeMs, ctime_ms: st.ctimeMs, ino: st.ino, sha256: hash };
-    out[i] = { path: rel, size: st.size, mtime_ms: Math.floor(st.mtimeMs), sha256: hash, kind: st.mode & 0o111 ? "executable" : "file" };
+    const executable = gitExecutable ? gitExecutable.has(rel) : Boolean(st.mode & 0o111);
+    out[i] = { path: rel, size: st.size, mtime_ms: Math.floor(st.mtimeMs), sha256: hash, kind: executable ? "executable" : "file" };
   });
   if (indexed) await writeIndex(file, { scanned_ms: scanned, files: next }).catch(() => undefined);
   return out;
+}
+
+/** The files git tracks as executable (mode 100755) under folder, by their path from it; none outside a repository. */
+export async function executablesInGit(folder: string): Promise<Set<string>> {
+  try {
+    const listed = (await run("git", ["-C", folder, "ls-files", "-s", "-z"], { timeoutMs: 30_000 })).stdout;
+    // Each entry: <mode> <object> <stage>\t<path>, NUL-separated; the paths are from the folder.
+    return new Set(listed.split("\0").filter((e) => e.startsWith("100755 ")).map((e) => e.slice(e.indexOf("\t") + 1)));
+  } catch {
+    return new Set();
+  }
 }
 
 // ---- The hash index: per folder on this machine, never sent --------------------------------------------------
