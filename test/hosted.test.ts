@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { callSummary, copyExcept, forgetAppPaths, gitEnv, gitUrl, hosted, trustNothingIn, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
+import { callSummary, copyExcept, forgetAppPaths, gitEnv, gitUrl, hosted, trustNothingIn, hostedText, setDownloadLimit, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const project = "prj_" + "f".repeat(32);
@@ -258,6 +258,80 @@ test("a reused clone folder runs none of the hooks, file monitor or settings lef
   git(["status", "--porcelain"], gitEnv("https://github.com/a/b", "ghp_secret"));
   assert.deepEqual(readdirSync(marks).filter((f) => f !== "monitor.sh"), [], "no hook, file monitor or setting ran");
   assert.equal(git(["config", "--get", "remote.origin.url"], gitEnv("https://github.com/a/b", undefined)).trim(), "https://github.com/a/b");
+});
+
+test("a sync, an upload and a download never act through a link left where a folder goes, and a download is bounded", async () => {
+  const workspace = mkdtempSync(join(tmpdir(), "su-ws-"));
+  await hosted("simulator-use/configure", { workspace });
+  const root = join(workspace, "src", project);
+  const outside = mkdtempSync(join(tmpdir(), "su-outside-"));
+  writeFileSync(join(outside, "keep.txt"), "not the workspace's");
+  writeFileSync(join(outside, "lib.swift"), "outside");
+  const first = await sync({ "Lib/lib.swift": "let a = 1\n", "Lib/keep.txt": "x" });
+  assert.equal(first.placed.state, "done");
+  // Code in the workspace swaps the folder for a link elsewhere.
+  rmSync(join(root, "Lib"), { recursive: true });
+  symlinkSync(outside, join(root, "Lib"));
+  // A sync that drops Lib/keep.txt and still has Lib/lib.swift: nothing outside is removed, changed or counted as here.
+  const second = await sync({ "Lib/lib.swift": "let a = 1\n" });
+  assert.deepEqual(second.missing, ["Lib/lib.swift"], "a file behind a link is not taken as the workspace's");
+  assert.equal(second.placed.state, "done", String(second.placed.error));
+  assert.ok(lstatSync(join(root, "Lib")).isDirectory(), "the folder is a real one again, as on the client");
+  assert.equal(readFileSync(join(root, "Lib/lib.swift"), "utf8"), "let a = 1\n");
+  assert.equal(readFileSync(join(outside, "keep.txt"), "utf8"), "not the workspace's");
+  assert.equal(readFileSync(join(outside, "lib.swift"), "utf8"), "outside");
+  assert.equal(statSync(join(outside, "lib.swift")).mode & 0o777, statSync(join(outside, "keep.txt")).mode & 0o777);
+
+  // An upload: a link where its folder goes becomes a real folder; nothing lands outside.
+  const realFetch = globalThis.fetch;
+  const project2 = mkdtempSync(join(tmpdir(), "su-up-"));
+  mkdirSync(join(project2, "Sources"));
+  writeFileSync(join(project2, "Sources/A.swift"), "let a = 1\n");
+  const tgz = join(project2, "..", `${project2.split("/").pop()}.tgz`);
+  spawnSync("tar", [...(process.platform === "darwin" ? ["--no-mac-metadata"] : []), "-czf", tgz, "-C", project2, "Sources"], { env: { ...process.env, COPYFILE_DISABLE: "1" } });
+  const data = readFileSync(tgz);
+  let body: Uint8Array<ArrayBuffer> = new Uint8Array(data);
+  globalThis.fetch = (async () => new Response(body)) as typeof fetch;
+  const fetchOnce = async (n: string, sha256: string) => {
+    let answer: Record<string, unknown>;
+    do answer = (await hosted("simulator-use/fetch", { id: `fetch_${n.repeat(40)}`, url: "https://r2.example.test/get", sha256, name: "linked" })) as Record<string, unknown>;
+    while (answer.state === "running");
+    return answer;
+  };
+  try {
+    const sha256 = createHash("sha256").update(data).digest("hex");
+    const one = await fetchOnce("6", sha256);
+    assert.equal(one.state, "done", String(one.error));
+    const uploadRoot = String(one.root);
+    rmSync(join(uploadRoot, "Sources"), { recursive: true });
+    symlinkSync(outside, join(uploadRoot, "Sources"));
+    writeFileSync(join(project2, "Sources/A.swift"), "let a = 2\n");
+    spawnSync("tar", [...(process.platform === "darwin" ? ["--no-mac-metadata"] : []), "-czf", tgz, "-C", project2, "Sources"], { env: { ...process.env, COPYFILE_DISABLE: "1" } });
+    const data2 = readFileSync(tgz);
+    body = new Uint8Array(data2);
+    const two = await fetchOnce("7", createHash("sha256").update(data2).digest("hex"));
+    assert.equal(two.state, "done", String(two.error));
+    assert.ok(lstatSync(join(uploadRoot, "Sources")).isDirectory(), "the link became a real folder");
+    assert.equal(readFileSync(join(uploadRoot, "Sources/A.swift"), "utf8"), "let a = 2\n");
+    assert.deepEqual(readdirSync(outside).sort(), ["keep.txt", "lib.swift"], "nothing written or removed outside");
+
+    // A download past its limit stops, streamed: the file never lands.
+    setDownloadLimit(1024);
+    body = new Uint8Array(4096);
+    const big = await fetchOnce("8", "0".repeat(64));
+    assert.equal(big.state, "failed");
+    assert.match(String(big.error), /upload_too_large/);
+  } finally {
+    setDownloadLimit(2 * 1024 ** 3);
+    globalThis.fetch = realFetch;
+  }
+
+  // A file id never uploads a link, nor a file whose real place is outside the folders an answer may name.
+  writeFileSync(join(workspace, "real.log"), "the log");
+  symlinkSync(join(outside, "keep.txt"), join(workspace, "linked.log"));
+  const linked = /file_[a-f0-9]{40}/.exec(hostedText(`See ${join(workspace, "linked.log")}`))?.[0];
+  assert.ok(linked);
+  await assert.rejects(hosted("simulator-use/get", { id: `get_${"9".repeat(40)}`, file: linked, url: "https://r2.example.test/put" }), /file_not_found/);
 });
 
 test("an uploaded project or .app is unpacked into the workspace, only what differs moved in", async () => {

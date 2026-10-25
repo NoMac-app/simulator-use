@@ -7,7 +7,7 @@
 import { type ChildProcess, execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream, existsSync, statSync } from "node:fs";
-import { chmod, lstat, lutimes, mkdir, mkdtemp, readdir, readFile, readlink, rename, rm, unlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, lutimes, mkdir, mkdtemp, open, readdir, readFile, readlink, realpath, rename, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, sep } from "node:path";
 import { Readable } from "node:stream";
@@ -46,6 +46,21 @@ const absolute = (value: unknown): value is string =>
   typeof value === "string" && value.startsWith("/") && !value.includes("\0") && !value.split("/").includes("..") && value.length <= 1024;
 const safePath = (path: unknown): path is string =>
   typeof path === "string" && path.length > 0 && !path.includes("\0") && !path.includes("\\") && path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
+
+/**
+ * Whether every folder on the way to rel inside root is a real folder (or not there yet): a sync or an upload never
+ * reads or writes through a link that code in the workspace left where a folder goes.
+ */
+export async function realFolders(root: string, rel: string): Promise<boolean> {
+  let at = root;
+  for (const part of rel.split("/").slice(0, -1)) {
+    at = join(at, part);
+    const st = await lstat(at).catch(() => undefined);
+    if (!st) return true;
+    if (!st.isDirectory()) return false;
+  }
+  return true;
+}
 
 /** The host tells a warm server, at hand-over, the account's build cache and workspace. */
 export function configure(params: Record<string, unknown>): Record<string, never> {
@@ -92,7 +107,7 @@ async function manifest(params: Record<string, unknown>): Promise<{ missing: str
   for (const e of entries as Entry[]) {
     const known = index[e.path];
     let present = false;
-    if (known && known.sha256 === e.sha256 && known.kind === (e.kind ?? "file")) {
+    if (known && known.sha256 === e.sha256 && known.kind === (e.kind ?? "file") && (await realFolders(root, e.path))) {
       present = await lstat(join(root, e.path)).then((st) => (known.kind === "symlink" ? st.isSymbolicLink() : st.isFile() && st.size === e.size), () => false);
     }
     if (!present) {
@@ -149,9 +164,11 @@ async function asAnnounced(root: string, entries: Entry[], missing: Set<string>)
     const e = byPath.get(path);
     if (!e) continue;
     const at = join(root, path);
-    const st = await lstat(at).catch(() => undefined);
+    const inside = await realFolders(root, path);
+    const st = inside ? await lstat(at).catch(() => undefined) : undefined;
     let why: string | undefined;
-    if (!st) why = "not in the archive";
+    if (!inside) why = "a folder on its way is a link";
+    else if (!st) why = "not in the archive";
     else if ((e.kind ?? "file") === "symlink") {
       if (!st.isSymbolicLink()) why = "not a symbolic link";
       else if (createHash("sha256").update(await readlink(at)).digest("hex") !== e.sha256) why = "a different link";
@@ -179,9 +196,7 @@ async function write(sync: Sync, archive: Record<string, unknown> | undefined): 
       if (typeof archive.base64 === "string") {
         await writeFile(file, Buffer.from(archive.base64, "base64"));
       } else if (typeof archive.url === "string" && archive.url.startsWith("https://")) {
-        const response = await fetch(archive.url);
-        if (!response.ok || !response.body) throw new Error(`archive_download_failed: ${response.status}`);
-        await pipeline(Readable.fromWeb(response.body as never), createWriteStream(file));
+        await download(archive.url, file, "archive");
       } else {
         throw new Error("archive_invalid");
       }
@@ -191,6 +206,8 @@ async function write(sync: Sync, archive: Record<string, unknown> | undefined): 
         if (hash.digest("hex") !== archive.sha256) throw new Error("archive_checksum_mismatch");
       }
       await onlyAskedFor(file, sync.missing);
+      // The folders the manifest's files go in are real folders, as on the client: a link left in one's place goes.
+      for (const path of sync.missing) await realFoldersIn(root, path);
       // bsdtar keeps every entry inside root: it strips a leading / and refuses .. without -P.
       await run("/usr/bin/tar", ["-xzf", file, "-C", root], { timeoutMs: 10 * 60_000 });
     } finally {
@@ -204,10 +221,12 @@ async function write(sync: Sync, archive: Record<string, unknown> | undefined): 
   for (const e of entries) {
     const path = join(root, e.path);
     const kind = e.kind ?? "file";
+    if (!(await realFolders(root, e.path))) continue;
     const st = await lstat(path).catch(() => undefined);
     if (!st) continue;
     const mode = kind === "executable" ? 0o755 : 0o644;
-    if (kind !== "symlink" && (st.mode & 0o777) !== mode) await chmod(path, mode).catch(() => {});
+    // chmod follows a link: only a file itself gets its mode.
+    if (kind !== "symlink" && st.isFile() && (st.mode & 0o777) !== mode) await chmod(path, mode).catch(() => {});
     if (Math.floor(st.mtimeMs) !== e.mtime_ms) {
       const when = new Date(e.mtime_ms);
       await lutimes(path, when, when).catch(() => {});
@@ -217,7 +236,7 @@ async function write(sync: Sync, archive: Record<string, unknown> | undefined): 
   const now = new Set(entries.map((e) => e.path));
   let removed = 0;
   for (const path of Object.keys(before)) {
-    if (now.has(path) || !safePath(path)) continue;
+    if (now.has(path) || !safePath(path) || !(await realFolders(root, path))) continue;
     await rm(join(root, path), { force: true });
     removed++;
   }
@@ -300,7 +319,7 @@ async function get(params: Record<string, unknown>): Promise<Got> {
   let got = gets.get(id);
   if (!got) {
     const path = files.get(file);
-    if (!path || !existsSync(path)) throw Object.assign(new Error("file_not_found"), { code: -32000 });
+    if (!path || !(await insideRoots(path))) throw Object.assign(new Error("file_not_found"), { code: -32000 });
     const started: Got = { state: "running" };
     gets.set(id, started);
     while (gets.size > KEEP_GETS) gets.delete(gets.keys().next().value!);
@@ -313,6 +332,16 @@ async function get(params: Record<string, unknown>): Promise<Got> {
   const deadline = Date.now() + ANSWER_WITHIN_MS;
   while (got.state === "running" && Date.now() < deadline) await new Promise((r) => setTimeout(r, 50));
   return { ...got };
+}
+
+/** A file itself (never a link), whose real path is inside the folders an answer may name. */
+async function insideRoots(path: string): Promise<boolean> {
+  const st = await lstat(path).catch(() => undefined);
+  if (!st?.isFile()) return false;
+  const real = await realpath(path).catch(() => undefined);
+  if (!real) return false;
+  const roots = await Promise.all(fileRoots().map((root) => realpath(root).catch(() => undefined)));
+  return roots.some((root) => root !== undefined && real.startsWith(`${root}${sep}`));
 }
 
 /** Streams the file to the link, never whole in memory: as many bytes as it had when the upload began. */
@@ -507,15 +536,10 @@ async function unpackUpload(url: string, sha256: string, name: string): Promise<
   const work = await mkdtemp(join(srcRoot(), ".nomac-upload-"));
   try {
     const file = join(work, "archive");
-    const response = await fetch(url);
-    if (!response.ok || !response.body) throw new Error(`upload_download_failed: ${response.status}`);
-    await pipeline(Readable.fromWeb(response.body as never), createWriteStream(file));
-    const hash = createHash("sha256");
-    await pipeline(createReadStream(file), hash);
-    if (hash.digest("hex") !== sha256) throw new Error("upload_checksum_mismatch: the file is not the one its sha256 names");
+    if ((await download(url, file, "upload")) !== sha256) throw new Error("upload_checksum_mismatch: the file is not the one its sha256 names");
     const out = join(work, "out");
     await mkdir(out);
-    const head = (await readFile(file)).subarray(0, 4);
+    const head = await firstBytes(file, 4);
     if (head[0] === 0x50 && head[1] === 0x4b) await run("/usr/bin/ditto", ["-x", "-k", file, out], { timeoutMs: 10 * 60_000 });
     // bsdtar keeps every entry inside out: it strips a leading / and refuses .. without -P.
     else if (head[0] === 0x1f && head[1] === 0x8b) await run("/usr/bin/tar", ["-xzf", file, "-C", out], { timeoutMs: 10 * 60_000 });
@@ -526,6 +550,60 @@ async function unpackUpload(url: string, sha256: string, name: string): Promise<
     return { root, ...(app ? { app } : {}), written, removed };
   } finally {
     await rm(work, { recursive: true, force: true });
+  }
+}
+
+/** An upload or a sync's archive is at most this large, and its download takes at most this long. */
+let DOWNLOAD_MAX_BYTES = 2 * 1024 ** 3;
+const DOWNLOAD_MS = 30 * 60_000;
+export const setDownloadLimit = (bytes: number) => (DOWNLOAD_MAX_BYTES = bytes);
+
+/**
+ * Downloads a link NoMac signed to file, streamed (never whole in memory), within DOWNLOAD_MS and DOWNLOAD_MAX_BYTES;
+ * answers its sha256.
+ */
+async function download(url: string, file: string, what: string): Promise<string> {
+  const response = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_MS) }).catch((error: Error) => {
+    throw new Error(`${what}_download_failed: ${error.name === "TimeoutError" ? "timed out" : error.message}`);
+  });
+  if (!response.ok || !response.body) throw new Error(`${what}_download_failed: ${response.status}`);
+  if (Number(response.headers.get("content-length") ?? 0) > DOWNLOAD_MAX_BYTES) throw new Error(`${what}_too_large: at most ${Math.round(DOWNLOAD_MAX_BYTES / 1024 ** 2)} MiB`);
+  const hash = createHash("sha256");
+  let bytes = 0;
+  await pipeline(Readable.fromWeb(response.body as never), async function* (chunks: AsyncIterable<Buffer>) {
+    for await (const chunk of chunks) {
+      bytes += chunk.length;
+      if (bytes > DOWNLOAD_MAX_BYTES) throw new Error(`${what}_too_large: at most ${Math.round(DOWNLOAD_MAX_BYTES / 1024 ** 2)} MiB`);
+      hash.update(chunk);
+      yield chunk;
+    }
+  }, createWriteStream(file)).catch((error: Error) => {
+    throw error.message.startsWith(what) ? error : new Error(`${what}_download_failed: ${error.name === "TimeoutError" ? "timed out" : error.message}`);
+  });
+  return hash.digest("hex");
+}
+
+/** A file's first bytes, read alone. */
+async function firstBytes(file: string, n: number): Promise<Buffer> {
+  const handle = await open(file, "r");
+  try {
+    const buffer = Buffer.alloc(n);
+    const { bytesRead } = await handle.read(buffer, 0, n, 0);
+    return buffer.subarray(0, bytesRead);
+  } finally {
+    await handle.close();
+  }
+}
+
+/** Each folder on the way to rel inside root becomes a real folder: a link or a file where one goes is removed first. */
+async function realFoldersIn(root: string, rel: string): Promise<void> {
+  let at = root;
+  for (const part of rel.split("/").slice(0, -1)) {
+    at = join(at, part);
+    const st = await lstat(at).catch(() => undefined);
+    if (st?.isDirectory()) continue;
+    if (st) await unlink(at);
+    await mkdir(at);
   }
 }
 
@@ -546,6 +624,7 @@ async function mirror(from: string, to: string): Promise<{ written: number; remo
       }
       files.add(rel);
       const target = join(to, rel);
+      await realFoldersIn(to, rel);
       if (await sameContent(path, target, entry.isSymbolicLink())) continue;
       await mkdir(dirname(target), { recursive: true });
       await rm(target, { recursive: true, force: true });
@@ -577,7 +656,11 @@ async function sameContent(a: string, b: string, link: boolean): Promise<boolean
     const [sa, sb] = await Promise.all([lstat(a), lstat(b)]);
     if (link || sa.isSymbolicLink() || sb.isSymbolicLink()) return sa.isSymbolicLink() && sb.isSymbolicLink() && (await readlink(a)) === (await readlink(b));
     if (sa.size !== sb.size || (sa.mode & 0o111) !== (sb.mode & 0o111)) return false;
-    const [ha, hb] = await Promise.all([a, b].map(async (p) => createHash("sha256").update(await readFile(p)).digest("hex")));
+    const [ha, hb] = await Promise.all([a, b].map(async (p) => {
+      const hash = createHash("sha256");
+      await pipeline(createReadStream(p), hash);
+      return hash.digest("hex");
+    }));
     return ha === hb;
   } catch {
     return false;
