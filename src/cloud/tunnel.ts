@@ -23,6 +23,8 @@ const RESPONSE = /^HTTP\/1\.[01] (\d{3})/;
 const SEND_BUFFER = 4 * 1024 * 1024;
 
 export class Tunnel {
+  /** How long the phone's relay has to answer once the connection is up; tests shorten it. */
+  static helloWaitMs = 30_000;
   readonly session: string;
   readonly localPort: number;
   readonly localHost: string;
@@ -74,6 +76,14 @@ export class Tunnel {
       const reader = new FrameReader();
       let opened = 0;
       let answered = false;
+      // A relay that never says which port it took would leave cloud tunnel waiting for ever.
+      const silent = setTimeout(() => {
+        if (answered) return;
+        answered = true;
+        this.stop();
+        this.error = "the phone's relay did not answer";
+        reject(new ToolError(`The phone's tunnel did not open within ${Math.max(1, Math.round(Tunnel.helloWaitMs / 1000))} s.`, "The phone must be ready; call cloud status, then cloud tunnel again."));
+      }, Tunnel.helloWaitMs);
       ws.onmessage = (event) => {
         let frames;
         try {
@@ -93,6 +103,7 @@ export class Tunnel {
             this.phonePort = port;
             this.state = "open";
             opened = Date.now();
+            clearTimeout(silent);
             if (!answered) {
               answered = true;
               resolve(this.phonePort);
@@ -103,6 +114,7 @@ export class Tunnel {
         }
       };
       ws.onclose = () => {
+        clearTimeout(silent);
         for (const conn of this.conns.values()) conn.socket.destroy();
         this.conns.clear();
         if (this.ws !== ws || this.stopped) return;

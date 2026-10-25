@@ -167,3 +167,33 @@ test("a tunnel back on another port of the phone says so once, with the port to 
     (globalThis as { WebSocket: unknown }).WebSocket = saved;
   }
 });
+
+test("a phone's relay that never answers ends the tunnel's start with a clear answer, never a wait for ever", async () => {
+  class SilentSocket {
+    static OPEN = 1;
+    readyState = 1;
+    bufferedAmount = 0;
+    binaryType = "arraybuffer";
+    onmessage?: (event: { data: ArrayBuffer }) => void;
+    onclose?: () => void;
+    send() {}
+    close() {
+      this.readyState = 3;
+      this.onclose?.();
+    }
+  }
+  const saved = { socket: globalThis.WebSocket, wait: Tunnel.helloWaitMs };
+  (globalThis as { WebSocket: unknown }).WebSocket = SilentSocket;
+  Tunnel.helloWaitMs = 200;
+  const api = { json: async () => ({ url: "wss://gw.test/t", token: "t", protocol: "nomac.tunnel" }) } as unknown as CloudApi;
+  const tunnel = new Tunnel(api, "ses_x", 8080);
+  try {
+    const outcome = await Promise.race([tunnel.start().then(() => "opened", (error: Error & { toText?: () => string }) => error.toText?.() ?? error.message), new Promise((r) => setTimeout(() => r("still waiting"), 3_000))]);
+    assert.equal(outcome, "The phone's tunnel did not open within 1 s.\nNext: The phone must be ready; call cloud status, then cloud tunnel again.");
+    assert.equal(tunnel.state, "closed");
+  } finally {
+    tunnel.stop();
+    (globalThis as { WebSocket: unknown }).WebSocket = saved.socket;
+    Tunnel.helloWaitMs = saved.wait;
+  }
+});
