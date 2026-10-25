@@ -201,7 +201,7 @@ An app that talks to a backend on your machine reaches it through a tunnel (Node
 simulator-use cloud tunnel 8080    # until Ctrl-C: the phone reaches localhost:8080 here, each request printed
 ```
 
-The answer says the address the phone's apps use, such as `http://127.0.0.1:20199`; point the app there, for example with `run --env "API_URL=http://127.0.0.1:20199"`. Each request that passes is listed with its status and time (`cloud tunnel` without a port shows them over MCP). It lasts while the phone runs and comes back by itself after a dropped connection; `cloud tunnel` with port 0 closes it.
+The answer says the address the phone's apps use, such as `http://127.0.0.1:20199`; point the app there, for example with `run --env "API_URL=http://127.0.0.1:20199"`. Each request that passes is listed with its status and time (`cloud tunnel` without a port shows them over MCP). It lasts while the phone runs and comes back by itself after a dropped connection; `cloud tunnel` with port 0 closes it. While it is open, anything on the phone reaches that port: its apps, pages in its Safari and your project's build; nothing outside the phone does.
 
 On GitHub, from any runner, with the result posted on each pull request and the screenshot and recording kept as artifacts:
 
