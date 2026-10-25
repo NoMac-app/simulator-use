@@ -135,7 +135,14 @@ export async function uploadState(statesDir: string, name: string, url: string, 
   try {
     const packing = tar(["-cf", "-", name], statesDir);
     packing.child.stdin.end();
-    await Promise.all([pipeline(packing.child.stdout, createGzip({ level: 1 }), sealer(stateKey(key)), createWriteStream(sealed, { mode: 0o600 })), packing.exited]);
+    try {
+      await pipeline(packing.child.stdout, createGzip({ level: 1 }), sealer(stateKey(key)), createWriteStream(sealed, { mode: 0o600 }));
+    } catch (error) {
+      packing.child.kill();
+      await packing.exited.catch(() => {});
+      throw error;
+    }
+    await packing.exited;
     const { size } = await stat(sealed);
     const body = Readable.toWeb(createReadStream(sealed)) as ReadableStream<Uint8Array>;
     const response = await fetch(url, { method: "PUT", body, headers: { "content-length": String(size) }, duplex: "half" } as RequestInit);
@@ -143,7 +150,7 @@ export async function uploadState(statesDir: string, name: string, url: string, 
     if (!response.ok) throw new Error(`the state's upload failed: storage answered ${response.status}`);
     return size;
   } finally {
-    await rm(dir, { recursive: true, force: true });
+    await rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 }
 
@@ -158,11 +165,19 @@ export async function fetchState(statesDir: string, name: string, url: string, k
   try {
     // bsdtar keeps entries inside into: no absolute paths, no .., no writes through a symlink.
     const unpacking = tar(["-xf", "-"], into);
-    await Promise.all([pipeline(Readable.fromWeb(response.body as never), opener(stateKey(key)), createGunzip(), unpacking.child.stdin), unpacking.exited]);
+    try {
+      await pipeline(Readable.fromWeb(response.body as never), opener(stateKey(key)), createGunzip(), unpacking.child.stdin);
+    } catch (error) {
+      // Stopped and gone before its folder is removed, so nothing is written into it after.
+      unpacking.child.kill();
+      await unpacking.exited.catch(() => {});
+      throw error;
+    }
+    await unpacking.exited;
     await stat(join(into, name, "state.json"));
     await rm(join(statesDir, name), { recursive: true, force: true });
     await rename(join(into, name), join(statesDir, name));
   } finally {
-    await rm(into, { recursive: true, force: true });
+    await rm(into, { recursive: true, force: true }).catch(() => {});
   }
 }
