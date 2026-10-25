@@ -23,7 +23,16 @@ export type Entry = { path: string; size: number; mtime_ms: number; sha256: stri
 
 /** Folders a build makes or a package manager fills: never sent, never removed on the host. */
 export const SKIP_DIRS = new Set([".git", ".hg", ".svn", "DerivedData", "build", ".build", "node_modules", "Pods", "xcuserdata", ".swiftpm", ".expo", ".gradle"]);
-const SKIP_FILES = (name: string) => name === ".DS_Store" || name.endsWith(".xcuserstate");
+const SKIP_FILES = (name: string) => name === ".DS_Store" || name.endsWith(".xcuserstate") || secretFile(name);
+/**
+ * Key and credential files, never sent even when git tracks them: environment files (but their examples), signing
+ * keys and certificates, provisioning profiles, keystores, SSH keys and .netrc. A Simulator build needs none of them.
+ */
+export const secretFile = (name: string) =>
+  (/^\.env(\..+)?$/.test(name) && !/\.(example|sample|template)$/.test(name)) ||
+  /\.(p8|p12|pfx|pem|key|mobileprovision|provisionprofile|keystore|jks)$/i.test(name) ||
+  /^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$/.test(name) ||
+  name === ".netrc";
 // The protocol's limits (NoMac's mac-protocol, simManifestEntrySchema and the sim route's body).
 const PAGE_ENTRIES = 1000;
 const PAGE_BYTES = 192 * 1024;
@@ -32,9 +41,10 @@ const INLINE_MAX = 8 * 1024 * 1024;
 const ARCHIVE_MAX = 2 * 1024 ** 3;
 
 /**
- * The project's files as the host is to have them: build output, dependencies and editor state left out. With
- * only (a .app beside others in its folder), that one alone and all of it: a bundle's own folders (an app's
- * node_modules or build) are part of the app. Files are hashed a few at a time, never blocking the process (a
+ * The project's files as the host is to have them: in a git repository, the files git tracks or would track
+ * (.gitignore's rules kept), else the folder's; build output, dependencies, editor state and key or credential files
+ * left out either way. With only (a .app beside others in its folder), that one alone and all of it: a bundle's own
+ * folders (an app's node_modules or build) are part of the app. Files are hashed a few at a time, never blocking the process (a
  * cloud tunnel runs in it), and a file whose size, mtime, ctime and inode match the index is not read again.
  */
 export async function listProject(folder: string, only?: string): Promise<Entry[]> {
@@ -54,7 +64,19 @@ export async function listProject(folder: string, only?: string): Promise<Entry[
   if (only) {
     const top = join(folder, only);
     if (lstatSync(top, { throwIfNoEntry: false })?.isDirectory()) walk(top, true);
-  } else walk(folder, false);
+  } else {
+    const tracked = await filesInGit(folder);
+    if (!tracked) walk(folder, false);
+    else {
+      for (const rel of tracked.sort()) {
+        const parts = rel.split("/");
+        if (SKIP_FILES(parts.at(-1)!) || parts.slice(0, -1).some((part) => SKIP_DIRS.has(part))) continue;
+        const path = join(folder, ...parts);
+        const st = lstatSync(path, { throwIfNoEntry: false });
+        if (st && (st.isSymbolicLink() || st.isFile())) found.push({ rel, path, st });
+      }
+    }
+  }
 
   // Windows keeps no executable bit: git's index has it for the files it tracks (a build phase's script).
   const gitExecutable = process.platform === "win32" ? await executablesInGit(folder) : undefined;
@@ -84,6 +106,34 @@ export async function listProject(folder: string, only?: string): Promise<Entry[
 }
 
 /** The files git tracks as executable (mode 100755) under folder, by their path from it; none outside a repository. */
+/**
+ * The files git tracks in folder, or would (untracked but not ignored), from the folder, a submodule's too; undefined
+ * when folder is not a repository's top (or git is not there).
+ */
+export async function filesInGit(folder: string): Promise<string[] | undefined> {
+  try {
+    const top = (await run("git", ["-C", folder, "rev-parse", "--show-toplevel"], { timeoutMs: 5_000 })).stdout.trim();
+    if (realpathSync(top) !== realpathSync(folder)) return undefined;
+  } catch {
+    return undefined;
+  }
+  const list = async (dir: string, prefix: string, depth: number): Promise<string[]> => {
+    const listed = (await run("git", ["-C", dir, "ls-files", "-co", "--exclude-standard", "-z"], { timeoutMs: 60_000 })).stdout.split("\0").filter(Boolean);
+    const out: string[] = [];
+    for (const rel of listed.map((path) => path.replace(/\/+$/, ""))) {
+      // A submodule (or a repository inside) is listed as its folder: its own files, by its own rules.
+      if (depth < 4 && lstatSync(join(dir, rel), { throwIfNoEntry: false })?.isDirectory()) out.push(...(await list(join(dir, rel), `${prefix}${rel}/`, depth + 1).catch(() => [])));
+      else out.push(`${prefix}${rel}`);
+    }
+    return out;
+  };
+  try {
+    return await list(folder, "", 0);
+  } catch {
+    return undefined;
+  }
+}
+
 export async function executablesInGit(folder: string): Promise<Set<string>> {
   try {
     const listed = (await run("git", ["-C", folder, "ls-files", "-s", "-z"], { timeoutMs: 30_000 })).stdout;

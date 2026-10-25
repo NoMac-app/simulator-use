@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
@@ -29,6 +30,35 @@ test("a project is listed without build output, dependencies or editor state, sy
   const listed = await listProject(dir);
   assert.deepEqual(listed.map((e) => `${e.path}:${e.kind}`), ["App.xcodeproj/project.pbxproj:file", "Sources/App.swift:file", "link.swift:symlink"]);
   assert.equal(listed[2]!.size, "Sources/App.swift".length);
+});
+
+test("a repository sends what git tracks or would, never what .gitignore leaves out, and no folder sends a key file", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "su-repo-"));
+  const git = (...args: string[]) => execFileSync("git", ["-C", dir, ...args], { env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com" } });
+  git("init", "-q");
+  mkdirSync(join(dir, "Sources"));
+  mkdirSync(join(dir, "private"));
+  mkdirSync(join(dir, "Pods/A"), { recursive: true });
+  writeFileSync(join(dir, ".gitignore"), "private/\n*.log\n");
+  writeFileSync(join(dir, "Sources/App.swift"), "import SwiftUI\n");
+  writeFileSync(join(dir, "Sources/New.swift"), "// not added yet\n");
+  writeFileSync(join(dir, "private/notes.txt"), "ignored");
+  writeFileSync(join(dir, "build.log"), "ignored");
+  writeFileSync(join(dir, ".env"), "API_KEY=x");
+  writeFileSync(join(dir, ".env.example"), "API_KEY=");
+  writeFileSync(join(dir, "AuthKey_ABC.p8"), "key");
+  writeFileSync(join(dir, "Pods/A/a.m"), "// committed pods stay on the host's side");
+  git("add", "-f", ".gitignore", "Sources/App.swift", ".env", ".env.example", "AuthKey_ABC.p8", "Pods/A/a.m");
+  git("commit", "-q", "-m", "one");
+  const listed = (await listProject(dir)).map((e) => e.path);
+  assert.deepEqual(listed, [".env.example", ".gitignore", "Sources/App.swift", "Sources/New.swift"]);
+  // Outside a repository, the folder's files, key files left out all the same.
+  const plain = mkdtempSync(join(tmpdir(), "su-plain-"));
+  writeFileSync(join(plain, "App.swift"), "x");
+  writeFileSync(join(plain, ".env.production"), "x");
+  writeFileSync(join(plain, "dist.mobileprovision"), "x");
+  writeFileSync(join(plain, "id_ed25519"), "x");
+  assert.deepEqual((await listProject(plain)).map((e) => e.path), ["App.swift"]);
 });
 
 test("a file changed in place, its size and mtime kept, is read again: its ctime moved", async () => {

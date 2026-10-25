@@ -219,7 +219,7 @@ It runs the simulator-use of its own tag (`@v0.10` runs what that tag holds; `ve
 
 ## Privacy
 
-simulator-use sends nothing unless cloud mode is on. There is no telemetry and no network access at runtime: it runs `xcrun simctl`, the bundled AXe binary and `sips`, all on your Mac. With cloud on, it sends the project being run or tested, and the tools' calls, to NoMac, which keeps the session's replay for 7 days.
+simulator-use sends nothing unless cloud mode is on. There is no telemetry and no network access at runtime: it runs `xcrun simctl`, the bundled AXe binary and `sips`, all on your Mac. With cloud on, it sends the project being run or tested, and the tools' calls, to NoMac, which keeps the session's replay for 7 days. The project is the git repository it is in, as the files git tracks or would track (what `.gitignore` leaves out stays on your machine), or its folder when it is in none; either way never build output, dependencies, editor state or key and credential files (`.env` files but their examples, `.p8`, `.p12`, `.pfx`, `.pem`, `.key`, provisioning profiles, keystores, SSH keys, `.netrc`), even when git tracks them.
 
 ## How it works
 
