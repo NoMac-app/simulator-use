@@ -384,7 +384,11 @@ test("saved phone states: checked names and ids, listed with their size, deleted
   mkdirSync(join(workspace, "phone-states", "half.saving"), { recursive: true });
   const listed = (await hosted("simulator-use/state", { id: id(2), action: "list" })) as { states: Array<{ name: string }> };
   assert.deepEqual(listed.states.map((s) => s.name), ["signed-in"], "a state still being written is not listed");
-  for (const bad of [{ id: "state_1", action: "list" }, { id: id(3), action: "save", name: "../escape" }, { id: id(3), action: "save", name: "" }, { id: id(3), action: "wipe", name: "x" }]) {
+  const key = "k".repeat(43);
+  for (const bad of [{ id: "state_1", action: "list" }, { id: id(3), action: "save", name: "../escape" }, { id: id(3), action: "save", name: "" }, { id: id(3), action: "wipe", name: "x" },
+    // A link and a key go together, the link https, the key a state key; a restore with them names the save it wants.
+    { id: id(3), action: "save", name: "x", url: "https://storage.example/s" }, { id: id(3), action: "save", name: "x", url: "http://storage.example/s", data_key: key },
+    { id: id(3), action: "save", name: "x", url: "https://storage.example/s", data_key: "short" }, { id: id(3), action: "restore", name: "x", url: "https://storage.example/s", data_key: key }]) {
     await assert.rejects(hosted("simulator-use/state", bad), Error, JSON.stringify(bad));
   }
   assert.deepEqual(await hosted("simulator-use/state", { id: id(4), action: "delete", name: "signed-in" }), { state: "done", states: [] });

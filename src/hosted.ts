@@ -20,6 +20,7 @@ import { listDevices, pickDevice } from "./engine/simctl.ts";
 import { heldDevice, stateDir } from "./engine/state.ts";
 import { normalizeRemote, SKIP_DIRS } from "./cloud/sync.ts";
 import { callTool } from "./registry.ts";
+import { fetchState, uploadState } from "./state-archive.ts";
 
 type Kind = "file" | "executable" | "symlink";
 type Entry = { path: string; size: number; mtime_ms: number; sha256: string; kind?: Kind };
@@ -697,7 +698,9 @@ export async function removeExcept(root: string, keep: string): Promise<void> {
   }
 }
 type SavedState = { name: string; bytes: number; saved_at: string; device: string; runtime: string };
-type StateJob = { state: "running" | "done" | "failed"; error?: string; bytes?: number; ms?: number; states?: SavedState[]; device?: string };
+type StateJob = { state: "running" | "done" | "failed"; error?: string; bytes?: number; ms?: number; states?: SavedState[]; device?: string; saved_at?: string; uploaded?: boolean; fetched?: boolean };
+/** A state's way to and from NoMac's storage (October 25, 2026): a link NoMac signed, and the state's own key. */
+type StateTransfer = { url: string; key: string };
 const stateJobs = new Map<string, StateJob>();
 const statesDir = () => {
   if (!workspace) throw Object.assign(new Error("no_workspace"), { code: -32000 });
@@ -743,11 +746,12 @@ const listStates = async (): Promise<SavedState[]> => {
   return states.sort((a, b) => b.saved_at.localeCompare(a.saved_at));
 };
 
-async function saveState(name: string): Promise<StateJob> {
+async function saveState(name: string, upload?: StateTransfer): Promise<StateJob> {
   const device = pickDevice(await listDevices(true), undefined, await heldDevice());
   const data = await dataPathOf(device.udid);
   const dir = join(statesDir(), name), saving = `${dir}.saving`;
   await shutDown(device.udid);
+  let uploading: Promise<number> | undefined, result: StateJob;
   try {
     await rm(saving, { recursive: true, force: true });
     await mkdir(saving, { recursive: true });
@@ -757,21 +761,34 @@ async function saveState(name: string): Promise<StateJob> {
     await writeFile(join(saving, "state.json"), JSON.stringify(meta));
     await rm(dir, { recursive: true, force: true });
     await rename(saving, dir);
-    return { state: "done", bytes, device: `${device.name} (${device.runtime})` };
+    // Kept in NoMac's storage too, so it restores on any phone: it uploads while the phone boots again.
+    uploading = upload ? uploadState(statesDir(), name, upload.url, upload.key, tmpdir()) : undefined;
+    uploading?.catch(() => {});
+    result = { state: "done", bytes, device: `${device.name} (${device.runtime})`, saved_at: meta.saved_at };
   } finally {
     await rm(saving, { recursive: true, force: true });
     await bootAgain(device.udid);
   }
+  if (uploading) {
+    await uploading.catch((error: Error) => { throw new Error(`saved on this phone, but not kept for other phones: ${error.message}`); });
+    result.uploaded = true;
+  }
+  return result;
 }
 
-async function restoreState(name: string): Promise<StateJob> {
+async function restoreState(name: string, fetch?: StateTransfer & { savedAt: string }): Promise<StateJob> {
   const dir = join(statesDir(), name);
-  let meta: SavedState;
-  try {
-    meta = JSON.parse(await readFile(join(dir, "state.json"), "utf8")) as SavedState;
-  } catch {
-    throw new Error(`no saved state named ${name}`);
+  const local = async () => JSON.parse(await readFile(join(dir, "state.json"), "utf8")) as SavedState;
+  let meta = await local().catch(() => undefined);
+  // A copy here is the state only if it is the same save; otherwise the account's copy in NoMac's storage comes down.
+  let fetched = false;
+  if (fetch && meta?.saved_at !== fetch.savedAt) {
+    await fetchState(statesDir(), name, fetch.url, fetch.key);
+    meta = await local();
+    if (meta.saved_at !== fetch.savedAt) throw new Error(`the stored ${name} is not the save asked for`);
+    fetched = true;
   }
+  if (!meta) throw new Error(`no saved state named ${name}`);
   const device = pickDevice(await listDevices(true), undefined, await heldDevice());
   // A state goes back onto the phone it came from: the same model and iOS.
   if (meta.device !== device.name || meta.runtime !== device.runtime) throw new Error(`${name} was saved on ${meta.device} (${meta.runtime}); this phone is ${device.name} (${device.runtime})`);
@@ -781,7 +798,7 @@ async function restoreState(name: string): Promise<StateJob> {
     await removeExcept(data, SYSTEM_ASSETS);
     await run("/usr/bin/ditto", [join(dir, "data"), data], { timeoutMs: 10 * 60_000 });
     await forgetAppPaths(data);
-    return { state: "done", bytes: meta.bytes, device: `${device.name} (${device.runtime})` };
+    return { state: "done", bytes: meta.bytes, device: `${device.name} (${device.runtime})`, ...(fetch ? { fetched } : {}) };
   } finally {
     await bootAgain(device.udid);
   }
@@ -794,7 +811,12 @@ async function restoreState(name: string): Promise<StateJob> {
  * id reads their state.
  */
 async function phoneState(params: Record<string, unknown>): Promise<StateJob> {
-  const { id, action, name } = params as { id: unknown; action: unknown; name: unknown };
+  const { id, action, name, url, data_key: key, saved_at: savedAt } = params as { id: unknown; action: unknown; name: unknown; url: unknown; data_key: unknown; saved_at: unknown };
+  // A save given a link and a key keeps the state in NoMac's storage too; a restore given them fetches it when this
+  // workspace has no copy of that save (saved_at).
+  const transfer = url === undefined && key === undefined ? undefined : typeof url === "string" && url.startsWith("https://") && typeof key === "string" && /^[A-Za-z0-9_-]{43}$/.test(key) ? { url, key } : null;
+  if (transfer === null) throw invalid("a state's url (https) and data_key");
+  if (transfer && action === "restore" && (typeof savedAt !== "string" || savedAt.length > 64)) throw invalid("a restore's saved_at");
   if (typeof id !== "string" || !STATE_ID.test(id)) throw invalid("state id");
   if (action === "list") return { state: "done", states: await listStates() };
   if (typeof name !== "string" || !STATE_NAME.test(name)) throw invalid("name: letters, digits, dots, dashes and underscores, up to 64");
@@ -810,7 +832,7 @@ async function phoneState(params: Record<string, unknown>): Promise<StateJob> {
     stateJobs.set(id, started);
     while (stateJobs.size > KEEP_STATE_JOBS) stateJobs.delete(stateJobs.keys().next().value!);
     const began = Date.now();
-    (action === "save" ? saveState(name) : restoreState(name)).then(
+    (action === "save" ? saveState(name, transfer) : restoreState(name, transfer ? { ...transfer, savedAt: savedAt as string } : undefined)).then(
       // The whole of it: the copy and the phone booted and readable again.
       (result) => Object.assign(started, result, { ms: Date.now() - began }),
       (error: Error) => Object.assign(started, { state: "failed", error: error.message.slice(0, 300) }),
