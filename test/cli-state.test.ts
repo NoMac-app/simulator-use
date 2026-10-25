@@ -130,7 +130,8 @@ test("settings: SIMULATOR_USE_* first, then SIMTAP_* as before the rename", asyn
     }).then((r) => r.stdout.trim());
   assert.equal(await read({ SIMTAP_STATE_DIR: "/tmp/old-name" }), "/tmp/old-name");
   assert.equal(await read({ SIMTAP_STATE_DIR: "/tmp/old-name", SIMULATOR_USE_STATE_DIR: "/tmp/new-name" }), "/tmp/new-name");
-  assert.match(await read({}), /simulator-use$/);
+  // The default: macOS's own temporary folder, or one named for the user where the temporary folder is shared.
+  assert.match(await read({}), process.platform === "darwin" ? /simulator-use$/ : /simulator-use-\d+$/);
 });
 
 test("the local state folder is the user's own: named for the user where the temporary folder is shared, 0700, never a link", () => {
