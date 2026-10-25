@@ -18,7 +18,7 @@ export const deviceUse: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      device: { type: "string", description: "Name, name with runtime (\"iPhone 17 Pro (iOS 26.5)\") or UDID; default: the booted one, else the newest iPhone" },
+      device: { type: "string", description: "Name, name with runtime (\"iPhone 17 Pro (iOS 27.0)\") or UDID; default: the booted one, else the newest iPhone" },
       appearance: { type: "string", enum: ["light", "dark"], description: "Light or dark mode" },
       status_bar: { type: "string", enum: ["clean", "real"], description: "clean: 9:41 and full bars; real: undo" },
     },

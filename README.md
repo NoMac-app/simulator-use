@@ -14,7 +14,7 @@ It builds, runs and tests Xcode projects, reads and uses the screen of any app (
 ## What the agent sees
 
 ```
-Demo · Sign In · iPhone 17 Pro (iOS 26.5)
+Demo · Sign In · iPhone 17 Pro (iOS 27.0)
 textfield "Email" #email @201,194
 securefield "Password" #password @201,246
 switch "Remember me" #remember off @341,298
@@ -92,7 +92,7 @@ The app's permissions are granted when it is installed and its first launch's pr
 ```
 Built Demo in 4.2 s, installed dev.simtap.demo.
 Launched Demo in 3.9 s.
-Demo · Sign In · iPhone 17 Pro (iOS 26.5)
+Demo · Sign In · iPhone 17 Pro (iOS 27.0)
 textfield "Email" #email @201,194
 ...
 ```
@@ -145,7 +145,7 @@ Agents that run simulator-use through a shell, a command per call, get the same 
 
 ```
 $ simulator-use call ui_look '{"find":"Sign In"}'
-{"content":[{"type":"text","text":"Demo · Sign In · iPhone 17 Pro (iOS 26.5)\nbutton \"Sign In\" #signIn @201,350"}]}
+{"content":[{"type":"text","text":"Demo · Sign In · iPhone 17 Pro (iOS 27.0)\nbutton \"Sign In\" #signIn @201,350"}]}
 ```
 
 ## What it can't do yet
