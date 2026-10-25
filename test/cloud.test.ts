@@ -264,7 +264,10 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   writeFileSync(join(project, "Sources/App.swift"), "import SwiftUI\n");
   const out = mkdtempSync(join(tmpdir(), "su-ci-out-"));
   phoneState = "ready";
-  const ran = await callTool("cloud", { action: "run", path: project, tests: true, out }, { waitForJobs: true });
+  const ci = { CI: process.env.CI, GITHUB_ACTIONS: process.env.GITHUB_ACTIONS };
+  delete process.env.CI;
+  delete process.env.GITHUB_ACTIONS;
+  const ran = await callTool("cloud", { action: "run", path: project, tests: true, out }, { waitForJobs: true }).finally(() => Object.assign(process.env, Object.fromEntries(Object.entries(ci).filter(([, v]) => v !== undefined))));
   assert.equal(ran.isError, undefined, ran.text);
   assert.match(ran.text, /Built Demo in 1\.2 s/);
   assert.match(ran.text, /3 tests passed in 9\.6 s\./);
@@ -280,6 +283,26 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   assert.equal(readFileSync(join(out, "build.log"), "utf8"), "Demo.swift:3: error: cannot find 'x' in scope\n");
   assert.equal((await fetch(`${local()}/api/v1/simulator/files/${LOG_TOKEN}`)).status, 410);
   assert.match((await callTool("cloud", { action: "status" })).text, /^Cloud is off/);
+});
+
+test("in CI, cloud run's log holds no link that opens without signing in: the replay's is read with the account's key", async () => {
+  const project = mkdtempSync(join(tmpdir(), "su-ci-"));
+  mkdirSync(join(project, "Sources"));
+  writeFileSync(join(project, "Sources/App.swift"), "import SwiftUI\n");
+  const out = mkdtempSync(join(tmpdir(), "su-ci-out-"));
+  phoneState = "ready";
+  const saved = process.env.CI;
+  process.env.CI = "true";
+  try {
+    const ran = await callTool("cloud", { action: "run", path: project, tests: true, out }, { waitForJobs: true });
+    assert.equal(ran.isError, undefined, ran.text);
+    assert.doesNotMatch(ran.text, /\/simulator-use\/(?:replay|view)\/|\/api\/v1\/simulator\/files\//, ran.text);
+    assert.match(ran.text, /Its replay, the screen and every call, is kept 7 days\. Its link opens without signing in, so it is left out here: GET https:\/\/nomac\.app\/api\/v1\/simulator\/sessions\/ses_phone with the account's key answers it \(links\.replay\)\./);
+    assert.ok(ran.text.includes(`Full log: ${join(out, "build.log")}`), "a file it kept is still named");
+  } finally {
+    if (saved === undefined) delete process.env.CI;
+    else process.env.CI = saved;
+  }
 });
 
 test("the sign-in link names simulator-use as its source", () => {

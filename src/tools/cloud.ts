@@ -183,7 +183,12 @@ async function extend(args: Record<string, unknown>): Promise<ToolResult> {
   return { text: `The cloud phone ${phone.id} ${runs}, if the account's credit lasts. cloud extend again near then, up to 8 hours in all.${stopNotice(answer)}` };
 }
 
-async function stop(): Promise<ToolResult> {
+/** NoMac's links that open without signing in: a phone's view and control, its replay and its files. */
+const OPEN_LINK = /https?:\/\/[^\s/]+\/(?:simulator-use\/(?:view|replay)|api\/v1\/simulator\/files)\/[A-Za-z0-9_.-]+/g;
+/** A CI job, whose log and pull request comment can be public. */
+const inCI = () => Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
+
+async function stop(options: { linkless?: boolean } = {}): Promise<ToolResult> {
   tunnel?.stop();
   tunnel = undefined;
   const state = await cloudState();
@@ -209,7 +214,11 @@ async function stop(): Promise<ToolResult> {
   }
   const cost = phone ? `after ${Math.ceil((phone.cost?.billable_seconds ?? 0) / 60)} min, ${dollars(phone.cost?.accrued_microunits)}` : "(its cost is on NoMac's dashboard)";
   const replay = ((stopped?.links ?? {}) as Links).replay;
-  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. A file link from its answers keeps working only if it was opened before this stop.${replay ? `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).` : ""}` };
+  // In CI the link stays out of the log and the comment, which can be public: the account's key reads it.
+  const replayLine = !replay ? "" : options.linkless
+    ? `\nIts replay, the screen and every call, is kept 7 days. Its link opens without signing in, so it is left out here: GET https://nomac.app/api/v1/simulator/sessions/${state.session} with the account's key answers it (links.replay).`
+    : `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).`;
+  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. A file link from its answers keeps working only if it was opened before this stop.${replayLine}` };
 }
 
 /** A phone stopped at once, as the process ends (a signal): no waiting for its cleanup. */
@@ -351,10 +360,12 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
     await keepFiles(lines, out);
   } finally {
     release();
-    if (!signingIn && ((await startedHere()) || !before.on)) lines.push((await stop()).text);
+    if (!signingIn && ((await startedHere()) || !before.on)) lines.push((await stop({ linkless: inCI() })).text);
   }
+  // In CI, a link that opens without signing in (one keepFiles could not save) stays out of the log and the comment.
+  const text = inCI() ? lines.join("\n\n").replace(OPEN_LINK, "(a link left out: CI's log can be public)") : lines.join("\n\n");
   // The command line saved the screenshot above; an MCP client gets the picture itself.
-  return { text: lines.join("\n\n"), ...(image && !context.waitForJobs ? { image } : {}), ...(failed ? { isError: true } : {}) };
+  return { text, ...(image && !context.waitForJobs ? { image } : {}), ...(failed ? { isError: true } : {}) };
 }
 
 export const cloud: Tool = {

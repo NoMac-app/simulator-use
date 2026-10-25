@@ -215,7 +215,7 @@ steps:
       api-key: ${{ secrets.NOMAC_API_KEY }}
 ```
 
-It runs the simulator-use of its own tag (`@v0.10` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason.
+It runs the simulator-use of its own tag (`@v0.10` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason. A job's log and its pull request comment can be public, so in CI (`CI` or `GITHUB_ACTIONS` set) `cloud run` prints no link that opens without signing in: files it links are kept in the run's artifacts, and the replay's link is read with the account's key (`GET https://nomac.app/api/v1/simulator/sessions/{id}`, `links.replay`).
 
 ## Privacy
 
