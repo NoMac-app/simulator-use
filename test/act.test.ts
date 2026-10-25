@@ -4,7 +4,7 @@ import { test } from "node:test";
 
 import { diff } from "../src/act/diff.ts";
 import { fieldAt, isResolved, resolve } from "../src/act/resolve.ts";
-import { parseStep } from "../src/act/steps.ts";
+import { maskedStep, parseStep } from "../src/act/steps.ts";
 import { type AxNode, snapshot } from "../src/look/snapshot.ts";
 import { readBackVerdict } from "../src/tools/ui-act.ts";
 
@@ -147,4 +147,12 @@ test("one id on several elements is ambiguous, not a silent tap on the first", (
   const r = resolve(snap, { by: "id", id: "row" });
   assert.ok(!isResolved(r));
   assert.match(r.error, /^2 elements match #row/);
+});
+
+test("a step an answer repeats leaves out what a fill or type typed", () => {
+  assert.equal(maskedStep("  fill #password hunter2"), "fill #password …");
+  assert.equal(maskedStep('fill "Password" "hunter2\\nmore"'), 'fill "Password" …');
+  assert.equal(maskedStep("type hunter2 more"), "type …");
+  assert.equal(maskedStep("Fill"), "fill …");
+  assert.equal(maskedStep(' tap "Sign in" '), 'tap "Sign in"');
 });

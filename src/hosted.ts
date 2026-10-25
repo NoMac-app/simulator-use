@@ -18,6 +18,7 @@ import { closeEngines, engineCall } from "./engine/native.ts";
 import { cancelAllJobs } from "./engine/jobs.ts";
 import { listDevices, pickDevice } from "./engine/simctl.ts";
 import { heldDevice, stateDir } from "./engine/state.ts";
+import { describeTarget, parseStep } from "./act/steps.ts";
 import { normalizeRemote, SKIP_DIRS } from "./cloud/sync.ts";
 import { callTool } from "./registry.ts";
 import { fetchState, uploadState } from "./state-archive.ts";
@@ -376,13 +377,15 @@ export function gitUrl(url: string): boolean {
 async function fetchRepository(url: string, ref: string | undefined, token: string | undefined): Promise<{ root: string; commit: string }> {
   const root = join(srcRoot(), `git_${createHash("sha256").update(normalizeRemote(url)).digest("hex").slice(0, 32)}`);
   const git = (args: string[], timeoutMs = 60_000) => gitRun(args, gitEnv(url, token), timeoutMs, token);
-  if (!existsSync(join(root, ".git"))) {
+  // A folder's git metadata is a folder of its own; anything else there (a file or a link pointing elsewhere) is not
+  // trusted, and the repository is fetched again from nothing.
+  const meta = await lstat(join(root, ".git")).catch(() => undefined);
+  if (meta && !meta.isDirectory()) await rm(root, { recursive: true, force: true });
+  if (!meta || !meta.isDirectory()) {
     await mkdir(root, { recursive: true });
     await git(["init", "-q", root]);
-    await git(["-C", root, "remote", "add", "origin", url]);
-  } else {
-    await git(["-C", root, "remote", "set-url", "origin", url]);
   }
+  await trustNothingIn(root, url);
   await git(["-C", root, "fetch", "--depth", "1", "--no-tags", "origin", ref ?? "HEAD"], 10 * 60_000);
   await git(["-C", root, "checkout", "--quiet", "--force", "--detach", "FETCH_HEAD"]);
   if (existsSync(join(root, ".gitmodules"))) await git(["-C", root, "submodule", "update", "--init", "--recursive", "--depth", "1"], 10 * 60_000);
@@ -390,14 +393,61 @@ async function fetchRepository(url: string, ref: string | undefined, token: stri
   return { root, commit };
 }
 
-/** git never asks, and a token goes as an HTTP header set from the environment (GIT_CONFIG_*), for this host only. */
+/**
+ * The clone folder is reused, so code that ran in this workspace may have changed its git configuration: before each
+ * fetch the repository's config, and each submodule's, is written again from nothing but the values git needs (the
+ * remote's link, a submodule's worktree), so no setting there runs a program or sends the token anywhere. The link
+ * goes in the file, never in an argument. Hooks and the file monitor are off from the environment (gitEnv).
+ */
+export async function trustNothingIn(root: string, url: string): Promise<void> {
+  const gitDir = join(root, ".git");
+  await writeConfig(gitDir, { url });
+  // Submodules' own repositories, at any depth: .git/modules/<name>[/modules/<name>...].
+  const walk = async (dir: string): Promise<void> => {
+    for (const entry of await readdir(dir, { withFileTypes: true }).catch(() => [])) {
+      if (!entry.isDirectory()) continue;
+      const sub = join(dir, entry.name);
+      if (existsSync(join(sub, "HEAD"))) {
+        const read = async (key: string) => (await gitRun(["config", "--file", join(sub, "config"), "--get", key], gitEnv(url, undefined), 10_000, undefined).catch(() => "")).trim();
+        const worktree = await read("core.worktree");
+        const remote = await read("remote.origin.url");
+        await writeConfig(sub, { worktree: worktree && !/[\n\r"\\]/.test(worktree) ? worktree : undefined, url: remote && gitUrl(remote) ? remote : undefined });
+        await walk(join(sub, "modules"));
+      } else {
+        await walk(sub);
+      }
+    }
+  };
+  await walk(join(gitDir, "modules"));
+}
+
+async function writeConfig(gitDir: string, values: { url?: string; worktree?: string }): Promise<void> {
+  const lines = ["[core]", "\trepositoryformatversion = 0", "\tfilemode = true", "\tbare = false"];
+  if (values.worktree) lines.push(`\tworktree = "${values.worktree}"`);
+  if (values.url) lines.push('[remote "origin"]', `\turl = ${values.url}`, "\tfetch = +refs/heads/*:refs/remotes/origin/*");
+  const tmp = join(gitDir, `config.nomac-${process.pid}`);
+  await writeFile(tmp, `${lines.join("\n")}\n`, { mode: 0o600 });
+  await rename(tmp, join(gitDir, "config"));
+}
+
+/**
+ * git never asks, reads no configuration of the user or the system, runs no hook or file monitor, and fetches only
+ * over https; a token goes as an HTTP header set from the environment (GIT_CONFIG_*), for this host only.
+ */
 export function gitEnv(url: string, token: string | undefined): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_ASKPASS: "/usr/bin/false" };
+  const config: Array<[string, string]> = [
+    ["core.hooksPath", "/dev/null"],
+    ["core.fsmonitor", "false"],
+    ["protocol.allow", "never"],
+    ["protocol.https.allow", "always"],
+  ];
   if (token) {
     const { hostname } = new URL(url);
     const user = hostname === "gitlab.com" ? "oauth2" : hostname === "bitbucket.org" ? "x-token-auth" : "x-access-token";
-    Object.assign(env, { GIT_CONFIG_COUNT: "1", GIT_CONFIG_KEY_0: `http.https://${hostname}/.extraHeader`, GIT_CONFIG_VALUE_0: `Authorization: Basic ${Buffer.from(`${user}:${token}`).toString("base64")}` });
+    config.push([`http.https://${hostname}/.extraHeader`, `Authorization: Basic ${Buffer.from(`${user}:${token}`).toString("base64")}`]);
   }
+  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0", GIT_ASKPASS: "/usr/bin/false", GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_COUNT: String(config.length) };
+  config.forEach(([key, value], i) => Object.assign(env, { [`GIT_CONFIG_KEY_${i}`]: key, [`GIT_CONFIG_VALUE_${i}`]: value }));
   return env;
 }
 
@@ -553,23 +603,63 @@ type Logged = { at_ms: number; tool: string; what: string; ms: number; ok: boole
 let replay: { recorder: ChildProcess; file: string; started: number; log: Logged[] } | undefined;
 const REPLAY_CALLS = 2000;
 
+/** A ui_act step as the replay lists it, from the parsed step: what it acted on, never what it typed or a line it could not read. */
+function stepSummary(line: string): string {
+  const step = parseStep(String(line));
+  if (typeof step === "string") return "(a step that did not parse)";
+  switch (step.op) {
+    case "fill":
+      return `fill ${describeTarget(step.target)} …`;
+    case "type":
+      return "type …";
+    case "scroll":
+    case "swipe":
+      return [step.op, step.direction, ...(step.target ? [describeTarget(step.target)] : [])].join(" ");
+    case "key":
+      return `key ${step.key}`;
+    case "back":
+    case "home":
+      return step.op;
+    default:
+      return `${step.op} ${describeTarget(step.target)}`;
+  }
+}
+
 /**
- * What a call did, for the replay: the tool and its main argument, with typed text masked (fill #password …).
+ * What a call did, for the replay: the tool and its main argument, built from what was asked (a ui_act step's action and
+ * target), so typed text and links never reach the list.
  */
 export function callSummary(tool: string, args: Record<string, unknown>): string {
-  if (tool === "ui_act" && Array.isArray(args.steps)) return args.steps.map((step) => String(step).replace(/^((?:fill|type)\b(?:\s+(?:#\S+|"[^"]*"|\S+))?)\s.*$/i, (_m, head: string) => (/^type/i.test(head) ? "type …" : `${head} …`))).join(" · ").slice(0, 200);
+  if (tool === "ui_act" && Array.isArray(args.steps)) return args.steps.map(stepSummary).join(" · ").slice(0, 200);
   if (tool === "app_control") return [args.action, args.action === "open_url" ? "(a link)" : args.app].filter(Boolean).join(" ").slice(0, 120);
   if (tool === "app_run" || tool === "tests_run") return tool;
   return Object.keys(args).length ? `${tool} ${Object.keys(args).join(", ")}` : tool;
+}
+
+/**
+ * What a call answered, for the replay: for ui_act, how many steps were done or which one failed, never its answer's
+ * words (they can repeat what a field shows); for a link, that it opened; for logs, that they were read (an app's logs
+ * can hold anything). Other tools' first line.
+ */
+export function callAnswer(tool: string, args: Record<string, unknown>, text: string, failed: boolean): string {
+  const first = hostedText(text.split(/\r?\n|\r|\u2028|\u2029/)[0] ?? "");
+  if (tool === "ui_act") {
+    const done = /^(\d+) steps? done in ([\d.]+) s$/.exec(first);
+    if (done && !failed) return `${done[1]} step${done[1] === "1" ? "" : "s"} done in ${done[2]} s`;
+    const step = /^Step (\d+)\b/.exec(first) ?? /^Stopped before step (\d+)\b/.exec(first);
+    if (step) return first.startsWith("Stopped") ? `Stopped before step ${step[1]}: out of time` : `Step ${step[1]} failed`;
+    return failed ? "failed" : "done";
+  }
+  if (tool === "app_control" && args.action === "open_url") return failed ? "Could not open the link." : "Opened the link.";
+  if (tool === "app_logs") return failed ? "Could not read the app's logs." : "Read the app's logs.";
+  return first;
 }
 
 /** Notes a call for the replay, while one records. */
 export function noteCall(tool: string, args: Record<string, unknown>, started: number, result: { content: unknown[]; isError?: boolean }) {
   if (!replay || replay.log.length >= REPLAY_CALLS) return;
   const text = result.content.map((c) => (c && typeof c === "object" && (c as { type?: unknown }).type === "text" ? String((c as { text?: unknown }).text ?? "") : "")).join("\n");
-  // ui_act's answer can repeat what was typed ("fill #password \"…\" failed"): its quoted parts never reach the list.
-  const first = hostedText(text.split("\n")[0] ?? "");
-  const said = tool === "ui_act" ? first.replace(/"[^"]*"|“[^”]*”/g, "…") : first;
+  const said = callAnswer(tool, args, text, Boolean(result.isError));
   replay.log.push({ at_ms: started - replay.started, tool, what: callSummary(tool, args), ms: Date.now() - started, ok: !result.isError, said: said.slice(0, 200) });
 }
 

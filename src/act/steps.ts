@@ -187,3 +187,12 @@ export function describeTarget(t: Target): string {
   if (t.by === "point") return `@${t.x},${t.y}`;
   return `${t.kind ? `${t.kind} ` : ""}${JSON.stringify(t.label)}`;
 }
+
+/** A step as an answer repeats it: a fill's or type's text left out, since the answer can reach logs and a replay. */
+export function maskedStep(line: string): string {
+  const trimmed = line.trim();
+  const verb = (/^\S+/.exec(trimmed)?.[0] ?? "").toLowerCase();
+  if (verb !== "fill" && verb !== "type") return trimmed;
+  const step = parseStep(trimmed);
+  return typeof step !== "string" && step.op === "fill" ? `fill ${describeTarget(step.target)} …` : `${verb} …`;
+}

@@ -2,7 +2,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { diff } from "../act/diff.ts";
 import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
-import { describeTarget, KEYS, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
+import { describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
 import { setPasteboard } from "../engine/apps.ts";
 import { batch, elementAt, gesture, pressButton, setSlider, typeStep } from "../engine/axe.ts";
@@ -134,7 +134,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   const started = called;
   const steps = lines.map(parseStep);
   const bad = steps.findIndex((s) => typeof s === "string");
-  if (bad >= 0) return { text: `Step ${bad + 1} (${lines[bad]!.trim()}): ${steps[bad] as string}\nNothing was done.`, isError: true };
+  if (bad >= 0) return { text: `Step ${bad + 1} (${maskedStep(lines[bad]!)}): ${steps[bad] as string}\nNothing was done.`, isError: true };
 
   const firstRead = Date.now();
   let snap = (await readScreen(udid)).snap;
@@ -397,13 +397,13 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
     try {
       const stepStarted = Date.now();
       await run(steps[i] as Step, i + 1);
-      if (setting("DEBUG")) process.stderr.write(`simulator-use: step ${i + 1} ${lines[i]!.trim()} ${Date.now() - stepStarted} ms\n`);
+      if (setting("DEBUG")) process.stderr.write(`simulator-use: step ${i + 1} ${maskedStep(lines[i]!)} ${Date.now() - stepStarted} ms\n`);
     } catch (error) {
       if (!(error instanceof ToolError) && !(error instanceof StepFailure)) throw error;
       const next = error instanceof StepFailure ? error.next : (error.next ?? "Call ui_look to see the screen, then try again.");
       if (!(error instanceof StepFailure)) await fresh().catch(() => snap);
       return {
-        text: [`Step ${i + 1} (${lines[i]!.trim()}) failed: ${error.message}`, `Next: ${next}`, `${i} of ${steps.length} steps done before it.`, ...notes, "Screen now:", render(snap, { device: deviceLabel })].join("\n"),
+        text: [`Step ${i + 1} (${maskedStep(lines[i]!)}) failed: ${error.message}`, `Next: ${next}`, `${i} of ${steps.length} steps done before it.`, ...notes, "Screen now:", render(snap, { device: deviceLabel })].join("\n"),
         isError: true,
       };
     }

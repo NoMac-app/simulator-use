@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { spawn, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { callSummary, copyExcept, forgetAppPaths, gitEnv, gitUrl, hosted, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
+import { callSummary, copyExcept, forgetAppPaths, gitEnv, gitUrl, hosted, trustNothingIn, hostedText, noteCall, removeExcept, replayDir, setAnswerWithin, setFirstRead, setReplayRecorder } from "../src/hosted.ts";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const project = "prj_" + "f".repeat(32);
@@ -218,16 +218,46 @@ test("a repository comes only by an https link without credentials, and its toke
   for (const bad of ["http://github.com/a/b", "git@github.com:a/b.git", "file:///etc", "https://user:token@github.com/a/b", "https://github.com/", "https://github.com/a/b?x=1", "https://github.com/a b", "ssh://github.com/a/b", "--upload-pack=x"]) {
     assert.equal(gitUrl(bad), false, bad);
   }
+  const configOf = (env: NodeJS.ProcessEnv) => Object.fromEntries(Array.from({ length: Number(env.GIT_CONFIG_COUNT) }, (_, i) => [env[`GIT_CONFIG_KEY_${i}`], env[`GIT_CONFIG_VALUE_${i}`]]));
   const env = gitEnv("https://github.com/a/b", "ghp_secret");
   assert.equal(env.GIT_TERMINAL_PROMPT, "0");
-  assert.equal(env.GIT_CONFIG_KEY_0, "http.https://github.com/.extraHeader");
-  assert.equal(env.GIT_CONFIG_VALUE_0, `Authorization: Basic ${Buffer.from("x-access-token:ghp_secret").toString("base64")}`);
-  assert.equal(gitEnv("https://gitlab.com/a/b", "t").GIT_CONFIG_VALUE_0, `Authorization: Basic ${Buffer.from("oauth2:t").toString("base64")}`);
-  assert.equal(gitEnv("https://github.com/a/b", undefined).GIT_CONFIG_COUNT, undefined);
+  assert.equal(configOf(env)["http.https://github.com/.extraHeader"], `Authorization: Basic ${Buffer.from("x-access-token:ghp_secret").toString("base64")}`);
+  assert.equal(configOf(gitEnv("https://gitlab.com/a/b", "t"))["http.https://gitlab.com/.extraHeader"], `Authorization: Basic ${Buffer.from("oauth2:t").toString("base64")}`);
+  assert.equal(Object.keys(configOf(gitEnv("https://github.com/a/b", undefined))).some((key) => /extraHeader/.test(String(key))), false);
   const id = `clone_${"a".repeat(40)}`;
   await assert.rejects(hosted("simulator-use/clone", { id, url: "http://github.com/a/b" }), /https link/);
   await assert.rejects(hosted("simulator-use/clone", { id, url: "https://github.com/a/b", ref: "--upload-pack=touch" }), /ref/);
   await assert.rejects(hosted("simulator-use/clone", { id: "clone_x", url: "https://github.com/a/b" }), /clone id/);
+});
+
+test("a reused clone folder runs none of the hooks, file monitor or settings left in it, and keeps the link out of git's arguments", async () => {
+  const root = mkdtempSync(join(tmpdir(), "su-git-"));
+  const marks = mkdtempSync(join(tmpdir(), "su-marks-"));
+  const plain = { ...process.env, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com" };
+  const git = (args: string[], env: NodeJS.ProcessEnv = plain) => execFileSync("git", ["-C", root, ...args], { env, encoding: "utf8" });
+  git(["init", "-q"]);
+  writeFileSync(join(root, "a.txt"), "one\n");
+  git(["add", "a.txt"]);
+  git(["commit", "-q", "-m", "one"]);
+  // What earlier code in the workspace could have left: a hook, a file monitor and a program-running setting.
+  writeFileSync(join(root, ".git", "hooks", "post-checkout"), `#!/bin/sh\ntouch "${marks}/hook"\n`, { mode: 0o755 });
+  writeFileSync(join(marks, "monitor.sh"), `#!/bin/sh\ntouch "${marks}/monitor"\n`, { mode: 0o755 });
+  git(["config", "core.fsmonitor", join(marks, "monitor.sh")]);
+  git(["config", "core.pager", `touch "${marks}/pager"`]);
+  git(["config", "alias.co", `!touch "${marks}/alias"`]);
+  // Without the clean-up, git runs them (the test's own check that they are live).
+  git(["checkout", "-q", "--force", "--detach", "HEAD"]);
+  assert.equal(existsSync(join(marks, "hook")), true, "the planted hook runs for a plain git");
+  rmSync(join(marks, "hook"), { force: true });
+  rmSync(join(marks, "monitor"), { force: true });
+  await trustNothingIn(root, "https://github.com/a/b");
+  const config = readFileSync(join(root, ".git", "config"), "utf8");
+  assert.doesNotMatch(config, /fsmonitor|pager|alias|marks/);
+  assert.match(config, /url = https:\/\/github.com\/a\/b/);
+  git(["checkout", "-q", "--force", "--detach", "HEAD"], gitEnv("https://github.com/a/b", "ghp_secret"));
+  git(["status", "--porcelain"], gitEnv("https://github.com/a/b", "ghp_secret"));
+  assert.deepEqual(readdirSync(marks).filter((f) => f !== "monitor.sh"), [], "no hook, file monitor or setting ran");
+  assert.equal(git(["config", "--get", "remote.origin.url"], gitEnv("https://github.com/a/b", undefined)).trim(), "https://github.com/a/b");
 });
 
 test("an uploaded project or .app is unpacked into the workspace, only what differs moved in", async () => {
@@ -308,21 +338,26 @@ test("the replay lists every call without what was typed, and its stop leaves th
   assert.deepEqual(await hosted("simulator-use/replay", { op: "start" }), { recording: true }, "a second start keeps the first recording");
   await new Promise((resolve) => setTimeout(resolve, 300));
   const at = Date.now();
-  noteCall("ui_act", { steps: ['fill #password "hunter2"', "tap Sign in", "type secret words"] }, at, { content: [{ type: "text", text: 'fill #password "hunter2" failed: no field' }], isError: true });
-  noteCall("app_control", { action: "open_url", app: "https://example.com/?token=abc" }, at, { content: [{ type: "text", text: "Opened." }] });
+  noteCall("ui_act", { steps: ['fill #password "hunter2"', "tap Sign in", "type secret words"] }, at, { content: [{ type: "text", text: 'Step 1 (fill #password "hunter2") failed: no field' }], isError: true });
+  noteCall("app_control", { action: "open_url", value: "https://example.com/?token=abc" }, at, { content: [{ type: "text", text: "Opened https://example.com/?token=abc." }] });
   noteCall("ui_look", {}, at, { content: [{ type: "text", text: "Home screen" }] });
+  // Typed text in every form a step takes: unquoted, after leading space, across lines and line separators, and a
+  // field that shows it back in a failure.
+  noteCall("ui_act", { steps: ["  fill #password hunter3", "fill #pin \"line\\nhunter4\"", "type hunter5\nmore", "fill #code hunter6\u2028x", "fill nonsense"] }, at,
+    { content: [{ type: "text", text: "Step 2 (fill #pin hunter4) failed: #pin shows \u201chunter4\u201d, not hunter4\u2028hunter6" }], isError: true });
+  noteCall("app_logs", {}, at, { content: [{ type: "text", text: "token=hunter7 from the app's console" }] });
   const done = (await hosted("simulator-use/replay", { op: "stop" })) as Record<string, unknown>;
   assert.equal(done.recording, false);
-  assert.equal(done.calls, 3);
+  assert.equal(done.calls, 5);
   assert.equal(done.video, true);
   assert.equal(readFileSync(join(replayDir(), "video.mp4"), "utf8"), "video");
   const log = JSON.parse(readFileSync(join(replayDir(), "log.json"), "utf8")) as { calls: Array<Record<string, unknown>>; video: boolean };
   assert.equal(log.video, true);
-  assert.deepEqual(log.calls.map((c) => c.what), ["fill #password … · tap Sign in · type …", "open_url (a link)", "ui_look"]);
-  assert.equal(log.calls[0]!.said, "fill #password … failed: no field");
+  assert.deepEqual(log.calls.map((c) => c.what), ['fill #password … · tap "Sign in" · type …', "open_url (a link)", "ui_look", "fill #password … · fill #pin … · type … · fill #code … · (a step that did not parse)", "app_logs"]);
+  assert.deepEqual(log.calls.map((c) => c.said), ["Step 1 failed", "Opened the link.", "Home screen", "Step 2 failed", "Read the app's logs."]);
   assert.equal(log.calls[0]!.ok, false);
   assert.ok((log.calls[0]!.at_ms as number) >= 300);
-  assert.doesNotMatch(readFileSync(join(replayDir(), "log.json"), "utf8"), /hunter2|secret words|token=abc/);
+  assert.doesNotMatch(readFileSync(join(replayDir(), "log.json"), "utf8"), /hunter|secret words|token=abc/);
   // A call after the stop is not listed anywhere.
   noteCall("ui_look", {}, Date.now(), { content: [] });
   assert.equal(callSummary("app_run", { git: "https://x" }), "app_run");
