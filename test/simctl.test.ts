@@ -87,7 +87,7 @@ test("devices: iOS before watchOS, tvOS and visionOS, whatever their names sort 
   assert.deepEqual(parseDevices(json).map((d) => d.udid).slice(0, 2), ["N", "O"]);
 });
 
-test("where simulator-use can't run, the next step names a place to get a Mac; SIMULATOR_USE_NO_CLOUD_HINT hides it", async (t) => {
+test("where simulator-use can't run, the next step is a cloud phone, then a Mac; SIMULATOR_USE_NO_CLOUD_HINT leaves the phone out", async (t) => {
   const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
   Object.defineProperty(process, "platform", { value: "linux" });
   t.after(() => {
@@ -97,7 +97,7 @@ test("where simulator-use can't run, the next step names a place to get a Mac; S
   await assert.rejects(listDevices(true), (e: unknown) => {
     assert.ok(e instanceof ToolError);
     assert.match(e.toText(), /can't run the iOS Simulator/);
-    assert.match(e.toText(), /Next: Run simulator-use on a Mac with Xcode\. No Mac to run it on\? The cloud tool \(simulator-use cloud start\) runs the same tools on a NoMac cloud iPhone Simulator/);
+    assert.match(e.toText(), /Next: cloud start runs every tool on a NoMac cloud iPhone Simulator, \$0\.80 an hour by the minute \(.+\); then call this again\. Or: run simulator-use on a Mac with Xcode\.$/);
     assert.ok(e.toText().includes(NOMAC_URL));
     return true;
   });
