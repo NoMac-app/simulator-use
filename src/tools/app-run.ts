@@ -74,7 +74,7 @@ export const appRun: Tool = {
     // Finding the project (xcodebuild -list) and booting count toward the 40 s answer too: all of it is the job.
     const job = startJob("Build and run", async (progress) => {
       progress.step("finding the project");
-      const { project, scheme, dir, note, xcode: kept } = await projectFor(args.path as string | undefined, args.scheme as string | undefined);
+      const { project, scheme, dir, note, xcode: kept } = await projectFor(args.path as string | undefined, args.scheme as string | undefined, progress);
       const asked = (args.xcode as string | undefined) ?? kept;
       const xcode = await pickXcode(asked);
       const other = xcode && !xcode.default ? xcode : undefined;

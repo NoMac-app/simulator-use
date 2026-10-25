@@ -206,3 +206,58 @@ test("a project that targets a later iOS than the phone says so, and how to fix 
   assert.equal(await targetTooNew(project, "Target", { name: "iPhone 17", runtime: "iOS 26.6" }, "app_run again"), undefined);
   assert.equal(await targetTooNew(project, "Target", { name: "Apple TV", runtime: "tvOS 26.5" }, "app_run again"), undefined);
 });
+
+test("on NoMac's host a Podfile's pods are installed before the build, once, in the account's own CocoaPods home", async () => {
+  const { mkdtempSync, mkdirSync, readFileSync, realpathSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { findProject } = await import("../src/engine/xcode.ts");
+  const dir = mkdtempSync(join(tmpdir(), "su-pods-"));
+  mkdirSync(join(dir, "App.xcodeproj"));
+  writeFileSync(join(dir, "App.xcodeproj/project.pbxproj"), "// pbx\n");
+  writeFileSync(join(dir, "Podfile"), "platform :ios, '17.0'\ntarget 'App' do\n  pod 'Foo'\nend\n");
+  const runs = join(dir, "..", `${join(dir).split("/").pop()}-runs`);
+  const saved = { pod: process.env.SIMULATOR_USE_POD, cache: process.env.SIMULATOR_USE_CACHE_DIR, state: process.env.SIMULATOR_USE_STATE_DIR, runs: process.env.FAKE_POD_RUNS };
+  const cache = mkdtempSync(join(tmpdir(), "su-pods-cache-"));
+  process.env.SIMULATOR_USE_CACHE_DIR = cache;
+  process.env.SIMULATOR_USE_STATE_DIR = mkdtempSync(join(tmpdir(), "su-pods-state-"));
+  process.env.FAKE_POD_RUNS = runs;
+  const ran = () => { try { return readFileSync(runs, "utf8").trim().split("\n"); } catch { return []; } };
+  try {
+    // A developer's own Mac: the project as it is, no pod run.
+    delete process.env.SIMULATOR_USE_POD;
+    assert.equal((await findProject(dir)).kind, "project");
+    assert.deepEqual(ran(), []);
+    process.env.SIMULATOR_USE_POD = new URL("fixtures/fake-pod.sh", import.meta.url).pathname;
+    const lines: string[] = [];
+    const steps = { step: (s: string) => lines.push(`step: ${s}`), line: (l: string) => lines.push(l), setCancel: () => {} };
+    const first = await findProject(dir, steps);
+    assert.equal(first.kind, "workspace");
+    assert.equal(first.path, join(dir, "App.xcworkspace"));
+    assert.match(first.note ?? "", /^Installed the CocoaPods dependencies in [\d.]+ s \(pod install\)\.$/);
+    assert.deepEqual(ran(), [`${realpathSync(dir)}|install|${join(cache, "cocoapods")}`]);
+    assert.equal(readFileSync(join(cache, "cocoapods/config.yaml"), "utf8"), `cache_root: ${JSON.stringify(join(cache, "cocoapods/cache"))}\n`);
+    assert.ok(lines.includes("step: installing the CocoaPods dependencies (pod install)") && lines.includes("Installing Foo (1.2.3)"), lines.join("|"));
+    // The pods are current: the next build skips it.
+    const again = await findProject(dir, steps);
+    assert.equal(again.note, undefined);
+    assert.equal(ran().length, 1);
+    // A changed Podfile no longer matches its lock: installed again.
+    writeFileSync(join(dir, "Podfile"), "platform :ios, '17.0'\ntarget 'App' do\n  pod 'Foo'\n  pod 'Bar'\nend\n");
+    await findProject(dir, steps);
+    assert.equal(ran().length, 2);
+    // A pod CocoaPods cannot find: its own message, and the log.
+    writeFileSync(join(dir, "Podfile"), "target 'App' do\n  pod 'Nope'\nend\n");
+    await assert.rejects(findProject(dir, steps), (error: Error & { toText?: () => string }) => {
+      const text = error.toText!();
+      assert.match(text, /^pod install failed after [\d.]+ s\. Full log: \S+pod-install-\d+\.log\n\[!\] Unable to find a specification for `Nope`\n/, text);
+      assert.match(text, /\nNext: Fix the Podfile or the pod it names \(Podfile\.lock pins the versions\), then app_run again\.$/);
+      return true;
+    });
+  } finally {
+    for (const [key, value] of [["SIMULATOR_USE_POD", saved.pod], ["SIMULATOR_USE_CACHE_DIR", saved.cache], ["SIMULATOR_USE_STATE_DIR", saved.state], ["FAKE_POD_RUNS", saved.runs]] as const) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
