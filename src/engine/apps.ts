@@ -181,24 +181,31 @@ export async function pushPayload(udid: string, bundleId: string, payload: strin
   });
 }
 
+/** Runs xcrun with the text on its input: what is typed never goes in an argument, which every user of a Mac can read. */
+export function withInput(args: string[], input: string, timeoutMs: number): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn("xcrun", args, { stdio: ["pipe", "ignore", "pipe"] });
+    let stderr = "";
+    const timer = setTimeout(() => child.kill("SIGKILL"), timeoutMs);
+    child.stderr.on("data", (d) => (stderr += d));
+    child.on("error", (error) => (clearTimeout(timer), reject(error)));
+    child.on("close", (code, signal) => (clearTimeout(timer), code === 0 ? resolve() : reject(new ToolError(stderr.trim() || (signal ? `ended by ${signal}` : `exit ${code}`)))));
+    child.stdin.on("error", () => {});
+    child.stdin.end(input);
+  });
+}
+
 /** Puts text on the Simulator's clipboard, for pasting what the keyboard can't type (é, 日本, emoji). */
 export async function setPasteboard(udid: string, text: string): Promise<void> {
   try {
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn("xcrun", ["simctl", "pbcopy", udid], { stdio: ["pipe", "ignore", "pipe"] });
-      let stderr = "";
-      child.stderr.on("data", (d) => (stderr += d));
-      child.on("error", reject);
-      child.on("close", (code, signal) => (code === 0 ? resolve() : reject(new ToolError(`Could not set the Simulator's clipboard: ${stderr.trim() || signal || `exit ${code}`}`))));
-      child.stdin.end(text);
-    });
+    await withInput(["simctl", "pbcopy", udid], text, 15_000);
   } catch (error) {
     // A macOS user with no screen session (a shared Simulator host's users) has no pasteboard server, and simctl
-    // pbcopy crashes: the helper sets the phone's own pasteboard from inside the phone instead.
+    // pbcopy crashes: the helper sets the phone's own pasteboard from inside the phone instead, from its input.
     const helper = pasteHelper();
-    if (!helper) throw error;
+    if (!helper) throw new ToolError(`Could not set the Simulator's clipboard: ${(error as Error).message}`);
     try {
-      await simctl(["spawn", udid, helper, text], 15_000);
+      await withInput(["simctl", "spawn", udid, helper, "-"], text, 15_000);
     } catch (fallback) {
       throw new ToolError(`Could not set the Simulator's clipboard: ${(error as Error).message}; from inside the phone: ${(fallback as Error).message}`);
     }

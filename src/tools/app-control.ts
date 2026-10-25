@@ -3,13 +3,26 @@ import { resolve as resolvePath } from "node:path";
 
 import { appInfo, BUNDLE_ID, bundleIdOf, install, pushPayload, simctlAction, stopLogStream } from "../engine/apps.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
+import { engineCall } from "../engine/native.ts";
 import { currentApp, heldDevice, setCurrentApp, setDeviceTimeZone } from "../engine/state.ts";
 import { ToolError } from "../errors.ts";
+import { setting } from "../settings.ts";
 import { readScreen } from "../look/read.ts";
 import { render } from "../look/snapshot.ts";
 import { grantAll, openInPrompt, setPermissionMode } from "../engine/prompts.ts";
 import { launchAndLook, tapPrompt } from "./launch-app.ts";
 import type { Tool } from "./types.ts";
+
+/**
+ * A link opens through the engine, which reads it from its input: simctl openurl takes it as an argument, which every
+ * user of a Mac can read, so a shared host (SIMULATOR_USE_HOSTED) never falls back to it.
+ */
+export async function openUrl(udid: string, url: string): Promise<void> {
+  const answer = await engineCall(udid, { op: "open_url", url }, 20_000);
+  if (answer?.ok) return;
+  if (setting("HOSTED")) throw new ToolError(`Could not open the link${answer?.error ? `: ${answer.error}` : ""}.`, "Check it is a full link with its scheme (https://, or the app's own), then try again.");
+  await simctlAction(["openurl", udid, url], "open the link");
+}
 
 const ACTIONS = ["launch", "install", "terminate", "uninstall", "open_url", "grant", "revoke", "reset_permissions", "location", "push", "appearance", "locale", "timezone", "text_size", "status_bar"];
 /** simctl ui content_size's sizes. */
@@ -128,12 +141,12 @@ export const appControl: Tool = {
         await simctlAction(["uninstall", device.udid, bundleId!], `remove ${bundleId}`);
         return { text: `Removed ${bundleId} and its data from ${label}.` };
       case "open_url": {
-        await simctlAction(["openurl", device.udid, value!], `open ${value}`);
+        await openUrl(device.udid, value!);
         let snap = (await readScreen(device.udid)).snap;
         // A link that opens another app makes iOS ask "Open in “App”?": the agent asked for exactly that.
         const asked = openInPrompt(snap);
         if (asked) snap = await tapPrompt(device, "Open");
-        return { text: `Opened ${value}.${asked ? ` iOS asked "${asked}": answered Open.` : ""}\n${render(snap, { device: label })}` };
+        return { text: `Opened the link.${asked ? ` iOS asked "${asked}": answered Open.` : ""}\n${render(snap, { device: label })}` };
       }
       case "grant":
       case "revoke":

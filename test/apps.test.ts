@@ -5,9 +5,9 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { parseArgs } from "../src/cli.ts";
-import { freshFile, install, plistValue } from "../src/engine/apps.ts";
+import { freshFile, install, pasteHelper, plistValue, setPasteboard } from "../src/engine/apps.ts";
 import { cleanConsole, crashReports, parseSystemLog, summarizeIps } from "../src/engine/logs.ts";
-import { appControl, pushJson } from "../src/tools/app-control.ts";
+import { appControl, openUrl, pushJson } from "../src/tools/app-control.ts";
 import { parseSince } from "../src/tools/app-logs.ts";
 import { ToolError } from "../src/errors.ts";
 
@@ -134,4 +134,58 @@ test("crash reports are the app's own on this Simulator: another app named the s
   const crashes = await crashReports("Demo", 0, { bundleId: "dev.simtap.demo", udid: here, dir });
   assert.deepEqual(crashes.map((c) => c.file), [join(dir, "Demo-2026-10-25-100001.ips")]);
   assert.ok(crashes[0]!.summary.some((l) => l.includes("mine")));
+});
+
+test("pasted text reaches the Simulator on standard input, never in an argument, through the phone's own helper too", async () => {
+  const bin = mkdtempSync(join(tmpdir(), "su-xcrun-"));
+  const record = join(bin, "calls");
+  // A stand-in xcrun: each call's arguments, then what came on its input; pbcopy fails as it does for a user with no
+  // screen session (a shared host's), so the phone's own helper is used.
+  writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nprintf 'args:%s\\n' "$*" >> "${record}"\nprintf 'input:' >> "${record}"\ncat >> "${record}"\nprintf '\\n' >> "${record}"\n[ "$2" = pbcopy ] && exit 1\nexit 0\n`, { mode: 0o755 });
+  const path = process.env.PATH;
+  process.env.PATH = `${bin}:${path}`;
+  try {
+    const text = "hunter2 é 日本";
+    if (pasteHelper()) {
+      await setPasteboard("UDID", text);
+      const calls = readFileSync(record, "utf8");
+      assert.match(calls, /args:simctl pbcopy UDID\ninput:hunter2 é 日本/);
+      assert.match(calls, /args:simctl spawn UDID \S+simulator-use-pbset -\ninput:hunter2 é 日本/);
+      assert.doesNotMatch(calls.split("\n").filter((l) => l.startsWith("args:")).join("\n"), /hunter2/);
+    } else {
+      await assert.rejects(setPasteboard("UDID", text), /clipboard/);
+      assert.doesNotMatch(readFileSync(record, "utf8").split("\n").filter((l) => l.startsWith("args:")).join("\n"), /hunter2/);
+    }
+  } finally {
+    process.env.PATH = path;
+  }
+});
+
+test("a link opens through the engine's input; a shared host never puts it in simctl's arguments", async () => {
+  const bin = mkdtempSync(join(tmpdir(), "su-open-"));
+  const record = join(bin, "calls");
+  writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nprintf 'args:%s\\n' "$*" >> "${record}"\nexit 0\n`, { mode: 0o755 });
+  // A stand-in engine: ready, then it answers each request and keeps what it was asked.
+  writeFileSync(join(bin, "engine"), `#!/bin/sh\necho '{"ready":true}'\nwhile read -r line; do printf 'engine:%s\\n' "$line" >> "${record}"; echo '{"ok":true}'; done\n`, { mode: 0o755 });
+  const saved = { PATH: process.env.PATH, ENGINE: process.env.SIMULATOR_USE_ENGINE, HOSTED: process.env.SIMULATOR_USE_HOSTED };
+  process.env.PATH = `${bin}:${saved.PATH}`;
+  const link = "myapp://sign-in?token=hunter2";
+  try {
+    process.env.SIMULATOR_USE_ENGINE = join(bin, "engine");
+    await openUrl("UDID-OPEN-1", link);
+    assert.match(readFileSync(record, "utf8"), /engine:\{"op":"open_url","url":"myapp:\/\/sign-in\?token=hunter2"\}/);
+    process.env.SIMULATOR_USE_ENGINE = "off";
+    process.env.SIMULATOR_USE_HOSTED = "1";
+    await assert.rejects(openUrl("UDID-OPEN-2", link), /Could not open the link/);
+    assert.doesNotMatch(readFileSync(record, "utf8"), /args:/, "no simctl call on a shared host");
+    delete process.env.SIMULATOR_USE_HOSTED;
+    await openUrl("UDID-OPEN-3", link);
+    assert.match(readFileSync(record, "utf8"), /args:simctl openurl UDID-OPEN-3/, "a machine of one user without the engine still opens it");
+  } finally {
+    process.env.PATH = saved.PATH;
+    for (const [key, value] of [["SIMULATOR_USE_ENGINE", saved.ENGINE], ["SIMULATOR_USE_HOSTED", saved.HOSTED]] as const) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });

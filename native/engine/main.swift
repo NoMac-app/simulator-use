@@ -643,6 +643,11 @@ func main() async {
           try await hid.send(event: .composite(events), logger: logger)
         case "lock":
           try await hid.send(event: .shortButtonPress(.lock), logger: logger)
+        case "open_url":
+          // The link comes on the engine's input, never in an argument (simctl openurl's), which every user of a Mac can read.
+          guard let text = req["url"] as? String, let url = URL(string: text), url.scheme != nil else { throw EngineError(message: "url: a link with a scheme") }
+          let target = simulator
+          try await blocking { _ = try target.open(url).block() }
         case "settle":
           let (waited, updates, settled) = await settle(watcher, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 0)
           answer["waited_ms"] = waited; answer["updates"] = updates; answer["settled"] = settled
