@@ -29,21 +29,25 @@ export class Tunnel {
   phonePort?: number;
   state: "connecting" | "open" | "closed" = "connecting";
   error?: string;
+  /** Said once with the next answer: the phone's port changed when the tunnel came back. */
+  notice?: string;
   requests: Captured[] = [];
   connections = 0;
   private readonly api: CloudApi;
   private readonly onRequest?: (request: Captured) => void;
+  private readonly onNotice?: (notice: string) => void;
   private ws?: WebSocket;
   private conns = new Map<number, Conn>();
   private stopped = false;
   private drops = 0;
 
-  constructor(api: CloudApi, session: string, localPort: number, localHost = "127.0.0.1", onRequest?: (request: Captured) => void) {
+  constructor(api: CloudApi, session: string, localPort: number, localHost = "127.0.0.1", onRequest?: (request: Captured) => void, onNotice?: (notice: string) => void) {
     this.api = api;
     this.session = session;
     this.localPort = localPort;
     this.localHost = localHost;
     this.onRequest = onRequest;
+    this.onNotice = onNotice;
   }
 
   /** Opens the tunnel; answers the port the phone's apps reach once the phone's relay listens. */
@@ -80,7 +84,13 @@ export class Tunnel {
         }
         for (const f of frames) {
           if (f.type === HELLO) {
-            this.phonePort = Number((JSON.parse(f.payload.toString("utf8")) as { port?: unknown }).port);
+            const port = Number((JSON.parse(f.payload.toString("utf8")) as { port?: unknown }).port);
+            // The host keeps the port when it can; when it could not, an app pointed at the old one fails.
+            if (this.phonePort !== undefined && port !== this.phonePort) {
+              this.notice = `The tunnel came back on another port of the phone, ${port} (it was ${this.phonePort}).\nNext: app_run again with env "API_URL=http://127.0.0.1:${port}".`;
+              this.onNotice?.(this.notice);
+            }
+            this.phonePort = port;
             this.state = "open";
             opened = Date.now();
             if (!answered) {

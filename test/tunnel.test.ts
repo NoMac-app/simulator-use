@@ -121,3 +121,47 @@ test("an app on the phone reaches the developer's backend through the tunnel, an
     backend.close();
   }
 });
+
+test("a tunnel back on another port of the phone says so once, with the port to use", async () => {
+  // The phone's side: the first connection says port 20199 and drops; the next says 20198.
+  const ports = [20199, 20198];
+  const sockets: { close: () => void }[] = [];
+  class FakeSocket {
+    static OPEN = 1;
+    readyState = 1;
+    bufferedAmount = 0;
+    binaryType = "arraybuffer";
+    onmessage?: (event: { data: ArrayBuffer }) => void;
+    onclose?: () => void;
+    constructor() {
+      const port = ports.shift()!;
+      sockets.push(this);
+      setTimeout(() => {
+        const hello = frame(HELLO, 0, Buffer.from(JSON.stringify({ port })));
+        this.onmessage?.({ data: hello.buffer.slice(hello.byteOffset, hello.byteOffset + hello.byteLength) as ArrayBuffer });
+      }, 5);
+    }
+    send() {}
+    close() {
+      this.readyState = 3;
+      this.onclose?.();
+    }
+  }
+  const saved = globalThis.WebSocket;
+  (globalThis as { WebSocket: unknown }).WebSocket = FakeSocket;
+  const api = { json: async () => ({ url: "wss://gw.test/t", token: "t", protocol: "nomac.tunnel" }) } as unknown as CloudApi;
+  const told: string[] = [];
+  const tunnel = new Tunnel(api, "ses_x", 8080, "127.0.0.1", undefined, (n) => told.push(n));
+  try {
+    assert.equal(await tunnel.start(), 20199);
+    assert.equal(tunnel.notice, undefined);
+    sockets[0]!.close();
+    for (let i = 0; i < 300 && tunnel.phonePort !== 20198; i++) await new Promise((r) => setTimeout(r, 10));
+    assert.equal(tunnel.phonePort, 20198);
+    assert.equal(tunnel.notice, 'The tunnel came back on another port of the phone, 20198 (it was 20199).\nNext: app_run again with env "API_URL=http://127.0.0.1:20198".');
+    assert.deepEqual(told, [tunnel.notice]);
+  } finally {
+    tunnel.stop();
+    (globalThis as { WebSocket: unknown }).WebSocket = saved;
+  }
+});

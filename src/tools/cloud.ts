@@ -82,6 +82,13 @@ async function start(context: CallContext): Promise<ToolResult> {
 /** The phone's tunnel to a backend on this machine, while this process runs (one at a time). */
 let tunnel: Tunnel | undefined;
 
+/** The tunnel's notice (its port changed), once: said after the next answer from the phone. */
+export function tunnelNotice(): string | undefined {
+  const notice = tunnel?.notice;
+  if (tunnel) tunnel.notice = undefined;
+  return notice;
+}
+
 const tunnelLine = (t: Tunnel) =>
   t.state === "closed" ? `The tunnel closed${t.error ? `: ${t.error}` : ""}.` : `The phone reaches ${t.localHost}:${t.localPort} on this machine at http://127.0.0.1:${t.phonePort}${t.state === "connecting" ? " (reconnecting)" : ""}.`;
 
@@ -103,7 +110,8 @@ async function openTunnel(args: Record<string, unknown>, context: CallContext): 
   if (port === undefined) {
     if (!tunnel) return { text: "No tunnel is open.\nNext: cloud tunnel with port, your backend's port on this machine." };
     const recent = tunnel.requests.slice(-20).map((r) => describeRequest(r));
-    return { text: `${tunnelLine(tunnel)} ${tunnel.requests.length} requests so far${recent.length ? `, the last:\n${recent.join("\n")}` : "."}${tunnel.error && tunnel.state !== "closed" ? `\nLast problem: ${tunnel.error}.` : ""}` };
+    const notice = tunnelNotice();
+    return { text: `${tunnelLine(tunnel)} ${tunnel.requests.length} requests so far${recent.length ? `, the last:\n${recent.join("\n")}` : "."}${tunnel.error && tunnel.state !== "closed" ? `\nLast problem: ${tunnel.error}.` : ""}${notice ? `\n${notice}` : ""}` };
   }
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new ToolError(`${port} is not a port.`, "Pass port: your backend's port on this machine, like 8080.");
   if (!api || !state.on || !state.session) throw new ToolError("Cloud has no phone.", "Call cloud start first.");
@@ -112,7 +120,7 @@ async function openTunnel(args: Record<string, unknown>, context: CallContext): 
     tunnel = undefined;
   }
   if (!tunnel) {
-    const opened = new Tunnel(api, state.session, port, "127.0.0.1", context.waitForJobs ? (r) => console.log(describeRequest(r, false)) : undefined);
+    const opened = new Tunnel(api, state.session, port, "127.0.0.1", context.waitForJobs ? (r) => console.log(describeRequest(r, false)) : undefined, context.waitForJobs ? (n) => console.log(n) : undefined);
     await opened.start();
     tunnel = opened;
   }

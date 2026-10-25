@@ -7,7 +7,7 @@ import { setting } from "./settings.ts";
 import { appControl } from "./tools/app-control.ts";
 import { appLogs } from "./tools/app-logs.ts";
 import { appRun } from "./tools/app-run.ts";
-import { cloud } from "./tools/cloud.ts";
+import { cloud, tunnelNotice } from "./tools/cloud.ts";
 import { deviceUse } from "./tools/device-use.ts";
 import { devices } from "./tools/devices.ts";
 import { jobCancel, jobStatus } from "./tools/jobs.ts";
@@ -66,7 +66,11 @@ export async function callTool(name: string, args: Record<string, unknown> = {},
   if (problem) return { text: problem, isError: true };
   try {
     // With cloud on, every other tool runs on the NoMac phone (src/cloud/forward.ts).
-    if (tool !== cloud && !setting("HOSTED") && (await cloudState()).on) return await forward(tool.name, args, context);
+    if (tool !== cloud && !setting("HOSTED") && (await cloudState()).on) {
+      const out = await forward(tool.name, args, context);
+      const notice = tunnelNotice();
+      return notice ? { ...out, text: `${out.text}\n${notice}` } : out;
+    }
     return await tool.run(args, context);
   } catch (error) {
     if (error instanceof ToolError) return { text: error.toText(), isError: true };
