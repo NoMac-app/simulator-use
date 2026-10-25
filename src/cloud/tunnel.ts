@@ -87,7 +87,7 @@ export class Tunnel {
             const port = Number((JSON.parse(f.payload.toString("utf8")) as { port?: unknown }).port);
             // The host keeps the port when it can; when it could not, an app pointed at the old one fails.
             if (this.phonePort !== undefined && port !== this.phonePort) {
-              this.notice = `The tunnel came back on another port of the phone, ${port} (it was ${this.phonePort}).\nNext: app_run again with env "API_URL=http://127.0.0.1:${port}".`;
+              this.notice = `The tunnel came back on another port of the phone, ${port} (it was ${this.phonePort}): app_run again with env "API_URL=http://127.0.0.1:${port}" for an app that used the old one.`;
               this.onNotice?.(this.notice);
             }
             this.phonePort = port;

@@ -146,6 +146,10 @@ test("the CLI keeps cloud mode between its commands", async () => {
   script = { "GET /api/v1/simulator/sessions/ses_cli": [{ status: 200, body: { session: { id: "ses_cli", state: "ready", cost: { accrued_microunits: "40000", billable_seconds: 180 } } } }] };
   const status = await promisify(execFile)(process.execPath, [CLI, "cloud", "status"], { env: { ...process.env, SIMULATOR_USE_STATE_DIR: state } });
   assert.match(status.stdout, /^Cloud is on: phone ses_cli is ready; 3 min so far, \$0\.04/);
+  // A phone that says when it is ready and its limit says when it stops, and how to keep it.
+  script = { "GET /api/v1/simulator/sessions/ses_cli": [{ status: 200, body: { session: { id: "ses_cli", state: "ready", ready_at: "2026-10-25T10:00:00.000Z", limits: { max_duration_seconds: 7200 }, cost: { accrued_microunits: "40000", billable_seconds: 180 } } } }] };
+  const timed = await promisify(execFile)(process.execPath, [CLI, "cloud", "status"], { env: { ...process.env, SIMULATOR_USE_STATE_DIR: state } });
+  assert.match(timed.stdout, /It stops by 12:00 UTC at the latest; cloud extend keeps it longer\./);
 });
 
 test("an MCP server stops the cloud phone it started when its client closes it", async () => {

@@ -153,7 +153,10 @@ async function status(): Promise<ToolResult> {
   const { phone, links } = await readPhone(api, state.session);
   const minutes = Math.ceil((phone.cost?.billable_seconds ?? 0) / 60);
   if (phone.state === "queued") return { text: `Cloud is on: phone ${phone.id} is waiting.${phone.message ? ` ${phone.message}` : ""}` };
-  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
+  const limit = (phone as Phone & { ready_at?: string | null; limits?: { max_duration_seconds?: number } });
+  const until = phone.state === "ready" && limit.ready_at && limit.limits?.max_duration_seconds ? new Date(Date.parse(limit.ready_at) + limit.limits.max_duration_seconds * 1000).toISOString().slice(11, 16) : undefined;
+  const stops = until ? ` It stops by ${until} UTC at the latest; cloud extend keeps it longer.` : "";
+  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${stops}${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
 }
 
 /**
@@ -206,7 +209,7 @@ async function stop(): Promise<ToolResult> {
   }
   const cost = phone ? `after ${Math.ceil((phone.cost?.billable_seconds ?? 0) / 60)} min, ${dollars(phone.cost?.accrued_microunits)}` : "(its cost is on NoMac's dashboard)";
   const replay = ((stopped?.links ?? {}) as Links).replay;
-  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. A file link from its answers works now only if it was opened before this stop.${replay ? `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).` : ""}` };
+  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. A file link from its answers keeps working only if it was opened before this stop.${replay ? `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).` : ""}` };
 }
 
 /** A phone stopped at once, as the process ends (a signal): no waiting for its cleanup. */

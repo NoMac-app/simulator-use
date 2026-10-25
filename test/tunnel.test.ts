@@ -158,7 +158,7 @@ test("a tunnel back on another port of the phone says so once, with the port to 
     sockets[0]!.close();
     for (let i = 0; i < 300 && tunnel.phonePort !== 20198; i++) await new Promise((r) => setTimeout(r, 10));
     assert.equal(tunnel.phonePort, 20198);
-    assert.equal(tunnel.notice, 'The tunnel came back on another port of the phone, 20198 (it was 20199).\nNext: app_run again with env "API_URL=http://127.0.0.1:20198".');
+    assert.equal(tunnel.notice, 'The tunnel came back on another port of the phone, 20198 (it was 20199): app_run again with env "API_URL=http://127.0.0.1:20198" for an app that used the old one.');
     assert.deepEqual(told, [tunnel.notice]);
   } finally {
     tunnel.stop();
