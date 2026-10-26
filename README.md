@@ -27,7 +27,7 @@ tabs: Login (selected) @158,822, Items @244,822
 - Groups, icons inside buttons, scroll bars, the status bar and the keyboard's keys are folded away. The tab bar, scrolling and the keyboard are one line each.
 - Only what can be tapped is listed. An alert, a sheet, a menu or a full-screen view in front hides the screen behind it, and iOS's own permission prompts read as alerts over the app. Rows under the navigation bar, the tab bar or the keyboard are counted as hidden (above, below, to the left or right), not listed.
 - A web view in UIKit (Capacitor, React Native's WebView, a sign-in page inside most apps) is read point by point, and its headings, texts, fields, checkboxes, buttons and links are listed like the rest. Web views hosted by SwiftUI, Safari's own pages, in-app browsers, maps, games and iOS's out-of-process pickers have nothing for accessibility to read. They come back as one `unreadable` line with their place, so the agent knows to take a screenshot and tap by point.
-- A screenshot, when asked for, is sized to points, so a point in the picture is a point to tap.
+- A screenshot, when asked for, is sized to points, so a point in the picture is a point to tap. `screenshot_file` saves the screen at full resolution as a PNG for a person, a report or the App Store; in cloud mode it is saved on your machine too.
 - The sign-in screen above is about 70 tokens. The full accessibility tree it comes from is about 40,000.
 
 ## Using the screen
@@ -72,7 +72,7 @@ Every step is checked, so nothing succeeds silently:
 | `devices` | `simulator-use devices` | Lists the Simulators on this Mac with their runtime, UDID and state, and its Xcodes |
 | `device_use` | `simulator-use use "iPhone 17 Pro"` | Chooses the Simulator the other tools use, booting it (one boot at a time); dark mode, a clean status bar |
 | `app_control` | `simulator-use app launch dev.example.app` | `install`, `launch` (answers with the first screen), `terminate`, `uninstall`, `open_url`; `grant`, `revoke` and `reset_permissions`; `location`; `push`; the phone's `appearance`, `locale`, `timezone`, `text_size` and a clean `status_bar` |
-| `ui_look` | `simulator-use look` | Reads the screen; `find` keeps matching lines, `screenshot` adds a picture, `full` saves the whole tree |
+| `ui_look` | `simulator-use look` | Reads the screen; `find` keeps matching lines, `screenshot` adds a picture, `screenshot_file` saves a full-resolution PNG, `full` saves the whole tree |
 | `ui_act` | `simulator-use act "tap #signIn" ...` | Does steps in order and answers with what changed |
 | `app_logs` | `simulator-use logs` | The app's print output and its own system log lines; `grep`, `wait_for`, `crashes` |
 | `tests_run` | `simulator-use test` | Runs the unit and UI tests; each case as it finishes, counts, each failure as `file:line` and the slowest; "0 tests ran" is an error |
@@ -215,12 +215,12 @@ permissions:
   pull-requests: write
 steps:
   - uses: actions/checkout@v5
-  - uses: NoMac-app/simulator-use@v0.11
+  - uses: NoMac-app/simulator-use@v0.12
     with:
       api-key: ${{ secrets.NOMAC_API_KEY }}
 ```
 
-It runs the simulator-use of its own tag (`@v0.11` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason. A job's log and its pull request comment can be public, so in CI (`CI` or `GITHUB_ACTIONS` set) `cloud run` prints no link that opens without signing in: files it links are kept in the run's artifacts, and the replay's link is read with the account's key (`GET https://nomac.app/api/v1/simulator/sessions/{id}`, `links.replay`).
+It runs the simulator-use of its own tag (`@v0.12` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason. A job's log and its pull request comment can be public, so in CI (`CI` or `GITHUB_ACTIONS` set) `cloud run` prints no link that opens without signing in: files it links are kept in the run's artifacts, and the replay's link is read with the account's key (`GET https://nomac.app/api/v1/simulator/sessions/{id}`, `links.replay`).
 
 ## Privacy
 

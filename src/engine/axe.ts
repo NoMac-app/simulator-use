@@ -77,6 +77,18 @@ export async function screenshot(udid: string, points: Frame): Promise<Buffer> {
   }
 }
 
+/** The screen at the device's full resolution, as a PNG in file: for a person, a report or a store, not the agent's eyes. */
+export async function screenshotFile(udid: string, file: string): Promise<void> {
+  const answer = await engineCall(udid, { op: "screenshot", png_path: file });
+  if (answer?.ok && existsSync(file)) return;
+  if (answer?.busy) throw new ToolError("The screenshot took more than 30 s.", "Take it again: the phone is still working on an earlier request.");
+  try {
+    await run(axePath(), ["screenshot", "--output", file, "--udid", udid], { timeoutMs: 30_000 });
+  } catch (error) {
+    throw new ToolError(`Could not take a screenshot: ${(error as Error).message}`);
+  }
+}
+
 /**
  * Any AXe command may open and close an automation session of its own (a slider is found by its id), so each one is
  * followed by the time the next engine waits from (noteSessionClosed).

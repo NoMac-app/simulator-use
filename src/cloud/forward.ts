@@ -1,18 +1,22 @@
 /**
  * With cloud on, every tool runs on the NoMac phone instead of this machine: called by name through NoMac's API
  * and polled until it ends. app_run and tests_run send their project first, and app_control install its .app, so
- * the paths the phone takes are its own. Answers read as a local tool's do; files they name are links.
+ * the paths the phone takes are its own. Answers read as a local tool's do; files they name are links, but for the
+ * files ui_look saves, which are saved here.
  */
 
 import { existsSync, realpathSync, statSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 import { basename, dirname, extname, relative, resolve, sep } from "node:path";
 import { createHash } from "node:crypto";
 
 import { run } from "../engine/exec.ts";
+import { stateDir } from "../engine/state.ts";
 import { ToolError } from "../errors.ts";
 import type { CallContext, ToolResult } from "../tools/types.ts";
 import { account, cloudState, setCloudState } from "./account.ts";
 import { type CloudApi, CloudError } from "./api.ts";
+import { keepFiles } from "./files.ts";
 import { randomKey, syncFolder } from "./sync.ts";
 
 const JOB = /Next: job_status \{job_id: "([^"]+)"\}/;
@@ -92,6 +96,13 @@ export async function forward(name: string, args: Record<string, unknown>, conte
     for (let rounds = 0; job && rounds < 120; rounds++) {
       result = await call(api, session, "job_status", { job_id: job });
       if (result.isError || !STILL_RUNNING.test(result.text)) break;
+    }
+    // A file ui_look saved (the screenshot, the whole tree) is saved here too, as the tool on this machine does.
+    if (name === "ui_look" && (args.screenshot_file || args.full) && !result.isError) {
+      const lines = [result.text];
+      await mkdir(stateDir(), { recursive: true });
+      await keepFiles(lines, stateDir());
+      result = { ...result, text: lines[0]! };
     }
     return note ? { ...result, text: `${note}${result.text}` } : result;
   } catch (error) {

@@ -88,7 +88,7 @@ test("MCP errors: unknown method, unknown tool, bad arguments", async () => {
   assert.match(unknown.content[0]!.text, /No tool named "nope"\. Tools: devices, device_use, app_run, ui_look, ui_act, app_control, app_logs, tests_run, job_status, job_cancel, screen_record/);
   const bad = await callTool("ui_look", { screenshot: "yes" });
   assert.deepEqual(bad, { text: "ui_look: screenshot must be a boolean.", isError: true });
-  assert.match((await callTool("ui_look", { zoom: 2 })).text, /ui_look has no argument "zoom"\. It takes: device, find, screenshot, full\./);
+  assert.match((await callTool("ui_look", { zoom: 2 })).text, /ui_look has no argument "zoom"\. It takes: device, find, screenshot, screenshot_file, full\./);
   assert.deepEqual(await callTool("ui_act", {}), { text: "ui_act needs steps.", isError: true });
   assert.deepEqual(await callTool("ui_act", { steps: "tap #a" }), { text: "ui_act: steps must be a list of strings.", isError: true });
   assert.deepEqual(await callTool("ui_act", { steps: [] }), { text: "ui_act: steps needs at least 1.", isError: true });

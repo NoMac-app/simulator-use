@@ -8,7 +8,7 @@ description: Build, run, test and use iOS apps in the Simulator on this Mac from
 `npx simulator-use <command>` drives the iOS Simulator on this Mac.
 
 - `simulator-use run [folder]`: build the Xcode project, install, launch; prints the first screen, or errors as `file:line`.
-- `simulator-use look [--find text] [--screenshot]`: the screen, one line per element: `button "Sign In" #signIn @201,350`.
+- `simulator-use look [--find text] [--screenshot] [--screenshot-file]`: the screen, one line per element: `button "Sign In" #signIn @201,350`. `--screenshot-file` saves a full-size PNG.
 - `simulator-use act "step" "step" ...`: do steps in order; prints what changed. Steps:
   `tap #id` · `tap "label"` · `tap @x,y` · `fill #id text` · `type text` · `scroll down` · `swipe left "Row 3"` · `hold "Row 5"` · `set #volume 75` · `back` · `home` · `key return` · `wait "Welcome" 10` · `gone "Loading"`
 - `simulator-use logs [--grep x] [--wait-for x] [--crashes]`: the app's print output, its own log lines, crash reports.

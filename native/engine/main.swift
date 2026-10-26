@@ -93,6 +93,19 @@ func withDefaults(_ any: Any) -> Any {
   return element
 }
 
+/** A screenshot as an opaque PNG: a screen has no transparency, so the file carries no alpha channel. */
+func opaquePNG(_ data: Data) throws -> Data {
+  guard let source = CGImageSourceCreateWithData(data as CFData, nil), let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { throw EngineError(message: "screenshot could not be decoded") }
+  if [.none, .noneSkipFirst, .noneSkipLast].contains(image.alphaInfo) { return data }
+  guard let ctx = CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { throw EngineError(message: "png encoder unavailable") }
+  ctx.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+  let result = NSMutableData()
+  guard let flat = ctx.makeImage(), let dest = CGImageDestinationCreateWithData(result, UTType.png.identifier as CFString, 1, nil) else { throw EngineError(message: "png encoder unavailable") }
+  CGImageDestinationAddImage(dest, flat, nil)
+  guard CGImageDestinationFinalize(dest) else { throw EngineError(message: "png encoding failed") }
+  return result as Data
+}
+
 func jpeg(fromPNG data: Data, maxPoints: (Double, Double)?, quality: Double) throws -> Data {
   guard let source = CGImageSourceCreateWithData(data as CFData, nil), let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { throw EngineError(message: "screenshot could not be decoded") }
   var out = image
@@ -696,8 +709,14 @@ func main() async {
         case "screenshot":
           let png = try await simulator.takeScreenshot(format: .png)
           let shotMs = ms(t0)
+          // The screen at full size to a file (png_path), alone or beside the JPEG.
+          if let file = req["png_path"] as? String {
+            let opaque = try opaquePNG(png)
+            try opaque.write(to: URL(fileURLWithPath: file))
+            answer["png_bytes"] = opaque.count
+          }
           if (req["format"] as? String) == "png" { answer["bytes"] = png.count }
-          else {
+          else if req["png_path"] == nil || req["path"] != nil || req["inline"] as? Bool == true {
             var size: (Double, Double)? = nil
             if let w = req["width"] as? Double, let h = req["height"] as? Double { size = (w, h) }
             let jpg = try jpeg(fromPNG: png, maxPoints: size, quality: req["quality"] as? Double ?? 0.7)

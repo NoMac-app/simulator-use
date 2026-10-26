@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -24,7 +24,8 @@ before(async () => {
     const path = req.url ?? "";
     seen.push({ method: req.method ?? "", path, body: raw.length && req.headers["content-type"] === "application/json" ? JSON.parse(raw.toString()) : undefined });
     const queue = script[`${req.method} ${path}`];
-    const answer = (queue && (queue.length > 1 ? queue.shift() : queue[0])) as { status: number; body: unknown } | undefined;
+    const answer = (queue && (queue.length > 1 ? queue.shift() : queue[0])) as { status: number; body: unknown; file?: Buffer } | undefined;
+    if (answer?.file) { res.writeHead(answer.status, { "content-type": "application/octet-stream" }); res.end(answer.file); return; }
     res.writeHead(answer?.status ?? 404, { "content-type": "application/json" });
     res.end(JSON.stringify(answer?.body ?? { error: { code: "not_found", message: path } }));
   });
@@ -104,6 +105,23 @@ test("an app is sent whole, its own folders too, and nothing beside it is read",
   writeFileSync(join(dir, "My.app/build/main.js"), "x");
   writeFileSync(join(dir, "elsewhere.zip"), "not read");
   assert.deepEqual((await listProject(dir, "My.app")).map((e) => e.path), ["My.app/My", "My.app/assets/node_modules/pkg/index.js", "My.app/build/main.js"]);
+});
+
+test("a screenshot file ui_look saves on the phone is saved on this machine, its path in the answer as the local tool's", async () => {
+  await onPhone();
+  const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+  const token = `${Buffer.from(JSON.stringify({ s: "ses_p", f: `file_${"a".repeat(40)}`, n: "screen-B618F794-1792.png" })).toString("base64url")}.sig`;
+  const link = `${process.env.NOMAC_API_URL}/api/v1/simulator/files/${token}`;
+  script = { [`POST ${PHONE}/tools/ui_look`]: [done(`Demo · Sign In\nscreenshot file: ${link}`)], [`GET /api/v1/simulator/files/${token}`]: [{ status: 200, body: null, file: png }] };
+  const file = join(process.env.SIMULATOR_USE_STATE_DIR!, "screen-B618F794-1792.png");
+  assert.equal((await callTool("ui_look", { screenshot_file: true })).text, `Demo · Sign In\nscreenshot file: ${file}`);
+  assert.deepEqual(readFileSync(file), png);
+  assert.deepEqual(seen.find((r) => r.path === `${PHONE}/tools/ui_look`)?.body, { screenshot_file: true });
+  // A link that cannot be saved stays a link; any other answer's links are left alone.
+  script = { [`POST ${PHONE}/tools/ui_look`]: [done(`Demo · Sign In\nscreenshot file: ${link}`)], [`GET /api/v1/simulator/files/${token}`]: [{ status: 410, body: { error: { code: "file_gone" } } }] };
+  assert.equal((await callTool("ui_look", { screenshot_file: true })).text, `Demo · Sign In\nscreenshot file: ${link}`);
+  script = { [`POST ${PHONE}/tools/app_logs`]: [done(`Saved: ${link}`)] };
+  assert.equal((await callTool("app_logs", {})).text, `Saved: ${link}`);
 });
 
 test("a phone's stop notice is said after the answer, in cloud mode's own way on", async () => {

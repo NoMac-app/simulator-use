@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { screenshot } from "../engine/axe.ts";
+import { screenshot, screenshotFile } from "../engine/axe.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { heldDevice, stateDir } from "../engine/state.ts";
 import { readScreen } from "../look/read.ts";
@@ -19,6 +19,7 @@ export const uiLook: Tool = {
       device: { type: "string", description: "Name or UDID; default: the one in use" },
       find: { type: "string", description: "Only elements whose label, id or value contains this" },
       screenshot: { type: "boolean", description: "Also return a JPEG sized to points" },
+      screenshot_file: { type: "boolean", description: "Also save the screen at full resolution to a PNG file" },
       full: { type: "boolean", description: "Also save the whole accessibility tree to a JSON file" },
     },
     additionalProperties: false,
@@ -29,12 +30,17 @@ export const uiLook: Tool = {
     const device = pickDevice(await listDevices(), args.device as string | undefined, heldDevice());
     const { tree, snap } = await readScreen(device.udid);
     let text = render(snap, { device: `${device.name} (${device.runtime})`, find: args.find as string | undefined });
+    const dir = stateDir();
+    if (args.full || args.screenshot_file) await mkdir(dir, { recursive: true });
     if (args.full) {
-      const dir = stateDir();
-      await mkdir(dir, { recursive: true });
       const file = join(dir, `tree-${device.udid.slice(0, 8)}-${Date.now()}.json`);
       await writeFile(file, JSON.stringify(tree, null, 1));
       text += `\nfull tree: ${file}`;
+    }
+    if (args.screenshot_file) {
+      const file = join(dir, `screen-${device.udid.slice(0, 8)}-${Date.now()}.png`);
+      await screenshotFile(device.udid, file);
+      text += `\nscreenshot file: ${file}`;
     }
     if (!args.screenshot) return { text };
     return { text, image: { data: await screenshot(device.udid, snap.screen), mimeType: "image/jpeg" } };
