@@ -40,7 +40,7 @@ async function untilReady(api: CloudApi, id: string, waitMs: number): Promise<Ph
   return phone;
 }
 
-const DEVICE_NAMES: Record<string, string> = { iphone: "iPhone", ipad: "iPad" };
+const DEVICE_NAMES: Record<string, string> = { iphone: "iPhone", ipad: "iPad", "iphone-pro-max": "iPhone Pro Max" };
 
 async function start(args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
   const device = typeof args.device === "string" ? args.device : undefined;
@@ -326,12 +326,12 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless) and starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. extend: an hour more. stop: ends it. run (CLI, CI): start, build and run path, tests, screenshot, recording, stop. tunnel: the phone reaches port here.",
+    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless), starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. extend: an hour more. stop: ends it. run (CI): start, build and run path, tests, screenshot, video, stop. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
       action: { type: "string", enum: ACTIONS, description: "what to do" },
-      device: { type: "string", enum: ["iphone", "ipad"], description: "start, run" },
+      device: { type: "string", enum: ["iphone", "ipad", "iphone-pro-max"], description: "start, run" },
       port: { type: "number", description: "tunnel: a local port; 0 closes it" },
       path: { type: "string", description: "run: project folder" },
       tests: { type: "boolean", description: "run: tests too" },

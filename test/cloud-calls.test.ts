@@ -202,6 +202,16 @@ test("cloud start takes a device: an iPad is asked for, and one asked for while 
   assert.equal(other.isError, true);
   assert.equal(other.text, "Cloud already has phone ses_pad, an iPad.\nNext: cloud stop, then cloud start with device iphone.");
   await setCloudState({ on: false });
+  // The 6.9-inch iPhone, for App Store screenshots, is asked for the same way.
+  seen.length = 0;
+  script = {
+    "POST /api/v1/simulator/sessions": [{ status: 202, body: { session: { id: "ses_max", state: "queued" }, links: {} } }],
+    "GET /api/v1/simulator/sessions/ses_max": [{ status: 200, body: { session: { id: "ses_max", state: "ready", device: "iphone-pro-max" } } }],
+  };
+  const max = await callTool("cloud", { action: "start", device: "iphone-pro-max" });
+  assert.match(max.text, /^Cloud phone ready in [\d.]+ s: an iPhone Pro Max Simulator on a NoMac Mac/);
+  assert.deepEqual(seen.find((r) => r.method === "POST")!.body, { device: "iphone-pro-max" });
+  await setCloudState({ on: false });
 });
 
 test("cloud extend keeps the phone an hour longer, or the minutes the command line names; at its longest it says what then", async () => {
