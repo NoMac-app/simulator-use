@@ -167,8 +167,12 @@ export async function ensurePods(dir: string, steps?: Steps): Promise<string | u
   return `Installed the CocoaPods dependencies in ${seconds} s (pod install).`;
 }
 
-/** A command of the project's own code under the build's clamp (SIMULATOR_USE_BUILD_CLAMP), as builds run. */
-function clamped(command: string, args: string[]): [string, string[]] {
+/**
+ * A command of the project's own code under the build's clamp (SIMULATOR_USE_BUILD_CLAMP), as builds run: pod install,
+ * and the project's reads before a build, which run its code too (XcodeGen's pre- and post-gen commands, Swift
+ * package manifests resolved by xcodebuild -list and -showBuildSettings).
+ */
+export function clamped(command: string, args: string[]): [string, string[]] {
   const clamp = setting("BUILD_CLAMP");
   return clamp === "utility" || clamp === "background" ? ["/usr/sbin/taskpolicy", ["-c", clamp, command, ...args]] : [command, args];
 }
@@ -189,7 +193,7 @@ function isExpo(file: string): boolean {
  */
 async function xcodegen(dir: string, hasProject: boolean): Promise<string | undefined> {
   try {
-    await run("xcodegen", ["generate", "--quiet", "--use-cache", "--spec", join(dir, "project.yml")], { timeoutMs: 60_000 });
+    await run(...clamped("xcodegen", ["generate", "--quiet", "--use-cache", "--spec", join(dir, "project.yml")]), { timeoutMs: 60_000 });
     return undefined;
   } catch (error) {
     const why = ((error as Error).message.split("\n")[0] ?? "").slice(0, 200);
@@ -200,7 +204,7 @@ async function xcodegen(dir: string, hasProject: boolean): Promise<string | unde
 
 /** The scheme to build: the one asked for, the only one, or the one named like the project. */
 export async function pickScheme(project: Project, wanted?: string): Promise<string> {
-  const { stdout } = await run("xcodebuild", ["-list", "-json", project.kind === "workspace" ? "-workspace" : "-project", project.path], { timeoutMs: 60_000 });
+  const { stdout } = await run(...clamped("xcodebuild", ["-list", "-json", project.kind === "workspace" ? "-workspace" : "-project", project.path]), { timeoutMs: 60_000 });
   const list = JSON.parse(stdout) as { project?: { schemes?: string[] }; workspace?: { schemes?: string[] } };
   const schemes = list.workspace?.schemes ?? list.project?.schemes ?? [];
   if (wanted) {
@@ -309,7 +313,7 @@ export function laterVersion(a: string, b: string): boolean {
 /** The latest iOS deployment target among a scheme's targets, as the Xcode that builds it reads them. */
 export async function deploymentTarget(project: Project, scheme: string, xcode?: Xcode): Promise<string | undefined> {
   const args = [project.kind === "workspace" ? "-workspace" : "-project", project.path, "-scheme", scheme, "-showBuildSettings", "-json"];
-  const { stdout } = await run("xcodebuild", args, { timeoutMs: 60_000, env: xcodeEnv(xcode) });
+  const { stdout } = await run(...clamped("xcodebuild", args), { timeoutMs: 60_000, env: xcodeEnv(xcode) });
   const targets = (JSON.parse(stdout) as { buildSettings?: { IPHONEOS_DEPLOYMENT_TARGET?: string } }[]).map((t) => t.buildSettings?.IPHONEOS_DEPLOYMENT_TARGET).filter((v): v is string => Boolean(v));
   return targets.reduce<string | undefined>((latest, v) => (!latest || laterVersion(v, latest) ? v : latest), undefined);
 }

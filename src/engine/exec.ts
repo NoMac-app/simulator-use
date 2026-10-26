@@ -6,10 +6,12 @@ export type Output = { stdout: string; stderr: string };
 /** Runs a program without a shell. Rejects with its stderr when it fails or runs past the timeout. */
 export function run(file: string, args: string[], options: { timeoutMs?: number; maxBytes?: number; env?: NodeJS.ProcessEnv } = {}): Promise<Output> {
   const started = Date.now();
+  // A program under the build's clamp (taskpolicy -c <clamp> <program> ...) is named for itself, not for taskpolicy.
+  const [program, shown] = file === "/usr/sbin/taskpolicy" && args[0] === "-c" && args[2] ? [args[2], args.slice(3)] : [file, args];
   return new Promise((resolve, reject) => {
     execFile(file, args, { timeout: options.timeoutMs ?? 30_000, maxBuffer: options.maxBytes ?? 64 * 1024 * 1024, encoding: "utf8", ...(options.env ? { env: options.env } : {}) }, (error, stdout, stderr) => {
       // SIMULATOR_USE_DEBUG=1 prints every program run and how long it took, to find where time goes.
-      if (setting("DEBUG")) process.stderr.write(`simulator-use:   ${file.split("/").pop()} ${args.slice(0, 2).join(" ")} ${Date.now() - started} ms${error ? " (failed)" : ""}\n`);
+      if (setting("DEBUG")) process.stderr.write(`simulator-use:   ${program.split("/").pop()} ${shown.slice(0, 2).join(" ")} ${Date.now() - started} ms${error ? " (failed)" : ""}\n`);
       if (!error) return resolve({ stdout, stderr });
       const code = (error as NodeJS.ErrnoException).code;
       const reason =
@@ -18,7 +20,7 @@ export function run(file: string, args: string[], options: { timeoutMs?: number;
           : error.killed
             ? `timed out after ${Math.round((options.timeoutMs ?? 30_000) / 1000)} s`
             : (stderr || error.message).trim();
-      reject(Object.assign(new Error(`${file.split("/").pop()} ${args[0] ?? ""}: ${reason}`), { stderr, code: error.code }));
+      reject(Object.assign(new Error(`${program.split("/").pop()} ${shown[0] ?? ""}: ${reason}`), { stderr, code: error.code }));
     });
   });
 }

@@ -5,8 +5,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
+import { run } from "../src/engine/exec.ts";
 import { getJob, startJob, waitFor } from "../src/engine/jobs.ts";
-import { buildCommand, deploymentTarget, findProject, formatIssue, knownFix, laterVersion, parseIssue, targetTooNew } from "../src/engine/xcode.ts";
+import { buildCommand, clamped, deploymentTarget, findProject, formatIssue, knownFix, laterVersion, parseIssue, targetTooNew } from "../src/engine/xcode.ts";
 import { ToolError } from "../src/errors.ts";
 
 test("xcodebuild lines become errors and warnings with their place", () => {
@@ -181,6 +182,21 @@ test("builds run under the host's clamp when one is set, and as plain xcodebuild
   }
 });
 
+test("the project's own commands before a build run under the host's clamp too, named for themselves when they fail", { skip: process.platform !== "darwin" }, async () => {
+  const saved = process.env.SIMULATOR_USE_BUILD_CLAMP;
+  try {
+    delete process.env.SIMULATOR_USE_BUILD_CLAMP;
+    assert.deepEqual(clamped("xcodegen", ["generate"]), ["xcodegen", ["generate"]]);
+    process.env.SIMULATOR_USE_BUILD_CLAMP = "utility";
+    assert.deepEqual(clamped("xcodebuild", ["-list", "-json"]), ["/usr/sbin/taskpolicy", ["-c", "utility", "xcodebuild", "-list", "-json"]]);
+    const missing = join(tmpdir(), `dl-missing-${process.pid}`);
+    await assert.rejects(run(...clamped("ls", [missing])), (error: Error) => error.message.startsWith(`ls ${missing}: `));
+  } finally {
+    if (saved === undefined) delete process.env.SIMULATOR_USE_BUILD_CLAMP;
+    else process.env.SIMULATOR_USE_BUILD_CLAMP = saved;
+  }
+});
+
 test("versions compare by their numbers", () => {
   assert.equal(laterVersion("27.1", "27.0"), true);
   assert.equal(laterVersion("27.0.1", "27.0"), true);
@@ -201,6 +217,15 @@ test("a project that targets a later iOS than the phone says so, and how to fix 
   assert.equal(spawnSync("xcodegen", ["generate"], { cwd: dir }).status, 0);
   const project = await findProject(join(dir, "Target.xcodeproj"));
   assert.equal(await deploymentTarget(project, "Target"), "26.5.1");
+  // The same read under NoMac's clamp (taskpolicy -c utility xcodebuild ...).
+  const saved = process.env.SIMULATOR_USE_BUILD_CLAMP;
+  process.env.SIMULATOR_USE_BUILD_CLAMP = "utility";
+  try {
+    assert.equal(await deploymentTarget(project, "Target"), "26.5.1");
+  } finally {
+    if (saved === undefined) delete process.env.SIMULATOR_USE_BUILD_CLAMP;
+    else process.env.SIMULATOR_USE_BUILD_CLAMP = saved;
+  }
   assert.equal(await targetTooNew(project, "Target", { name: "iPhone 17", runtime: "iOS 26.5" }, "app_run again"),
     "Target targets iOS 26.5.1 (its deployment target) and iPhone 17 runs iOS 26.5, so Xcode has no destination for it.\nNext: lower the deployment target to iOS 26.5 or earlier (IPHONEOS_DEPLOYMENT_TARGET; in Xcode, the target's General > Minimum Deployments), then app_run again.");
   assert.equal(await targetTooNew(project, "Target", { name: "iPhone 17", runtime: "iOS 26.6" }, "app_run again"), undefined);
