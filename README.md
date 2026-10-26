@@ -168,6 +168,8 @@ claude mcp add simulator-use -- npx -y simulator-use mcp
 codex mcp add simulator-use -- npx -y simulator-use mcp
 ```
 
+Claude Code also takes it as a plugin: `/plugin install simulator-use --marketplace NoMac-app/simulator-use`.
+
 Cursor, Windsurf, VS Code and other clients that take a JSON config:
 
 ```json
