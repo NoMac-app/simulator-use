@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "app.nomac/simulator-use",
+  "title": "simulator-use",
+  "description": "The iOS Simulator for coding agents: build Xcode projects, read the screen as text, tap by label.",
+  "websiteUrl": "https://simulator-use.dev",
+  "repository": {
+    "url": "https://github.com/NoMac-app/simulator-use",
+    "source": "github"
+  },
+  "version": "0.12.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "simulator-use",
+      "version": "0.12.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ]
+    }
+  ]
+}
