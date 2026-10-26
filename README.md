@@ -241,6 +241,8 @@ npm run build      # dist/ for the npm package
 node bin/simulator-use.js look
 ```
 
+The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0, Swift 6.3.2, which is Xcode 26.5 (build 17F42), the Xcode releases are built with. `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 26.5's `Contents/Developer`. The build is reproducible: built from the tag with Xcode 26.5, both binaries match the published package byte for byte, signature included (0.12.0: `simulator-use-engine` sha256 `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea`, `simulator-use-pbset` `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22`).
+
 `examples/swiftui-demo` is the sample app the tests' screens come from. `scripts/golden.sh` builds it, runs it on a Simulator and checks 19 golden tasks: build and launch in one call, sign in, toggle, open an item, back and scroll, the app's logs, a crash, a build error and a failing test as `file:line`, a video, and a wrong password that must fail loudly.
 
 `examples/edge-lab` is an app with every awkward screen: segments, steppers, sliders, menus, alerts, sheets, full-screen covers, permission prompts, text in any language, autocorrect, late content, toasts, swipe-to-delete, long press, a web view, UIKit and a deep link. `scripts/lab.sh` builds it and runs 26 checks on it.
