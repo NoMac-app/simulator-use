@@ -3,494 +3,283 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>simulator-use: the iOS Simulator for AI agents</title>
-<meta name="description" content="The fastest, most token-efficient way for an AI agent to use the iOS Simulator. Build and run Xcode projects, read the screen as text, tap by label, run tests. Free and open source, MCP and CLI.">
+<title>simulator-use: the iOS Simulator for coding agents</title>
+<meta name="description" content="Lets Claude Code, Codex, Cursor or any MCP client build your iOS app, read the Simulator's screen as text and tap by label. Free and open source.">
 <link rel="canonical" href="https://simulator-use.dev/">
-<meta name="theme-color" content="#050607">
+<meta name="theme-color" content="#0b0b0c">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://simulator-use.dev/">
-<meta property="og:title" content="simulator-use: the iOS Simulator for AI agents">
-<meta property="og:description" content="A whole screen in about 280 ms and 70 tokens. Build, run, read, tap and test from Claude Code, Codex, Cursor or any MCP client. Free and open source.">
+<meta property="og:title" content="simulator-use: the iOS Simulator for coding agents">
+<meta property="og:description" content="Build your iOS app, read the screen as text, tap by label. A whole screen in about 280 ms and 70 tokens. Free and open source.">
 <meta property="og:image" content="https://simulator-use.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="simulator-use: the iOS Simulator for AI agents">
-<meta name="twitter:description" content="A whole screen in about 280 ms and 70 tokens. Free and open source, MCP and CLI.">
+<meta name="twitter:title" content="simulator-use: the iOS Simulator for coding agents">
+<meta name="twitter:description" content="Build your iOS app, read the screen as text, tap by label. Free and open source.">
 <meta name="twitter:image" content="https://simulator-use.dev/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="/img/phone-0.webp" type="image/webp">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"simulator-use","applicationCategory":"DeveloperApplication","operatingSystem":"macOS","description":"Read and drive the iOS Simulator from any MCP client or the command line: build and run Xcode projects, read the screen as text, tap and type by label, run tests.","url":"https://simulator-use.dev/","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"codeRepository":"https://github.com/NoMac-app/simulator-use","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"}}
 </script>
 <style>
 :root {
-  --bg: #050607;
-  --bg-2: #090b0d;
-  --panel: #0c0f12;
-  --panel-2: #11151a;
-  --line: rgba(255, 255, 255, 0.07);
-  --line-2: rgba(255, 255, 255, 0.13);
-  --text: #edeef0;
-  --muted: #9ba3ad;
-  --faint: #5f6873;
-  --accent: #3b9eff;
-  --accent-soft: rgba(59, 158, 255, 0.14);
-  --mint: #5ff2b4;
-  --amber: #ffc46b;
-  --violet: #a58bff;
-  --radius: 14px;
-  --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --bg: #0b0b0c;
+  --surface: #121214;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --muted: #a1a1a6;
+  --faint: #6e6e73;
+  --accent: #0a84ff;
+  --green: #30d158;
+  --amber: #ffd60a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-body {
-  margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans);
-  -webkit-font-smoothing: antialiased; overflow-x: hidden;
-}
-a { color: inherit; text-decoration: none; }
-code, pre, .mono { font-family: var(--mono); }
-.icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-.wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, pre, kbd { font-family: var(--mono); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
 @media (max-width: 640px) { .wrap { padding: 0 16px; } }
+.i { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-/* Backdrop: a faint grid fading out, and two cold lights. */
-.backdrop { position: absolute; inset: 0 0 auto 0; height: 1100px; pointer-events: none; overflow: hidden; z-index: 0; }
-.backdrop::before {
-  content: ""; position: absolute; inset: 0;
-  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 56px 56px; background-position: center top;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 20%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 20%, transparent 75%);
-  opacity: 0.55;
-}
-.backdrop::after {
-  content: ""; position: absolute; left: 50%; top: -280px; width: 1200px; height: 760px; transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(59, 158, 255, 0.22), transparent 70%), radial-gradient(closest-side at 70% 60%, rgba(165, 139, 255, 0.12), transparent 70%);
-  filter: blur(10px);
-}
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
+.name { font: 600 15px var(--mono); text-decoration: none; letter-spacing: -0.01em; }
+header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+header nav a { color: var(--muted); text-decoration: none; }
+header nav a:hover { color: var(--text); }
 
-/* Header */
-header.top { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(140%) blur(14px); -webkit-backdrop-filter: saturate(140%) blur(14px); background: rgba(5, 6, 7, 0.72); border-bottom: 1px solid var(--line); }
-header.top .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
-.brand .mark { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: linear-gradient(160deg, #1b2733, #0d1218); border: 1px solid var(--line-2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
-.brand .mark svg { width: 15px; height: 15px; color: var(--accent); }
-nav.links { display: flex; gap: 22px; margin-left: auto; align-items: center; font-size: 14px; color: var(--muted); }
-nav.links a:hover { color: var(--text); }
-nav.links .gh { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--text); }
-nav.links .gh:hover { border-color: rgba(255,255,255,0.28); }
-nav.links .gh svg { width: 16px; height: 16px; }
-@media (max-width: 720px) { nav.links .hide-sm { display: none; } }
-
-/* Hero */
-.hero { position: relative; z-index: 1; padding: 88px 0 40px; text-align: center; }
-.pill { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 8px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.025); font-size: 13px; color: var(--muted); }
-.pill .tag { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-.pill a { color: var(--text); }
-h1 { font-size: clamp(42px, 7.2vw, 88px); line-height: 0.98; letter-spacing: -0.045em; font-weight: 600; margin: 26px auto 22px; max-width: 13ch; }
-h1 .dim { background: linear-gradient(180deg, #fff 10%, #8b96a3); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 680px; margin: 0 auto; line-height: 1.55; }
-.lead b { color: var(--text); font-weight: 500; }
-.cta { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
-.cmd { display: inline-flex; align-items: center; gap: 12px; max-width: 100%; padding: 12px 12px 12px 18px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-2); font: 500 14px var(--mono); color: var(--text); box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 20px 50px -20px rgba(59,158,255,0.35); }
+.hero { padding: 88px 0 0; }
+h1 { font-size: clamp(36px, 5.4vw, 56px); line-height: 1.06; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 20px; max-width: 16ch; }
+.lead { font-size: 19px; color: var(--muted); max-width: 560px; margin: 0; line-height: 1.5; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 32px; }
+.cmd { display: flex; align-items: center; gap: 12px; max-width: 100%; min-width: 0; padding: 10px 10px 10px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); font: 14px var(--mono); }
+.cmd span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cmd .p { color: var(--faint); }
-.cmd span.t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.copy { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.03); color: var(--muted); cursor: pointer; flex: none; transition: color .15s, border-color .15s; }
-.copy:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
-.copy.done { color: var(--mint); border-color: rgba(95,242,180,0.4); }
-.copy svg { width: 15px; height: 15px; }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; font-weight: 500; font-size: 15px; border: 1px solid var(--line-2); color: var(--text); }
-.btn:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.03); }
-.btn svg { width: 16px; height: 16px; }
-.under { margin-top: 16px; font-size: 13px; color: var(--faint); }
-.under a { color: var(--muted); border-bottom: 1px solid var(--line-2); }
+.copy { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: var(--faint); cursor: pointer; flex: none; }
+.copy:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.copy.done { color: var(--green); }
+.link { display: inline-flex; align-items: center; gap: 6px; color: var(--text); text-decoration: none; font-size: 15px; }
+.link:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-/* Demo stage: the phone and what the agent reads */
-.stage { position: relative; z-index: 1; text-align: left; margin: 56px auto 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: center; max-width: 1040px; padding: 28px; border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(17,21,26,0.85), rgba(9,11,13,0.9)); box-shadow: 0 50px 120px -40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.04); }
-.stage::before { content: ""; position: absolute; inset: -1px; border-radius: 24px; padding: 1px; background: linear-gradient(140deg, rgba(59,158,255,0.5), transparent 30%, transparent 70%, rgba(165,139,255,0.35)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-@media (max-width: 860px) { .stage { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 18px; } }
+/* The demo: a real Simulator, and what the agent reads from it */
+.demo { margin-top: 64px; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: center; padding: 40px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+@media (max-width: 820px) { .demo { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 24px 16px; gap: 28px; } }
+.phone { position: relative; width: 300px; max-width: 78vw; aspect-ratio: 600 / 1199; }
+.phone img { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .35s ease; }
+.phone img + img { opacity: 0; }
+.phone img.on { opacity: 1; }
+/* The screen inside Apple's bezel, in the frame's own proportions; boxes are placed in points (402 x 874). */
+.scr { position: absolute; left: 6.054%; top: 2.189%; width: 88.004%; height: 95.847%; }
+.hl { position: absolute; border: 2px solid var(--accent); border-radius: 10px; opacity: 0; transition: opacity .2s, left .25s, top .25s, width .25s, height .25s; pointer-events: none; }
+.hl.show { opacity: 1; }
+.tap { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(10, 132, 255, 0.35); opacity: 0; pointer-events: none; }
+.tap.go { animation: tap .5s ease-out; }
+@keyframes tap { from { opacity: 1; transform: scale(.5); } to { opacity: 0; transform: scale(1.6); } }
 
-.phone { --s: 0.62; width: calc(402px * var(--s) + 20px); height: calc(874px * var(--s) + 20px); padding: 10px; border-radius: 52px; background: linear-gradient(145deg, #2a2f35, #0d0f12 40%, #1c2025); box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 60px -20px rgba(0,0,0,0.8), inset 0 0 0 2px #050607; position: relative; }
-@media (max-width: 420px) { .phone { --s: 0.56; } }
-.screen { width: calc(402px * var(--s)); height: calc(874px * var(--s)); border-radius: 43px; overflow: hidden; position: relative; background: #000; }
-.pts { position: absolute; left: 0; top: 0; width: 402px; height: 874px; transform: scale(var(--s)); transform-origin: 0 0; font-family: -apple-system, "SF Pro Text", var(--sans); color: #fff; }
-.pts .island { position: absolute; left: 138px; top: 11px; width: 126px; height: 37px; border-radius: 20px; background: #000; box-shadow: 0 0 0 1px #111; z-index: 3; }
-.pts .sb { position: absolute; top: 17px; left: 46px; right: 38px; display: flex; justify-content: space-between; font-weight: 600; font-size: 17px; }
-.pts .sb .r { display: flex; gap: 6px; align-items: center; }
-.pts .sb .bat { width: 27px; height: 13px; border-radius: 4px; border: 1.5px solid rgba(255,255,255,0.5); position: relative; }
-.pts .sb .bat::after { content: ""; position: absolute; inset: 1.5px; border-radius: 2px; background: #fff; }
-.pts .title { position: absolute; left: 20px; top: 98px; font-size: 34px; font-weight: 700; letter-spacing: 0.01em; }
-.pts .field { position: absolute; left: 20px; width: 362px; height: 44px; border-radius: 10px; background: #1c1c1e; display: flex; align-items: center; padding: 0 14px; font-size: 17px; color: #8e8e93; }
-.pts .field.on { color: #fff; }
-.pts .field .caret { width: 2px; height: 22px; background: var(--accent); margin-left: 1px; animation: blink 1s steps(1) infinite; display: none; }
-.pts .field.typing .caret { display: inline-block; }
+.term { width: 100%; min-width: 0; }
+.term .top { display: flex; justify-content: space-between; font: 12px var(--mono); color: var(--faint); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.term pre { margin: 0; padding-top: 14px; min-height: 340px; font-size: 13px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; color: #c7c7cc; }
+@media (max-width: 640px) { .term pre { font-size: 12px; min-height: 300px; } }
+.ln { display: block; padding: 0 6px; margin: 0 -6px; border-radius: 5px; }
+.ln.on { background: rgba(10, 132, 255, 0.14); }
+.pr { color: var(--faint); }
+.cm { color: var(--text); }
+.k { color: var(--muted); }
+.s { color: var(--text); }
+.id { color: #64a8ff; }
+.st { color: var(--amber); }
+.at, .nt { color: var(--faint); }
+.ok { color: var(--green); }
+.cur { display: inline-block; width: 7px; height: 14px; background: var(--muted); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-.pts .row { position: absolute; left: 20px; width: 362px; top: 282px; height: 32px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; }
-.pts .switch { width: 51px; height: 31px; border-radius: 16px; background: #39393d; position: relative; margin-right: 15px; }
-.pts .switch::after { content: ""; position: absolute; left: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
-.pts .button { position: absolute; left: 20px; top: 325px; width: 362px; height: 50px; border-radius: 12px; background: #0a84ff; display: grid; place-items: center; font-size: 17px; font-weight: 600; transition: filter .15s, transform .15s; }
-.pts .button.press { filter: brightness(0.75); transform: scale(0.985); }
-.pts .status { position: absolute; left: 0; right: 0; top: 390px; text-align: center; font-size: 17px; color: #8e8e93; transition: color .3s; }
-.pts .status.ok { color: #30d158; }
-.pts .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 83px; background: rgba(28,28,30,0.92); border-top: 0.5px solid rgba(255,255,255,0.12); }
-.pts .tab { position: absolute; top: 7px; width: 80px; margin-left: -40px; display: grid; justify-items: center; gap: 3px; font-size: 10px; color: #8e8e93; }
-.pts .tab.sel { color: #0a84ff; }
-.pts .tab i { width: 26px; height: 22px; border-radius: 6px; border: 2px solid currentColor; display: block; }
-.pts .home { position: absolute; bottom: 8px; left: 134px; width: 134px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.85); }
-.pts .hl { position: absolute; border: 2.5px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 6px rgba(59,158,255,0.18), 0 0 30px rgba(59,158,255,0.35); opacity: 0; transition: opacity .2s, left .25s, top .25s, width .25s, height .25s; z-index: 5; pointer-events: none; }
-.pts .hl.show { opacity: 1; }
-.pts .hl b { position: absolute; left: -2px; bottom: calc(100% + 6px); font: 600 17px var(--mono); padding: 3px 9px; border-radius: 8px; background: var(--accent); color: #031222; white-space: nowrap; }
-.pts .tap { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: rgba(255,255,255,0.35); z-index: 6; opacity: 0; transform: scale(0.4); pointer-events: none; }
-.pts .tap.go { animation: tap .55s ease-out; }
-@keyframes tap { 0% { opacity: 0.9; transform: scale(0.4); } 100% { opacity: 0; transform: scale(1.5); } }
 
-.term { min-width: 0; width: 100%; border-radius: 16px; border: 1px solid var(--line-2); background: #07090b; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
-.term .bar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--mono); color: var(--faint); }
-.term .bar i { width: 10px; height: 10px; border-radius: 50%; background: #23282e; display: block; }
-.term .bar span { margin-left: 8px; }
-.term .bar .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
-.term .bar .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); }
-.term pre { margin: 0; padding: 16px 18px 18px; min-height: 360px; font-size: 13.2px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; color: #c9d1d9; }
-@media (max-width: 640px) { .term pre { font-size: 12px; min-height: 330px; } }
-.term .ln { display: block; border-radius: 6px; padding: 0 6px; margin: 0 -6px; transition: background .15s; }
-.term .ln[data-el] { cursor: default; }
-.term .ln.on { background: rgba(59,158,255,0.12); }
-.term .prompt { color: var(--accent); }
-.term .cmdt { color: #fff; }
-.term .k { color: var(--muted); }
-.term .s { color: #fff; }
-.term .id { color: var(--accent); }
-.term .st { color: var(--amber); }
-.term .at { color: var(--faint); }
-.term .ok { color: var(--mint); }
-.term .note { color: var(--faint); }
-.term .cur { display: inline-block; width: 8px; height: 15px; background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 28px; border-top: 1px solid var(--line); }
+.facts div { padding: 18px 16px 0 0; }
+.facts b { display: block; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.facts span { color: var(--muted); font-size: 14px; }
+@media (max-width: 720px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* Sections */
-section { position: relative; z-index: 1; padding: 110px 0 0; }
-.eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 500 12.5px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-h2 { font-size: clamp(30px, 4.4vw, 50px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 600; margin: 14px 0 14px; max-width: 20ch; }
-.sub { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0; }
-.sub b { color: var(--text); font-weight: 500; }
+section { padding-top: 104px; }
+h2 { font-size: 28px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 10px; }
+.sub { color: var(--muted); max-width: 600px; margin: 0; }
+.sub code, .fine code, td code { font-size: 0.9em; color: var(--text); }
+.fine { color: var(--faint); font-size: 13px; margin: 16px 0 0; max-width: 720px; }
+.fine a { color: var(--muted); }
 
-/* Stats */
-.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 72px; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--line); gap: 1px; position: relative; z-index: 1; }
-.stat { background: var(--bg-2); padding: 26px 22px 24px; }
-.stat .n { font: 600 clamp(30px, 3.4vw, 42px)/1 var(--sans); letter-spacing: -0.04em; display: flex; align-items: baseline; gap: 4px; }
-.stat .n small { font-size: 0.5em; color: var(--muted); font-weight: 500; letter-spacing: -0.01em; }
-.stat .l { margin-top: 12px; font-size: 14px; color: var(--muted); line-height: 1.45; }
-.stat .l em { font-style: normal; color: var(--faint); display: block; font-size: 12.5px; margin-top: 4px; font-family: var(--mono); }
-.stat .grad { background: linear-gradient(180deg, #fff, #9fc7ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-@media (max-width: 980px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat:last-child { grid-column: span 2; } }
+.bench { margin-top: 32px; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.row .what { font-size: 15px; }
+.row .what code { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.bars { display: grid; gap: 7px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 14px; align-items: center; font: 12.5px var(--mono); }
+.bar i { display: block; height: 8px; border-radius: 4px; width: 0; transition: width 1s cubic-bezier(.2,.8,.2,1); }
+.bar.us i { background: var(--text); }
+.bar.them i { background: #3a3a3e; }
+.bar span { color: var(--faint); white-space: nowrap; }
+.bar.us span { color: var(--text); }
+@media (max-width: 720px) { .row { grid-template-columns: minmax(0, 1fr); gap: 10px; } .bar { grid-template-columns: minmax(0, 1fr) 118px; } }
 
-/* Benchmarks */
-.bench { margin-top: 48px; display: grid; gap: 14px; }
-.bm { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; align-items: center; padding: 20px 22px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-2); }
-.bm h3 { margin: 0; font-size: 15px; font-weight: 500; }
-.bm h3 small { display: block; margin-top: 4px; color: var(--faint); font: 400 12.5px var(--mono); }
-.bars { display: grid; gap: 10px; }
-.br { display: grid; grid-template-columns: minmax(0, 1fr) 76px; gap: 14px; align-items: center; font: 500 13px var(--mono); }
-.br .track { height: 26px; border-radius: 7px; background: rgba(255,255,255,0.025); position: relative; overflow: hidden; }
-.br .fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 7px; display: flex; align-items: center; padding-left: 10px; white-space: nowrap; font-size: 12px; transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
-.br.us .fill { background: linear-gradient(90deg, #1d74d8, var(--accent)); color: #fff; box-shadow: 0 0 24px rgba(59,158,255,0.35); }
-.br.them .fill { background: rgba(255,255,255,0.09); color: var(--muted); }
-.br .v { text-align: right; color: var(--muted); }
-.br.us .v { color: var(--text); }
-.bm .x { font: 600 13px var(--mono); color: var(--mint); }
-.legend { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 22px; font-size: 13px; color: var(--muted); }
-.legend span { display: inline-flex; align-items: center; gap: 8px; }
-.legend i { width: 14px; height: 8px; border-radius: 3px; display: block; }
-.fine { margin-top: 14px; font-size: 13px; color: var(--faint); max-width: 860px; }
-.fine a { color: var(--muted); border-bottom: 1px solid var(--line-2); }
-@media (max-width: 760px) { .bm { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
+table { width: 100%; border-collapse: collapse; margin-top: 28px; font-size: 14.5px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 13px; padding: 0 0 10px; border-bottom: 1px solid var(--line); }
+td { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+td:first-child { color: var(--text); }
+th.n, td.n { text-align: right; font-family: var(--mono); font-size: 13px; width: 90px; }
+tfoot td { color: var(--text); font-weight: 500; border-bottom: 0; }
 
-/* Golden tasks */
-.golden { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: stretch; }
-@media (max-width: 900px) { .golden { grid-template-columns: minmax(0, 1fr); } }
-.tbl { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--bg-2); }
-.tbl table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.tbl th { text-align: left; font: 500 12px var(--mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); padding: 14px 18px; border-bottom: 1px solid var(--line); }
-.tbl td { padding: 11px 18px; border-bottom: 1px solid var(--line); color: var(--muted); }
-.tbl tr:last-child td { border-bottom: 0; }
-.tbl td:first-child { color: var(--text); }
-.tbl td.n, .tbl th.n { text-align: right; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
-.tbl td .pass { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: rgba(95,242,180,0.12); color: var(--mint); align-items: center; justify-content: center; margin-right: 10px; vertical-align: -4px; }
-.tbl td .pass svg { width: 12px; height: 12px; stroke-width: 3; }
-.tbl tfoot td { color: var(--text); font-weight: 500; background: rgba(255,255,255,0.02); }
-@media (max-width: 560px) { .tbl td, .tbl th { padding: 10px 12px; } .tbl td .pass { display: none; } }
-.score { border: 1px solid var(--line); border-radius: var(--radius); background: radial-gradient(120% 80% at 50% 0%, rgba(59,158,255,0.16), transparent 60%), var(--bg-2); padding: 28px 26px; display: flex; flex-direction: column; gap: 22px; }
-.score .big { font: 600 64px/1 var(--sans); letter-spacing: -0.05em; }
-.score .big small { font-size: 28px; color: var(--muted); }
-.score .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.score .row2 div { border-top: 1px solid var(--line); padding-top: 12px; }
-.score .row2 b { display: block; font: 600 26px var(--sans); letter-spacing: -0.03em; }
-.score .row2 span, .score p { color: var(--muted); font-size: 13.5px; margin: 0; }
-.score code { font-size: 12.5px; color: var(--text); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 6px; }
+.tools { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; border-top: 1px solid var(--line); }
+.tools div { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.tools code { font-size: 14px; color: var(--text); }
+.tools p { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
+@media (max-width: 720px) { .tools { grid-template-columns: minmax(0, 1fr); } }
 
-/* Tools */
-.tools { margin-top: 44px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
-.tool { background: var(--bg-2); padding: 22px 20px 24px; transition: background .2s; }
-.tool:hover { background: var(--panel-2); }
-.tool .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: rgba(255,255,255,0.04); border: 1px solid var(--line); color: var(--accent); }
-.tool .ic svg { width: 18px; height: 18px; }
-.tool h3 { margin: 16px 0 6px; font: 500 14.5px var(--mono); }
-.tool p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-@media (max-width: 980px) { .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .tools { grid-template-columns: minmax(0, 1fr); } }
-
-/* Install */
-.install { margin-top: 40px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--panel); overflow: hidden; }
-.tabsbar { display: flex; gap: 2px; padding: 8px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-.tabsbar button { font: 500 13.5px var(--sans); color: var(--muted); background: none; border: 0; padding: 8px 14px; border-radius: 9px; cursor: pointer; white-space: nowrap; }
-.tabsbar button[aria-selected="true"] { background: rgba(255,255,255,0.06); color: var(--text); }
+.install { margin-top: 28px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.tabs { display: flex; gap: 20px; padding: 0 18px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { font: 14px var(--sans); color: var(--faint); background: none; border: 0; padding: 13px 0 11px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
 .pane { display: none; position: relative; }
 .pane.on { display: block; }
-.pane pre { margin: 0; padding: 22px 64px 22px 22px; font-size: 13.5px; line-height: 1.7; overflow-x: auto; color: #d6dde5; }
-.pane pre .c { color: var(--faint); }
-@media (max-width: 640px) { .pane pre { white-space: pre-wrap; word-break: break-word; font-size: 12.5px; } .card pre { font-size: 12px; } .card pre .c.side { display: none; } }
-.pane .copy { position: absolute; right: 14px; top: 14px; }
-.reqs { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 16px; font-size: 13.5px; color: var(--muted); }
-.reqs span { display: inline-flex; align-items: center; gap: 8px; }
-.reqs svg { width: 15px; height: 15px; color: var(--mint); stroke-width: 2.5; }
+.pane pre { margin: 0; padding: 18px 56px 18px 18px; font-size: 13.5px; line-height: 1.7; overflow-x: auto; }
+.pane .copy { position: absolute; right: 10px; top: 12px; }
+.c { color: var(--faint); }
+@media (max-width: 640px) { .pane pre { white-space: pre-wrap; word-break: break-word; font-size: 12.5px; } .cloud pre .side { display: none; } }
 
-/* Cloud */
-.cloud { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; }
-@media (max-width: 900px) { .cloud { grid-template-columns: minmax(0, 1fr); } }
-.card { border: 1px solid var(--line); border-radius: 18px; background: var(--bg-2); padding: 26px; }
-.card pre { margin: 0; font-size: 13.2px; line-height: 1.85; overflow-x: auto; color: #d6dde5; }
-.card pre .c { color: var(--faint); }
-.card pre .p { color: var(--accent); }
-.facts { display: grid; gap: 0; }
-.fact { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.fact:first-child { padding-top: 0; }
-.fact:last-of-type { border-bottom: 0; }
-.fact .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
-.fact .ic svg { width: 17px; height: 17px; }
-.fact b { display: block; font-weight: 500; }
-.fact span { color: var(--muted); font-size: 14px; }
-.cloud .btn { margin-top: 18px; background: #fff; color: #050607; border-color: #fff; }
-.cloud .btn:hover { background: #dfe7f0; }
+.cloud { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.cloud pre { margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 13px; line-height: 1.8; overflow-x: auto; }
+.cloud ul { margin: 0; padding: 0; list-style: none; }
+.cloud li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+.cloud li:first-child { padding-top: 0; }
+.cloud li b { color: var(--text); font-weight: 500; }
+.cloud .link { margin-top: 18px; }
+@media (max-width: 820px) { .cloud { grid-template-columns: minmax(0, 1fr); } }
 
-/* How it works */
-.flow { margin-top: 44px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; align-items: stretch; }
-.node { position: relative; border: 1px solid var(--line); border-radius: 16px; background: var(--bg-2); padding: 20px; margin-right: 34px; }
-.node:last-child { margin-right: 0; }
-.node:not(:last-child)::after { content: ""; position: absolute; right: -35px; top: 50%; width: 34px; height: 1px; background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 12px); background-size: 24px 1px; animation: flow 1.2s linear infinite; }
-@keyframes flow { to { background-position: 24px 0; } }
-.node .k { font: 500 12px var(--mono); color: var(--faint); letter-spacing: 0.06em; text-transform: uppercase; }
-.node h3 { margin: 8px 0 6px; font-size: 16px; font-weight: 500; }
-.node p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
-.node.hot { border-color: rgba(59,158,255,0.45); background: linear-gradient(180deg, rgba(59,158,255,0.10), var(--bg-2)); }
-@media (max-width: 900px) { .flow { grid-template-columns: minmax(0, 1fr); gap: 26px; } .node { margin-right: 0; } .node:not(:last-child)::after { right: auto; left: 50%; top: auto; bottom: -27px; width: 1px; height: 26px; background: repeating-linear-gradient(180deg, var(--accent) 0 6px, transparent 6px 12px); animation: none; } }
-
-/* Closing */
-.closing { margin: 120px 0 0; padding: 72px 28px; text-align: center; border-radius: 28px; border: 1px solid var(--line); background: radial-gradient(70% 90% at 50% 0%, rgba(59,158,255,0.18), transparent 70%), var(--bg-2); position: relative; z-index: 1; }
-.closing h2 { margin: 0 auto 16px; max-width: 18ch; }
-.closing .sub { margin: 0 auto; }
-footer { padding: 56px 0 48px; color: var(--faint); font-size: 13.5px; position: relative; z-index: 1; }
-footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
-footer nav { margin-left: auto; display: flex; gap: 20px; flex-wrap: wrap; }
+footer { margin-top: 120px; border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--faint); font-size: 13.5px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+footer nav { margin-left: auto; display: flex; gap: 20px; }
+footer a { color: var(--muted); text-decoration: none; }
 footer a:hover { color: var(--text); }
 
-.reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
-.reveal.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .reveal { opacity: 1; transform: none; }
-}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-<symbol id="i-app-window" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/> <path d="M10 4v4"/> <path d="M2 8h20"/> <path d="M6 4v4"/></symbol>
-<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/> <path d="m12 5 7 7-7 7"/></symbol>
-<symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10"/> <path d="M7 17 17 7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-<symbol id="i-circle-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/> <path d="m15 9-6 6"/> <path d="m9 9 6 6"/></symbol>
-<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
-<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
-<symbol id="i-cpu" viewBox="0 0 24 24"><path d="M12 20v2"/> <path d="M12 2v2"/> <path d="M17 20v2"/> <path d="M17 2v2"/> <path d="M2 12h2"/> <path d="M2 17h2"/> <path d="M2 7h2"/> <path d="M20 12h2"/> <path d="M20 17h2"/> <path d="M20 7h2"/> <path d="M7 20v2"/> <path d="M7 2v2"/> <rect x="4" y="4" width="16" height="16" rx="2"/> <rect x="8" y="8" width="8" height="8" rx="1"/></symbol>
-<symbol id="i-flask-conical" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/> <path d="M6.453 15h11.094"/> <path d="M8.5 2h7"/></symbol>
-<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/> <path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
-<symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
-<symbol id="i-hammer" viewBox="0 0 24 24"><path d="m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9"/> <path d="m18 15 4-4"/> <path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/></symbol>
-<symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/> <path d="M5 2h14"/> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></symbol>
-<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
-<symbol id="i-list-tree" viewBox="0 0 24 24"><path d="M8 5h13"/> <path d="M13 12h8"/> <path d="M13 19h8"/> <path d="M3 10a2 2 0 0 0 2 2h3"/> <path d="M3 5v12a2 2 0 0 0 2 2h3"/></symbol>
-<symbol id="i-monitor-smartphone" viewBox="0 0 24 24"><path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/> <path d="M10 19v-3.96 3.15"/> <path d="M7 19h5"/> <rect width="6" height="10" x="16" y="12" rx="2"/></symbol>
-<symbol id="i-npm" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z"/></symbol>
-<symbol id="i-pointer" viewBox="0 0 24 24"><path d="M22 14a8 8 0 0 1-8 8"/> <path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/> <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"/> <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"/> <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
-<symbol id="i-scan-text" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/> <path d="M17 3h2a2 2 0 0 1 2 2v2"/> <path d="M21 17v2a2 2 0 0 1-2 2h-2"/> <path d="M7 21H5a2 2 0 0 1-2-2v-2"/> <path d="M7 8h8"/> <path d="M7 12h10"/> <path d="M7 16h6"/></symbol>
-<symbol id="i-scroll-text" viewBox="0 0 24 24"><path d="M15 12h-5"/> <path d="M15 8h-5"/> <path d="M19 17V5a2 2 0 0 0-2-2H4"/> <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></symbol>
-<symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/> <path d="M12 18h.01"/></symbol>
-<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/> <path d="M20 2v4"/> <path d="M22 4h-4"/> <circle cx="4" cy="20" r="2"/></symbol>
-<symbol id="i-tablet-smartphone" viewBox="0 0 24 24"><rect width="10" height="14" x="3" y="8" rx="2"/> <path d="M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4"/> <path d="M8 18h.01"/></symbol>
-<symbol id="i-terminal" viewBox="0 0 24 24"><path d="M12 19h8"/> <path d="m4 17 6-6-6-6"/></symbol>
-<symbol id="i-video" viewBox="0 0 24 24"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/> <rect x="2" y="6" width="14" height="12" rx="2"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
 </svg>
-<div class="backdrop" aria-hidden="true"></div>
 
-<header class="top">
+<header>
   <div class="wrap">
-    <a class="brand" href="/" aria-label="simulator-use home"><span class="mark"><svg class="icon"><use href="#i-smartphone"/></svg></span>simulator-use</a>
-    <nav class="links">
-      <a class="hide-sm" href="#benchmarks">Benchmarks</a>
-      <a class="hide-sm" href="#tools">Tools</a>
-      <a class="hide-sm" href="#cloud">Cloud</a>
-      <a href="#install">Install</a>
-      <a class="gh" href="https://github.com/NoMac-app/simulator-use"><svg><use href="#i-github"/></svg>GitHub</a>
-    </nav>
+    <a class="name" href="/">simulator-use</a>
+    <nav><a href="#install">Install</a><a href="https://github.com/NoMac-app/simulator-use#readme">Docs</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
   </div>
 </header>
 
-<main>
+<main class="wrap">
   <div class="hero">
-    <div class="wrap">
-      <span class="pill"><span class="tag" id="ver">v0.12.0</span>Free and open source, MIT</span>
-      <h1><span class="dim">The iOS Simulator, built for agents.</span></h1>
-      <p class="lead">simulator-use gives Claude Code, Codex, Cursor and any MCP client a phone. It builds and runs your Xcode project, <b>reads the screen as a few lines of text</b>, taps and types by label, and runs your tests case by case.</p>
-      <div class="cta">
-        <div class="cmd"><span class="t"><span class="p">$ </span>claude mcp add simulator-use -- npx -y simulator-use mcp</span><button class="copy" data-copy="claude mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy the command"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-        <a class="btn" href="https://github.com/NoMac-app/simulator-use#readme">Read the docs<svg class="icon"><use href="#i-arrow-right"/></svg></a>
-      </div>
-      <p class="under">On any Mac with Xcode. No Mac? <a href="#cloud">The same tools on a cloud iPhone</a>.</p>
-
-      <div class="stage" id="demo" aria-label="A phone and the text an agent reads from it">
-        <div class="phone" aria-hidden="true">
-          <div class="screen">
-            <div class="pts" id="pts">
-              <div class="island"></div>
-              <div class="sb"><span>9:41</span><span class="r"><span class="bat"></span></span></div>
-              <div class="title">Sign In</div>
-              <div class="field" id="f-email" style="top:172px"><span class="v">Email</span><span class="caret"></span></div>
-              <div class="field" id="f-password" style="top:224px"><span class="v">Password</span><span class="caret"></span></div>
-              <div class="row"><span>Remember me</span><span class="switch"></span></div>
-              <div class="button" id="f-signIn">Sign In</div>
-              <div class="status" id="f-status">Not signed in</div>
-              <div class="tabs"><div class="tab sel" style="left:158px"><i></i>Login</div><div class="tab" style="left:244px"><i></i>Items</div></div>
-              <div class="home"></div>
-              <div class="hl" id="hl"><b></b></div>
-              <div class="tap" id="tap"></div>
-            </div>
-          </div>
-        </div>
-        <div class="term">
-          <div class="bar"><i></i><i></i><i></i><span>agent ↔ simulator-use</span><span class="live">MCP</span></div>
-          <pre id="out" aria-live="off"></pre>
-        </div>
-      </div>
+    <h1>The iOS Simulator for coding agents.</h1>
+    <p class="lead">Claude Code, Codex, Cursor or any MCP client builds your app, reads the screen as text and taps by label. Free and open source.</p>
+    <div class="actions">
+      <div class="cmd"><span><span class="p">$ </span>claude mcp add simulator-use -- npx -y simulator-use mcp</span><button class="copy" data-copy="claude mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <a class="link" href="https://github.com/NoMac-app/simulator-use">View on GitHub<svg class="i"><use href="#i-arrow"/></svg></a>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="stats reveal">
-      <div class="stat"><div class="n"><span class="grad">280</span><small>ms</small></div><div class="l">to read a whole screen<em>5x a helper per call</em></div></div>
-      <div class="stat"><div class="n"><span class="grad">&lt;1</span><small>ms</small></div><div class="l">to send a tap<em>2 to 3 s a helper per call</em></div></div>
-      <div class="stat"><div class="n"><span class="grad">70</span><small>tokens</small></div><div class="l">for a sign-in screen<em>its raw tree: 40,000</em></div></div>
-      <div class="stat"><div class="n"><span class="grad">12/12</span></div><div class="l">golden tasks passed<em>808 tokens read in all</em></div></div>
-      <div class="stat"><div class="n"><span class="grad" id="dl" data-fallback="846">846</span></div><div class="l">npm downloads last week<em id="dlr">live from npm</em></div></div>
+  <div class="demo" id="demo">
+    <div class="phone" aria-label="The demo app on an iPhone 17 Pro Simulator">
+      <img src="/img/phone-0.webp" alt="" class="on" width="600" height="1199">
+      <img src="/img/phone-1.webp" alt="" width="600" height="1199" loading="lazy">
+      <img src="/img/phone-2.webp" alt="" width="600" height="1199" loading="lazy">
+      <img src="/img/phone-3.webp" alt="" width="600" height="1199" loading="lazy">
+      <div class="scr"><div class="hl" id="hl"></div><div class="tap" id="tap"></div></div>
+    </div>
+    <div class="term">
+      <div class="top"><span>what the agent reads</span><span>MCP</span></div>
+      <pre id="out"></pre>
     </div>
   </div>
 
-  <section id="benchmarks">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-gauge"/></svg>Benchmarks</span>
-      <h2 class="reveal">Its own engine, so a call takes milliseconds.</h2>
-      <p class="sub reveal">A tool that starts a helper process for every call opens and closes iOS's automation session each time. simulator-use keeps one native engine per Simulator, with its input, accessibility session and screen buffer open. <b>Same tools, same phone, engine on and off.</b></p>
-      <div class="bench" id="bench">
-        <div class="bm reveal"><h3>Read the screen<small>ui_look</small></h3><div class="bars">
-          <div class="br us"><div class="track"><div class="fill" data-w="19">engine</div></div><div class="v">0.28 s</div></div>
-          <div class="br them"><div class="track"><div class="fill" data-w="100">a helper per call</div></div><div class="v">1.45 s</div></div></div></div>
-        <div class="bm reveal"><h3>Read it with a screenshot<small>ui_look screenshot</small></h3><div class="bars">
-          <div class="br us"><div class="track"><div class="fill" data-w="22">engine</div></div><div class="v">0.35 s</div></div>
-          <div class="br them"><div class="track"><div class="fill" data-w="100">a helper per call</div></div><div class="v">1.62 s</div></div></div></div>
-        <div class="bm reveal"><h3>Tap, wait for the screen, read what changed<small>ui_act tap "Settings"</small></h3><div class="bars">
-          <div class="br us"><div class="track"><div class="fill" data-w="26">engine</div></div><div class="v">1.58 s</div></div>
-          <div class="br them"><div class="track"><div class="fill" data-w="100">a helper per call</div></div><div class="v">5.97 s</div></div></div></div>
-        <div class="bm reveal"><h3>Send one tap<small>the input alone</small></h3><div class="bars">
-          <div class="br us"><div class="track"><div class="fill" data-w="1.2">&nbsp;</div></div><div class="v">&lt;1 ms</div></div>
-          <div class="br them"><div class="track"><div class="fill" data-w="100">a helper per call</div></div><div class="v">2.6 s</div></div></div></div>
-      </div>
-      <div class="legend"><span><i style="background:var(--accent)"></i>simulator-use's engine</span><span><i style="background:rgba(255,255,255,0.18)"></i>the same tool with a helper process per call (AXe 1.8.0)</span></div>
-      <p class="fine">Measured October 21, 2026 on an Apple M6 Mac mini with iOS 27.0: simulator-use's MCP tools over stdio, two to three rounds each, the middle shown; the tap is the input sent, before the app animates. The scripts are in the repo under <a href="https://github.com/NoMac-app/simulator-use/tree/main/native/engine/bench">native/engine/bench</a>.</p>
+  <div class="facts">
+    <div><b>0.28 s</b><span>to read a whole screen</span></div>
+    <div><b>70 tokens</b><span>for that screen</span></div>
+    <div><b>&lt;1 ms</b><span>to send a tap</span></div>
+    <div><b id="dl">846</b><span>npm downloads last week</span></div>
+  </div>
+
+  <section id="speed">
+    <h2>One engine per Simulator.</h2>
+    <p class="sub">It keeps the input, the accessibility session and the screen buffer open. A tool that starts a helper for every call pays for them every time.</p>
+    <div class="bench" id="bench">
+      <div class="row"><div class="what">Read the screen<code>ui_look</code></div><div class="bars"><div class="bar us"><i data-w="19"></i><span>0.28 s</span></div><div class="bar them"><i data-w="100"></i><span>1.45 s per helper</span></div></div></div>
+      <div class="row"><div class="what">Read it with a screenshot<code>ui_look screenshot</code></div><div class="bars"><div class="bar us"><i data-w="22"></i><span>0.35 s</span></div><div class="bar them"><i data-w="100"></i><span>1.62 s per helper</span></div></div></div>
+      <div class="row"><div class="what">Tap, wait, read what changed<code>ui_act tap "Settings"</code></div><div class="bars"><div class="bar us"><i data-w="26"></i><span>1.58 s</span></div><div class="bar them"><i data-w="100"></i><span>5.97 s per helper</span></div></div></div>
+      <div class="row"><div class="what">Send a tap<code>the input alone</code></div><div class="bars"><div class="bar us"><i data-w="1"></i><span>&lt;1 ms</span></div><div class="bar them"><i data-w="100"></i><span>2.6 s per helper</span></div></div></div>
     </div>
+    <p class="fine">The same tools with the engine on and off (off: AXe 1.8.0, one process per call). Apple M6 Mac mini, iOS 27.0, October 21, 2026. Scripts in <a href="https://github.com/NoMac-app/simulator-use/tree/main/native/engine/bench">native/engine/bench</a>.</p>
   </section>
 
   <section id="golden">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-flask-conical"/></svg>Golden tasks</span>
-      <h2 class="reveal">A whole agent run, measured end to end.</h2>
-      <p class="sub reveal">Twelve tasks on the demo app, run the way an agent runs them: the time it waits for each answer and the tokens it reads back. <b>Reproducible from the repo.</b></p>
-      <div class="golden">
-        <div class="tbl reveal"><table>
-          <thead><tr><th>Task</th><th class="n">Seconds</th><th class="n">Tokens</th></tr></thead>
-          <tbody>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>A cloud phone, ready</td><td class="n">2.71</td><td class="n">0</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>The project from git</td><td class="n">5.34</td><td class="n">19</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Build, install and launch in one call</td><td class="n">15.18</td><td class="n">89</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Read the screen</td><td class="n">0.61</td><td class="n">71</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Sign in: fill, tap, wait for "Welcome"</td><td class="n">6.75</td><td class="n">29</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Toggle a switch</td><td class="n">2.75</td><td class="n">14</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Open an item</td><td class="n">4.32</td><td class="n">49</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Back and scroll</td><td class="n">5.59</td><td class="n">138</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>The app's print output</td><td class="n">0.46</td><td class="n">122</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>Find a crash, as file:line</td><td class="n">2.10</td><td class="n">142</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>The tests pass (3 XCTests)</td><td class="n">9.49</td><td class="n">12</td></tr>
-            <tr><td><span class="pass"><svg class="icon"><use href="#i-check"/></svg></span>A wrong password fails loudly</td><td class="n">11.96</td><td class="n">123</td></tr>
-          </tbody>
-          <tfoot><tr><td>All twelve</td><td class="n">67.3</td><td class="n">808</td></tr></tfoot>
-        </table></div>
-        <div class="score reveal">
-          <div><div class="big">808<small> tokens</small></div><p>for everything the agent read across all twelve tasks: less than one raw accessibility tree of a single screen.</p></div>
-          <div class="row2"><div><b>12/12</b><span>passed</span></div><div><b>67 s</b><span>in all</span></div></div>
-          <p>On a NoMac cloud phone, October 24, 2026. Run it yourself: <code>node scripts/golden-cloud.mjs</code></p>
-        </div>
-      </div>
-    </div>
+    <h2>A whole agent run: 67 seconds, 808 tokens.</h2>
+    <p class="sub">Twelve tasks on the demo app, from a fresh phone to a failing sign-in. Rerun it with <code>scripts/golden-cloud.mjs</code>.</p>
+    <table>
+      <thead><tr><th>Task</th><th class="n">Seconds</th><th class="n">Tokens</th></tr></thead>
+      <tbody>
+        <tr><td>A cloud phone, ready</td><td class="n">2.71</td><td class="n">0</td></tr>
+        <tr><td>The project from git</td><td class="n">5.34</td><td class="n">19</td></tr>
+        <tr><td>Build, install and launch</td><td class="n">15.18</td><td class="n">89</td></tr>
+        <tr><td>Read the screen</td><td class="n">0.61</td><td class="n">71</td></tr>
+        <tr><td>Sign in and wait for "Welcome"</td><td class="n">6.75</td><td class="n">29</td></tr>
+        <tr><td>Toggle a switch</td><td class="n">2.75</td><td class="n">14</td></tr>
+        <tr><td>Open an item</td><td class="n">4.32</td><td class="n">49</td></tr>
+        <tr><td>Back and scroll</td><td class="n">5.59</td><td class="n">138</td></tr>
+        <tr><td>The app's print output</td><td class="n">0.46</td><td class="n">122</td></tr>
+        <tr><td>Find a crash as file:line</td><td class="n">2.10</td><td class="n">142</td></tr>
+        <tr><td>Run 3 XCTests</td><td class="n">9.49</td><td class="n">12</td></tr>
+        <tr><td>A wrong password fails loudly</td><td class="n">11.96</td><td class="n">123</td></tr>
+      </tbody>
+      <tfoot><tr><td>12 of 12 passed</td><td class="n">67.3</td><td class="n">808</td></tr></tfoot>
+    </table>
+    <p class="fine">On a NoMac cloud phone, October 24, 2026. Tokens are what the agent reads back.</p>
   </section>
 
   <section id="tools">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-layers"/></svg>Tools</span>
-      <h2 class="reveal">Twelve tools. One list for MCP and the CLI.</h2>
-      <p class="sub reveal">Short descriptions, under 4,000 tokens with the instructions, and every step checked: typed text is read back, a tap that changes nothing is reported, and the first failing step stops the rest.</p>
-      <div class="tools reveal">
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-hammer"/></svg></div><h3>app_run</h3><p>Builds the Xcode project, installs and launches it, answers with the first screen. Errors as file:line.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-scan-text"/></svg></div><h3>ui_look</h3><p>The screen as text: kind, label, #id, state, @x,y. A screenshot or a full-size PNG when asked.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-pointer"/></svg></div><h3>ui_act</h3><p>Taps, fills, scrolls, swipes and waits, in the words ui_look prints, and answers with what changed.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-flask-conical"/></svg></div><h3>tests_run</h3><p>XCTest and XCUITest, each case as it finishes, each failure as file:line. Zero tests is an error.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-app-window"/></svg></div><h3>app_control</h3><p>Install, launch, deep links, permissions, location, push, appearance, locale and a clean status bar.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-scroll-text"/></svg></div><h3>app_logs</h3><p>The app's print output and its log lines, grep and wait_for, and crashes with the crashing thread.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-video"/></svg></div><h3>screen_record</h3><p>A video of the screen, to show a person what happened.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-tablet-smartphone"/></svg></div><h3>devices · device_use</h3><p>The Simulators and Xcodes on the Mac; choose one, boot it, dark mode, a clean status bar.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-hourglass"/></svg></div><h3>job_status</h3><p>A build past 40 s becomes a job: follow it until it ends, with its last lines meanwhile.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-circle-x"/></svg></div><h3>job_cancel</h3><p>Stops a build that is no longer needed.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-cloud"/></svg></div><h3>cloud</h3><p>Moves every tool to a cloud iPhone and back: start, status, extend, stop, and run for CI.</p></div>
-        <div class="tool"><div class="ic"><svg class="icon"><use href="#i-terminal"/></svg></div><h3>the CLI</h3><p>simulator-use look, act, run, test: the same tools from a shell, taught by a skill under 2 KB.</p></div>
-      </div>
+    <h2>Tools</h2>
+    <p class="sub">One list for MCP and the CLI. Every step is checked: typed text is read back, and a tap that changes nothing says so.</p>
+    <div class="tools">
+      <div><code>app_run</code><p>Build, install and launch. Errors as file:line.</p></div>
+      <div><code>ui_look</code><p>The screen as text. A screenshot, or a full-size PNG.</p></div>
+      <div><code>ui_act</code><p>Tap, fill, scroll, swipe, wait. Answers with what changed.</p></div>
+      <div><code>tests_run</code><p>XCTest and XCUITest, case by case.</p></div>
+      <div><code>app_control</code><p>Install, deep links, permissions, location, push, locale.</p></div>
+      <div><code>app_logs</code><p>Print output, system logs and crashes.</p></div>
+      <div><code>screen_record</code><p>A video of the screen.</p></div>
+      <div><code>devices</code>, <code>device_use</code><p>Pick and boot a Simulator.</p></div>
+      <div><code>job_status</code>, <code>job_cancel</code><p>Follow or stop a long build.</p></div>
+      <div><code>cloud</code><p>Run every tool on a cloud iPhone instead.</p></div>
     </div>
   </section>
 
   <section id="install">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-terminal"/></svg>Install</span>
-      <h2 class="reveal">One line in your agent.</h2>
-      <div class="install reveal">
-        <div class="tabsbar" role="tablist">
-          <button role="tab" aria-selected="true" data-pane="p-claude">Claude Code</button>
-          <button role="tab" aria-selected="false" data-pane="p-codex">Codex</button>
-          <button role="tab" aria-selected="false" data-pane="p-json">Cursor, VS Code, Windsurf</button>
-          <button role="tab" aria-selected="false" data-pane="p-cli">Shell</button>
-        </div>
-        <div class="pane on" id="p-claude"><pre>claude mcp add simulator-use -- npx -y simulator-use mcp</pre><button class="copy" data-copy="claude mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-        <div class="pane" id="p-codex"><pre>codex mcp add simulator-use -- npx -y simulator-use mcp</pre><button class="copy" data-copy="codex mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-        <div class="pane" id="p-json"><pre>{
+    <h2>Install</h2>
+    <p class="sub">Needs a Mac with Xcode and Node 20. Nothing leaves your Mac unless you turn on cloud.</p>
+    <div class="install">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-pane="p-claude">Claude Code</button>
+        <button role="tab" aria-selected="false" data-pane="p-codex">Codex</button>
+        <button role="tab" aria-selected="false" data-pane="p-json">Cursor and others</button>
+        <button role="tab" aria-selected="false" data-pane="p-cli">Shell</button>
+      </div>
+      <div class="pane on" id="p-claude"><pre>claude mcp add simulator-use -- npx -y simulator-use mcp</pre><button class="copy" data-copy="claude mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <div class="pane" id="p-codex"><pre>codex mcp add simulator-use -- npx -y simulator-use mcp</pre><button class="copy" data-copy="codex mcp add simulator-use -- npx -y simulator-use mcp" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <div class="pane" id="p-json"><pre>{
   "mcpServers": {
     "simulator-use": { "command": "npx", "args": ["-y", "simulator-use", "mcp"] }
   }
@@ -498,69 +287,40 @@ footer a:hover { color: var(--text); }
   "mcpServers": {
     "simulator-use": { "command": "npx", "args": ["-y", "simulator-use", "mcp"] }
   }
-}' aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-        <div class="pane" id="p-cli"><pre><span class="c"># read the booted Simulator, then act on it</span>
-npx simulator-use look
-npx simulator-use act 'fill #email gary@example.com' 'tap #signIn'</pre><button class="copy" data-copy="npx simulator-use look" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-      </div>
-      <div class="reqs"><span><svg class="icon"><use href="#i-check"/></svg>macOS with Xcode and a Simulator runtime</span><span><svg class="icon"><use href="#i-check"/></svg>Node 20 or newer</span><span><svg class="icon"><use href="#i-check"/></svg>No telemetry: nothing leaves your Mac unless cloud is on</span><span><svg class="icon"><use href="#i-check"/></svg>SwiftUI, UIKit and React Native apps</span></div>
+}' aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <div class="pane" id="p-cli"><pre>npx simulator-use look
+npx simulator-use act 'fill #email gary@example.com' 'tap #signIn'</pre><button class="copy" data-copy="npx simulator-use look" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
     </div>
   </section>
 
   <section id="cloud">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-cloud"/></svg>Cloud</span>
-      <h2 class="reveal">No Mac? The same tools on a cloud iPhone.</h2>
-      <p class="sub reveal">From Linux, Windows, a cloud agent or CI: one command moves every tool to an iPhone Simulator on a Mac with Xcode, run by NoMac. Only the files the phone lacks are sent, and builds stay incremental.</p>
-      <div class="cloud">
-        <div class="card reveal"><pre><span class="p">$</span> npx simulator-use cloud start  <span class="c side"># a phone in seconds</span>
-<span class="p">$</span> npx simulator-use run          <span class="c side"># send, build, launch</span>
-<span class="p">$</span> npx simulator-use look         <span class="c side"># every tool runs there</span>
-<span class="p">$</span> npx simulator-use cloud stop   <span class="c side"># back to this machine</span>
+    <h2>No Mac? Use a cloud iPhone.</h2>
+    <p class="sub">The same tools from Linux, Windows or CI, on an iPhone Simulator run by NoMac.</p>
+    <div class="cloud">
+      <pre>npx simulator-use cloud start
+npx simulator-use run      <span class="c side"># send, build, launch</span>
+npx simulator-use look
+npx simulator-use cloud stop
 
-<span class="c"># CI in one line: build, run, test, screenshot, video</span>
-<span class="p">$</span> npx simulator-use cloud run . --tests</pre></div>
-        <div class="card reveal"><div class="facts">
-          <div class="fact"><div class="ic"><svg class="icon"><use href="#i-gauge"/></svg></div><div><b>$0.80 an hour, by the minute</b><span>Prepaid credit, no subscription. Waiting for a phone is free.</span></div></div>
-          <div class="fact"><div class="ic"><svg class="icon"><use href="#i-monitor-smartphone"/></svg></div><div><b>A link to watch, a link to use</b><span>Hand a person the live phone; every session has a replay for 7 days.</span></div></div>
-          <div class="fact"><div class="ic"><svg class="icon"><use href="#i-github"/></svg></div><div><b>A GitHub Action</b><span>Builds and tests each pull request on a phone and posts the result.</span></div></div>
-        </div>
-        <a class="btn" href="https://nomac.app/simulator?utm_source=simulator-use.dev">Get a cloud iPhone<svg class="icon"><use href="#i-arrow-up-right"/></svg></a></div>
+<span class="c"># CI in one line</span>
+npx simulator-use cloud run . --tests</pre>
+      <div>
+        <ul>
+          <li><b>$0.80 an hour</b>, by the minute. No subscription.</li>
+          <li><b>Only changed files</b> are sent; builds stay incremental.</li>
+          <li><b>A live link</b> to watch the phone, and a replay for 7 days.</li>
+          <li><b>A GitHub Action</b> that tests each pull request.</li>
+        </ul>
+        <a class="link" href="https://nomac.app/simulator?utm_source=simulator-use.dev">nomac.app/simulator<svg class="i"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </section>
-
-  <section id="how">
-    <div class="wrap">
-      <span class="eyebrow"><svg class="icon"><use href="#i-cpu"/></svg>How it works</span>
-      <h2 class="reveal">Nothing to build into your app.</h2>
-      <p class="sub reveal">No test runner to compile and no SDK in the app: simulator-use reads what iOS's accessibility already knows, through the Simulator's own frameworks, so the first call is as fast as the rest.</p>
-      <div class="flow reveal">
-        <div class="node"><span class="k">Agent</span><h3>Claude Code, Codex, Cursor</h3><p>Or any MCP client, or a shell with the CLI.</p></div>
-        <div class="node"><span class="k">MCP or CLI</span><h3>simulator-use</h3><p>Twelve tools; answers fold the screen into lines the agent can use.</p></div>
-        <div class="node hot"><span class="k">Engine</span><h3>One per Simulator</h3><p>Input, the accessibility session and the screen buffer, kept open.</p></div>
-        <div class="node"><span class="k">Device</span><h3>iOS Simulator</h3><p>iPhone and iPad, any runtime Xcode has, on your Mac or in the cloud.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="wrap">
-    <div class="closing reveal">
-      <span class="eyebrow"><svg class="icon"><use href="#i-sparkles"/></svg>Made at NoMac</span>
-      <h2>Give your agent a phone it can read.</h2>
-      <p class="sub">Built from thousands of agent runs on real Macs: where agents get stuck, what they misread on screen, and what they need to be told to keep going.</p>
-      <div class="cta">
-        <div class="cmd"><span class="t"><span class="p">$ </span>npx -y simulator-use mcp</span><button class="copy" data-copy="npx -y simulator-use mcp" aria-label="Copy the command"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-        <a class="btn" href="https://github.com/NoMac-app/simulator-use"><svg class="icon" style="fill:currentColor;stroke:none"><use href="#i-github"/></svg>Star on GitHub</a>
-      </div>
-    </div>
-  </div>
 </main>
 
 <footer>
   <div class="wrap">
-    <span>MIT licensed. Built on <a href="https://github.com/cameroncooke/AXe">AXe</a>'s frameworks (MIT). Made at <a href="https://nomac.app/?utm_source=simulator-use.dev">NoMac</a>.</span>
-    <nav><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a><a href="https://github.com/NoMac-app/simulator-use#readme">Docs</a><a href="https://nomac.app/simulator?utm_source=simulator-use.dev">Cloud iPhone</a></nav>
+    <span>MIT. Built on <a href="https://github.com/cameroncooke/AXe">AXe</a>. Made at <a href="https://nomac.app/?utm_source=simulator-use.dev">NoMac</a>.</span>
+    <nav><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a><a href="https://github.com/NoMac-app/simulator-use#readme">Docs</a></nav>
   </div>
 </footer>
 
@@ -568,42 +328,32 @@ npx simulator-use act 'fill #email gary@example.com' 'tap #signIn'</pre><button 
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Copy buttons
   document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); } catch { return; }
-    b.classList.add("done"); b.querySelector("use").setAttribute("href", "#i-check");
-    setTimeout(() => { b.classList.remove("done"); b.querySelector("use").setAttribute("href", "#i-copy"); }, 1600);
+    const use = b.querySelector("use"); b.classList.add("done"); use.setAttribute("href", "#i-check");
+    setTimeout(() => { b.classList.remove("done"); use.setAttribute("href", "#i-copy"); }, 1500);
   }));
 
-  // Install tabs
-  document.querySelectorAll(".tabsbar button").forEach(t => t.addEventListener("click", () => {
-    document.querySelectorAll(".tabsbar button").forEach(o => o.setAttribute("aria-selected", String(o === t)));
+  document.querySelectorAll(".tabs button").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach(o => o.setAttribute("aria-selected", String(o === t)));
     document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === t.dataset.pane));
   }));
 
-  // Live numbers from npm
   fetch("https://api.npmjs.org/downloads/point/last-week/simulator-use").then(r => r.json()).then(d => {
     if (typeof d.downloads === "number" && d.downloads > 0) document.getElementById("dl").textContent = d.downloads.toLocaleString("en-US");
   }).catch(() => {});
-  fetch("https://registry.npmjs.org/simulator-use/latest").then(r => r.json()).then(d => {
-    if (typeof d.version === "string" && /^\d+\.\d+\.\d+$/.test(d.version)) document.getElementById("ver").textContent = `v${d.version}`;
-  }).catch(() => {});
 
-  // Reveal on scroll, bars grow when seen
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (!e.isIntersecting) return;
-    e.target.classList.add("in");
-    e.target.querySelectorAll(".fill").forEach(f => { f.style.width = `${f.dataset.w}%`; });
-    io.unobserve(e.target);
-  }), { threshold: 0.15 });
-  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  const bench = document.getElementById("bench");
+  new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { bench.querySelectorAll("i[data-w]").forEach(i => { i.style.width = `${Math.max(Number(i.dataset.w), 0.8)}%`; }); o.disconnect(); } }, { threshold: 0.2 }).observe(bench);
 
-  // The demo: what the agent reads, and the phone it reads
+  // The demo: the agent's calls and answers, and the real Simulator frames they produce.
   const out = document.getElementById("out"), hl = document.getElementById("hl"), tap = document.getElementById("tap");
-  const box = { email: [20, 172, 362, 44], password: [20, 224, 362, 44], remember: [312, 280, 58, 36], signIn: [20, 325, 362, 50], status: [70, 386, 262, 32], tabs: [100, 792, 202, 56] };
-  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const frames = [...document.querySelectorAll(".phone img")];
+  const frame = n => frames.forEach((f, i) => f.classList.toggle("on", i === n));
+  // Each element's box in points on the 402 x 874 screen, around the centers ui_look prints.
+  const box = { email: [16, 169, 370, 50], password: [16, 221, 370, 50], remember: [303, 282, 76, 32], signIn: [16, 325, 370, 50], status: [16, 377, 370, 50], tabs: [106, 791, 190, 62] };
   const look = [
-    { t: `<span class="note">Demo · Sign In · iPhone 17 Pro (iOS 27.0)</span>` },
+    { t: `<span class="nt">Demo · Sign In · iPhone 17 Pro (iOS 26.5)</span>` },
     { el: "email", t: `<span class="k">textfield</span> <span class="s">"Email"</span> <span class="id">#email</span> <span class="at">@201,194</span>` },
     { el: "password", t: `<span class="k">securefield</span> <span class="s">"Password"</span> <span class="id">#password</span> <span class="at">@201,246</span>` },
     { el: "remember", t: `<span class="k">switch</span> <span class="s">"Remember me"</span> <span class="id">#remember</span> <span class="st">off</span> <span class="at">@341,298</span>` },
@@ -611,73 +361,51 @@ npx simulator-use act 'fill #email gary@example.com' 'tap #signIn'</pre><button 
     { el: "status", t: `<span class="k">text</span> <span class="s">"Not signed in"</span> <span class="id">#status</span> <span class="at">@201,402</span>` },
     { el: "tabs", t: `<span class="k">tabs:</span> <span class="s">Login</span> <span class="st">(selected)</span> <span class="at">@158,822</span>, <span class="s">Items</span> <span class="at">@244,822</span>` },
   ];
-  const labels = { email: "#email", password: "#password", remember: "#remember", signIn: "#signIn", status: "#status", tabs: "tabs" };
-  const field = id => document.getElementById(`f-${id}`);
-  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
-  let lines = [];
+  const pct = (v, of) => `${(v / of) * 100}%`;
+  let lines = [], hover = false;
   const show = el => {
-    lines.forEach(l => l.classList.toggle("on", l.dataset.el === el));
+    lines.forEach(l => l.classList.toggle("on", !!el && l.dataset.el === el));
     if (!el) { hl.classList.remove("show"); return; }
     const [x, y, w, h] = box[el];
-    Object.assign(hl.style, { left: `${x - 6}px`, top: `${y - 6}px`, width: `${w + 12}px`, height: `${h + 12}px` });
-    hl.querySelector("b").textContent = labels[el]; hl.classList.add("show");
+    Object.assign(hl.style, { left: pct(x, 402), top: pct(y, 874), width: pct(w, 402), height: pct(h, 874) });
+    hl.classList.add("show");
   };
   const add = (html, el) => {
     const s = document.createElement("span"); s.className = "ln"; s.innerHTML = html;
     if (el) { s.dataset.el = el; s.addEventListener("mouseenter", () => { hover = true; show(el); }); s.addEventListener("mouseleave", () => { hover = false; show(null); }); }
     out.appendChild(s); lines.push(s); return s;
   };
-  let hover = false;
-  const typeCmd = async (text) => {
-    const s = add(`<span class="prompt">❯</span> <span class="cmdt"></span><span class="cur"></span>`);
-    const c = s.querySelector(".cmdt");
-    for (let i = 1; i <= text.length; i++) { c.textContent = text.slice(0, i); await wait(18); }
+  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+  const type = async text => {
+    const s = add(`<span class="pr">›</span> <span class="cm"></span><span class="cur"></span>`), c = s.querySelector(".cm");
+    for (let i = 1; i <= text.length; i++) { c.textContent = text.slice(0, i); await wait(16); }
     s.querySelector(".cur").remove();
-  };
-  const reset = () => {
-    out.innerHTML = ""; lines = []; show(null);
-    field("email").classList.remove("on", "typing"); field("email").querySelector(".v").textContent = "Email";
-    field("password").classList.remove("on", "typing"); field("password").querySelector(".v").textContent = "Password";
-    const st = field("status"); st.textContent = "Not signed in"; st.classList.remove("ok");
-  };
-  const fill = async (id, text, secret) => {
-    const f = field(id), v = f.querySelector(".v");
-    show(id); f.classList.add("on", "typing"); v.textContent = "";
-    for (let i = 1; i <= text.length; i++) { v.textContent = secret ? "•".repeat(i) : text.slice(0, i); await wait(45); }
-    f.classList.remove("typing");
-  };
-  const press = async () => {
-    show("signIn"); const b = field("signIn");
-    Object.assign(tap.style, { left: "201px", top: "350px" }); tap.classList.remove("go"); void tap.offsetWidth; tap.classList.add("go");
-    b.classList.add("press"); await wait(160); b.classList.remove("press");
   };
   async function run() {
     for (;;) {
-      reset();
-      await typeCmd("ui_look");
-      await wait(250);
-      for (const l of look) { add(l.t, l.el); await wait(70); }
-      add(`<span class="note">≈ 70 tokens · 0.28 s</span>`);
+      out.innerHTML = ""; lines = []; show(null); frame(0);
+      await type("ui_look");
+      await wait(200);
+      for (const l of look) { add(l.t, l.el); await wait(60); }
+      add(`<span class="nt">≈ 70 tokens · 0.28 s</span>`);
       await wait(500);
-      for (const l of look.filter(l => l.el)) { if (!hover) show(l.el); await wait(900); }
+      for (const l of look.filter(l => l.el)) { if (!hover) show(l.el); await wait(800); }
       show(null);
       add("&nbsp;");
-      await typeCmd(`ui_act ["fill #email gary@example.com", "fill #password secret1", "tap #signIn", "wait \\"Welcome\\""]`);
-      await fill("email", "gary@example.com");
-      await fill("password", "secret1", true);
-      await press();
-      await wait(500);
-      const st = field("status"); show("status"); st.textContent = "Welcome, gary@example.com"; st.classList.add("ok");
+      await type(`ui_act ["fill #email gary@example.com", "fill #password secret1", "tap #signIn", "wait \\"Welcome\\""]`);
+      show("email"); await wait(500); frame(1); await wait(700);
+      show("password"); await wait(500); frame(2); await wait(700);
+      show("signIn"); await wait(300);
+      Object.assign(tap.style, { left: pct(60, 402), top: pct(350, 874) }); tap.classList.remove("go"); void tap.offsetWidth; tap.classList.add("go");
+      await wait(450); frame(3); show("status");
       add(`<span class="ok">4 steps done in 4.5 s</span>`);
       add(`<span class="k">changed:</span> <span class="id">#email</span> <span class="s">"gary@example.com"</span> · <span class="id">#password</span> <span class="s">"•••••••"</span> · <span class="id">#status</span> <span class="s">"Welcome, gary@example.com"</span>`, "status");
       if (reduce) { show(null); return; }
-      await wait(1800); show(null);
-      await wait(4200);
+      await wait(2200); show(null); await wait(4500);
     }
   }
   const demo = document.getElementById("demo");
-  const start = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { start.disconnect(); run(); } }, { threshold: 0.2 });
-  start.observe(demo);
+  new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { o.disconnect(); run(); } }, { threshold: 0.25 }).observe(demo);
 })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
