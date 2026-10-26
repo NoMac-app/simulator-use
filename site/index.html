@@ -140,6 +140,7 @@ tfoot td { color: var(--text); font-weight: 500; border-bottom: 0; }
 .tools p { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
 @media (max-width: 720px) { .tools { grid-template-columns: minmax(0, 1fr); } }
 
+.oneclick { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 0; }
 .install { margin-top: 28px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
 .tabs { display: flex; gap: 20px; padding: 0 18px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
 .tabs button { font: 14px var(--sans); color: var(--faint); background: none; border: 0; padding: 13px 0 11px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
@@ -270,6 +271,7 @@ footer a:hover { color: var(--text); }
   <section id="install">
     <h2>Install</h2>
     <p class="sub">Needs a Mac with Xcode and Node 20. Nothing leaves your Mac unless you turn on cloud.</p>
+    <p class="oneclick"><a class="link" href="cursor://anysphere.cursor-deeplink/mcp/install?name=simulator-use&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNpbXVsYXRvci11c2UiLCJtY3AiXX0=">Add to Cursor<svg class="i"><use href="#i-arrow"/></svg></a><a class="link" href="vscode:mcp/install?%7B%22name%22%3A%22simulator-use%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22simulator-use%22%2C%22mcp%22%5D%7D">Add to VS Code<svg class="i"><use href="#i-arrow"/></svg></a></p>
     <div class="install">
       <div class="tabs" role="tablist">
         <button role="tab" aria-selected="true" data-pane="p-claude">Claude Code</button>
