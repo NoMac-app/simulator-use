@@ -435,6 +435,9 @@ test("the replay lists every call without what was typed, and its stop leaves th
   // A call after the stop is not listed anywhere.
   noteCall("ui_look", {}, Date.now(), { content: [] });
   assert.equal(callSummary("app_run", { git: "https://x" }), "app_run");
+  // An app's values (env) are a platform's secrets: the list never names them (NoMac's products plan 4.3).
+  assert.equal(callSummary("app_run", { path: "/x", env: { STAGING_KEY: "sk_test_value" } }), "app_run");
+  assert.equal(callSummary("tests_run", { path: "/x", env: { STAGING_KEY: "sk_test_value" } }), "tests_run");
 });
 
 test("the pool's first read asks the engine again until it reads, and says when it never did", async () => {
