@@ -137,7 +137,7 @@ simulator-use app storekit clear               # back to the App Store
 
 ## iPhone apps on an iPad
 
-App Review runs iPhone apps on an iPad, where iPadOS draws them in a window, moved and scaled. `ui_look` says so in a line of its own, and gives every position in the iPad's screen points, as taps and screenshots use them; a tap beside the window is reported as landing outside it.
+App Review runs iPhone apps on an iPad, where iPadOS draws them in a window, moved and scaled. `ui_look` says so in a line of its own, and gives every position in the iPad's screen points, as taps and screenshots use them; a tap beside the window is reported as landing outside it. Use an iPad Air Simulator for this: on iOS 27.0 an iPad Pro 11-inch (M5) Simulator crashes its display server (backboardd) when an iPhone-only app opens, also without simulator-use, and the app is gone with it.
 
 ## Logs and crashes
 
