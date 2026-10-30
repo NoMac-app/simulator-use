@@ -27,7 +27,7 @@ tabs: Login (selected) @158,822, Items @244,822
 - Groups, icons inside buttons, scroll bars, the status bar and the keyboard's keys are folded away. The tab bar, scrolling and the keyboard are one line each.
 - Only what can be tapped is listed. An alert, a sheet, a menu or a full-screen view in front hides the screen behind it, and iOS's own permission prompts read as alerts over the app. Rows under the navigation bar, the tab bar or the keyboard are counted as hidden (above, below, to the left or right), not listed.
 - A web view in UIKit (Capacitor, React Native's WebView, a sign-in page inside most apps) is read point by point, and its headings, texts, fields, checkboxes, buttons and links are listed like the rest. Web views hosted by SwiftUI, Safari's own pages, in-app browsers, maps, games and iOS's out-of-process pickers have nothing for accessibility to read. They come back as one `unreadable` line with their place, so the agent knows to take a screenshot and tap by point.
-- A screenshot, when asked for, is sized to points, so a point in the picture is a point to tap. `screenshot_file` saves the screen at full resolution as a PNG for a person, a report or the App Store; in cloud mode it is saved on your machine too.
+- A screenshot, when asked for, is sized to points, so a point in the picture is a point to tap. `screenshot_file` saves the screen at full resolution as a PNG for a person, a report or the App Store; in cloud mode it is saved on your machine too. Either waits for the screen to hold still (up to 2 s), so it shows the screen, not an animation into it.
 - The sign-in screen above is about 70 tokens. The full accessibility tree it comes from is about 40,000.
 
 ## Using the screen
@@ -71,8 +71,8 @@ Every step is checked, so nothing succeeds silently:
 | `app_run` | `simulator-use run` | Builds the Xcode project here, installs and launches it, answers with the first screen; errors as `file:line`; `--xcode 26.6` builds with another installed Xcode |
 | `devices` | `simulator-use devices` | Lists the Simulators on this Mac with their runtime, UDID and state, and its Xcodes |
 | `device_use` | `simulator-use use "iPhone 17 Pro"` | Chooses the Simulator the other tools use, booting it (one boot at a time); dark mode, a clean status bar |
-| `app_control` | `simulator-use app launch dev.example.app` | `install`, `launch` (answers with the first screen), `terminate`, `uninstall`, `open_url`; `grant`, `revoke` and `reset_permissions`; `location`; `push`; the phone's `appearance`, `locale`, `timezone`, `text_size` and a clean `status_bar` |
-| `ui_look` | `simulator-use look` | Reads the screen; `find` keeps matching lines, `screenshot` adds a picture, `screenshot_file` saves a full-resolution PNG, `full` saves the whole tree |
+| `app_control` | `simulator-use app launch dev.example.app` | `install`, `launch` (answers with the first screen; `value` passes launch arguments), `terminate`, `uninstall`, `open_url`; `grant`, `revoke` and `reset_permissions`; `location`; `push`; the phone's `appearance`, `locale`, `timezone`, `text_size` and a clean `status_bar` |
+| `ui_look` | `simulator-use look` | Reads the screen; `find` keeps matching lines, `screenshot` adds a picture, `screenshot_file` saves a full-resolution PNG, `full` saves the whole tree; `--out file.jpg` (or `.png`) saves the screen where you say |
 | `ui_act` | `simulator-use act "tap #signIn" ...` | Does steps in order and answers with what changed |
 | `app_logs` | `simulator-use logs` | The app's print output and its own system log lines; `grep`, `wait_for`, `crashes` |
 | `tests_run` | `simulator-use test` | Runs the unit and UI tests; each case as it finishes, counts, each failure as `file:line` and the slowest; "0 tests ran" is an error |
@@ -134,6 +134,31 @@ simulator-use app storekit clear               # back to the App Store
 - Applying starts from the file's state: its products, no purchases. Purchases complete without iOS's purchase sheet, which is not in the app's accessibility tree.
 - It lasts until the app is removed: building and installing over it keeps it.
 - A relative path is looked up here, then in the folder of the project `app_run` built last (on a cloud phone, the uploaded project).
+
+## Any screen, and its screenshot
+
+An app opens any screen without tapping through it when it reads launch arguments: `-Key value` sets `Key` in `UserDefaults` for that launch only, like the "Arguments Passed On Launch" of an Xcode scheme.
+
+```
+simulator-use app launch com.example.app -Onboarding 3 -Demo YES   # app_control {action: "launch", value: "-Onboarding 3 -Demo YES"}
+simulator-use look --out shots/onboarding-3.jpg                     # sized to points (402x874 on an iPhone 17 Pro), to read
+simulator-use look --out store/onboarding-3.png                     # full resolution, for the App Store
+```
+
+- The words after the app are its arguments, quoted as in a shell: `-Greeting "Hello there"`. `value` takes them the same way, and the app defaults to the one launched last.
+- `launch` answers once the app is in front and its screen settled, and a screenshot waits for the picture to hold still (up to 2 s: a spinner never does, and the answer says so), so it shows the screen asked for, not the launch.
+- Launch arguments are the app's process arguments, which every user of a Mac can read: a secret goes in `app_run`'s `env`, which only the app sees.
+- A set of screens is a loop:
+
+```
+for mode in light dark; do
+  simulator-use app appearance $mode
+  for step in 0 1 2 3; do
+    simulator-use app launch -Onboarding $step
+    simulator-use look --out "shots/$mode/onboarding-$step.jpg" > /dev/null
+  done
+done
+```
 
 ## iPhone apps on an iPad
 
@@ -266,7 +291,7 @@ The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0
 
 | Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
 |---|---|---|---|
-| 0.13.0 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
+| 0.13.0 and 0.14.0 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
 | 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
 

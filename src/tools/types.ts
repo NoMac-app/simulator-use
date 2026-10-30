@@ -32,5 +32,7 @@ export type Tool = {
   command: string;
   /** Arguments the CLI also takes as bare words, in order: `simulator-use app launch dev.example.app`. */
   positional?: string[];
+  /** The argument that takes the words after the positional ones, each quoted as a shell would: app launch's arguments. */
+  restWords?: (args: Record<string, unknown>) => string | undefined;
   run: (args: Record<string, unknown>, context: CallContext) => Promise<ToolResult>;
 };

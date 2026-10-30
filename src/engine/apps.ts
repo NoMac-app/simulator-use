@@ -83,12 +83,57 @@ export function freshFile(path: string): number {
 /** A launched app: with --console-pty its launcher lives as long as the app, so ended() says the app is gone. */
 export type Launched = { ended: () => boolean };
 
-export async function launch(udid: string, bundleId: string): Promise<Launched> {
+/**
+ * The app's launch arguments from one string, split into words as a shell would: quotes keep spaces in a word, a
+ * backslash keeps the next character (in double quotes, a $, `, " or \\), nothing is expanded. `-Key value` sets that key in UserDefaults for this launch.
+ * They reach the app through simctl's arguments, which every user of a Mac can read (ps), so never a secret: app_run's
+ * env is the private way in (a process's environment is its own user's).
+ */
+export function launchWords(text: string): string[] {
+  const words: string[] = [];
+  let word: string | undefined;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!;
+    // A shell's word separators only: a no-break space (French copy) stays in its word.
+    if (c === " " || c === "\t" || c === "\n" || c === "\r") {
+      if (word !== undefined) words.push(word);
+      word = undefined;
+    } else if (c === "'" || c === '"') {
+      const end = c === "'" ? text.indexOf("'", i + 1) : closingQuote(text, i + 1);
+      if (end < 0) throw new ToolError(`The launch arguments have a ${c === "'" ? "single" : "double"} quote that is never closed.`, `Quote a word with spaces whole: -Greeting "Hello there".`);
+      const inner = text.slice(i + 1, end);
+      word = (word ?? "") + (c === "'" ? inner : inner.replace(/\\([$`"\\])/g, "$1"));
+      i = end;
+    } else if (c === "\\" && i + 1 < text.length) {
+      word = (word ?? "") + text[++i];
+    } else {
+      word = (word ?? "") + c;
+    }
+  }
+  if (word !== undefined) words.push(word);
+  if (words.length > 100) throw new ToolError("A launch takes up to 100 arguments.");
+  if (words.some((w) => w.includes("\0"))) throw new ToolError("A launch argument can't hold a NUL character.");
+  return words;
+}
+
+/** Where a double-quoted word ends: the next " not escaped by a backslash. */
+function closingQuote(text: string, from: number): number {
+  for (let i = from; i < text.length; i++) {
+    if (text[i] === "\\") i++;
+    else if (text[i] === '"') return i;
+  }
+  return -1;
+}
+
+/** A word a shell (and launchWords) reads back as it is: in single quotes when it needs them. */
+export const shellWord = (word: string) => (/^[\w@%+=:,./-]+$/.test(word) ? word : `'${word.replace(/'/g, `'\\''`)}'`);
+
+export async function launch(udid: string, bundleId: string, args: string[] = []): Promise<Launched> {
   const file = await consoleFile(udid, bundleId);
   const timeZone = await deviceTimeZone(udid);
   const env = Object.fromEntries(Object.entries(await deviceEnv(udid)).map(([key, value]) => [`SIMCTL_CHILD_${key}`, value]));
   const fd = freshFile(file);
-  const child = spawn("xcrun", ["simctl", "launch", "--console-pty", "--terminate-running-process", udid, bundleId], {
+  const child = spawn("xcrun", ["simctl", "launch", "--console-pty", "--terminate-running-process", udid, bundleId, ...args], {
     detached: true,
     stdio: ["ignore", fd, fd],
     // The time zone app_control set (iOS takes a process's TZ) and app_run's env: simctl hands SIMCTL_CHILD_ variables to the app.

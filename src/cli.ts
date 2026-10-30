@@ -3,12 +3,14 @@
  * `simulator-use look --find "Sign In"` calls ui_look with { find: "Sign In" }.
  */
 
-import { writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { copyFile, mkdir, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
 import { persistCloud } from "./cloud/account.ts";
+import { shellWord } from "./engine/apps.ts";
 import { onSignalExit } from "./engine/jobs.ts";
 import { persistHeld } from "./engine/state.ts";
 import { serve } from "./mcp.ts";
@@ -25,17 +27,29 @@ export function parseArgs(tool: Tool, argv: string[]): Record<string, unknown> |
   const args: Record<string, unknown> = {};
   const list = Object.entries(props).find(([, p]) => p.type === "array")?.[0];
   const words = [...(tool.positional ?? [])];
+  // After "--" every word is a bare word, one that starts with "--" too: `simulator-use app launch -- --uitesting`.
+  let options = true;
   for (let i = 0; i < argv.length; i++) {
     const raw = argv[i]!;
-    if (!raw.startsWith("--")) {
+    if (options && raw === "--") {
+      options = false;
+      continue;
+    }
+    if (!options || !raw.startsWith("--")) {
       // Bare words fill the tool's positional arguments in order, then a list argument takes the rest.
       const next = words.find((w) => !(w in args));
       if (next) {
-        args[next] = raw;
+        // The argument that takes the rest is quoted from its first word on, so each word stays one: `-Name "O'Brien"`.
+        args[next] = tool.restWords?.(args) === next ? shellWord(raw) : raw;
         continue;
       }
       if (list) {
         args[list] = [...((args[list] as string[] | undefined) ?? []), raw];
+        continue;
+      }
+      const rest = tool.restWords?.(args);
+      if (rest && typeof args[rest] === "string") {
+        args[rest] = `${args[rest]} ${shellWord(raw)}`;
         continue;
       }
       return `Unexpected "${raw}". ${usage(tool)}`;
@@ -55,10 +69,16 @@ export function parseArgs(tool: Tool, argv: string[]): Record<string, unknown> |
   return args;
 }
 
+/** Options only the command line has, beside the tool's own. */
+const CLI_OPTIONS: Record<string, [string, string][]> = {
+  ui_look: [["--out <file>", "Save the screen to this file: a .jpg sized to points (to read), or a .png at full resolution (a store, a report)"]],
+};
+
 export function usage(tool: Tool): string {
   const entries = Object.entries(tool.inputSchema.properties);
   const bare = (tool.positional ?? []).map((key) => ` [${key}]`).join("");
   const options = entries.filter(([key, p]) => p.type !== "array" && !tool.positional?.includes(key)).map(([key, p]) => `${flag(key)}${p.type === "boolean" ? "" : ` <${p.type}>`}`);
+  options.push(...(CLI_OPTIONS[tool.name] ?? []).map(([name]) => name));
   const words = entries.filter(([, p]) => p.type === "array").map(([key]) => ` <${key}...>`).join("");
   return `Usage: simulator-use ${tool.command}${bare}${options.length ? ` [${options.join("] [")}]` : ""}${words}`;
 }
@@ -139,7 +159,33 @@ export function commandHelp(tool: Tool): string {
     const name = p.type === "array" ? `<${key}...>` : tool.positional?.includes(key) ? `[${key}] or ${flag(key)}` : flag(key);
     lines.push(`  ${name}  ${p.description}${choices}`);
   }
+  for (const [name, description] of CLI_OPTIONS[tool.name] ?? []) lines.push(`  ${name}  ${description}`);
   return lines.join("\n");
+}
+
+/**
+ * look --out FILE, taken out of the command's words: the screen saved where the person names it, a .jpg sized to
+ * points (what ui_look's screenshot gives the agent) or a .png at full resolution (its screenshot_file).
+ */
+export function outOption(tool: Tool, argv: string[]): { argv: string[]; out?: string } | string {
+  if (!CLI_OPTIONS[tool.name]) return { argv };
+  const rest: string[] = [];
+  let out: string | undefined;
+  for (let i = 0; i < argv.length; i++) {
+    const raw = argv[i]!;
+    if (raw === "--") {
+      rest.push(...argv.slice(i));
+      break;
+    }
+    if (raw !== "--out" && !raw.startsWith("--out=")) {
+      rest.push(raw);
+      continue;
+    }
+    out = raw === "--out" ? argv[++i] : raw.slice("--out=".length);
+    if (!out) return "--out needs a file: a .jpg sized to points, or a .png at full resolution.";
+  }
+  if (out !== undefined && !/\.(jpe?g|png)$/i.test(out)) return `--out takes a .jpg (sized to points, to read) or a .png (full resolution), not ${out}.`;
+  return { argv: rest, out };
 }
 
 export async function main(argv: string[]): Promise<number> {
@@ -180,21 +226,44 @@ export async function main(argv: string[]): Promise<number> {
     console.error(`Unknown command "${command}".\n\n${help()}`);
     return 2;
   }
-  if (rest.includes("--help") || rest.includes("-h")) {
+  // Help is asked for before a "--": after it, -h is an app's launch argument like any other.
+  const options = rest.includes("--") ? rest.slice(0, rest.indexOf("--")) : rest;
+  if (options.includes("--help") || options.includes("-h")) {
     console.log(commandHelp(tool));
     return 0;
   }
-  const args = parseArgs(tool, rest);
+  const taken = outOption(tool, rest);
+  const args = typeof taken === "string" ? taken : parseArgs(tool, taken.argv);
   if (typeof args === "string") {
     console.error(args);
     return 2;
   }
+  const saveTo = typeof taken === "string" || !taken.out ? undefined : resolve(taken.out);
+  const png = Boolean(saveTo && /\.png$/i.test(saveTo));
+  if (saveTo) args[png ? "screenshot_file" : "screenshot"] = true;
   const out = await callTool(tool.name, args, { waitForJobs: true });
   let text = out.text;
-  if (out.image) {
-    const file = join(tmpdir(), `simulator-use-${Date.now()}.${out.image.mimeType === "image/png" ? "png" : "jpg"}`);
-    await writeFile(file, out.image.data);
-    text += `\nscreenshot: ${file}`;
+  // The full-resolution PNG is in simulator-use's folder (with cloud on, already fetched there): moved where asked.
+  const saved = png && !out.isError ? /^screenshot file: (.+)$/m.exec(text)?.[1] : undefined;
+  try {
+    if (out.image) {
+      const file = saveTo && !png ? saveTo : join(tmpdir(), `simulator-use-${Date.now()}.${out.image.mimeType === "image/png" ? "png" : "jpg"}`);
+      await mkdir(dirname(file), { recursive: true });
+      await writeFile(file, out.image.data);
+      text += `\nscreenshot: ${file}`;
+    }
+    if (png && !out.isError) {
+      if (!saved || !existsSync(saved)) throw new Error(saved ? `it is at ${saved}` : "the answer named no file");
+      await mkdir(dirname(saveTo!), { recursive: true });
+      if (saved !== saveTo) {
+        await copyFile(saved, saveTo!);
+        await unlink(saved).catch(() => undefined);
+      }
+      text = text.replace(`screenshot file: ${saved}`, () => `screenshot file: ${saveTo}`);
+    }
+  } catch (error) {
+    console.error(`${forCommandLine(text)}\nThe screenshot could not be saved to ${saveTo ?? "a file"}: ${(error as Error).message}.`);
+    return 1;
   }
   (out.isError ? console.error : console.log)(forCommandLine(text));
   return out.isError ? 1 : 0;

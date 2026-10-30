@@ -1,12 +1,35 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { screenshot, screenshotFile } from "../engine/axe.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { heldDevice, stateDir } from "../engine/state.ts";
 import { readScreen } from "../look/read.ts";
-import { render } from "../look/snapshot.ts";
+import { render, type Frame } from "../look/snapshot.ts";
 import type { Tool } from "./types.ts";
+
+/** A screenshot waits up to this long for the screen to hold still, comparing frames this far apart. */
+const STILL_WAIT_MS = 2_000;
+const STILL_GAP_MS = 150;
+
+/**
+ * The screen once it holds still: two frames alike in a row. Right after a launch the accessibility tree already
+ * gives an animation's end while its pixels still move (an 8 s slide-in read as done, its card caught halfway,
+ * October 30), so a picture for a person or a store waits for the picture itself; a still screen costs the gap and
+ * one more frame (about 0.3 s). A spinner never stops: after STILL_WAIT_MS the last frame is taken, and the answer
+ * says so. A later frame that fails (a busy phone) leaves the one in hand: no wait is worth failing the look for.
+ */
+export async function stillScreen(udid: string, points: Frame): Promise<{ jpeg: Buffer; moving: boolean }> {
+  let last = await screenshot(udid, points);
+  for (const until = Date.now() + STILL_WAIT_MS; Date.now() < until; ) {
+    await sleep(STILL_GAP_MS);
+    const next = await screenshot(udid, points).catch(() => undefined);
+    if (!next || next.equals(last)) return { jpeg: last, moving: false };
+    last = next;
+  }
+  return { jpeg: last, moving: true };
+}
 
 export const uiLook: Tool = {
   name: "ui_look",
@@ -37,14 +60,16 @@ export const uiLook: Tool = {
       await writeFile(file, JSON.stringify(tree, null, 1));
       text += `\nfull tree: ${file}`;
     }
+    if (!args.screenshot && !args.screenshot_file) return { text };
+    // The whole screen, sized to its points: for an app in a window, the window is only part of it.
+    const points = snap.display ? { x: 0, y: 0, ...snap.display } : snap.screen;
+    const { jpeg, moving } = await stillScreen(device.udid, points);
+    if (moving) text += `\nThe screen was still moving after ${STILL_WAIT_MS / 1000} s (an animation or a spinner): the screenshot is one moment of it.`;
     if (args.screenshot_file) {
       const file = join(dir, `screen-${device.udid.slice(0, 8)}-${Date.now()}.png`);
       await screenshotFile(device.udid, file);
       text += `\nscreenshot file: ${file}`;
     }
-    if (!args.screenshot) return { text };
-    // The whole screen, sized to its points: for an app in a window, the window is only part of it.
-    const points = snap.display ? { x: 0, y: 0, ...snap.display } : snap.screen;
-    return { text, image: { data: await screenshot(device.udid, points), mimeType: "image/jpeg" } };
+    return args.screenshot ? { text, image: { data: jpeg, mimeType: "image/jpeg" } } : { text };
   },
 };

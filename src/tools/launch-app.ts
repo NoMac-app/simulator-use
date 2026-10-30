@@ -21,19 +21,20 @@ const LAUNCH_BUDGET_MS = 42_000;
  * showed seconds later, and right after a crash the app once stayed behind for over 20 s. So: wait, then launch
  * once more if there is time.
  */
-export async function launchAndLook(device: Device, bundleId: string): Promise<string> {
+export async function launchAndLook(device: Device, bundleId: string, args: string[] = []): Promise<string> {
   const label = `${device.name} (${device.runtime})`;
   const info = await appInfo(device.udid, bundleId);
   if (!info) throw new ToolError(`${bundleId} is not installed on ${label}.`, 'Install it with app_control {action: "install", app: "path/to/App.app"}.');
   const started = Date.now();
   if (info.executable) await startLogStream(device.udid, bundleId, info.executable);
-  let running = await launch(device.udid, bundleId);
+  let running = await launch(device.udid, bundleId, args);
   await setCurrentApp(device.udid, { bundleId, executable: info.executable, launchedAt: started });
   const name = info.name ?? info.executable ?? bundleId;
   // In front: the app itself, or the app under one of iOS's prompts ("Name · system alert"). Not "Name · system
   // screen": that is iOS still animating the launch, the app's card behind it (Xcode 27 VM, October 19).
   const front = (app: string) => app === name || app === `${name} · system alert`;
-  const launched = () => `Launched ${name} in ${((Date.now() - started) / 1000).toFixed(1)} s`;
+  const withArgs = args.length ? ` with ${args.length} argument${args.length === 1 ? "" : "s"}` : "";
+  const launched = () => `Launched ${name}${withArgs} in ${((Date.now() - started) / 1000).toFixed(1)} s`;
   const inFront = async (until: number) => {
     let { snap } = await readScreen(device.udid);
     while (!front(snap.app) && Date.now() < until) {
@@ -50,7 +51,7 @@ export async function launchAndLook(device: Device, bundleId: string): Promise<s
     let again = "";
     // Only while the call has time for it: a cold Simulator's first read alone can take 35 s.
     if (!front(snap.app) && Date.now() - started < LAUNCH_BUDGET_MS - RELAUNCH_WAIT_MS) {
-      running = await launch(device.udid, bundleId);
+      running = await launch(device.udid, bundleId, args);
       snap = await inFront(Date.now() + RELAUNCH_WAIT_MS);
       if (!front(snap.app) && running.ended()) throw quit();
       again = " (launched twice: it was not in front after the first)";

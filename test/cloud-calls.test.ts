@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -155,6 +155,49 @@ test("an MCP server's cloud phone is its own: another process on the machine doe
   assert.deepEqual(JSON.parse(other.stdout), { on: false });
   assert.deepEqual(await cloudState(), { on: true, session: "ses_mine" });
   await setCloudState({ on: false });
+});
+
+test("the CLI's look --out saves the screen where asked, and app launch sends its arguments as one value", async () => {
+  seen.length = 0;
+  const state = mkdtempSync(join(tmpdir(), "su-cli-out-"));
+  const cwd = realpathSync(mkdtempSync(join(tmpdir(), "su-cli-out-cwd-")));
+  writeFileSync(join(state, "cloud.json"), JSON.stringify({ on: true, session: "ses_out" }));
+  const cli = (...args: string[]) => promisify(execFile)(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, SIMULATOR_USE_STATE_DIR: state } });
+  const tools = "/api/v1/simulator/sessions/ses_out/tools";
+  // A .png is the phone's full-resolution file, fetched and moved to the name given (folders made as needed).
+  const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 4, 5, 6]);
+  const token = `${Buffer.from(JSON.stringify({ s: "ses_out", f: `file_${"b".repeat(40)}`, n: "screen-0UT-1.png" })).toString("base64url")}.sig`;
+  script = { [`POST ${tools}/ui_look`]: [done(`Demo · Sign In\nscreenshot file: ${process.env.NOMAC_API_URL}/api/v1/simulator/files/${token}`)], [`GET /api/v1/simulator/files/${token}`]: [{ status: 200, body: null, file: png }] };
+  const full = await cli("look", "--out", "store/onb-1.png");
+  assert.equal(full.stdout.trim(), `Demo · Sign In\nscreenshot file: ${join(cwd, "store/onb-1.png")}`);
+  assert.deepEqual(readFileSync(join(cwd, "store/onb-1.png")), png);
+  assert.deepEqual(seen.find((r) => r.path === `${tools}/ui_look`)?.body, { screenshot_file: true });
+  // A .jpg is the picture sized to points, as the agent's screenshot.
+  const jpeg = Buffer.from("jpeg-bytes");
+  script = { [`POST ${tools}/ui_look`]: [{ status: 200, body: { state: "done", result: { content: [{ type: "text", text: "Demo · Home" }, { type: "image", data: jpeg.toString("base64"), mimeType: "image/jpeg" }] } } }] };
+  seen.length = 0;
+  const small = await cli("look", "--find", "Home", "--out=shots/home.jpg");
+  assert.equal(small.stdout.trim(), `Demo · Home\nscreenshot: ${join(cwd, "shots/home.jpg")}`);
+  assert.deepEqual(readFileSync(join(cwd, "shots/home.jpg")), jpeg);
+  assert.deepEqual(seen.find((r) => r.path === `${tools}/ui_look`)?.body, { find: "Home", screenshot: true });
+  // A file that could not be fetched is an error that says so, the link kept.
+  script = { [`POST ${tools}/ui_look`]: [done(`Demo · Sign In\nscreenshot file: ${process.env.NOMAC_API_URL}/api/v1/simulator/files/${token}`)], [`GET /api/v1/simulator/files/${token}`]: [{ status: 410, body: { error: { code: "file_gone" } } }] };
+  await assert.rejects(cli("look", "--out", "store/onb-2.png"), (error: { code: number; stderr: string }) => error.code === 1 && /could not be saved to .*onb-2\.png/.test(error.stderr));
+  await assert.rejects(cli("look", "--out", "a.gif"), (error: { code: number; stderr: string }) => error.code === 2 && /--out takes a \.jpg/.test(error.stderr));
+  // The phone gets a launch's arguments as the value, quoted so it splits them back as typed.
+  script = { [`POST ${tools}/app_control`]: [done("Launched Demo with 4 arguments in 1.2 s.")] };
+  seen.length = 0;
+  await cli("app", "launch", "dev.example.app", "-Step", "3", "-AutoAsk", "How do I say no?");
+  assert.deepEqual(seen.find((r) => r.path === `${tools}/app_control`)?.body, { action: "launch", value: "dev.example.app -Step 3 -AutoAsk 'How do I say no?'" });
+  // After "--", -h is the app's argument, not a request for help.
+  seen.length = 0;
+  const launched = await cli("app", "launch", "dev.example.app", "--", "-h");
+  assert.match(launched.stdout, /^Launched Demo/);
+  assert.deepEqual(seen.find((r) => r.path === `${tools}/app_control`)?.body, { action: "launch", value: "dev.example.app -h" });
+  // A file that cannot be written (a folder by that name) is a plain error, not a crash.
+  mkdirSync(join(cwd, "taken.jpg"));
+  script = { [`POST ${tools}/ui_look`]: [{ status: 200, body: { state: "done", result: { content: [{ type: "text", text: "Demo · Home" }, { type: "image", data: jpeg.toString("base64"), mimeType: "image/jpeg" }] } } }] };
+  await assert.rejects(cli("look", "--out", "taken.jpg"), (error: { code: number; stderr: string }) => error.code === 1 && /The screenshot could not be saved to .*taken\.jpg: EISDIR/.test(error.stderr) && !/\n\s+at /.test(error.stderr));
 });
 
 test("the CLI keeps cloud mode between its commands", async () => {

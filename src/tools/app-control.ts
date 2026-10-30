@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { dirname, isAbsolute, resolve as resolvePath } from "node:path";
 
-import { appInfo, BUNDLE_ID, bundleIdOf, install, pushPayload, simctlAction, stopLogStream } from "../engine/apps.ts";
+import { appInfo, BUNDLE_ID, bundleIdOf, install, launchWords, pushPayload, simctlAction, stopLogStream } from "../engine/apps.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { engineCall } from "../engine/native.ts";
 import { currentApp, heldDevice, setCurrentApp, setDeviceTimeZone } from "../engine/state.ts";
@@ -83,6 +83,16 @@ export function pushJson(value: string): string {
   return trimmed;
 }
 
+/**
+ * launch's value: the app's launch arguments (`-Step 3 -Demo YES`), after its bundle id when app is not given. Before
+ * 0.14 a launch's value was only ever the app, so the app named in both is the app, not an argument.
+ */
+export function launchValue(value: string | undefined, app: string | undefined): { app?: string; args: string[] } {
+  const words = value === undefined ? [] : launchWords(value);
+  const named = words[0] !== undefined && !words[0].startsWith("-") && (app === undefined || words[0] === app) ? words.shift() : undefined;
+  return { app: app ?? named, args: words };
+}
+
 /** A .storekit path: as given, or else in the folder of the project app_run built last (a cloud phone's upload). */
 async function storeKitFile(value: string): Promise<string> {
   const here = resolvePath(value);
@@ -96,13 +106,13 @@ export const appControl: Tool = {
   name: "app_control",
   title: "Control an app",
   description:
-    "Launch, install, stop or remove an app; open a URL or deep link; grant, revoke or reset a permission; set the location; send a push; test purchases (.storekit); set the phone's appearance, locale, time zone, text size or a clean status bar. launch answers with its first screen; app defaults to the last launched.",
+    "Launch, install, stop or remove an app; open a URL or deep link; grant, revoke or reset permissions; set location; send a push; test purchases (.storekit); set appearance, locale, time zone, text size or a clean status bar. launch answers with its first screen.",
   inputSchema: {
     type: "object",
     properties: {
       action: { type: "string", enum: ACTIONS, description: "What to do" },
-      app: { type: "string", description: "Bundle id, or for install the path to a Simulator .app" },
-      value: { type: "string", description: "URL, permission, lat,long, push text/JSON, light/dark, locale (fr_FR), time zone (Europe/Paris), text size or clean/clear, per action" },
+      app: { type: "string", description: "Bundle id (default: last launched); install: a Simulator .app path" },
+      value: { type: "string", description: "Per action: URL, permission, lat,long, push text/JSON, launch args (-Key value; no secrets), light/dark, locale (fr_FR), time zone (Europe/Paris), text size, clean/clear" },
       device: { type: "string", description: "Name or UDID; default: the one in use" },
     },
     required: ["action"],
@@ -111,6 +121,8 @@ export const appControl: Tool = {
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   command: "app",
   positional: ["action", "value"],
+  // `simulator-use app launch dev.example.app -Step 3 -Demo YES`: the words after the app are its arguments.
+  restWords: (args) => (args.action === "launch" ? "value" : undefined),
   async run(args) {
     const action = args.action as string;
     const device = pickDevice(await listDevices(), args.device as string | undefined, heldDevice());
@@ -118,7 +130,8 @@ export const appControl: Tool = {
     // Actions without a value take the app as their one word: `simulator-use app launch dev.example.app`.
     const takesValue = Boolean(VALUE[action]) || action === "reset_permissions";
     const value = takesValue ? (args.value as string | undefined) : undefined;
-    const app = (args.app as string | undefined) ?? (takesValue ? undefined : (args.value as string | undefined));
+    const launching = action === "launch" ? launchValue(args.value as string | undefined, args.app as string | undefined) : undefined;
+    const app = launching ? launching.app : ((args.app as string | undefined) ?? (takesValue ? undefined : (args.value as string | undefined)));
     if (VALUE[action] && !value) throw new ToolError(`${action} needs value: ${VALUE[action]}.`);
 
     if (action === "install") {
@@ -142,7 +155,7 @@ export const appControl: Tool = {
 
     switch (action) {
       case "launch":
-        return { text: await launchAndLook(device, bundleId!) };
+        return { text: await launchAndLook(device, bundleId!, launching!.args) };
       case "terminate":
         await simctlAction(["terminate", device.udid, bundleId!], `stop ${bundleId}`).catch((error: ToolError) => {
           if (!/found nothing to terminate|not running/i.test(error.message)) throw error;
