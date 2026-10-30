@@ -345,14 +345,187 @@ func intValue(_ value: Any?) -> Int? {
   if let n = value as? NSNumber { return n.intValue }
   return nil
 }
+/** A number as FBSimulatorControl's dictionaries hold it: a Double, or an NSNumber that `as? Double` does not always take. */
+func number(_ value: Any?) -> Double? {
+  if let d = value as? Double { return d }
+  if let n = value as? NSNumber { return n.doubleValue }
+  if let f = value as? CGFloat { return Double(f) }
+  return nil
+}
 /** An element's frame: FBSimulatorControl's "frame" dictionary, or its "AXFrame" string. */
 func frameOf(_ node: [String: Any]) -> CGRect? {
-  if let f = node["frame"] as? [String: Any], let x = f["x"] as? Double, let y = f["y"] as? Double, let w = f["width"] as? Double, let h = f["height"] as? Double {
+  if let f = node["frame"] as? [String: Any], let x = number(f["x"]), let y = number(f["y"]), let w = number(f["width"]), let h = number(f["height"]) {
     return CGRect(x: x, y: y, width: w, height: h)
   }
   if let text = node["AXFrame"] as? String { return NSRectFromString(text) }
   return nil
 }
+// MARK: An app in a window
+
+/**
+ * Where the frontmost app's points are on the screen. An iPhone app on an iPad runs in a window that iPadOS moves and
+ * scales (an iPad Air on iOS 26.5: from x 79, 1.77 times; App Review's iPad Air on iPadOS 27: from x 204, unscaled),
+ * while accessibility gives the app's frames in its own points, from its own top left: a tap at those numbers lands
+ * beside the app, or on another of its controls (October 30, 2026, reproducing an App Review rejection). A hit test
+ * takes screen points, so the window is measured by asking which app is at a point: its left and right edges give the
+ * scale and x, its top or bottom gives y (the status bar hides a window's top from hit tests), and of those candidates
+ * the one the app's own elements answer to is kept. The tree's frames are then screen points, like taps, swipes and
+ * screenshots, and its root says where the window is (placement) and how big the screen is (display).
+ */
+struct Placement: Equatable {
+  var x: Double, y: Double, scale: Double
+  static let identity = Placement(x: 0, y: 0, scale: 1)
+  /** Within a point and a percent of none: an app's own rounding, not a window. */
+  var isIdentity: Bool { abs(x) < 1.5 && abs(y) < 1.5 && abs(scale - 1) < 0.01 }
+  func rect(_ r: CGRect) -> CGRect { CGRect(x: x + r.minX * scale, y: y + r.minY * scale, width: r.width * scale, height: r.height * scale) }
+}
+/** The screen in points (the screen buffer's pixels over its scale), set at start. */
+var display = CGSize.zero
+/** The last measurement: the app (pid) whose root had this frame, where it was (nil: not found), and when. */
+var lastPlacement: (pid: Int, app: CGRect, placement: Placement?, at: Date)? = nil
+/** A window that could not be measured is not measured again for this long (each try costs about a second). */
+let unplacedRetry: TimeInterval = 10
+
+/** A node and everything under it with its frames moved and scaled onto the screen. */
+func placed(_ node: [String: Any], _ p: Placement) -> [String: Any] {
+  var n = node
+  if let f = node["frame"] as? [String: Any], let r = frameOf(["frame": f]) {
+    let m = p.rect(r); n["frame"] = ["x": m.minX, "y": m.minY, "width": m.width, "height": m.height]
+  }
+  if let text = node["AXFrame"] as? String { n["AXFrame"] = NSStringFromRect(p.rect(NSRectFromString(text))) }
+  if let kids = node["children"] as? [[String: Any]] { n["children"] = kids.map { placed($0, p) } }
+  return n
+}
+/** The element at a screen point as its app reports it (in the app's own points), or nil where there is none. */
+@MainActor
+func rawHit(_ simulator: FBSimulator, _ x: Double, _ y: Double) async -> [String: Any]? {
+  guard let element = try? await simulator.accessibilityElement(at: CGPoint(x: x, y: y)) else { return nil }
+  defer { element.close() }
+  return (try? element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: false, keys: outputKeys)).elements).map(withDefaults) as? [String: Any]
+}
+/** A hit at a screen point, in screen points: inside a measured window its frames are the app's own, and are placed. */
+func onScreen(_ found: Any, at point: CGPoint) -> Any {
+  guard let last = lastPlacement, let p = last.placement, !p.isIdentity, p.rect(last.app).insetBy(dx: -1, dy: -1).contains(point) else { return found }
+  if let list = found as? [[String: Any]] { return list.map { placed($0, p) } }
+  if let one = found as? [String: Any] { return placed(one, p) }
+  return found
+}
+/** Up to four of the app's labelled leaves, spread from top to bottom: what a candidate placement is checked against. */
+func probes(_ root: [String: Any], app: CGRect) -> [(label: String, frame: CGRect)] {
+  var found: [(label: String, frame: CGRect)] = []
+  func walk(_ n: [String: Any]) {
+    let kids = (n["children"] as? [[String: Any]]) ?? []
+    if kids.isEmpty, let label = n["AXLabel"] as? String, !label.isEmpty, let f = frameOf(n), f.width >= 4, f.height >= 4,
+       f.width < app.width * 0.8, f.height < app.height * 0.5, app.contains(CGPoint(x: f.midX, y: f.midY)) { found.append((label, f)) }
+    kids.forEach(walk)
+  }
+  walk(root)
+  found.sort { $0.frame.midY < $1.frame.midY }
+  guard found.count > 4 else { return found }
+  return [0, found.count / 3, 2 * found.count / 3, found.count - 1].map { found[$0] }
+}
+/** Whether a hit is the probe: the same label, overlapping it (a hit is the deepest element, which a leaf is). */
+func isProbe(_ hit: [String: Any]?, _ probe: (label: String, frame: CGRect)) -> Bool {
+  guard let hit, (hit["AXLabel"] as? String) == probe.label, let f = frameOf(hit) else { return false }
+  return f.intersects(probe.frame)
+}
+@MainActor
+func measurePlacement(_ simulator: FBSimulator, pid: Int, app: CGRect, root: [String: Any]) async -> Placement? {
+  let W = Double(display.width), H = Double(display.height)
+  guard W > 0, H > 0, app.width > 0, app.height > 0 else { return nil }
+  // About 60 hit tests, 10 to 25 ms each once a phone is warm; right after a boot one can take seconds, so the
+  // measurement gives up after 4 s (the read goes on unplaced, said so, and the next read after unplacedRetry tries again).
+  let deadline = Date().addingTimeInterval(4)
+  var late: Bool { Date() > deadline }
+  func inside(_ x: Double, _ y: Double) async -> Bool {
+    if late { return false }
+    return intValue(await rawHit(simulator, x, y)?["pid"]) == pid
+  }
+  // A point in the window: the screen's middle, else one of a grid.
+  var start: (x: Double, y: Double)? = nil
+  var grid: [(x: Double, y: Double)] = []
+  for gy in [0.5, 0.3, 0.7, 0.15, 0.85] { for gx in [0.5, 0.3, 0.7, 0.15, 0.85] { grid.append((W * gx, H * gy)) } }
+  for p in grid where start == nil && !late { if await inside(p.x, p.y) { start = p } }
+  guard let s = start, !late else { return nil }
+  /** Where the window ends between a point in it (from) and the screen's edge (to), to a quarter of a point. */
+  func edge(_ from: Double, _ to: Double, _ at: (Double) -> (x: Double, y: Double)) async -> Double {
+    if await inside(at(to).x, at(to).y) { return to }
+    var a = from, b = to
+    while abs(b - a) > 0.25 { let m = (a + b) / 2; if await inside(at(m).x, at(m).y) { a = m } else { b = m } }
+    return (a + b) / 2
+  }
+  let left = await edge(s.x, 0) { ($0, s.y) }, right = await edge(s.x, W) { ($0, s.y) }
+  let top = await edge(s.y, 0) { (s.x, $0) }, bottom = await edge(s.y, H) { (s.x, $0) }
+  let across = (right - left) / Double(app.width), down = (bottom - top) / Double(app.height)
+  let candidates = [
+    Placement(x: left - across * Double(app.minX), y: bottom - across * Double(app.maxY), scale: across),
+    Placement(x: left - across * Double(app.minX), y: top - across * Double(app.minY), scale: across),
+    Placement(x: left - down * Double(app.minX), y: top - down * Double(app.minY), scale: down),
+    Placement(x: right - down * Double(app.maxX), y: bottom - down * Double(app.maxY), scale: down),
+    Placement.identity,
+  ].filter { $0.scale > 0.2 && $0.scale < 5 }
+  if late { return nil }
+  let checks = probes(root, app: app)
+  // Nothing labelled to check against: the window's sides and bottom (its top may be under the status bar).
+  if checks.isEmpty { return candidates.first }
+  var best: (placement: Placement, score: Int)? = nil
+  for candidate in candidates {
+    var score = 0
+    for probe in checks {
+      let m = candidate.rect(probe.frame)
+      guard m.midX > 0, m.midX < W, m.midY > 0, m.midY < H else { continue }
+      if isProbe(await rawHit(simulator, Double(m.midX), Double(m.midY)), probe) { score += 1 }
+    }
+    if score > (best?.score ?? 0) { best = (candidate, score) }
+    if score == checks.count || late { break }
+  }
+  return best?.placement
+}
+/** Whether the app is still where it was measured: one of its labelled leaves, or else its middle, answers there. */
+@MainActor
+func stillPlaced(_ simulator: FBSimulator, _ p: Placement, pid: Int, app: CGRect, root: [String: Any]) async -> Bool {
+  if let probe = probes(root, app: app).first {
+    let m = p.rect(probe.frame)
+    return isProbe(await rawHit(simulator, Double(m.midX), Double(m.midY)), probe)
+  }
+  let m = p.rect(app)
+  return intValue(await rawHit(simulator, Double(m.midX), Double(m.midY))?["pid"]) == pid
+}
+/** The tree in screen points (see Placement). An app that fills the screen, as every app on an iPhone does, is as read. */
+@MainActor
+func onScreen(_ simulator: FBSimulator, _ tree: Any) async -> Any {
+  guard var roots = tree as? [[String: Any]], let root = roots.first, let app = frameOf(root), let pid = intValue(root["pid"]), display.width > 0,
+        !(abs(app.minX) < 1 && abs(app.minY) < 1 && abs(app.width - display.width) < 1 && abs(app.height - display.height) < 1) else { return tree }
+  var placement: Placement? = nil
+  if let last = lastPlacement, last.pid == pid, last.app == app,
+     last.placement == nil ? Date().timeIntervalSince(last.at) < unplacedRetry : await stillPlaced(simulator, last.placement!, pid: pid, app: app, root: root) {
+    placement = last.placement
+  } else {
+    placement = await measurePlacement(simulator, pid: pid, app: app, root: root)
+    lastPlacement = (pid, app, placement, Date())
+  }
+  let screen: [String: Any] = ["width": Double(display.width), "height": Double(display.height)]
+  guard let p = placement else {
+    roots[0]["placement"] = "unknown"; roots[0]["display"] = screen
+    return roots
+  }
+  if p.isIdentity { return tree }
+  // The root's children are the app's windows. One the size of the screen is the iPad's own (its keyboard, across
+  // the screen): already in screen points (iPadOS 27, October 30, 2026), so it is left as it is.
+  roots = roots.map { root in
+    var top = placed(root.filter { $0.key != "children" }, p)
+    if let windows = root["children"] as? [[String: Any]] {
+      top["children"] = windows.map { w in
+        guard let f = frameOf(w), abs(f.width - display.width) < 1, abs(f.height - display.height) < 1 else { return placed(w, p) }
+        return w
+      }
+    }
+    return top
+  }
+  roots[0]["placement"] = ["x": p.x, "y": p.y, "scale": p.scale]; roots[0]["display"] = screen
+  return roots
+}
+
 /** Some text in the element or under it, scroll bars aside. */
 func hasText(_ node: [String: Any]) -> Bool {
   if (node["role"] as? String) == "AXSlider" { return false }
@@ -393,11 +566,7 @@ func webScan(_ simulator: FBSimulator, region: CGRect, deadline: Date, appPid: I
       if reads >= 24 && !foreign { return ([], reads, true, false) }
       if let inside = covered.first(where: { $0.minX <= x && x <= $0.maxX && $0.minY <= y && y <= $0.maxY }) { y = inside.maxY + 1; continue }
       reads += 1
-      var hit: [String: Any]? = nil
-      if let element = try? await simulator.accessibilityElement(at: CGPoint(x: x, y: y)) {
-        hit = (try? element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: false, keys: outputKeys)).elements).map(withDefaults) as? [String: Any]
-        element.close()
-      }
+      let hit = (await rawHit(simulator, x, y)).map { onScreen($0, at: CGPoint(x: x, y: y)) } as? [String: Any]
       if let pid = intValue(hit?["pid"]), pid != appPid, pid > 0 { foreign = true }
       guard let node = hit, let frame = frameOf(node), frame.width > 0, frame.height > 0, frame.width * frame.height < area * 0.5 else { y += 20; continue }
       // The app's own elements over the page (a keyboard's bar, a toolbar) are in its tree already: jump past them.
@@ -421,11 +590,7 @@ func webScan(_ simulator: FBSimulator, region: CGRect, deadline: Date, appPid: I
     if covered.contains(where: { $0.contains(point) }) { continue }
     if Date() > deadline || reads >= 600 { return (ordered(), reads, false, true) }
     reads += 1
-    var hit: [String: Any]? = nil
-    if let element = try? await simulator.accessibilityElement(at: point) {
-      hit = (try? element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: false, keys: outputKeys)).elements).map(withDefaults) as? [String: Any]
-      element.close()
-    }
+    let hit = (await rawHit(simulator, point.x, point.y)).map { onScreen($0, at: point) } as? [String: Any]
     guard let node = hit, let f = frameOf(node), f.width > 0, f.height > 0, f.width * f.height < area * 0.5, intValue(node["pid"]) != appPid else { continue }
     let key = "\(node["role"] ?? "")|\(node["AXLabel"] ?? "")|\(node["AXValue"] ?? "")|\(Int(f.minX)),\(Int(f.minY)),\(Int(f.width)),\(Int(f.height))"
     if seen.insert(key).inserted {
@@ -522,6 +687,7 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
         }
       }
       lastFrontPid = intValue((tree as? [[String: Any]])?.first?["pid"]) ?? -1
+      tree = await onScreen(simulator, tree)
       if webScanOn { tree = await withWebContent(simulator, tree) }
       lastTreeSignature = signature(tree)
       return tree
@@ -559,6 +725,7 @@ func main() async {
       screen["width"] = IOSurfaceGetWidth(ref); screen["height"] = IOSurfaceGetHeight(ref)
     }
     if let scale = (simulator as AnyObject).value(forKeyPath: "device.deviceType.mainScreenScale") as? NSNumber { screen["scale"] = scale.doubleValue }
+    if let w = screen["width"] as? Int, let h = screen["height"] as? Int, let scale = screen["scale"] as? Double, scale > 0 { display = CGSize(width: Double(w) / scale, height: Double(h) / scale) }
     emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen])
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
@@ -609,7 +776,7 @@ func main() async {
               let element = try await simulator.accessibilityElement(at: CGPoint(x: x, y: y))
               defer { element.close() }
               // nested: the element with everything under it (a hit on a web page's background is the page).
-              answer["element"] = withDefaults(try element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: (req["nested"] as? Bool) ?? false, keys: outputKeys)).elements)
+              answer["element"] = onScreen(withDefaults(try element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: (req["nested"] as? Bool) ?? false, keys: outputKeys)).elements), at: CGPoint(x: x, y: y))
               break
             } catch {
               if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; continue }

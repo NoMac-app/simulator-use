@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { resolve as resolvePath } from "node:path";
+import { dirname, isAbsolute, resolve as resolvePath } from "node:path";
 
 import { appInfo, BUNDLE_ID, bundleIdOf, install, pushPayload, simctlAction, stopLogStream } from "../engine/apps.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
@@ -10,6 +10,8 @@ import { setting } from "../settings.ts";
 import { readScreen } from "../look/read.ts";
 import { render } from "../look/snapshot.ts";
 import { grantAll, openInPrompt, setPermissionMode } from "../engine/prompts.ts";
+import { applyStoreKit, removeStoreKit } from "../engine/storekit.ts";
+import { lastProject } from "../engine/xcode.ts";
 import { launchAndLook, tapPrompt } from "./launch-app.ts";
 import type { Tool } from "./types.ts";
 
@@ -24,7 +26,7 @@ export async function openUrl(udid: string, url: string): Promise<void> {
   await simctlAction(["openurl", udid, url], "open the link");
 }
 
-const ACTIONS = ["launch", "install", "terminate", "uninstall", "open_url", "grant", "revoke", "reset_permissions", "location", "push", "appearance", "locale", "timezone", "text_size", "status_bar"];
+const ACTIONS = ["launch", "install", "terminate", "uninstall", "open_url", "grant", "revoke", "reset_permissions", "location", "push", "storekit", "appearance", "locale", "timezone", "text_size", "status_bar"];
 /** simctl ui content_size's sizes. */
 const TEXT_SIZES = ["extra-small", "small", "medium", "large", "extra-large", "extra-extra-large", "extra-extra-extra-large",
   "accessibility-medium", "accessibility-large", "accessibility-extra-large", "accessibility-extra-extra-large", "accessibility-extra-extra-extra-large"];
@@ -38,6 +40,7 @@ const VALUE: Record<string, string> = {
   revoke: "a permission, as for grant",
   location: '"latitude,longitude", or "clear"',
   push: 'the notification text, or a JSON payload with "aps"',
+  storekit: 'a .storekit file (its path, or its path in the project app_run built), or "clear"',
   appearance: '"light" or "dark"',
   locale: 'a language and region, like "fr_FR", "pt-BR" or "zh-Hans_CN"',
   timezone: 'an IANA time zone, like "Europe/Paris", or "clear"',
@@ -80,11 +83,20 @@ export function pushJson(value: string): string {
   return trimmed;
 }
 
+/** A .storekit path: as given, or else in the folder of the project app_run built last (a cloud phone's upload). */
+async function storeKitFile(value: string): Promise<string> {
+  const here = resolvePath(value);
+  if (isAbsolute(value) || existsSync(here)) return here;
+  const project = await lastProject();
+  const there = project ? resolvePath(dirname(project), value) : undefined;
+  return there && existsSync(there) ? there : here;
+}
+
 export const appControl: Tool = {
   name: "app_control",
   title: "Control an app",
   description:
-    "Launch, install, stop or remove an app on the Simulator; open a URL or deep link; grant, revoke or reset a permission; set the location; send a push; set the phone's appearance, locale, time zone, text size or a clean status bar. launch answers with the app's first screen; later calls default to the app launched last.",
+    "Launch, install, stop or remove an app; open a URL or deep link; grant, revoke or reset a permission; set the location; send a push; test purchases (.storekit); set the phone's appearance, locale, time zone, text size or a clean status bar. launch answers with its first screen; app defaults to the last launched.",
   inputSchema: {
     type: "object",
     properties: {
@@ -172,6 +184,15 @@ export const appControl: Tool = {
       case "push":
         await pushPayload(device.udid, bundleId!, pushJson(value!));
         return { text: `Sent a push to ${bundleId}.` };
+      case "storekit": {
+        if (value!.trim() === "clear") {
+          await removeStoreKit(device.udid, bundleId!);
+          return { text: `${bundleId} uses the App Store again (in a Simulator its products load, and purchases need a device). Relaunch it: app_control {action: "launch"}.` };
+        }
+        const file = await storeKitFile(value!.trim());
+        await applyStoreKit(device.udid, bundleId!, file);
+        return { text: `${bundleId} now uses ${file} for StoreKit: its products, purchases and subscriptions are local (StoreKit Testing), with no Apple Account, until the app is removed. Purchases complete without iOS's purchase sheet. Launch or relaunch it so it loads them: app_control {action: "launch"}.` };
+      }
       case "appearance": {
         const mode = value!.trim().toLowerCase();
         if (mode !== "light" && mode !== "dark") throw new ToolError(`Appearance is "light" or "dark", not "${value}".`);

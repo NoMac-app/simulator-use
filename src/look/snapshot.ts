@@ -21,6 +21,14 @@ export type AxNode = {
   children?: AxNode[];
   /** "point_scan": read from a web page by the engine's web scan (native/engine), not from the app's own tree. */
   found_by?: string;
+  /**
+   * On the app's root, from the engine: the app runs in a window (an iPhone app on an iPad), placed at x, y on the
+   * screen and drawn scale times its size, its frames already moved there; "unknown" when the window could not be
+   * measured, its frames then the app's own.
+   */
+  placement?: { x: number; y: number; scale: number } | "unknown";
+  /** On the app's root, beside placement: the whole screen in points (the app's root is its window). */
+  display?: { width: number; height: number };
 };
 
 /** One element the agent can see, with the point to tap it. */
@@ -50,7 +58,12 @@ export type Snapshot = {
   unreadable: Frame[];
   /** A sheet, cover or alert in front: what is listed is only what it shows. */
   modal?: "alert" | "screen";
+  /** The app's area: the whole screen, or its window. */
   screen: Frame;
+  /** An app in a window (an iPhone app on an iPad): how much it is scaled, or "unknown" when its place was not found. */
+  window?: { scale: number } | "unknown";
+  /** The whole screen in points, when the app is in a window (screen is then the window). */
+  display?: { width: number; height: number };
 };
 
 /** UIKit's keyboard, its suggestion bar and the view holding both: shown to the agent as one line. */
@@ -166,6 +179,24 @@ function box(node: AxNode): Frame | undefined {
   }
 }
 
+/** The box around what a part shows (its readable elements): a part's own frame can be the whole screen when its content is not. */
+function contentBox(node: AxNode): Frame | undefined {
+  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+  for (const n of walkAll([node])) {
+    if (!n.frame || !area(n.frame) || !readableOwn(n)) continue;
+    left = Math.min(left, n.frame.x); top = Math.min(top, n.frame.y);
+    right = Math.max(right, n.frame.x + n.frame.width); bottom = Math.max(bottom, n.frame.y + n.frame.height);
+  }
+  return left === Infinity ? undefined : { x: left, y: top, width: right - left, height: bottom - top };
+}
+/** Whether what one part shows lies over what another shows: a quarter of the smaller of the two, or more. */
+function covers(front: AxNode, back: AxNode): boolean {
+  const a = contentBox(front), b = contentBox(back);
+  if (!a || !b) return true;
+  const width = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x), height = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+  return width > 0 && height > 0 && width * height >= 0.25 * Math.min(area(a), area(b));
+}
+
 /**
  * What is in front. An alert (an AXSheet: the app's own, or iOS's permission prompts) always is. Otherwise a
  * presented sheet or full-screen cover is a later sibling of the screen it covers, near the top of the tree:
@@ -188,9 +219,12 @@ function frontLayer(roots: AxNode[], screen: Frame): { nodes: AxNode[]; modal?: 
         // Something must be behind it: on an iPad the tab bar is its own part before the screen, and a screen
         // after a part that only holds tabs is just the screen. What it covers is a screen too: iOS 27's large
         // title is its own small part before the list, and a list after a title strip is just the screen.
+        // And it must cover what is behind it: an iPad's split view (Settings' sidebar beside its pages) is two
+        // parts side by side, the later one's frame the whole screen while what it shows is only on its side.
         const behind = parts
           .slice(0, i)
-          .some((p) => (area(box(p) ?? { x: 0, y: 0, width: 0, height: 0 }) >= area(screen) * 0.3) && [...walkAll([p])].some((n) => readableOwn(n) && n.subrole !== "AXTabButton" && !isTabBar(n)));
+          .some((p) => (area(box(p) ?? { x: 0, y: 0, width: 0, height: 0 }) >= area(screen) * 0.3) && [...walkAll([p])].some((n) => readableOwn(n) && n.subrole !== "AXTabButton" && !isTabBar(n))
+            && covers(part, p));
         if (large && actionable && behind && ![...walkAll([part])].some(isTabBar)) return { nodes: [part], modal: "screen" };
       }
       return { nodes: roots };
@@ -201,11 +235,17 @@ function frontLayer(roots: AxNode[], screen: Frame): { nodes: AxNode[]; modal?: 
   return { nodes: roots };
 }
 
-/** The on-screen keyboard's frame, or undefined when there is none or it is off screen (a hardware keyboard). */
-function keyboardFrame(nodes: AxNode[], screen: Frame): Frame | undefined {
+/**
+ * The on-screen keyboard's frame, or undefined when there is none or it is off screen (a hardware keyboard). For
+ * an app in a window (an iPhone app on an iPad), its own inputView is only where the app thinks the keyboard is:
+ * the iPad's keyboard, across the bottom of the screen, is the one that covers anything.
+ */
+function keyboardFrame(nodes: AxNode[], screen: Frame, windowed = false): Frame | undefined {
   let found: Frame | undefined;
-  for (const n of walkAll(nodes)) {
-    if (!isKeyboard(n) || !n.frame) continue;
+  const keyboards = [...walkAll(nodes)].filter((n) => isKeyboard(n) && n.frame);
+  const real = windowed && keyboards.some((n) => n.AXUniqueId !== "inputView") ? keyboards.filter((n) => n.AXUniqueId !== "inputView") : keyboards;
+  for (const n of real) {
+    if (!n.frame) continue;
     const part = visible(n.frame, screen, screen.y + screen.height);
     if (part && (!found || part.y < found.y)) found = { ...part, height: screen.y + screen.height - part.y };
   }
@@ -261,6 +301,8 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
     unreadable: [],
     screen,
     ...(front.modal ? { modal: front.modal } : {}),
+    ...(app.placement === "unknown" ? { window: "unknown" as const } : app.placement ? { window: { scale: app.placement.scale } } : {}),
+    ...(app.display ? { display: app.display } : {}),
   };
   const nodes = front.nodes;
 
@@ -279,7 +321,7 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
 
   // An on-screen keyboard covers the bottom of the screen, tab bar included; its own bottom row (Emoji,
   // Dictate) sits outside its groups on iOS 27, so everything whose middle is under it is left out.
-  const keyboard = keyboardFrame(roots, screen);
+  const keyboard = keyboardFrame(roots, screen, Boolean(app.placement));
   result.keyboard = Boolean(keyboard);
   if (keyboard) result.keyboardTop = Math.round(keyboard.y);
   const bottom = keyboard ? keyboard.y : screen.y + screen.height;
@@ -304,6 +346,7 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
     else result.hidden.below++;
   };
 
+  const listed = new Set<string>();
   const walk = (node: AxNode, owner: Element | null, inBar: boolean, inTabGroup: boolean, parentLabel: string) => {
     if (isKeyboard(node)) return;
     const nowInBar = inBar || barFrames.has(node.frame);
@@ -327,6 +370,12 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
       const onBar = nowInBar || kind === "tab";
       const shown = onBar ? visible(node.frame, screen, bottom) : visible(node.frame, screen, floor, ceiling);
       const point = shown ? center(shown) : null;
+      if (keyboard && shown && inside(center(node.frame), keyboard) && node.children?.length) {
+        // A container whose middle is under the keyboard (an alert taller than the room above it) keeps what of it
+        // is above: each child is judged on its own.
+        for (const child of node.children) walk(child, owner, nowInBar, node.role === "AXTabGroup", label || parentLabel);
+        return;
+      }
       if (keyboard && (!shown || inside(center(node.frame), keyboard))) return;
       const covered = point && !onBar && tabBar && inside(point, tabBar);
       if (!shown || covered) {
@@ -361,10 +410,11 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
         if (value) element.value = value;
         const state = stateOf(kind, node);
         if (state) element.state = state;
+        // The same element twice (iPad Settings' pages are in its tree twice, in two orders) is listed once.
         if (kind === "tab") result.tabs.push(element);
-        else {
-          const last = result.elements.at(-1);
-          if (!last || line(last) !== line(element)) result.elements.push(element);
+        else if (!listed.has(line(element))) {
+          listed.add(line(element));
+          result.elements.push(element);
         }
       }
     }
@@ -462,6 +512,12 @@ export function render(snap: Snapshot, options: RenderOptions = {}): string {
       lines.push(`No element matches ${quote(options.find)} (${snap.elements.length + snap.tabs.length} on screen).\nNext: ui_look without find lists them.`);
       return lines.join("\n");
     }
+  }
+  if (snap.window === "unknown") {
+    lines.push("This app is in a window whose place on the screen could not be measured: positions are the app's own and may be off. Check with ui_look screenshot and tap @x,y.");
+  } else if (snap.window) {
+    const { x, y, width, height } = snap.screen, scale = Math.round(snap.window.scale * 100) / 100;
+    lines.push(`This app is in a window at x ${Math.round(x)} to ${Math.round(x + width)}, y ${Math.round(y)} to ${Math.round(y + height)}${scale === 1 ? "" : `, drawn ${scale} times its size`} (an iPhone app on an iPad): positions are the screen's points, as in a screenshot.`);
   }
   if (snap.modal === "alert") lines.push("An alert is in front: answer it with one of its buttons.");
   else if (snap.modal === "screen") lines.push("Something is in front (a sheet, menu or full-screen view); the screen behind it is not listed.");

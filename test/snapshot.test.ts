@@ -257,3 +257,37 @@ test("a web page's checkbox, which WebKit reports as a switch, is a checkbox; a 
   assert.match(out, /^checkbox "Bacon" off @76,212$/m);
   assert.match(out, /^switch "Wi-Fi" off @76,272$/m);
 });
+
+// iPad Air 11-inch (M3), iOS 26.5, from the engine (October 30, 2026).
+const ipad = (name: string) => render(snapshot(fixture(name)), { device: "iPad Air 11-inch (M3) (iOS 26.5)" });
+
+test("an iPhone app in a window on an iPad: screen points, and the window said once", () => {
+  const snap = snapshot(fixture("ipad-iphone-app"));
+  assert.deepEqual(snap.window, { scale: 1.7681 });
+  assert.deepEqual(snap.display, { width: 820, height: 1180 });
+  assert.equal(
+    ipad("ipad-iphone-app"),
+    [
+      "Repro · iPad Air 11-inch (M3) (iOS 26.5)",
+      "This app is in a window at x 79 to 742, y 1 to 1180, drawn 1.77 times its size (an iPhone app on an iPad): positions are the screen's points, as in a screenshot.",
+      'text "Account=tester@example.com pwlen=11" #status @411,125',
+      'button "Sign in" @411,590',
+      'button "Start free week" @410,1038',
+    ].join("\n"),
+  );
+  // A window the engine could not measure: its positions are the app's own, and the agent is told so.
+  const unknown = fixture("ipad-iphone-app");
+  unknown[0]!.placement = "unknown";
+  assert.match(render(snapshot(unknown)), /^This app is in a window whose place on the screen could not be measured: positions are the app's own and may be off\./m);
+  // An app that fills the screen says nothing about windows.
+  assert.doesNotMatch(look("login"), /window/);
+});
+
+test("iPad Settings: the sidebar beside the page is one screen, nothing in front, each row once", () => {
+  const out = ipad("ipad-settings");
+  assert.doesNotMatch(out, /in front/);
+  assert.match(out, /^button "Developer" #com\.apple\.settings\.developer @170,1071$/m);
+  assert.match(out, /^button "General" #com\.apple\.settings\.general @170,345$/m);
+  // The page's rows are in Apple's tree twice, in two orders: listed once each.
+  for (const row of ["About", "Keyboard", "Fonts", "Language & Region"]) assert.equal(out.split("\n").filter((l) => l.startsWith(`button "${row}"`)).length, 1, row);
+});

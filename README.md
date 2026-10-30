@@ -4,7 +4,7 @@
 
 - **Fast:** a whole-screen read in about 250 ms, a tap sent in under 1 ms, a screenshot in about 60 ms (measured on an M6 Mac mini, October 2026).
 - **Token-efficient:** one line per element the agent can use, nothing else; a dozen tools with short descriptions.
-- **Complete:** build, install, launch, XCTest and XCUITest per case, logs and crashes, video, permission prompts, iPhone and iPad.
+- **Complete:** build, install, launch, XCTest and XCUITest per case, logs and crashes, video, permission prompts, in-app purchases, iPhone and iPad.
 - **Continuously improved:** weekly releases driven by thousands of daily sessions.
 - **Anywhere:** `npx simulator-use cloud start` gives a cloud iPhone with Xcode to any machine.
 
@@ -119,6 +119,25 @@ DemoTests/rejectsAnEmailWithoutAt(): Tests/SignInTests.swift:18: Expectation fai
 - XCTest and Swift Testing both.
 - Each failing test is named the way `only` takes it, to rerun just that one.
 - "0 tests ran" (no test target, or a filter that matched nothing) is an error, never a pass.
+
+## In-app purchases
+
+The App Store's sandbox cannot complete a purchase in a Simulator (Apple: purchases there need a device; signing in fails with `AMSErrorDomain`). StoreKit Testing can, and `app_control storekit` applies the app's `.storekit` file the way Xcode's Run does, with no Xcode window and no change to the app:
+
+```
+simulator-use app storekit Products.storekit   # the app launched last; app_control {action: "storekit", value: "Products.storekit", app: "com.example.app"}
+simulator-use app launch                       # the app loads the file's products, and purchases complete at once
+simulator-use app storekit clear               # back to the App Store
+```
+
+- Products, purchases, subscriptions and renewals are local (environment `Xcode`), with no Apple Account.
+- Applying starts from the file's state: its products, no purchases. Purchases complete without iOS's purchase sheet, which is not in the app's accessibility tree.
+- It lasts until the app is removed: building and installing over it keeps it.
+- A relative path is looked up here, then in the folder of the project `app_run` built last (on a cloud phone, the uploaded project).
+
+## iPhone apps on an iPad
+
+App Review runs iPhone apps on an iPad, where iPadOS draws them in a window, moved and scaled. `ui_look` says so in a line of its own, and gives every position in the iPad's screen points, as taps and screenshots use them; a tap beside the window is reported as landing outside it.
 
 ## Logs and crashes
 
@@ -237,18 +256,19 @@ simulator-use reads the Simulator through a small native engine (`native/engine`
 ```sh
 npm install
 npm run axe        # fetch the pinned AXe into vendor/axe
-npm run native     # build the engine and the clipboard helper into vendor/axe (IDB_HEADERS: idb's PrivateHeaders)
+npm run native     # build the engine, the clipboard and StoreKit helpers into vendor/axe (IDB_HEADERS: idb's PrivateHeaders)
 npm test           # node --test, no build needed
 npm run build      # dist/ for the npm package
 node bin/simulator-use.js look
 ```
 
-The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0, Swift 6.3.2, which is Xcode 26.5 (build 17F42), the Xcode releases are built with. `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 26.5's `Contents/Developer`. The build is reproducible: from a fresh clone of a release tag, in any folder, with Xcode 26.5, both binaries match the published package byte for byte, signature included. sha256, checked October 26, 2026:
+The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0, Swift 6.3.2, which is Xcode 26.5 (build 17F42), the Xcode releases are built with. `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 26.5's `Contents/Developer`. The build is reproducible: from a fresh clone of a release tag, in any folder, with Xcode 26.5, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026:
 
-| Release | `simulator-use-engine` | `simulator-use-pbset` |
-|---|---|---|
-| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` |
-| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` |
+| Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
+|---|---|---|---|
+| 0.13.0 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
+| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
+| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
 
 `examples/swiftui-demo` is the sample app the tests' screens come from. `scripts/golden.sh` builds it, runs it on a Simulator and checks 19 golden tasks: build and launch in one call, sign in, toggle, open an item, back and scroll, the app's logs, a crash, a build error and a failing test as `file:line`, a video, and a wrong password that must fail loudly.
 

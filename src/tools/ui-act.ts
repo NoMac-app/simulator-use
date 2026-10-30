@@ -157,6 +157,8 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
     snap = s.snap;
     stale = false;
   };
+  /** The elements of the screen the last target was found on: which field of its kind it was. */
+  let located: Element[] = [];
   const locate = async (target: Target): Promise<Resolved> => {
     let r = resolve(snap, target);
     if (stale && isResolved(r) && r.element && !pinned(await elementAt(udid, r.x, r.y), r.element)) r = resolve(await fresh(), target);
@@ -173,17 +175,26 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       }
       throw new StepFailure(r.error, r.next);
     }
+    located = snap.elements;
     return r;
   };
-  /** What a field shows now: the one element under its point, or, when that read fails, the field in a full read. */
-  const fieldValue = async (at: { x: number; y: number }, element?: Element) => {
+  /**
+   * What a field shows now: the one element under its point, or, when that read fails, the field in a full read.
+   * A field can move after it was found (an on-screen keyboard scrolls a form, or slides an alert up), so the
+   * element under the point counts only when it is that field (its id, or else its size), and a full read finds it
+   * by its id, its point, or else as the same one of its kind (the second text field is still the second).
+   */
+  const fieldValue = async (at: { x: number; y: number }, element?: Element, nth = -1) => {
     const node = await elementAt(udid, at.x, at.y);
-    // The element under the point must be the field: an on-screen keyboard can scroll the form under it.
-    if (node && (!element?.id || String(node.AXUniqueId ?? "") === element.id)) return String(node.AXValue ?? "");
+    const same = node && (element?.id ? String(node.AXUniqueId ?? "") === element.id
+      : !element || !node.frame || (Math.abs(node.frame.width - element.frame.width) <= 2 && Math.abs(node.frame.height - element.frame.height) <= 2));
+    if (node && same) return String(node.AXValue ?? "");
     // The single-element read failed on a fresh Xcode 27 VM while the text had landed; a full read is slower but sure.
     const s = await fresh();
-    const now = s.elements.find((e) => (element?.id ? e.id === element.id : e.x === at.x && e.y === at.y));
-    return now ? (now.value ?? now.label ?? "") : "";
+    const now = s.elements.find((e) => (element?.id ? e.id === element.id : e.x === at.x && e.y === at.y && (!element || e.kind === element.kind)))
+      ?? (element && !element.id && nth >= 0 ? s.elements.filter((e) => e.kind === element.kind)[nth] : undefined);
+    // A field's text is its value, or its label when it has no value of its own (an empty value is no text).
+    return now ? (now.value || now.label || "") : "";
   };
   const readBack = async (at: Resolved, typed: string, kind: string | undefined, check: (shown: string) => boolean) => {
     // Keys reach a just-launched app slowly: a real agent's first fill read "gary@exampl" at 2.5 s and the full
@@ -193,7 +204,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
     let shown = "";
     do {
       const before = shown;
-      shown = await fieldValue(at, at.element);
+      shown = await fieldValue(at, at.element, at.element ? located.filter((e) => e.kind === at.element!.kind).indexOf(at.element) : -1);
       if (check(shown)) return shown;
       if (shown !== before) deadline = Math.min(Math.max(deadline, Date.now() + 1_000), started + READ_BACK_MAX_MS);
       await sleep(POLL_MS);
@@ -231,7 +242,10 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         if (render(snap) === was) {
           // What can't be read (some web views, custom drawing) can't show a tap's effect either.
           const blind = snap.unreadable.some((f) => r.x >= f.x && r.x <= f.x + f.width && r.y >= f.y && r.y <= f.y + f.height);
-          notes.push(blind ? `step ${n} (tap ${describeTarget(step.target)}): landed in content that can't be read (some web views, custom drawing); check it with ui_look screenshot` : `step ${n} (tap ${describeTarget(step.target)}): no visible change`);
+          // A point beside an app's window (an iPhone app on an iPad) reaches what is behind it, not the app.
+          const w = snap.screen, outside = snap.window && snap.window !== "unknown" && (r.x < w.x || r.x > w.x + w.width || r.y < w.y || r.y > w.y + w.height);
+          notes.push(outside ? `step ${n} (tap ${describeTarget(step.target)}): landed outside the app's window (x ${Math.round(w.x)} to ${Math.round(w.x + w.width)}, y ${Math.round(w.y)} to ${Math.round(w.y + w.height)}), so the app did not get it`
+            : blind ? `step ${n} (tap ${describeTarget(step.target)}): landed in content that can't be read (some web views, custom drawing); check it with ui_look screenshot` : `step ${n} (tap ${describeTarget(step.target)}): no visible change`);
         }
         return;
       }

@@ -43,6 +43,8 @@ export const uiLook: Tool = {
       text += `\nscreenshot file: ${file}`;
     }
     if (!args.screenshot) return { text };
-    return { text, image: { data: await screenshot(device.udid, snap.screen), mimeType: "image/jpeg" } };
+    // The whole screen, sized to its points: for an app in a window, the window is only part of it.
+    const points = snap.display ? { x: 0, y: 0, ...snap.display } : snap.screen;
+    return { text, image: { data: await screenshot(device.udid, points), mimeType: "image/jpeg" } };
   },
 };

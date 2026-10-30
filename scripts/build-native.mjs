@@ -1,5 +1,6 @@
 // Builds simulator-use's native parts into vendor/axe, beside AXe's frameworks, and checks them: the engine
-// (native/engine, a persistent Simulator driver) and the clipboard helper (native/pbset, built for the Simulator).
+// (native/engine, a persistent Simulator driver), the clipboard helper (native/pbset) and the StoreKit helper
+// (native/skconfig), both built for the Simulator.
 // Run by prepack after fetch-axe.mjs, on a Mac with Xcode: a release without the engine would quietly fall back to
 // AXe everywhere, so a failed build stops the pack. SIMULATOR_USE_SKIP_NATIVE=1 packs without them (CI's check of
 // the package, a local tarball for testing AXe alone).
@@ -32,7 +33,8 @@ const sh = (script) => execFileSync("bash", [script], { cwd: root, stdio: "inher
 sh(join(root, "native", "engine", "build.sh"));
 execFileSync("mv", [join(root, "native", "engine", "simulator-use-engine"), join(vendor, "simulator-use-engine")]);
 sh(join(root, "native", "pbset", "build.sh"));
-for (const [name, platform] of [["simulator-use-engine", "macOS"], ["simulator-use-pbset", "iOS Simulator"]]) {
+sh(join(root, "native", "skconfig", "build.sh"));
+for (const [name, platform] of [["simulator-use-engine", "macOS"], ["simulator-use-pbset", "iOS Simulator"], ["simulator-use-skconfig", "iOS Simulator"]]) {
   const path = join(vendor, name);
   const info = execFileSync("file", [path], { encoding: "utf8" });
   if (!/Mach-O/.test(info) || !/arm64/.test(info)) throw new Error(`${name} is not an arm64 Mach-O binary: ${info.trim()}`);
