@@ -152,7 +152,7 @@ test("where the iOS Simulator can't run, every tool that needs it says so and ho
   delete process.env.SIMULATOR_USE_NO_CLOUD_HINT;
   Object.defineProperty(process, "platform", { value: "linux" });
   try {
-    const want = "This machine can't run the iOS Simulator: it needs a Mac with Xcode.\nNext: cloud start runs every tool on a NoMac cloud iPhone Simulator, $0.80 an hour by the minute (https://nomac.app/?utm_source=simulator-use); then call this again. Or: run simulator-use on a Mac with Xcode.";
+    const want = "This machine can't run the iOS Simulator: it needs a Mac with Xcode.\nNext: cloud start runs every tool on a NoMac cloud iPhone Simulator, billed per minute (https://nomac.app); then call this again. Or: run simulator-use on a Mac with Xcode.";
     for (const [name, args] of [["app_run", { path: "." }], ["tests_run", { path: "." }], ["ui_look", {}], ["devices", {}]] as const) {
       const out = await callTool(name, args as Record<string, unknown>, { waitForJobs: true });
       assert.equal(out.text, want, name);

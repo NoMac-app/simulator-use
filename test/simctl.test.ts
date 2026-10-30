@@ -97,7 +97,7 @@ test("where simulator-use can't run, the next step is a cloud phone, then a Mac;
   await assert.rejects(listDevices(true), (e: unknown) => {
     assert.ok(e instanceof ToolError);
     assert.match(e.toText(), /can't run the iOS Simulator/);
-    assert.match(e.toText(), /Next: cloud start runs every tool on a NoMac cloud iPhone Simulator, \$0\.80 an hour by the minute \(.+\); then call this again\. Or: run simulator-use on a Mac with Xcode\.$/);
+    assert.match(e.toText(), /Next: cloud start runs every tool on a NoMac cloud iPhone Simulator, billed per minute \(.+\); then call this again\. Or: run simulator-use on a Mac with Xcode\.$/);
     assert.ok(e.toText().includes(NOMAC_URL));
     return true;
   });

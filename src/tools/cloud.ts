@@ -17,11 +17,19 @@ import type { CallContext, Tool, ToolResult } from "./types.ts";
 const READY_WAIT_MS = 40_000;
 const ACTIONS = ["start", "status", "extend", "stop", "run", "tunnel"];
 
-type Phone = { id: string; state: string; device?: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean };
+type Phone = { id: string; state: string; device?: string; message?: string; ready_at?: string | null; failure_code?: string | null; cost?: { accrued_microunits?: string; billable_seconds?: number }; cleanup_confirmed?: boolean;
+  /** The price the phone started at, which it keeps to its end (NoMac's offer). */
+  offer?: { rate_microunits_per_hour?: string } };
 /** A phone answer's links: view and control while it runs, its replay always. */
 type Links = { view?: string; control?: string; replay?: string };
 
-const dollars = (micro: string | undefined) => `$${(Number(micro ?? 0) / 1e6).toFixed(2)}`;
+/** Dollars to the cent, half a cent up, in integers (toFixed rounds an exact half cent down). */
+const dollars = (micro: string | undefined) => {
+  const cents = (BigInt(micro ?? 0) + 5_000n) / 10_000n;
+  return `$${cents / 100n}.${String(cents % 100n).padStart(2, "0")}`;
+};
+/** A phone's own hourly price from NoMac's answer ("$0.90 an hour"), never one written here: it can change. */
+const perHour = (phone: Phone) => (phone.offer?.rate_microunits_per_hour ? `${dollars(phone.offer.rate_microunits_per_hour)} an hour, billed per minute` : "billed per minute");
 const readPhone = async (api: CloudApi, id: string) => {
   const read = await api.json("GET", `/api/v1/simulator/sessions/${id}`);
   return { phone: read.session as Phone, links: (read.links ?? {}) as Links };
@@ -80,7 +88,7 @@ async function start(args: Record<string, unknown>, context: CallContext): Promi
     return { text: `The cloud phone ${id} is still starting after ${((Date.now() - started) / 1000).toFixed(0)} s.${why}\nNext: cloud status, or any tool: it waits for the phone.` };
   }
   const watch = watchLine((created.links ?? {}) as Links);
-  return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an ${DEVICE_NAMES[device ?? "iphone"]} Simulator on a NoMac Mac, $0.80 an hour by the minute.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
+  return { text: `Cloud phone ready in ${((Date.now() - started) / 1000).toFixed(1)} s: an ${DEVICE_NAMES[device ?? "iphone"]} Simulator on a NoMac Mac, ${perHour(phone)}.\nEvery tool now runs there; app_run and tests_run send the project first. cloud stop ends it.${watch}` };
 }
 
 /** The phone's tunnel to a backend on this machine, while this process runs (one at a time). */
@@ -154,7 +162,7 @@ async function status(): Promise<ToolResult> {
   const limit = (phone as Phone & { ready_at?: string | null; limits?: { max_duration_seconds?: number } });
   const until = phone.state === "ready" && limit.ready_at && limit.limits?.max_duration_seconds ? new Date(Date.parse(limit.ready_at) + limit.limits.max_duration_seconds * 1000).toISOString().slice(11, 16) : undefined;
   const stops = until ? ` It stops by ${until} UTC at the latest; cloud extend keeps it longer.` : "";
-  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} at $0.80 an hour.${stops}${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
+  return { text: `Cloud is on: phone ${phone.id} is ${phone.state}; ${minutes} min so far, ${dollars(phone.cost?.accrued_microunits)} (${perHour(phone)}).${stops}${tunnel ? `\n${tunnelLine(tunnel)}` : ""}${phone.state === "ready" ? watchLine(links) : ""}` };
 }
 
 /**
@@ -326,7 +334,7 @@ export const cloud: Tool = {
   command: "cloud",
   positional: ["action", "path"],
   description:
-    "A NoMac cloud iPhone or iPad Simulator, $0.80 an hour by the minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless), starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. extend: an hour more. stop: ends it. run (CI): start, build and run path, tests, screenshot, video, stop. tunnel: the phone reaches port here.",
+    "A NoMac cloud iPhone or iPad Simulator, billed per minute, for Linux, Windows, cloud agents, CI. start signs in (a link; NOMAC_API_KEY headless), starts one: until stop every tool runs there, app_run and tests_run send the project. status: phone, cost. extend: an hour more. stop: ends it. run (CI): start, build and run path, tests, screenshot, video, stop. tunnel: the phone reaches port here.",
   inputSchema: {
     type: "object",
     properties: {
