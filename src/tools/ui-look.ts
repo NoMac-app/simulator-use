@@ -8,6 +8,7 @@ import { heldDevice, stateDir } from "../engine/state.ts";
 import { readScreen } from "../look/read.ts";
 import { render, type Frame } from "../look/snapshot.ts";
 import type { Tool } from "./types.ts";
+import { setting } from "../settings.ts";
 
 /** A screenshot waits up to this long for the screen to hold still, comparing frames this far apart. */
 const STILL_WAIT_MS = 2_000;
@@ -51,7 +52,9 @@ export const uiLook: Tool = {
   command: "look",
   async run(args) {
     const device = pickDevice(await listDevices(), args.device as string | undefined, heldDevice());
-    const { tree, snap } = await readScreen(device.udid);
+    // A look reads the screen afresh. SIMULATOR_USE_LOOK_REUSE=on lets it take the engine's last read while the
+    // screen's pixels are unchanged, as ui_act's first read does (off by default: a look is the agent's ground truth).
+    const { tree, snap } = await readScreen(device.udid, true, { full: Boolean(args.full), reuse: !args.full && setting("LOOK_REUSE") === "on" });
     let text = render(snap, { device: `${device.name} (${device.runtime})`, find: args.find as string | undefined });
     const dir = stateDir();
     if (args.full || args.screenshot_file) await mkdir(dir, { recursive: true });

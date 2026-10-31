@@ -154,6 +154,11 @@ export async function engineCall(udid: string, request: Record<string, unknown>,
   }
 }
 
+/** Whether the phone has a working engine (one is started if needed): a request that sends input goes to it only then. */
+export async function hasEngine(udid: string): Promise<boolean> {
+  return Boolean(await engineFor(udid));
+}
+
 /**
  * Each AXe read opens and closes an automation session of its own. A phone refuses a session opened too soon after
  * the last one closed, and then every session after it (measured on iOS 27), so the time goes where the next engine

@@ -5,12 +5,12 @@ import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
 import { describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
 import { setPasteboard } from "../engine/apps.ts";
-import { batch, elementAt, gesture, pressButton, setSlider, typeStep } from "../engine/axe.ts";
+import { batch, elementAt, pressButton, setSlider, typeStep } from "../engine/axe.ts";
 import { ToolError } from "../errors.ts";
 import { withLock } from "../engine/lock.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { heldDevice } from "../engine/state.ts";
-import { readScreen, settle } from "../look/read.ts";
+import { type Input, readScreen, readWhenStill, settle, type SettleOptions } from "../look/read.ts";
 import { type AxNode, quote, render, type Element, type Snapshot } from "../look/snapshot.ts";
 import type { Tool, ToolResult } from "./types.ts";
 import { setting } from "../settings.ts";
@@ -23,7 +23,8 @@ const FIND_WAIT_MS = 2_000;
 /** Typed text reaches the app a moment after the keys do; this is how long the read-back waits for it. */
 const READ_BACK_MS = 2_500;
 const READ_BACK_MAX_MS = 8_000;
-const POLL_MS = 150;
+/** A read of the one field under a point takes a few milliseconds with the engine: the text is seen as it lands. */
+const POLL_MS = 30;
 /** Half an iOS slider thumb: the track runs this far inside the slider's frame at each end. */
 const SLIDER_THUMB_RADIUS = 14;
 /** After a tap that seems to change nothing, how long to keep looking before saying so. */
@@ -137,22 +138,26 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   if (bad >= 0) return { text: `Step ${bad + 1} (${maskedStep(lines[bad]!)}): ${steps[bad] as string}\nNothing was done.`, isError: true };
 
   const firstRead = Date.now();
-  let snap = (await readScreen(udid)).snap;
-  if (setting("DEBUG")) process.stderr.write(`simulator-use: first read ${Date.now() - firstRead} ms\n`);
+  // The screen as last read, when it has not changed since (the agent looked, then acts): see readScreen.
+  const first = await readScreen(udid, true, { reuse: true });
+  let snap = first.snap;
+  if (setting("DEBUG")) process.stderr.write(`simulator-use: first read ${Date.now() - firstRead} ms${first.reused ? ` (the last read again: ${first.reused})` : ""}\n`);
   const before = snap;
   const notes: string[] = [];
   // The field typed text goes into: the last field tapped or filled in this call.
   let field: Element | undefined;
   // After typing, the last read may be out of date (an on-screen keyboard can scroll the form), so the next
   // tap first checks the one element under its point (0.15 s) instead of reading the whole screen (0.45 s).
-  let stale = false;
+  // A read given again is checked the same way before its first tap.
+  let stale = Boolean(first.reused);
   const fresh = async () => {
     snap = (await readScreen(udid, false)).snap;
     stale = false;
     return snap;
   };
-  const settled = async (n: number) => {
-    const s = await settle(udid, snap.app);
+  /** Sends the input (if any) and waits until the screen holds still, then reads it. */
+  const settled = async (n: number, input?: Input, options?: SettleOptions) => {
+    const s = await settle(udid, snap.app, input, options);
     if (!s.settled) notes.push(`step ${n}: the screen was still changing after 4 s`);
     snap = s.snap;
     stale = false;
@@ -217,27 +222,25 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       case "tap": {
         const r = await locate(step.target);
         const was = render(snap);
-        const tapped = Date.now();
-        await batch(udid, [tapStep(r)]);
-        if (setting("DEBUG")) process.stderr.write(`simulator-use:   tap ${Date.now() - tapped} ms\n`);
-        field = r.element && FIELDS.has(r.element.kind) ? r.element : undefined;
-        if (field) {
+        if (r.element && FIELDS.has(r.element.kind)) {
+          await batch(udid, [tapStep(r)]);
+          field = r.element;
           stale = true;
           return;
         }
-        await settled(n);
+        field = undefined;
+        await settled(n, { steps: [tapStep(r)] });
         // On a fresh Xcode 27 Simulator the first touch-style tap (switches get one) changed nothing, twice in two
         // runs; the second always worked. A switch can be checked, so it gets one more tap only if nothing changed.
         if (render(snap) === was && r.element && (r.element.kind === "switch" || r.element.kind === "checkbox")) {
-          await batch(udid, [tapStep(r)]);
-          await settled(n);
+          await settled(n, { steps: [tapStep(r)] });
           if (render(snap) !== was) notes.push(`step ${n}: the ${r.element.kind} needed a second tap`);
         }
         // Some answers come late: iOS's photo permission prompt showed 2 s after the tap. Watch a little longer
-        // before saying nothing happened.
-        for (let waited = 0; render(snap) === was && waited < LATE_CHANGE_MS; waited += 500) {
-          await sleep(500);
-          await fresh();
+        // before saying nothing happened: until the screen changes from what was last read (and holds still),
+        // which the engine sees in the screen's pixels as it happens.
+        for (const until = Date.now() + LATE_CHANGE_MS; render(snap) === was && Date.now() < until; ) {
+          await settled(n, undefined, { firstChangeMs: Math.max(1, until - Date.now()), baseline: "kept" });
         }
         if (render(snap) === was) {
           // What can't be read (some web views, custom drawing) can't show a tap's effect either.
@@ -307,11 +310,10 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         if (step.target) {
           const r = await locate(step.target);
           const f = r.element?.frame ?? { x: r.x - 150, y: r.y - 20, width: 300, height: 40 };
-          await gesture(udid, sweepIn(f, direction, slow));
+          await settled(n, { gesture: sweepIn(f, direction, slow) });
         } else {
-          await gesture(udid, sweep(snap, direction, slow));
+          await settled(n, { gesture: sweep(snap, direction, slow) });
         }
-        await settled(n);
         if (render(snap) === was) notes.push(`step ${n} (${step.op} ${step.direction}): nothing moved${slow && !step.target ? ", so this is the end" : ""}`);
         return;
       }
@@ -319,8 +321,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         // A long press: context menus, drag handles, "press and hold to record".
         const r = await locate(step.target);
         const was = render(snap);
-        await batch(udid, [`touch -x ${r.x} -y ${r.y} --down --up --delay ${step.seconds}`]);
-        await settled(n);
+        await settled(n, { steps: [`touch -x ${r.x} -y ${r.y} --down --up --delay ${step.seconds}`] });
         if (render(snap) === was) notes.push(`step ${n} (hold ${describeTarget(step.target)}): no visible change`);
         return;
       }
@@ -345,8 +346,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
           const track = Math.max(1, f.width - 2 * SLIDER_THUMB_RADIUS);
           const at = (percent: number) => Math.round(f.x + SLIDER_THUMB_RADIUS + (percent / 100) * track);
           const y = Math.round(f.y + f.height / 2);
-          await gesture(udid, ["drag", "--start-x", `${at(reached)}`, "--start-y", `${y}`, "--end-x", `${at(step.percent)}`, "--end-y", `${y}`, "--duration", "0.6"]);
-          await settled(n);
+          await settled(n, { gesture: ["drag", "--start-x", `${at(reached)}`, "--start-y", `${y}`, "--end-x", `${at(step.percent)}`, "--end-y", `${y}`, "--duration", "0.6"] });
           ({ now, reached } = reading());
         }
         if (reached === undefined || Math.abs(reached - step.percent) > 2) {
@@ -360,9 +360,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         const button = [...snap.elements].reverse().find((e) => e.kind === "back");
         const { screen } = snap;
         const cy = Math.round(screen.y + screen.height / 2);
-        if (button) await batch(udid, [`tap -x ${button.x} -y ${button.y}`]);
-        else await gesture(udid, ["swipe", "--start-x", `${screen.x + 2}`, "--start-y", `${cy}`, "--end-x", `${Math.round(screen.x + screen.width * 0.75)}`, "--end-y", `${cy}`, "--duration", "0.3"]);
-        await settled(n);
+        await settled(n, button ? { steps: [`tap -x ${button.x} -y ${button.y}`] } : { gesture: ["swipe", "--start-x", `${screen.x + 2}`, "--start-y", `${cy}`, "--end-x", `${Math.round(screen.x + screen.width * 0.75)}`, "--end-y", `${cy}`, "--duration", "0.3"] });
         if (render(snap) === was) throw new StepFailure(button ? "The back button changed nothing." : "No back button, and swiping from the left edge changed nothing.", "Call ui_look to find another way back, such as a Close or Cancel button.");
         field = undefined;
         return;
@@ -373,8 +371,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         await settled(n);
         return;
       case "key":
-        await batch(udid, [`key ${KEYS[step.key]}`]);
-        await settled(n);
+        await settled(n, { steps: [`key ${KEYS[step.key]}`] });
         return;
       case "wait":
       case "gone": {
@@ -422,7 +419,8 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       };
     }
   }
-  if (stale) await fresh();
+  // After typing (or a tap on a field): the screen once the text is drawn, which the next call can take as it is.
+  if (stale) snap = await readWhenStill(udid);
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   const changes = diff(before, snap, deviceLabel);
   const quiet = changes === "no visible change" && notes.some((note) => note.endsWith("no visible change") || note.includes("can't be read"));

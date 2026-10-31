@@ -220,12 +220,63 @@ struct UIKitTable: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UINavigationController, context: Context) {}
 }
 
+/// Timing cases for simulator-use's settle (bench/hard.mjs): an answer that comes late, a push, a screen that never holds still.
+struct TimingView: View {
+    @State private var late = "Waiting"
+    @State private var count = 0
+    @State private var ticking = false
+    @State private var ticks = 0
+    var body: some View {
+        List {
+            Section("Late") {
+                Button("Late 0.5") { answer(after: 0.5) }.accessibilityIdentifier("late05")
+                Button("Late 1.0") { answer(after: 1.0) }.accessibilityIdentifier("late10")
+                Button("Late 1.5") { answer(after: 1.5) }.accessibilityIdentifier("late15")
+                Text(late).accessibilityIdentifier("lateStatus")
+            }
+            Section("Moving") {
+                Button(ticking ? "Stop ticker" : "Start ticker") { ticking.toggle() }.accessibilityIdentifier("ticker")
+                if ticking {
+                    HStack {
+                        ProgressView()
+                        Text("Tick \(ticks)").monospacedDigit().accessibilityIdentifier("ticks")
+                    }
+                }
+                Button("Count") { count += 1 }.accessibilityIdentifier("count")
+                Text("Count: \(count)").accessibilityIdentifier("countLabel")
+            }
+            Section("Navigation") {
+                NavigationLink("Push detail") {
+                    Text("Detail page").accessibilityIdentifier("detailText").navigationTitle("Detail")
+                }
+                .accessibilityIdentifier("push")
+            }
+        }
+        .navigationTitle("Timing")
+        .task(id: ticking) {
+            while ticking {
+                try? await Task.sleep(for: .milliseconds(100))
+                ticks += 1
+            }
+        }
+    }
+
+    private func answer(after seconds: Double) {
+        late = "Waiting"
+        Task {
+            try? await Task.sleep(for: .seconds(seconds))
+            late = "Done after \(seconds) s"
+        }
+    }
+}
+
 struct MoreView: View {
     var body: some View {
         NavigationStack {
             List {
                 NavigationLink("Web page") { WebBox().navigationTitle("Web") }
                 NavigationLink("UIKit table") { UIKitTable().ignoresSafeArea() }
+                NavigationLink("Timing") { TimingView() }
             }
             .navigationTitle("More")
         }

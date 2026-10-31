@@ -28,6 +28,12 @@ FBControlCoreGlobalConfiguration.defaultLogger = logger
 // Custom actions are left out unless asked for (keys): simulator-use never shows them, and on a web page a read with
 // them took about 2 s in one run (0.1 s in another) against 60 to 400 ms without.
 let outputKeys: Set<FBAXKeys> = [.label, .frame, .value, .uniqueID, .type, .title, .frameDict, .help, .enabled, .role, .roleDescription, .subrole, .contentRequired, .pid]
+/**
+ * What simulator-use's screen reads use (src/look/snapshot.ts), asked for with "lean": the frame once (as a
+ * dictionary), no title, hint or contentRequired. About a tenth fewer calls into the phone per read (October 31: 907
+ * against 1009 for the sign-in screen's 102 elements, 190 against 211 ms).
+ */
+let leanKeys: Set<FBAXKeys> = [.label, .frameDict, .value, .uniqueID, .type, .role, .roleDescription, .subrole, .enabled, .pid]
 
 func keyNamed(_ name: String) -> FBAXKeys? {
   switch name {
@@ -48,6 +54,8 @@ func cpuMs() -> Int {
 }
 /** The last tree any read returned, to tell a screen that moved but did not change yet (an app still opening). */
 var lastTreeSignature = 0
+/** Whether the last readFrontmost's tree is whole: no reload, or one whose elements then read the same twice. */
+var lastReadStable = true
 var lastFrontPid = -1
 /**
  * Content drawn by another process (a web page: Safari's or an app's WKWebView) is not in the frontmost app's tree.
@@ -124,6 +132,8 @@ func jpeg(fromPNG data: Data, maxPoints: (Double, Double)?, quality: Double) thr
 /** Counts the Simulator's screen updates: "settled" means no update for a quiet period. */
 final class DamageWatcher: NSObject, FBFramebufferConsumer, @unchecked Sendable {
   private let lock = NSLock(); private var lastUpdate = Date(); private var updates = 0
+  /** The last time the surface's seed moved: a write to the screen (damage callbacks also come without one). */
+  private var lastWrite = Date()
   var surface: IOSurface?; private var lastSeed: UInt32 = 0
   func didChange(_ surface: IOSurface?) { lock.lock(); if let surface { self.surface = surface }; lock.unlock(); mark() }
   func didReceiveDamageRect() { mark() }
@@ -132,7 +142,9 @@ final class DamageWatcher: NSObject, FBFramebufferConsumer, @unchecked Sendable 
   func pollSeed() { lock.lock(); defer { lock.unlock() }
     guard let surface else { return }
     let seed = IOSurfaceGetSeed(unsafeBitCast(surface, to: IOSurfaceRef.self))
-    if seed != lastSeed { lastSeed = seed; lastUpdate = Date(); updates += 1 } }
+    if seed != lastSeed { lastSeed = seed; lastUpdate = Date(); lastWrite = lastUpdate; updates += 1 } }
+  /** How long ago the screen was last written to, as the seed clock saw it (polled every 8 ms). */
+  func sinceLastWrite() -> TimeInterval { lock.lock(); defer { lock.unlock() }; return Date().timeIntervalSince(lastWrite) }
   func snapshot() -> (Date, Int) { lock.lock(); defer { lock.unlock() }; return (lastUpdate, updates) }
   /** The surface's seed now: equal seeds, unchanged pixels (damage callbacks also come without a change). */
   func currentSeed() -> UInt32? { lock.lock(); defer { lock.unlock() }
@@ -185,6 +197,7 @@ func blocking(_ work: @escaping @Sendable () throws -> Void) async throws {
  */
 var bootstrapCount = 0
 var signalSources: [DispatchSourceSignal] = []
+var seedClocks: [DispatchSourceTimer] = []
 var forceBootstrap = false
 var automationSession: AnyObject?
 var skipBootstrap = CommandLine.arguments.contains("--no-bootstrap")
@@ -381,6 +394,8 @@ struct Placement: Equatable {
 }
 /** The screen in points (the screen buffer's pixels over its scale), set at start. */
 var display = CGSize.zero
+/** Pixels per point of the screen buffer. */
+var pixelScale: CGFloat = 1
 /** The last measurement: the app (pid) whose root had this frame, where it was (nil: not found), and when. */
 var lastPlacement: (pid: Int, app: CGRect, placement: Placement?, at: Date)? = nil
 /** A window that could not be measured is not measured again for this long (each try costs about a second). */
@@ -665,16 +680,17 @@ func remoteOptions(_ value: Any?) -> FBAccessibilityRemoteContentOptions? {
 }
 @MainActor
 func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool = true) async throws -> Any {
-  var reloaded = false
+  var reloaded = false, reloadedAfterError = false
   lastSerializeMs = []
   for attempt in 0..<2 {
     do {
       var tree = try await serializeFrontmost(simulator, keys: keys, nested: nested)
-      if attempt == 0 && isEmptyApp(tree) { forceBootstrap = true; reloaded = true; continue }
+      if attempt == 0 && isEmptyApp(tree) { forceBootstrap = true; reloaded = true; lastReloadAt = Date(); continue }
       // After accessibility was reloaded (an app that read empty), its elements fill in over a moment: read again
       // until two reads agree, up to 2 s. A newly opened app is read again by simulator-use (opening() in
       // src/look/read.ts); the pid comparison that once did it here never fired (pids came back nil), and every
       // measurement of the day was made without it, so it stays off.
+      lastReadStable = !reloaded && !reloadedAfterError
       if reloaded {
         let start = Date()
         while Date().timeIntervalSince(start) < 2 {
@@ -683,7 +699,7 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
           let same = signature(next) == signature(tree)
           tree = next
           // Two equal reads of a nearly empty app are its shell before the content: not settled yet.
-          if same && !isEmptyApp(tree) && nodeCount(tree) >= 12 { break }
+          if same && !isEmptyApp(tree) && nodeCount(tree) >= 12 { lastReadStable = true; break }
         }
       }
       lastFrontPid = intValue((tree as? [[String: Any]])?.first?["pid"]) ?? -1
@@ -692,12 +708,59 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
       lastTreeSignature = signature(tree)
       return tree
     } catch {
-      if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; continue }
+      if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; reloadedAfterError = true; lastReloadAt = Date(); continue }
       throw error
     }
   }
   return []
 }
+/**
+ * An input as one HID event: {"op": "tap", x, y}, {"op": "swipe", x1, y1, x2, y2, delta, duration}, {"op": "drag",
+ * x1, y1, x2, y2, duration, steps, hold}, or {"op": "steps", steps: [...]}, simulator-use's input batch as one
+ * composite: [{"tap":[x,y]}, {"sleep":s}, {"key":code}, {"combo":{"mods":[codes],"key":code}}, {"type":"text"},
+ * {"touch":[x,y],"hold":s}].
+ */
+func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
+  switch req["op"] as? String ?? "" {
+  case "tap":
+    return .tapAt(x: req["x"] as? Double ?? 0, y: req["y"] as? Double ?? 0)
+  case "swipe":
+    let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
+    return .swipe(x1, yStart: y1, xEnd: x2, yEnd: y2, delta: req["delta"] as? Double ?? 10, duration: req["duration"] as? Double ?? 0.3)
+  case "drag":
+    // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag.
+    let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
+    let duration = req["duration"] as? Double ?? 0.6, n = max(1, Int(req["steps"] as? Double ?? 20))
+    var events: [FBSimulatorHIDEvent] = [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)]
+    for i in 1...n { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
+    events.append(.touch(direction: .up, x: x2, y: y2))
+    return .composite(events)
+  case "steps":
+    var events: [FBSimulatorHIDEvent] = []
+    for step in (req["steps"] as? [[String: Any]]) ?? [] {
+      if let p = step["tap"] as? [Double], p.count == 2 { events.append(.tapAt(x: p[0], y: p[1])) }
+      else if let s = step["sleep"] as? Double { events.append(.delay(s)) }
+      else if let k = step["key"] as? Int { events += [.keyboard(direction: .down, keyCode: UInt32(k)), .keyboard(direction: .up, keyCode: UInt32(k))] }
+      else if let c = step["combo"] as? [String: Any], let k = c["key"] as? Int {
+        let mods = ((c["mods"] as? [Int]) ?? []).map { UInt32($0) }
+        events += mods.map { .keyboard(direction: .down, keyCode: $0) }
+        events += [.keyboard(direction: .down, keyCode: UInt32(k)), .keyboard(direction: .up, keyCode: UInt32(k))]
+        events += mods.reversed().map { .keyboard(direction: .up, keyCode: $0) }
+      }
+      else if let t = step["type"] as? String { events += try TextToHIDEvents.convertTextToHIDEvents(t) }
+      else if let p = step["touch"] as? [Double], p.count == 2 {
+        events += [.touch(direction: .down, x: p[0], y: p[1]), .delay(step["hold"] as? Double ?? 0.1), .touch(direction: .up, x: p[0], y: p[1])]
+      }
+      else { throw EngineError(message: "unknown step \(step)") }
+    }
+    return .composite(events)
+  default:
+    throw EngineError(message: "input: an op of tap, swipe, drag or steps")
+  }
+}
+/** Requests that send input to the phone: after one, the kept read (Settle.swift) is the past. */
+let inputOps: Set<String> = ["tap", "swipe", "type", "steps", "drag", "lock", "home", "open_url", "tap_settle_describe", "tap_trace"]
+
 @MainActor
 func main() async {
   do {
@@ -718,6 +781,14 @@ func main() async {
     }
     let surface = framebuffer?.attach(watcher, on: DispatchQueue(label: "damage"))
     watcher.surface = surface
+    // The seed clock: when the screen last changed, known at any moment (a seed read every 8 ms costs nothing).
+    let seedClock = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "seed", qos: .utility))
+    seedClock.schedule(deadline: .now(), repeating: .milliseconds(8), leeway: .milliseconds(2))
+    let clock = WriteClock()
+    writeClock = clock
+    seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.surface) }
+    seedClock.resume()
+    seedClocks.append(seedClock)
     // The screen in pixels and its scale (points = pixels / scale), so a live view maps a click to a tap.
     var screen: [String: Any] = [:]
     if let surface {
@@ -725,7 +796,7 @@ func main() async {
       screen["width"] = IOSurfaceGetWidth(ref); screen["height"] = IOSurfaceGetHeight(ref)
     }
     if let scale = (simulator as AnyObject).value(forKeyPath: "device.deviceType.mainScreenScale") as? NSNumber { screen["scale"] = scale.doubleValue }
-    if let w = screen["width"] as? Int, let h = screen["height"] as? Int, let scale = screen["scale"] as? Double, scale > 0 { display = CGSize(width: Double(w) / scale, height: Double(h) / scale) }
+    if let w = screen["width"] as? Int, let h = screen["height"] as? Int, let scale = screen["scale"] as? Double, scale > 0 { display = CGSize(width: Double(w) / scale, height: Double(h) / scale); pixelScale = scale }
     emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen])
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
@@ -738,6 +809,9 @@ func main() async {
       let t0 = Date()
       guard let data = line.data(using: .utf8), let req = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let op = req["op"] as? String else { emit(["ok": false, "error": "bad request"]); continue }
       let id = req["id"] ?? NSNull()
+      if inputOps.contains(op) || (op == "watch" && req["tap"] != nil) { keptRead = nil }
+      // settle_read's input went out: a failure after it (the read) must not be answered by sending it again.
+      var inputSent = false
       do {
         var answer: [String: Any] = ["id": id, "ok": true]
         switch op {
@@ -760,11 +834,25 @@ func main() async {
             let unknown = names.filter { keyNamed($0) == nil }
             if !unknown.isEmpty { throw EngineError(message: "unknown keys \(unknown.joined(separator: ", ")); the names are label, frame, value, uniqueID, type, title, frameDict, help, enabled, customActions, role, roleDescription, subrole, contentRequired, pid, traits, expanded, placeholder, hidden, focused, isRemote") }
             keys = Set(names.compactMap(keyNamed))
+          } else if (req["lean"] as? Bool) == true {
+            keys = leanKeys
           }
           readRemote = remoteOptions(req["remote"]); readProfile = (req["profile"] as? Bool) ?? false; lastReadReport = [:]
           webScanOn = (req["web"] as? Bool) ?? true; webBudget = (req["web_budget_ms"] as? Double).map { $0 / 1000 } ?? 2.5
           defer { readRemote = nil; readProfile = false; webScanOn = true; webBudget = 2.5 }
-          answer["tree"] = try await readFrontmost(simulator, keys: keys, nested: (req["nested"] as? Bool) ?? true)
+          let nested = (req["nested"] as? Bool) ?? true
+          lastSerializeMs = []
+          // reuse: the last read again while the screen's pixels are as they were then (Settle.swift), within max_age_ms.
+          var again: (tree: Any?, why: String) = (nil, "")
+          if (req["reuse"] as? Bool) == true { again = await reusableRead(simulator, keys: keys, nested: nested, maxAge: (req["max_age_ms"] as? Double ?? 30_000) / 1000) }
+          if let tree = again.tree {
+            answer["tree"] = tree; answer["reused"] = again.why
+          } else {
+            if !again.why.isEmpty { answer["not_reused"] = again.why }
+            let still = writeClock?.sinceSignificantWrite() ?? 0
+            let read = try await trackedRead(simulator, keys: keys, nested: nested, stillBefore: still >= 0.1)
+            answer["tree"] = read.tree; answer["kept"] = read.kept; answer["still_ms"] = Int(still * 1000)
+          }
           answer["cpu_ms"] = cpuMs(); answer["serialize_ms"] = lastSerializeMs
           if sessionTurnMs > 0 { answer["session_wait_ms"] = sessionTurnMs; sessionTurnMs = 0 }
           if sessionRecoveries > 0 { answer["session_recoveries"] = sessionRecoveries }
@@ -783,44 +871,14 @@ func main() async {
               throw error
             }
           }
-        case "tap":
-          let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
-          try await hid.send(event: .tapAt(x: x, y: y), logger: logger)
-        case "swipe":
-          let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
-          try await hid.send(event: .swipe(x1, yStart: y1, xEnd: x2, yEnd: y2, delta: req["delta"] as? Double ?? 10, duration: req["duration"] as? Double ?? 0.3), logger: logger)
+        case "tap", "swipe":
+          var input = req; input["op"] = op
+          try await hid.send(event: try inputEvent(input), logger: logger)
         case "type":
           let text = req["text"] as? String ?? ""
           try await hid.send(event: .composite(try TextToHIDEvents.convertTextToHIDEvents(text)), logger: logger)
-        case "steps":
-          // simulator-use's input batch, as one HID composite: [{"tap":[x,y]}, {"sleep":s}, {"key":code},
-          // {"combo":{"mods":[codes],"key":code}}, {"type":"text"}, {"touch":[x,y],"hold":s}].
-          var events: [FBSimulatorHIDEvent] = []
-          for step in (req["steps"] as? [[String: Any]]) ?? [] {
-            if let p = step["tap"] as? [Double], p.count == 2 { events.append(.tapAt(x: p[0], y: p[1])) }
-            else if let s = step["sleep"] as? Double { events.append(.delay(s)) }
-            else if let k = step["key"] as? Int { events += [.keyboard(direction: .down, keyCode: UInt32(k)), .keyboard(direction: .up, keyCode: UInt32(k))] }
-            else if let c = step["combo"] as? [String: Any], let k = c["key"] as? Int {
-              let mods = ((c["mods"] as? [Int]) ?? []).map { UInt32($0) }
-              events += mods.map { .keyboard(direction: .down, keyCode: $0) }
-              events += [.keyboard(direction: .down, keyCode: UInt32(k)), .keyboard(direction: .up, keyCode: UInt32(k))]
-              events += mods.reversed().map { .keyboard(direction: .up, keyCode: $0) }
-            }
-            else if let t = step["type"] as? String { events += try TextToHIDEvents.convertTextToHIDEvents(t) }
-            else if let p = step["touch"] as? [Double], p.count == 2 {
-              events += [.touch(direction: .down, x: p[0], y: p[1]), .delay(step["hold"] as? Double ?? 0.1), .touch(direction: .up, x: p[0], y: p[1])]
-            }
-            else { throw EngineError(message: "unknown step \(step)") }
-          }
-          try await hid.send(event: .composite(events), logger: logger)
-        case "drag":
-          // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag.
-          let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
-          let duration = req["duration"] as? Double ?? 0.6, n = max(1, Int(req["steps"] as? Double ?? 20))
-          var events: [FBSimulatorHIDEvent] = [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)]
-          for i in 1...n { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
-          events.append(.touch(direction: .up, x: x2, y: y2))
-          try await hid.send(event: .composite(events), logger: logger)
+        case "steps", "drag":
+          try await hid.send(event: try inputEvent(req), logger: logger)
         case "lock":
           try await hid.send(event: .shortButtonPress(.lock), logger: logger)
         case "open_url":
@@ -831,6 +889,17 @@ func main() async {
         case "settle":
           let (waited, updates, settled) = await settle(watcher, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 0)
           answer["waited_ms"] = waited; answer["updates"] = updates; answer["settled"] = settled
+        case "settle_read":
+          // An input (optional), the wait until the screen holds still, and the read: one request (Settle.swift).
+          let event = try (req["input"] as? [String: Any]).map(inputEvent)
+          lastReadReport = [:]
+          lastSerializeMs = []
+          let result = try await settleRead(simulator, input: event.map { e in { try await hid.send(event: e, logger: logger); inputSent = true } },
+            firstChangeMs: req["first_change_ms"] as? Double ?? 800, quietMs: req["quiet_ms"] as? Double ?? 150, startMs: req["start_ms"] as? Double ?? 50,
+            guardMs: req["guard_ms"] as? Double ?? 35, timeoutMs: req["timeout_ms"] as? Double ?? 4000, keys: (req["lean"] as? Bool) == true ? leanKeys : outputKeys,
+            fromKept: (req["baseline"] as? String) == "kept")
+          for (key, value) in result { answer[key] = value }
+          if let scan = lastReadReport["web_scan"] { answer["web_scan"] = scan }
         case "tap_settle_describe":
           // One call for an act: the tap, the wait until the screen stops changing, then the new tree.
           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
@@ -850,6 +919,29 @@ func main() async {
           }
           answer["tree"] = tree; answer["settle_ms"] = waited; answer["updates"] = updates; answer["settled"] = settled; answer["read_ms"] = ms(readStart); answer["reads"] = reads
           if let scan = lastReadReport["web_scan"] { answer["web_scan"] = scan }
+        case "watch":
+          // Where the screen changes over window_ms, each change as [ms, x, y, width, height] in points (the box
+          // around what changed since the frame before; [ms] alone: the seed moved but no pixel did). An optional
+          // input first: tap [x, y], or steps as in "steps".
+          let windowMs = req["window_ms"] as? Double ?? 2000
+          guard let surface = watcher.surface else { throw EngineError(message: "no screen buffer") }
+          let reference = PixelReference()
+          guard reference.capture(surface) else { throw EngineError(message: "the screen buffer can't be read") }
+          var lastSeed = reference.seed
+          if let p = req["tap"] as? [Double], p.count == 2 { try await hid.send(event: .tapAt(x: p[0], y: p[1]), logger: logger) }
+          let start = Date(); var changes: [[Double]] = []; var diffMs = 0.0, diffs = 0
+          while Date().timeIntervalSince(start) * 1000 < windowMs {
+            try? await Task.sleep(nanoseconds: 4_000_000)
+            guard let seed = watcher.currentSeed(), seed != lastSeed else { continue }
+            lastSeed = seed
+            let at = Double(ms(start)), d0 = Date()
+            let (readable, box) = reference.diff(surface, update: true)
+            diffMs += Date().timeIntervalSince(d0) * 1000; diffs += 1
+            if !readable { changes.append([at, -1]); _ = reference.capture(surface); continue }
+            if let box { changes.append([at] + rectArray(CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale))) }
+            else { changes.append([at]) }
+          }
+          answer["changes"] = changes; answer["diff_ms_avg"] = diffs > 0 ? diffMs / Double(diffs) : 0
         case "tap_trace":
           // When the screen changes after a tap: one timestamp (ms after the tap) per surface change.
           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0, windowMs = req["window_ms"] as? Double ?? 3000
@@ -930,7 +1022,7 @@ func main() async {
         if let failure = lastBootstrapError { answer["bootstrap_error"] = failure; lastBootstrapError = nil }
         emit(answer)
       } catch {
-        emit(["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? String(describing: error)])
+        emit(["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? String(describing: error), "input_sent": inputSent])
       }
     }
     closeSession()

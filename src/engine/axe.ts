@@ -30,12 +30,25 @@ export class AccessibilityStarting extends ToolError {}
 // Also right after a boot: "No translation object returned for simulator" (iPhone 17e, 5 s after booting).
 const STARTING = /remote automation session|No translation object returned/i;
 
-export async function describeUi(udid: string): Promise<AxNode[]> {
+export async function describeUi(udid: string, options: { full?: boolean } = {}): Promise<AxNode[]> {
+  return (await describeScreen(udid, options)).tree;
+}
+
+/** How long a read is given again while the screen's pixels stay as they were (native/engine/Settle.swift). */
+const REUSE_MAX_AGE_MS = 30_000;
+
+/**
+ * The screen's tree. With reuse, the engine may give its last read again (reused says why: the screen's buffer is
+ * unchanged, its pixels are, or only a caret blinked), once a few of its elements read again one point each agree.
+ */
+export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string }> {
   // A web page's first read can take half a minute (Safari, iOS 27): the engine gets a minute.
-  const answer = await engineCall(udid, { op: "describe" }, 60_000);
+  const reuse = options.reuse && setting("REUSE") !== "off";
+  // lean: only the attributes the screen's text uses; full: every one (ui_look's full tree, for the agent to open).
+  const answer = await engineCall(udid, { op: "describe", ...(options.full ? {} : { lean: true }), ...(reuse ? { reuse: true, max_age_ms: REUSE_MAX_AGE_MS } : {}) }, 60_000);
   if (answer?.ok) {
     const tree = answer.tree as AxNode | AxNode[];
-    return Array.isArray(tree) ? tree : [tree];
+    return { tree: Array.isArray(tree) ? tree : [tree], ...(typeof answer.reused === "string" ? { reused: answer.reused } : {}) };
   }
   if (answer?.busy) throw new ToolError("Reading the screen took more than a minute.", "Call ui_look again: the phone is still working on the last read.");
   if (answer && STARTING.test(answer.error ?? "")) {
@@ -45,7 +58,7 @@ export async function describeUi(udid: string): Promise<AxNode[]> {
     const { stdout } = await run(axePath(), ["describe-ui", "--udid", udid], { timeoutMs: 30_000 });
     noteSessionClosed(udid);
     const parsed = JSON.parse(stdout) as AxNode | AxNode[];
-    return Array.isArray(parsed) ? parsed : [parsed];
+    return { tree: Array.isArray(parsed) ? parsed : [parsed] };
   } catch (error) {
     noteSessionClosed(udid);
     if ((error as { code?: unknown }).code === "ENOENT") throw new ToolError("AXe is missing from this install.", "Reinstall simulator-use, or set SIMULATOR_USE_AXE to an axe binary.");
