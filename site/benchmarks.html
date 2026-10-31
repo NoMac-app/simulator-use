@@ -44,6 +44,8 @@ header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
 header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
 header nav a { color: var(--muted); text-decoration: none; }
 header nav a:hover, header nav a[aria-current] { color: var(--text); }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
 
 .hero { padding: 72px 0 0; }
 h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 18px; max-width: 20ch; }
@@ -88,7 +90,7 @@ footer a:hover { color: var(--text); }
 <header>
   <div class="wrap">
     <a class="name" href="/">simulator-use</a>
-    <nav><a href="/benchmarks" aria-current="page">Benchmarks</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
+    <nav><a href="/benchmarks" aria-current="page">Benchmarks</a><a href="/vs">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
   </div>
 </header>
 
@@ -120,6 +122,7 @@ footer a:hover { color: var(--text); }
 <p class="fine" id="drift">simulator-use ran first and again last, 58 minutes later: sign-in 4.66 s, then 7.13 s (+53%); screen read 0.21 s, then 0.22 s (+5%); tap 1.17 s, then 1.10 s (-5%); typing 1.22 s, then 2.28 s (+87%). Its sign-in and typing drifted by more than 10% between the two, so read a difference of that size between two tools with care. The leaderboard shows both of its sign-in times; the other tables show its first run.</p>
 <!-- /bench:drift -->
     <p class="fine">The runs went in this order: simulator-use, AXe, MobileBuildMCP, mobile-mcp, agent-device, Argent, Maestro MCP, Xcode MCP, then the second runs under <a href="#not-ranked">Not ranked here</a>. Tokens are estimates: characters / 4 for text (no Anthropic API key was set for this run), width * height / 750 for an image.</p>
+    <p class="fine">simulator-use against each tool, one page each: <a href="/vs">compare</a>.</p>
   </section>
 
   <section id="read">
@@ -349,7 +352,7 @@ footer a:hover { color: var(--text); }
 <footer>
   <div class="wrap">
     <span>MIT. Made at <a href="https://nomac.app">NoMac</a>.</span>
-    <nav><a href="/">simulator-use</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
+    <nav><a href="/">simulator-use</a><a href="/vs">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
   </div>
 </footer>
 <script defer src="/_vercel/insights/script.js"></script>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simulator-use compared</title>
+<meta name="description" content="simulator-use against each tool in the one-Mac benchmark, one page each: measured side by side, what each does with sources, and how to switch.">
+<link rel="canonical" href="https://simulator-use.dev/vs">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simulator-use.dev/vs">
+<meta property="og:title" content="simulator-use compared">
+<meta property="og:description" content="simulator-use against each tool in the one-Mac benchmark, one page each: measured side by side, what each does with sources, and how to switch.">
+<meta property="og:image" content="https://simulator-use.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #0b0b0c;
+  --surface: #121214;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --muted: #a1a1a6;
+  --faint: #6e6e73;
+  --accent: #0a84ff;
+  --amber: #ffd60a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, pre { font-family: var(--mono); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
+.name { font: 600 15px var(--mono); text-decoration: none; letter-spacing: -0.01em; }
+header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+header nav a { color: var(--muted); text-decoration: none; }
+header nav a:hover, header nav a[aria-current] { color: var(--text); }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+
+.hero { padding: 72px 0 0; }
+h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 18px; max-width: 20ch; }
+.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.5; }
+
+section { padding-top: 80px; }
+h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 10px; }
+.sub { color: var(--muted); max-width: 680px; margin: 0; }
+.sub code, .fine code, td code, li code { font-size: 0.9em; color: var(--text); }
+.fine { color: var(--faint); font-size: 13px; margin: 14px 0 0; max-width: 760px; }
+.fine a, .sub a, li a { color: var(--muted); }
+
+.scroll { margin-top: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.scroll table.wide { min-width: 640px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 13px; padding: 0 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); vertical-align: top; }
+td:first-child { color: var(--text); }
+th.n, td.n { text-align: right; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+td.r { width: 28px; color: var(--faint); font-family: var(--mono); font-size: 13px; }
+tr:first-child td.r { color: var(--text); }
+.v { color: var(--faint); font: 12px var(--mono); }
+.na { color: var(--faint); }
+td.bad, td.part { color: var(--amber); }
+.c { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.facts td { font-size: 14px; }
+.facts td:first-child { white-space: nowrap; }
+
+ul.notes { margin: 20px 0 0; padding: 0; list-style: none; max-width: 760px; border-top: 1px solid var(--line); }
+ul.notes li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+ul.notes li b { color: var(--text); font-weight: 500; }
+
+footer { margin-top: 112px; border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--faint); font-size: 13.5px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+footer nav { margin-left: auto; display: flex; gap: 20px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 640px) { table { font-size: 13.5px; } th.n, td.n { font-size: 11px; letter-spacing: -0.02em; } th.n { white-space: normal; } td, th { padding-right: 5px; } td:first-child { font-size: 13px; } td:last-child, th:last-child { padding-right: 0; } .v { display: block; } }
+
+.cmp td:first-child { color: var(--muted); }
+.cmp td.n { color: var(--text); }
+table.two td { width: 40%; }
+table.two td:first-child { width: 20%; color: var(--muted); }
+.src { color: var(--faint); font-size: 12.5px; }
+.src a { color: var(--faint); }
+.answer p { color: var(--muted); max-width: 680px; margin: 0 0 12px; font-size: 17px; line-height: 1.55; }
+.answer p.measured { color: var(--faint); font-size: 14.5px; }
+blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 2px solid var(--line-2); color: var(--text); max-width: 680px; }
+code.call { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; color: var(--text); margin: 0 0 6px; }
+.cmd { display: inline-flex; max-width: 100%; margin-top: 16px; padding: 10px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); font: 13.5px var(--mono); overflow-wrap: anywhere; }
+ul.vs { margin: 24px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); max-width: 760px; }
+ul.vs li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ul.vs a { color: var(--text); text-decoration: none; font-weight: 500; }
+ul.vs a:hover { text-decoration: underline; text-underline-offset: 4px; }
+ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top: 2px; }
+.cmp td.n, .cmp th.n { width: 22%; }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { table.two td { width: auto; } table.two td:first-child { width: 24%; white-space: normal; } .answer p { font-size: 16px; } header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="name" href="/">simulator-use</a>
+    <nav><a href="/benchmarks">Benchmarks</a><a href="/vs" aria-current="page">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>simulator-use compared</h1>
+    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. A sign-in took simulator-use 4.66 s (second run 7.13 s) and 194 tokens read (est.).</p>
+  </div>
+  <section style="padding-top:48px">
+    <ul class="vs">
+      <li><a href="/vs/xcode-mcp">simulator-use vs Xcode MCP</a><span>Xcode MCP: sign-in 3.71 s, 12,732 tokens read (est.)</span></li>
+      <li><a href="/vs/argent">simulator-use vs Argent</a><span>Argent: sign-in 6.61 s, 7,129 tokens read (est.)</span></li>
+      <li><a href="/vs/agent-device">simulator-use vs agent-device</a><span>agent-device: sign-in 6.90 s, 664 tokens read (est.)</span></li>
+      <li><a href="/vs/mobile-mcp">simulator-use vs mobile-mcp</a><span>mobile-mcp: sign-in 6.95 s, 980 tokens read (est.)</span></li>
+      <li><a href="/vs/maestro-mcp">simulator-use vs Maestro MCP</a><span>Maestro MCP: sign-in 9.00 s, 2,987 tokens read (est.)</span></li>
+      <li><a href="/vs/axe">simulator-use vs AXe</a><span>AXe: sign-in 9.22 s, 110,319 tokens read (est.)</span></li>
+      <li><a href="/vs/mobilebuildmcp">simulator-use vs MobileBuildMCP</a><span>MobileBuildMCP: sign-in 18.09 s, 1,560 tokens read (est.)</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT. Made at <a href="https://nomac.app">NoMac</a>.</span>
+    <nav><a href="/">simulator-use</a><a href="/benchmarks">Benchmarks</a><a href="/vs">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
+  </div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

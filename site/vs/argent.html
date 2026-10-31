@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simulator-use vs Argent</title>
+<meta name="description" content="simulator-use and Argent on the same iPhone 17 Pro Simulator: 194 against 7,129 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 6.61 s, and what each builds, tests and needs, with sources.">
+<link rel="canonical" href="https://simulator-use.dev/vs/argent">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simulator-use.dev/vs/argent">
+<meta property="og:title" content="simulator-use vs Argent">
+<meta property="og:description" content="simulator-use and Argent on the same iPhone 17 Pro Simulator: 194 against 7,129 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 6.61 s, and what each builds, tests and needs, with sources.">
+<meta property="og:image" content="https://simulator-use.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #0b0b0c;
+  --surface: #121214;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --muted: #a1a1a6;
+  --faint: #6e6e73;
+  --accent: #0a84ff;
+  --amber: #ffd60a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, pre { font-family: var(--mono); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
+.name { font: 600 15px var(--mono); text-decoration: none; letter-spacing: -0.01em; }
+header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+header nav a { color: var(--muted); text-decoration: none; }
+header nav a:hover, header nav a[aria-current] { color: var(--text); }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+
+.hero { padding: 72px 0 0; }
+h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 18px; max-width: 20ch; }
+.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.5; }
+
+section { padding-top: 80px; }
+h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 10px; }
+.sub { color: var(--muted); max-width: 680px; margin: 0; }
+.sub code, .fine code, td code, li code { font-size: 0.9em; color: var(--text); }
+.fine { color: var(--faint); font-size: 13px; margin: 14px 0 0; max-width: 760px; }
+.fine a, .sub a, li a { color: var(--muted); }
+
+.scroll { margin-top: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.scroll table.wide { min-width: 640px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 13px; padding: 0 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); vertical-align: top; }
+td:first-child { color: var(--text); }
+th.n, td.n { text-align: right; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+td.r { width: 28px; color: var(--faint); font-family: var(--mono); font-size: 13px; }
+tr:first-child td.r { color: var(--text); }
+.v { color: var(--faint); font: 12px var(--mono); }
+.na { color: var(--faint); }
+td.bad, td.part { color: var(--amber); }
+.c { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.facts td { font-size: 14px; }
+.facts td:first-child { white-space: nowrap; }
+
+ul.notes { margin: 20px 0 0; padding: 0; list-style: none; max-width: 760px; border-top: 1px solid var(--line); }
+ul.notes li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+ul.notes li b { color: var(--text); font-weight: 500; }
+
+footer { margin-top: 112px; border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--faint); font-size: 13.5px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+footer nav { margin-left: auto; display: flex; gap: 20px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 640px) { table { font-size: 13.5px; } th.n, td.n { font-size: 11px; letter-spacing: -0.02em; } th.n { white-space: normal; } td, th { padding-right: 5px; } td:first-child { font-size: 13px; } td:last-child, th:last-child { padding-right: 0; } .v { display: block; } }
+
+.cmp td:first-child { color: var(--muted); }
+.cmp td.n { color: var(--text); }
+table.two td { width: 40%; }
+table.two td:first-child { width: 20%; color: var(--muted); }
+.src { color: var(--faint); font-size: 12.5px; }
+.src a { color: var(--faint); }
+.answer p { color: var(--muted); max-width: 680px; margin: 0 0 12px; font-size: 17px; line-height: 1.55; }
+.answer p.measured { color: var(--faint); font-size: 14.5px; }
+blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 2px solid var(--line-2); color: var(--text); max-width: 680px; }
+code.call { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; color: var(--text); margin: 0 0 6px; }
+.cmd { display: inline-flex; max-width: 100%; margin-top: 16px; padding: 10px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); font: 13.5px var(--mono); overflow-wrap: anywhere; }
+ul.vs { margin: 24px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); max-width: 760px; }
+ul.vs li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ul.vs a { color: var(--text); text-decoration: none; font-weight: 500; }
+ul.vs a:hover { text-decoration: underline; text-underline-offset: 4px; }
+ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top: 2px; }
+.cmp td.n, .cmp th.n { width: 22%; }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { table.two td { width: auto; } table.two td:first-child { width: 24%; white-space: normal; } .answer p { font-size: 16px; } header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="name" href="/">simulator-use</a>
+    <nav><a href="/benchmarks">Benchmarks</a><a href="/vs" aria-current="page">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>simulator-use vs Argent</h1>
+    <div class="answer">
+      <p>Pick Argent for React Native apps: it builds and runs React Native projects, profiles Hermes and React renders, and also drives Android, TV and Electron apps. <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>)</span></p>
+      <p>Pick simulator-use for native Xcode projects, which it builds and tests with XCTest and XCUITest, and taps by label or id instead of screen fractions. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://docs.swmansion.com/argent/docs/reference/tools">Argent docs: tools reference</a>)</span></p>
+      <p class="measured">Measured on one Mac, a sign-in took Argent 6.61 s and 7,129 tokens read (est.); simulator-use 4.66 s (second run 7.13 s) and 194 tokens read (est.).</p>
+      
+    </div>
+  </div>
+
+  <section id="measured">
+    <h2>Measured side by side</h2>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of October 31, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4). simulator-use ran first and again last; both runs are shown.</p>
+    <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">Argent</th><th class="n">simulator-use</th><th class="n">simulator-use, second run</th></tr></thead><tbody>
+<tr><td>Signing in, step by step</td><td class="n">6.61 s</td><td class="n">4.66 s</td><td class="n">7.13 s</td></tr>
+<tr><td>Tokens read per sign-in (est.)</td><td class="n">7,129</td><td class="n">194</td><td class="n">194</td></tr>
+<tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
+<tr><td>Signing in, batched</td><td class="n">4.38 s</td><td class="n">3.69 s</td><td class="n">5.36 s</td></tr>
+<tr><td>Tokens read, batched (est.)</td><td class="n">2,971</td><td class="n">179</td><td class="n">179</td></tr>
+<tr><td>Batched sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.20 s</td><td class="n">0.21 s</td><td class="n">0.22 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">0.65 s</td><td class="n">1.17 s</td><td class="n">1.10 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">3.59 s</td><td class="n">1.22 s</td><td class="n">2.28 s</td></tr>
+<tr><td>Tool list in context (est.)</td><td class="n">42,531</td><td class="n">2,443</td><td class="n">2,443</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">46.57 s</td><td class="n">0.27 s</td><td class="n">0.13 s</td></tr>
+<tr><td>First read after a boot</td><td class="n">0.70 s</td><td class="n">14.50 s</td><td class="n">3.96 s</td></tr>
+</tbody></table></div>
+    <p class="fine">Argent 0.31.0, simulator-use 0.14.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">bench/results/2026-10-31</a>.</p>
+  </section>
+
+  <section id="what">
+    <h2>What each does</h2>
+    <p class="sub">From each tool's own README, license and docs, read on October 31, 2026.</p>
+    <div class="scroll"><table class="facts two"><thead><tr><th></th><th>Argent</th><th>simulator-use</th></tr></thead><tbody>
+<tr><td>License</td><td>Apache 2.0 source; its simulator-server and ax-service binaries are proprietary <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>, <a href="https://github.com/software-mansion/argent/blob/main/LICENSE.txt">Argent LICENSE</a>)</span></td><td>MIT <span class="src">(<a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a>)</span></td></tr>
+<tr><td>Builds the app</td><td>React Native projects <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>)</span></td><td>Yes: builds the Xcode project, installs and launches it (app_run) <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Runs tests</td><td>Records a path as an e2e test and replays it <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>)</span></td><td>XCTest and XCUITest, case by case (tests_run) <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Screen as text</td><td>An element tree, and a screenshot and element tree after each action <span class="src">(<a href="https://docs.swmansion.com/argent/docs/reference/tools">Argent docs: tools reference</a>)</span></td><td>One line per element: kind, label, #id, state and position <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>How it taps</td><td>At coordinates from 0 to 1, taken from its element tree <span class="src">(<a href="https://docs.swmansion.com/argent/docs/reference/tools">Argent docs: tools reference</a>, <a href="https://docs.swmansion.com/argent/docs/fundamentals/supported-platforms">Argent docs: supported platforms</a>)</span></td><td>By #id or label, or at @x,y <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Cloud option</td><td>Argent Cloud <span class="src">(<a href="https://docs.swmansion.com/argent/docs/cloud/fundamentals/getting-started">Argent docs: Argent Cloud</a>)</span></td><td>A NoMac cloud iPhone (simulator-use cloud start), billed per minute <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Needs besides Xcode</td><td>Node 20.12. Software Mansion's proprietary simulator-server and ax-service binaries <span class="src">(<a href="https://docs.swmansion.com/argent/docs/fundamentals/installation">Argent docs: installation</a>, <a href="https://github.com/software-mansion/argent">Argent README</a>)</span></td><td>Node 20. Its engine is built on AXe's frameworks, which it bundles <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+</tbody></table></div>
+  </section>
+
+  <section id="better">
+    <h2>Where Argent is better</h2>
+    <ul class="notes">
+      <li>React Native: build, launch and iterate with no extra setup, plus Hermes, React DevTools and Instruments profiling. <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>)</span></li>
+      <li>Beyond the iOS Simulator: Android emulators and devices, TVs and Electron or Chromium apps. <span class="src">(<a href="https://github.com/software-mansion/argent">Argent README</a>)</span></li>
+      <li>Each interaction answers with a screenshot and the element tree of the settled screen, so the next step needs no extra read. <span class="src">(<a href="https://docs.swmansion.com/argent/docs/reference/tools">Argent docs: tools reference</a>, <a href="https://docs.swmansion.com/argent/docs/features/interacting-with-apps">Argent docs: interacting with apps</a>)</span></li>
+      <li>Tapping a button: 0.65 s against simulator-use's 1.17 s (second run 1.10 s).</li>
+    </ul>
+    <h2 style="margin-top:48px">Where simulator-use is better</h2>
+    <ul class="notes">
+      <li>Builds a native Xcode project and runs its XCTest and XCUITest cases. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></li>
+      <li>MIT throughout, the AXe and IDB frameworks it bundles included; Argent's simulator-server and ax-service binaries are proprietary. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://github.com/software-mansion/argent">Argent README</a>)</span></li>
+      <li>Tokens read per sign-in (est.): 194 tokens against Argent's 7,129 tokens.</li>
+      <li>Tokens per screen read (est.): 72 tokens against Argent's 658 tokens.</li>
+      <li>Typing into a field: 1.22 s (second run 2.28 s) against Argent's 3.59 s.</li>
+      <li>Tool list in the agent's context (est.): 2,443 tokens against Argent's 42,531 tokens.</li>
+      <li>Setup and first read after a boot: 14.77 s (second run 4.09 s) against Argent's 47.28 s.</li>
+    </ul>
+    <p class="fine">A measured difference is listed only when it holds against both of simulator-use's runs by at least 5%.</p>
+  </section>
+
+  <section id="switching">
+    <h2>Switching</h2>
+    <p class="sub">Add simulator-use to Claude Code with one line (other clients: <a href="/#install">install</a>):</p>
+    <div class="cmd">claude mcp add simulator-use -- npx -y simulator-use mcp</div>
+    <p class="sub" style="margin-top:24px">The calls each made in the benchmark, step for step:</p>
+    <div class="scroll"><table class="facts two"><thead><tr><th></th><th>Argent</th><th>simulator-use</th></tr></thead><tbody>
+<tr><td>Setup</td><td><code class="call">boot-device {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;}</code><code class="call">launch-app {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;,&quot;bundleId&quot;:&quot;dev.simtap.demo&quot;}</code></td><td><code class="call">device_use {&quot;device&quot;:&quot;&lt;udid&gt;&quot;}</code></td></tr>
+<tr><td>Read the screen</td><td><code class="call">describe {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;}</code></td><td><code class="call">ui_look {}</code></td></tr>
+<tr><td>Tap a button</td><td><code class="call">gesture-tap {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;,&quot;x&quot;:0.5,&quot;y&quot;:0.4005}</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;tap #signIn&quot;]}</code></td></tr>
+<tr><td>Type into a field</td><td><code class="call">gesture-tap {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;,&quot;x&quot;:0.5005,&quot;y&quot;:0.2215}</code><code class="call">keyboard {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;,&quot;text&quot;:&quot;gary@example.com&quot;}</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;fill #email gary@example.com&quot;]}</code></td></tr>
+<tr><td>Several steps in one call</td><td><code class="call">run-sequence {&quot;udid&quot;:&quot;&lt;udid&gt;&quot;,&quot;steps&quot;:[{&quot;tool&quot;:&quot;gesture-tap&quot;,&quot;args&quot;:{&quot;x&quot;:0.5005,&quot;y&quot;:0.2215}},{&quot;tool&quot;:&quot;keyboard&quot;,&quot;args&quot;:{&quot;text&quot;:&quot;gary@example.com&quot;}},{&quot;tool&quot;:&quot;gesture-tap&quot;,&quot;args&quot;:{&quot;x&quot;:0.5005,&quot;y&quot;:0.282}},{&quot;tool&quot;:&quot;keyboard&quot;,&quot;args&quot;:{&quot;text&quot;:&quot;secret1&quot;}},{&quot;tool&quot;:&quot;gesture-tap&quot;,&quot;args&quot;:{&quot;x&quot;:0.5,&quot;y&quot;:0.4005}}]}</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;fill #email gary@example.com&quot;,&quot;fill #password secret1&quot;,&quot;tap #signIn&quot;]}</code></td></tr>
+</tbody></table></div>
+  </section>
+
+  <section id="sources">
+    <h2>Sources</h2>
+    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">the raw results</a>.</p>
+    <ul class="notes">
+      <li><a href="https://github.com/software-mansion/argent">Argent README</a></li>
+      <li><a href="https://github.com/software-mansion/argent/blob/main/LICENSE.txt">Argent LICENSE</a></li>
+      <li><a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a></li>
+      <li><a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a></li>
+      <li><a href="https://docs.swmansion.com/argent/docs/reference/tools">Argent docs: tools reference</a></li>
+      <li><a href="https://docs.swmansion.com/argent/docs/fundamentals/supported-platforms">Argent docs: supported platforms</a></li>
+      <li><a href="https://docs.swmansion.com/argent/docs/cloud/fundamentals/getting-started">Argent docs: Argent Cloud</a></li>
+      <li><a href="https://docs.swmansion.com/argent/docs/fundamentals/installation">Argent docs: installation</a></li>
+      <li><a href="https://docs.swmansion.com/argent/docs/features/interacting-with-apps">Argent docs: interacting with apps</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT. Made at <a href="https://nomac.app">NoMac</a>.</span>
+    <nav><a href="/">simulator-use</a><a href="/benchmarks">Benchmarks</a><a href="/vs">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
+  </div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

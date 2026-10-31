@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simulator-use vs AXe</title>
+<meta name="description" content="simulator-use and AXe on the same iPhone 17 Pro Simulator: 194 against 110,319 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 9.22 s, and what each builds, tests and needs, with sources.">
+<link rel="canonical" href="https://simulator-use.dev/vs/axe">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simulator-use.dev/vs/axe">
+<meta property="og:title" content="simulator-use vs AXe">
+<meta property="og:description" content="simulator-use and AXe on the same iPhone 17 Pro Simulator: 194 against 110,319 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 9.22 s, and what each builds, tests and needs, with sources.">
+<meta property="og:image" content="https://simulator-use.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #0b0b0c;
+  --surface: #121214;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --muted: #a1a1a6;
+  --faint: #6e6e73;
+  --accent: #0a84ff;
+  --amber: #ffd60a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, pre { font-family: var(--mono); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
+.name { font: 600 15px var(--mono); text-decoration: none; letter-spacing: -0.01em; }
+header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+header nav a { color: var(--muted); text-decoration: none; }
+header nav a:hover, header nav a[aria-current] { color: var(--text); }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+
+.hero { padding: 72px 0 0; }
+h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 18px; max-width: 20ch; }
+.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.5; }
+
+section { padding-top: 80px; }
+h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 10px; }
+.sub { color: var(--muted); max-width: 680px; margin: 0; }
+.sub code, .fine code, td code, li code { font-size: 0.9em; color: var(--text); }
+.fine { color: var(--faint); font-size: 13px; margin: 14px 0 0; max-width: 760px; }
+.fine a, .sub a, li a { color: var(--muted); }
+
+.scroll { margin-top: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.scroll table.wide { min-width: 640px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 13px; padding: 0 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); vertical-align: top; }
+td:first-child { color: var(--text); }
+th.n, td.n { text-align: right; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+td.r { width: 28px; color: var(--faint); font-family: var(--mono); font-size: 13px; }
+tr:first-child td.r { color: var(--text); }
+.v { color: var(--faint); font: 12px var(--mono); }
+.na { color: var(--faint); }
+td.bad, td.part { color: var(--amber); }
+.c { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.facts td { font-size: 14px; }
+.facts td:first-child { white-space: nowrap; }
+
+ul.notes { margin: 20px 0 0; padding: 0; list-style: none; max-width: 760px; border-top: 1px solid var(--line); }
+ul.notes li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+ul.notes li b { color: var(--text); font-weight: 500; }
+
+footer { margin-top: 112px; border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--faint); font-size: 13.5px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+footer nav { margin-left: auto; display: flex; gap: 20px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 640px) { table { font-size: 13.5px; } th.n, td.n { font-size: 11px; letter-spacing: -0.02em; } th.n { white-space: normal; } td, th { padding-right: 5px; } td:first-child { font-size: 13px; } td:last-child, th:last-child { padding-right: 0; } .v { display: block; } }
+
+.cmp td:first-child { color: var(--muted); }
+.cmp td.n { color: var(--text); }
+table.two td { width: 40%; }
+table.two td:first-child { width: 20%; color: var(--muted); }
+.src { color: var(--faint); font-size: 12.5px; }
+.src a { color: var(--faint); }
+.answer p { color: var(--muted); max-width: 680px; margin: 0 0 12px; font-size: 17px; line-height: 1.55; }
+.answer p.measured { color: var(--faint); font-size: 14.5px; }
+blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 2px solid var(--line-2); color: var(--text); max-width: 680px; }
+code.call { display: block; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; color: var(--text); margin: 0 0 6px; }
+.cmd { display: inline-flex; max-width: 100%; margin-top: 16px; padding: 10px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); font: 13.5px var(--mono); overflow-wrap: anywhere; }
+ul.vs { margin: 24px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); max-width: 760px; }
+ul.vs li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ul.vs a { color: var(--text); text-decoration: none; font-weight: 500; }
+ul.vs a:hover { text-decoration: underline; text-underline-offset: 4px; }
+ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top: 2px; }
+.cmp td.n, .cmp th.n { width: 22%; }
+.name { white-space: nowrap; }
+@media (max-width: 640px) { table.two td { width: auto; } table.two td:first-child { width: 24%; white-space: normal; } .answer p { font-size: 16px; } header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="name" href="/">simulator-use</a>
+    <nav><a href="/benchmarks">Benchmarks</a><a href="/vs" aria-current="page">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>simulator-use vs AXe</h1>
+    <div class="answer">
+      <p>Pick AXe for a command line with no MCP server: shell scripts, CI jobs, or agents that run commands. simulator-use is built on AXe's frameworks. <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>, <a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></p>
+      <p>Pick simulator-use for an MCP server on the same frameworks that also builds and tests the app and reads the screen as one line per element. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></p>
+      <p class="measured">Measured on one Mac, a sign-in took AXe 9.22 s and 110,319 tokens read (est.); simulator-use 4.66 s (second run 7.13 s) and 194 tokens read (est.).</p>
+      
+    </div>
+  </div>
+
+  <section id="measured">
+    <h2>Measured side by side</h2>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of October 31, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server (AXe through its command line). Times are medians; tokens are estimates (characters / 4). simulator-use ran first and again last; both runs are shown.</p>
+    <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">AXe</th><th class="n">simulator-use</th><th class="n">simulator-use, second run</th></tr></thead><tbody>
+<tr><td>Signing in, step by step</td><td class="n">9.22 s</td><td class="n">4.66 s</td><td class="n">7.13 s</td></tr>
+<tr><td>Tokens read per sign-in (est.)</td><td class="n">110,319</td><td class="n">194</td><td class="n">194</td></tr>
+<tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
+<tr><td>Signing in, batched</td><td class="n">4.41 s</td><td class="n">3.69 s</td><td class="n">5.36 s</td></tr>
+<tr><td>Tokens read, batched (est.)</td><td class="n">110,273</td><td class="n">179</td><td class="n">179</td></tr>
+<tr><td>Batched sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.84 s</td><td class="n">0.21 s</td><td class="n">0.22 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">1.67 s</td><td class="n">1.17 s</td><td class="n">1.10 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">1.98 s</td><td class="n">1.22 s</td><td class="n">2.28 s</td></tr>
+<tr><td>Tool list in context (est.)</td><td class="n">none (CLI)</td><td class="n">2,443</td><td class="n">2,443</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">none</td><td class="n">0.27 s</td><td class="n">0.13 s</td></tr>
+<tr><td>First read after a boot</td><td class="n">4.66 s</td><td class="n">14.50 s</td><td class="n">3.96 s</td></tr>
+</tbody></table></div>
+    <p class="fine">AXe 1.8.0, simulator-use 0.14.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">bench/results/2026-10-31</a>.</p>
+  </section>
+
+  <section id="device-hub">
+    <h2>With Device Hub open</h2>
+    <p class="sub">AXe's README says:</p>
+    <blockquote>"Xcode 27 simulator automation uses Device Hub; Simulator.app is not required." <span class="src">(<a href="https://github.com/cameroncooke/AXe#xcode-compatibility">AXe README</a>)</span></blockquote>
+    
+    <p class="sub">So AXe ran three times on the benchmark's Mac: with the Simulator headless like every tool, again with Device Hub open, and once more with Device Hub closed. The ranking uses the first run.</p>
+    <div class="scroll"><table class="cmp"><thead><tr><th>Condition</th><th class="n">Taps that reached the app</th><th class="n">Typings shown</th><th class="n">Sign-ins completed</th><th class="n">Sign-in</th></tr></thead><tbody>
+<tr><td>Headless, the ranked run</td><td class="n">20 of 20</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">9.22 s</td></tr>
+<tr><td>Device Hub open</td><td class="n">4 of 20</td><td class="n">1 of 10</td><td class="n">0 of 10</td><td class="n">none</td></tr>
+<tr><td>Headless again, last of all</td><td class="n">20 of 20</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">9.14 s</td></tr>
+    </tbody></table></div>
+    <p class="fine">With Device Hub open, every axe tap still answered that it was done; the counts are what the app's own log saw. simulator-use is built on AXe's frameworks: its engine keeps one session open per Simulator instead of starting AXe for each call.</p>
+  </section>
+
+  <section id="what">
+    <h2>What each does</h2>
+    <p class="sub">From each tool's own README, license and docs, read on October 31, 2026.</p>
+    <div class="scroll"><table class="facts two"><thead><tr><th></th><th>AXe</th><th>simulator-use</th></tr></thead><tbody>
+<tr><td>License</td><td>MIT <span class="src">(<a href="https://github.com/cameroncooke/AXe/blob/main/LICENSE">AXe LICENSE</a>)</span></td><td>MIT <span class="src">(<a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a>)</span></td></tr>
+<tr><td>Builds the app</td><td>No <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>)</span></td><td>Yes: builds the Xcode project, installs and launches it (app_run) <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Runs tests</td><td>No <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>)</span></td><td>XCTest and XCUITest, case by case (tests_run) <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Screen as text</td><td>The accessibility tree as JSON (describe-ui) <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>)</span></td><td>One line per element: kind, label, #id, state and position <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>How it taps</td><td>By accessibility id or label, or at coordinates <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>, <a href="https://github.com/cameroncooke/AXe#xcode-compatibility">AXe README</a>)</span></td><td>By #id or label, or at @x,y <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Cloud option</td><td>None in its docs <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>)</span></td><td>A NoMac cloud iPhone (simulator-use cloud start), billed per minute <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+<tr><td>Needs besides Xcode</td><td>macOS 14 or later. &quot;Xcode 27 simulator automation uses Device Hub; Simulator.app is not required.&quot; <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>, <a href="https://github.com/cameroncooke/AXe#xcode-compatibility">AXe README</a>)</span></td><td>Node 20. Its engine is built on AXe's frameworks, which it bundles <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></td></tr>
+</tbody></table></div>
+  </section>
+
+  <section id="better">
+    <h2>Where AXe is better</h2>
+    <ul class="notes">
+      <li>Screenshots, video recording and frame streaming from the same command. <span class="src">(<a href="https://axe-cli.com/docs">AXe docs</a>)</span></li>
+      <li>Tool list in the agent's context (est.): none, since AXe is a command line with no MCP server, against simulator-use's 2,443 tokens.</li>
+    </ul>
+    <h2 style="margin-top:48px">Where simulator-use is better</h2>
+    <ul class="notes">
+      <li>An MCP server, building and testing the Xcode project, on AXe's own frameworks. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></li>
+      <li>Signing in, step by step: 4.66 s (second run 7.13 s) against AXe's 9.22 s.</li>
+      <li>Tokens read per sign-in (est.): 194 tokens against AXe's 110,319 tokens.</li>
+      <li>Reading the screen: 0.21 s (second run 0.22 s) against AXe's 0.84 s.</li>
+      <li>Tokens per screen read (est.): 72 tokens against AXe's 44,869 tokens.</li>
+      <li>Tapping a button: 1.17 s (second run 1.10 s) against AXe's 1.67 s.</li>
+      <li>A tap's answer held the new status text in 20 of 20 taps, AXe's in 0 of 20.</li>
+    </ul>
+    <p class="fine">A measured difference is listed only when it holds against both of simulator-use's runs by at least 5%.</p>
+  </section>
+
+  <section id="switching">
+    <h2>Switching</h2>
+    <p class="sub">Add simulator-use to Claude Code with one line (other clients: <a href="/#install">install</a>):</p>
+    <div class="cmd">claude mcp add simulator-use -- npx -y simulator-use mcp</div>
+    <p class="sub" style="margin-top:24px">The calls each made in the benchmark, step for step:</p>
+    <div class="scroll"><table class="facts two"><thead><tr><th></th><th>AXe</th><th>simulator-use</th></tr></thead><tbody>
+<tr><td>Setup</td><td><span class="na">none</span></td><td><code class="call">device_use {&quot;device&quot;:&quot;&lt;udid&gt;&quot;}</code></td></tr>
+<tr><td>Read the screen</td><td><code class="call">axe describe-ui --udid &lt;udid&gt;</code></td><td><code class="call">ui_look {}</code></td></tr>
+<tr><td>Tap a button</td><td><code class="call">axe tap --id signIn --udid &lt;udid&gt;</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;tap #signIn&quot;]}</code></td></tr>
+<tr><td>Type into a field</td><td><code class="call">axe tap --id email --udid &lt;udid&gt;</code><code class="call">axe type gary@example.com --udid &lt;udid&gt;</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;fill #email gary@example.com&quot;]}</code></td></tr>
+<tr><td>Several steps in one call</td><td><code class="call">axe batch --udid &lt;udid&gt; --step &quot;tap --id email&quot; --step &quot;type 'gary@example.com'&quot; --step &quot;tap --id password&quot; --step &quot;type 'secret1'&quot; --step &quot;tap --id signIn&quot;</code></td><td><code class="call">ui_act {&quot;steps&quot;:[&quot;fill #email gary@example.com&quot;,&quot;fill #password secret1&quot;,&quot;tap #signIn&quot;]}</code></td></tr>
+</tbody></table></div>
+  </section>
+
+  <section id="sources">
+    <h2>Sources</h2>
+    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">the raw results</a>.</p>
+    <ul class="notes">
+      <li><a href="https://github.com/cameroncooke/AXe/blob/main/LICENSE">AXe LICENSE</a></li>
+      <li><a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a></li>
+      <li><a href="https://axe-cli.com/docs">AXe docs</a></li>
+      <li><a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a></li>
+      <li><a href="https://github.com/cameroncooke/AXe#xcode-compatibility">AXe README</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT. Made at <a href="https://nomac.app">NoMac</a>.</span>
+    <nav><a href="/">simulator-use</a><a href="/benchmarks">Benchmarks</a><a href="/vs">Compare</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
+  </div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

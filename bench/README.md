@@ -47,6 +47,7 @@ bash bench/run-all.sh bench/results/$(date -u +%F)            # every run, one a
 node bench/run.mjs --tool agent-device --udid $UDID --probe   # one of each step for one tool, printed
 node bench/summarize.mjs bench/results/2026-10-31             # summary.json, summary.md
 node bench/page.mjs bench/results/2026-10-31 site/benchmarks.html   # the page's tables, from summary.json
+node bench/vs.mjs bench/results/2026-10-31 site/vs                  # the /vs pages, from summary.json and vs-facts.mjs
 ```
 
 `setup.sh` pins every version it installs and needs `sudo` once, for `xcrun mcp-server enable` (Xcode's headless MCP
@@ -60,6 +61,10 @@ server). To count tokens with Anthropic's API, `npm install @anthropic-ai/sdk` i
 - `tools/<tool>.mjs`: how each tool is driven, with the reason for each choice in its comments.
 - `lib/`: the MCP client, the token and statistics rules, the Simulator helpers.
 - `summarize.mjs`: the numbers the page shows.
+- `vs.mjs` and `vs-facts.mjs`: the one-on-one pages (simulator-use.dev/vs). Every number comes from a run's
+  `summary.json` and raw results (the calls in "Switching" are the ones each tool made); every other claim lives in
+  `vs-facts.mjs` with the sources it was read from. A measured difference is claimed only when it holds against both of
+  simulator-use's runs by at least 5%.
 - `debug/`: the scripts used to find how a tool works (Xcode's command grammar, agent-device's snapshots) and to
   check a failure (`axe-taps.mjs`); not part of a run.
 - `lib/dedup.mjs`: stores each long answer text of a results file once (AXe's 220 KB screen read repeats). AXe's
