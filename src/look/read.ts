@@ -23,13 +23,13 @@ const QUIET_MS = 150;
 const READ_START_MS = 50;
 const READ_GUARD_MS = 35;
 
-export type Screen = { tree: AxNode[]; snap: Snapshot; reused?: string };
+export type Screen = { tree: AxNode[]; snap: Snapshot; reused?: string; notReused?: string };
 
 /** How long a call keeps trying while accessibility starts, leaving room in the 45 s a call may take. */
 const STARTING_BUDGET_MS = 35_000;
 
 /** Reads the tree, waiting out a starting accessibility service for up to 35 s before giving up. */
-async function describeWhenReady(udid: string, options: ReadOptions): Promise<{ tree: AxNode[]; reused?: string }> {
+async function describeWhenReady(udid: string, options: ReadOptions): Promise<{ tree: AxNode[]; reused?: string; notReused?: string }> {
   const deadline = Date.now() + STARTING_BUDGET_MS;
   for (;;) {
     try {
@@ -61,7 +61,7 @@ export async function readScreen(udid: string, waitUntilReady = true, options: R
     tree = await describeUi(udid, { full: options.full });
     snap = snapshot(tree);
   }
-  return { tree, snap, ...(first.reused && tree === first.tree ? { reused: first.reused } : {}) };
+  return { tree, snap, ...(first.reused && tree === first.tree ? { reused: first.reused } : {}), ...(first.notReused ? { notReused: first.notReused } : {}) };
 }
 
 /** An app that just came to the front shows its frame before its contents: mostly unreadable, almost nothing listed. */

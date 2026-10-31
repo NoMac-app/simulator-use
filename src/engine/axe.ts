@@ -41,14 +41,18 @@ const REUSE_MAX_AGE_MS = 30_000;
  * The screen's tree. With reuse, the engine may give its last read again (reused says why: the screen's buffer is
  * unchanged, its pixels are, or only a caret blinked), once a few of its elements read again one point each agree.
  */
-export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string }> {
+export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string; notReused?: string }> {
   // A web page's first read can take half a minute (Safari, iOS 27): the engine gets a minute.
   const reuse = options.reuse && setting("REUSE") !== "off";
   // lean: only the attributes the screen's text uses; full: every one (ui_look's full tree, for the agent to open).
   const answer = await engineCall(udid, { op: "describe", ...(options.full ? {} : { lean: true }), ...(reuse ? { reuse: true, max_age_ms: REUSE_MAX_AGE_MS } : {}) }, 60_000);
   if (answer?.ok) {
     const tree = answer.tree as AxNode | AxNode[];
-    return { tree: Array.isArray(tree) ? tree : [tree], ...(typeof answer.reused === "string" ? { reused: answer.reused } : {}) };
+    return {
+      tree: Array.isArray(tree) ? tree : [tree],
+      ...(typeof answer.reused === "string" ? { reused: answer.reused } : {}),
+      ...(typeof answer.not_reused === "string" ? { notReused: answer.not_reused } : {}),
+    };
   }
   if (answer?.busy) throw new ToolError("Reading the screen took more than a minute.", "Call ui_look again: the phone is still working on the last read.");
   if (answer && STARTING.test(answer.error ?? "")) {

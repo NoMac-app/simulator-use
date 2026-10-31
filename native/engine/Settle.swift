@@ -29,7 +29,7 @@ final class WriteClock: @unchecked Sendable {
   private var zones: [CGRect] = []
   /** The last change that counted (a write right after one, even of the same pixels, counts too: see transitionTail). */
   private var lastSignificant = Date()
-  private var lastPixels = Date()
+  private var lastPixels = Date.distantPast
   private var lastLook = Date.distantPast
   /** A write not looked at yet: looks are at most one per 50 ms, and one look covers every write since the last. */
   private var unlooked = false
@@ -48,6 +48,11 @@ final class WriteClock: @unchecked Sendable {
     }
     if surfaceSeed(current) != reference.seed { unlooked = true }
     guard unlooked, now.timeIntervalSince(lastLook) >= 0.05 else { return }
+    look(current, now)
+  }
+
+  /** Where the screen changed since the last look, and whether that counts (the lock held). */
+  private func look(_ current: IOSurface, _ now: Date) {
     lastLook = now; unlooked = false
     let (readable, box) = reference.diff(current, update: true)
     if !readable { _ = reference.capture(current); lastSignificant = now; lastPixels = now; return }
@@ -58,19 +63,21 @@ final class WriteClock: @unchecked Sendable {
     }
   }
 
-  /** Seconds since the screen last changed in a way that counts; 0 while a write waits to be looked at. */
+  /** Seconds since the screen last changed in a way that counts; a write not looked at yet is looked at first. */
   func sinceSignificantWrite() -> TimeInterval {
     lock.lock(); defer { lock.unlock() }
-    return unlooked ? 0 : Date().timeIntervalSince(lastSignificant)
+    if unlooked, let current = surface { look(current, Date()) }
+    return Date().timeIntervalSince(lastSignificant)
   }
 }
 
 /**
  * How long after a change of pixels a write of the same pixels still counts as the screen changing: a transition's
  * end is drawn again once more as it completes (its outgoing view removed, its elements unhidden), about 90 ms after
- * its last moving frame (a push, October 31). Later ones (a view redrawn every frame unchanged) do not count.
+ * its last moving frame (a push, October 31). Later ones do not count: after a tap on a SwiftUI list's button the
+ * same pixels were drawn again every frame for 450 ms, which counted would hold every tap that long.
  */
-let transitionTail: TimeInterval = 0.2
+let transitionTail: TimeInterval = 0.15
 var writeClock: WriteClock?
 
 func textFieldFrames(_ tree: Any) -> [CGRect] {
@@ -104,7 +111,8 @@ final class ChangeTracker {
   /** The last change that counted, as a box in points (for the caller's report). */
   private(set) var lastBox: CGRect?
 
-  private var lastPixels = Date()
+  /** The last change of pixels this tracker saw: none yet when it starts. */
+  private var lastPixels = Date.distantPast
 
   init?(zones: [CGRect], reference given: PixelReference? = nil) {
     guard let surface = screenWatcher?.currentSurface() else { return nil }

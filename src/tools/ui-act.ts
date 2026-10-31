@@ -143,7 +143,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   // The screen as last read, when it has not changed since (the agent looked, then acts): see readScreen.
   const first = await readScreen(udid, true, { reuse: true });
   let snap = first.snap;
-  if (setting("DEBUG")) process.stderr.write(`simulator-use: first read ${Date.now() - firstRead} ms${first.reused ? ` (the last read again: ${first.reused})` : ""}\n`);
+  if (setting("DEBUG")) process.stderr.write(`simulator-use: first read ${Date.now() - firstRead} ms${first.reused ? ` (the last read again: ${first.reused})` : first.notReused ? ` (afresh: ${first.notReused})` : ""}\n`);
   const before = snap;
   const notes: string[] = [];
   // The field typed text goes into: the last field tapped or filled in this call.
