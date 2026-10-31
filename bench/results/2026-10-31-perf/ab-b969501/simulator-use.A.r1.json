@@ -1,0 +1,4495 @@
+{
+ "tool": "simulator-use",
+ "label": "A.r1",
+ "name": "simulator-use",
+ "interface": "mcp",
+ "startedAt": "2026-10-31T18:57:20.958Z",
+ "counts": {
+  "reads": 20,
+  "taps": 20,
+  "types": 10,
+  "flows": 10
+ },
+ "notes": [],
+ "ops": [
+  {
+   "op": "setup",
+   "ok": true,
+   "error": null,
+   "wallMs": 147.303084,
+   "ms": 146.845166,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "device_use",
+     "args": {
+      "device": "59C46EAD-C115-4498-9331-B6DBC2F62390"
+     },
+     "ms": 146.845166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Using Bench iPhone 17 Pro (iOS 27.0, 59C46EAD-C115-4498-9331-B6DBC2F62390); the other tools use it from now on.",
+     "chars": 111,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 28
+  },
+  {
+   "op": "warmup",
+   "ok": true,
+   "error": null,
+   "wallMs": 43339.297333,
+   "ms": 43337.85675,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 43337.85675,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 987.243917,
+   "ms": 986.923084,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 986.923084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 465.584917,
+   "ms": 465.452167,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 465.452167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 587.360625,
+   "ms": 587.248208,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 587.248208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 464.442458,
+   "ms": 464.334417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 464.334417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 362.798125,
+   "ms": 362.707917,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 362.707917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 416.702625,
+   "ms": 416.624083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 416.624083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 442.70925,
+   "ms": 442.606458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 442.606458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 409.993,
+   "ms": 409.89275,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 409.89275,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 401.442292,
+   "ms": 401.366375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 401.366375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 369.725292,
+   "ms": 369.63175,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 369.63175,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 392.914708,
+   "ms": 392.83625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 392.83625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 382.779333,
+   "ms": 382.719958,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 382.719958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 471.063334,
+   "ms": 470.992083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 470.992083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 461.895625,
+   "ms": 461.842,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 461.842,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 392.278,
+   "ms": 392.196417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 392.196417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 372.451333,
+   "ms": 372.382125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 372.382125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 384.36625,
+   "ms": 384.281583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 384.281583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 441.554083,
+   "ms": 441.4715,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 441.4715,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 401.574792,
+   "ms": 401.515458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 401.515458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 369.591125,
+   "ms": 369.511208,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 369.511208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 72,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "tap",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 1275.548833,
+   "ms": 1275.244375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1275.244375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2857.718917,
+    "ms": 2857.560333,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2857.560333,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 1057.148042,
+   "ms": 1057.094041,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1057.094041,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2916.348709,
+    "ms": 2916.238708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2916.238708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 1057.727958,
+   "ms": 1057.679,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1057.679,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 843.5765,
+    "ms": 843.521584,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 843.521584,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 1069.3035,
+   "ms": 1069.248959,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1069.248959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 758.787959,
+    "ms": 758.729375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 758.729375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 1201.792542,
+   "ms": 1201.712292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1201.712292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 966.538208,
+    "ms": 966.431708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 966.431708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 1319.276084,
+   "ms": 1319.209291,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1319.209291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2121.256209,
+    "ms": 2121.194417,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2121.194417,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 1491.952584,
+   "ms": 1491.893792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1491.893792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2363.507583,
+    "ms": 2363.443458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2363.443458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 1280.151959,
+   "ms": 1280.091667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1280.091667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2663.237,
+    "ms": 2663.177083,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2663.177083,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 1303.3655,
+   "ms": 1303.310667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1303.310667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2093.981834,
+    "ms": 2093.91925,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2093.91925,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 1198.27075,
+   "ms": 1198.215667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1198.215667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2789.2385,
+    "ms": 2789.177166,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2789.177166,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 1313.733708,
+   "ms": 1313.654959,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1313.654959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1310.612167,
+    "ms": 1310.520083,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1310.520083,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 1052.749208,
+   "ms": 1052.698084,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1052.698084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2528.085209,
+    "ms": 2528.024958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2528.024958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 1398.808875,
+   "ms": 1398.719417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1398.719417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1228.74175,
+    "ms": 1228.681083,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1228.681083,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 1438.268459,
+   "ms": 1438.200833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1438.200833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2108.097542,
+    "ms": 2108.036542,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2108.036542,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 1203.194417,
+   "ms": 1203.138667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1203.138667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2393.122334,
+    "ms": 2393.070791,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2393.070791,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 1049.570833,
+   "ms": 1049.517125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1049.517125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.0 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 985.040125,
+    "ms": 984.986292,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 984.986292,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 1307.234458,
+   "ms": 1307.047583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1307.047583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1327.095209,
+    "ms": 1327.040833,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1327.040833,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 1139.316208,
+   "ms": 1139.263584,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1139.263584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.0 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2961.804625,
+    "ms": 2961.737875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2961.737875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 1176.219791,
+   "ms": 1176.108333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1176.108333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1302.347292,
+    "ms": 1302.291583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1302.291583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 1096.52775,
+   "ms": 1096.474583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1096.474583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #status \"Invalid email or password\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 17,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1213.99125,
+    "ms": 1213.92775,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1213.92775,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "type",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 2536.70175,
+   "ms": 2536.538083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 2536.538083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 2.4 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2003.003334,
+    "ms": 2002.945542,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2002.945542,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 398.460666,
+    "ms": 398.401041,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 398.401041,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 1666.96425,
+   "ms": 1666.910125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1666.910125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.5 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2571.280417,
+    "ms": 2571.206833,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2571.206833,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 396.064041,
+    "ms": 396.006708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 396.006708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 1295.493542,
+   "ms": 1295.4335,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1295.4335,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1254.082541,
+    "ms": 1254.029958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1254.029958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 517.618958,
+    "ms": 517.575875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 517.575875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 1704.788458,
+   "ms": 1704.724167,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1704.724167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.7 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1357.343875,
+    "ms": 1357.283334,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1357.283334,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 629.606,
+    "ms": 629.543167,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 629.543167,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 1635.931125,
+   "ms": 1635.86525,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1635.86525,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.6 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2295.183,
+    "ms": 2295.118375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2295.118375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 584.964625,
+    "ms": 584.913125,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 584.913125,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 1440.207833,
+   "ms": 1440.148833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1440.148833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2262.892333,
+    "ms": 2262.834916,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2262.834916,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 557.122208,
+    "ms": 557.056042,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 557.056042,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 1249.829709,
+   "ms": 1249.775,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1249.775,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1286.988417,
+    "ms": 1286.934791,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 1286.934791,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 489.24275,
+    "ms": 489.196917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 489.196917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 1558.542667,
+   "ms": 1558.479542,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1558.479542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.6 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2214.901042,
+    "ms": 2214.841667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2214.841667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 561.127916,
+    "ms": 561.069209,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 561.069209,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 1643.116709,
+   "ms": 1643.0395,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1643.0395,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.6 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2825.998042,
+    "ms": 2825.933125,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2825.933125,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 625.79875,
+    "ms": 625.74775,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 625.74775,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 1672.604583,
+   "ms": 1672.53975,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1672.53975,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.7 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 14,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 2562.400333,
+    "ms": 2562.332041,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 2562.332041,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 287,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 72,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 510.070625,
+    "ms": 510.010208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "ui_look",
+      "args": {},
+      "ms": 510.010208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+      "chars": 298,
+      "images": [],
+      "other": [],
+      "structuredChars": 0
+     }
+    ],
+    "tokens": 75,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "flow",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 7510.660625,
+   "ms": 7510.062209,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 2770.462,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1337.571875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1214.595042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1805.263667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.7 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 382.169625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 6402.126834,
+   "ms": 6401.829543,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1205.887834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1856.49425,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.8 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1146.442917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1774.036792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.8 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 418.96775,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 6330.781667,
+   "ms": 6330.507499,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 2114.024458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1243.957541,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1052.541333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1348.741208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 571.242959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 5048.713083,
+   "ms": 5048.4268329999995,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 968.644,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1260.872333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 982.303291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.0 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1470.243917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 366.363292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 5842.718542,
+   "ms": 5842.425418,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 988.934833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1209.240292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1303.674084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.2 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1846.628125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.8 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 493.948084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 6916.149625,
+   "ms": 6915.832291,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 2889.548333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1253.826167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 980.710375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.0 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1341.214583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 450.532833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 5913.420375,
+   "ms": 5913.133542,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 743.364625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1797.620417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.8 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1139.855583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.1 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1847.508417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.7 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 384.7845,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 6948.115917,
+   "ms": 6947.816375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1713.663459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1768.797083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.7 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1415.584708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1643.180042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.6 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 406.591083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 4938.525833,
+   "ms": 4938.251666,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1002.270208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1268.331916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 936.197584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 0.9 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1378.412041,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 353.039917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 5144.89025,
+   "ms": 5144.610541,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1056.689458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com"
+      ]
+     },
+     "ms": 1298.565625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.3 s\nchanged: #email \"gary@example.com\"",
+     "chars": 55,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #password secret1"
+      ]
+     },
+     "ms": 1014.058875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.0 s\nchanged: #password \"•••••••\"",
+     "chars": 49,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "tap #signIn"
+      ]
+     },
+     "ms": 1393.25525,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "1 step done in 1.4 s\nchanged: #status \"Welcome, gary@example.com\"",
+     "chars": 65,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 382.041333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 194,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 3696.02825,
+   "ms": 3695.6710820000003,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1030.321291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2301.219083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.3 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 364.130708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 4034.235167,
+   "ms": 4034.002584,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1194.1325,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2443.117959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.4 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 396.752125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 4025.8145,
+   "ms": 4025.648208,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1344.068916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2308.488625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.3 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 373.090667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 3529.614375,
+   "ms": 3529.409707,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 938.154708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2274.578708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.3 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 316.676291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 3677.360916,
+   "ms": 3677.177501,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 992.104875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2334.671917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.3 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 350.400709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 3707.659541,
+   "ms": 3707.498793,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 1183.027042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2211.306459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.2 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 313.165292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 3203.2385,
+   "ms": 3203.0744990000003,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 679.721083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2223.720083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.2 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 299.633333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 3241.819,
+   "ms": 3241.651624,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 669.570958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2265.718333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.2 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 306.362333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 3728.528583,
+   "ms": 3728.3422499999997,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 648.175584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2670.748041,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.7 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 409.418625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 3202.306625,
+   "ms": 3202.147041,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 684.2485,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"Email\" #email @201,194\nsecurefield \"Password\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Not signed in\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 287,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_act",
+     "args": {
+      "steps": [
+       "fill #email gary@example.com",
+       "fill #password secret1",
+       "tap #signIn"
+      ]
+     },
+     "ms": 2215.684666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "3 steps done in 2.2 s\nchanged: #email \"gary@example.com\" · #password \"•••••••\" · #status \"Welcome, gary@example.com\"",
+     "chars": 116,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "ui_look",
+     "args": {},
+     "ms": 302.213875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Demo · Sign In · Bench iPhone 17 Pro (iOS 27.0)\ntextfield \"gary@example.com\" #email @201,194\nsecurefield \"•••••••\" #password @201,246\nswitch \"Remember me\" #remember off @341,298\nbutton \"Sign In\" #signIn @201,350\ntext \"Welcome, gary@example.com\" #status @201,402\ntabs: Login (selected) @158,822, Items @244,822",
+     "chars": 309,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 179,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  }
+ ],
+ "condition": {
+  "deviceHubAsked": false,
+  "deviceHubRunning": false,
+  "simulator": "headless (simctl boot, no Device Hub)"
+ },
+ "environment": {
+  "date": "2026-10-31T18:57:56.342Z",
+  "macos": "26.6.2 (25G83)",
+  "hardware": {
+   "model": "VirtualMac2,1",
+   "cpu": "Apple M5 Pro (Virtual)",
+   "cores": 6,
+   "memoryGB": 8
+  },
+  "xcode": "Xcode 27.0, Build version 27A266a",
+  "node": "v24.20.0",
+  "simulator": {
+   "udid": "59C46EAD-C115-4498-9331-B6DBC2F62390",
+   "name": "Bench iPhone 17 Pro",
+   "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "runtime": "iOS 27.0 (24A434)"
+  }
+ },
+ "version": "0.14.0",
+ "server": {
+  "startToListMs": 56.495,
+  "initMs": 54.48425,
+  "listMs": 0.32025,
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+   "name": "simulator-use",
+   "version": "0.14.0"
+  },
+  "toolCount": 12,
+  "toolNames": [
+   "devices",
+   "device_use",
+   "app_run",
+   "ui_look",
+   "ui_act",
+   "app_control",
+   "app_logs",
+   "tests_run",
+   "job_status",
+   "job_cancel",
+   "screen_record",
+   "cloud"
+  ],
+  "definitionsChars": 8300,
+  "instructionsChars": 1470,
+  "outputSchemaChars": 61,
+  "env": [],
+  "command": "simulator-use mcp"
+ },
+ "leftoversKilled": [],
+ "finishedAt": "2026-10-31T19:03:47.961Z",
+ "mcpNotifications": 0,
+ "strayStdout": [],
+ "quick": {
+  "warmup": {
+   "n": 1,
+   "ok": 1,
+   "medianMs": 43337.85675,
+   "p90Ms": 43337.85675,
+   "medianTokens": 72
+  },
+  "read": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 405.70410400000003,
+   "p90Ms": 470.992083,
+   "medianTokens": 72
+  },
+  "tap": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 1202.4254795,
+   "p90Ms": 1398.719417,
+   "medianTokens": 17
+  },
+  "type": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 1639.452375,
+   "p90Ms": 1704.724167,
+   "medianTokens": 14
+  },
+  "flow": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 6121.8205204999995,
+   "p90Ms": 6947.816375,
+   "medianTokens": 194
+  },
+  "flowBatch": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 3686.4242915000004,
+   "p90Ms": 4025.648208,
+   "medianTokens": 179
+  }
+ },
+ "conditionAtEnd": {
+  "deviceHubRunning": false
+ }
+}

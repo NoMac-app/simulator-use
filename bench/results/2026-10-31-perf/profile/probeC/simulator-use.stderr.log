@@ -1,0 +1,26 @@
+simulator-use:   xcode-select -p 4 ms
+simulator-use:   xcrun simctl list 90 ms
+simulator-use:   xcrun simctl list 102 ms
+simulator-use: first read 176 ms (afresh: none kept)
+simulator-use:   settle 443 ms: first change 23 ms, 1 read(s) 187 ms, 0 dropped
+simulator-use: step 1 tap #signIn 443 ms
+simulator-use:   xcrun simctl list 112 ms
+simulator-use: first read 176 ms (afresh: none kept)
+simulator-use: step 1 fill #email … 493 ms
+simulator-use:   read when still: 420 ms, 1 read(s) 332 ms, 0 dropped
+simulator-use: first read 182 ms (afresh: none kept)
+simulator-use: step 1 fill #email … 461 ms
+simulator-use:   read when still: 433 ms, 1 read(s) 334 ms, 0 dropped
+simulator-use:   xcrun simctl list 93 ms
+simulator-use: first read 310 ms (afresh: spot check: AXRadioButton Login =1 #person [111.0, 795.0, 94.0, 54.0] at 158,815, kept: AXRadioButton Login =1 #<null> [111.0, 795.0, 94.0, 54.0])
+simulator-use: step 1 fill #password … 228 ms
+simulator-use:   read when still: 403 ms, 1 read(s) 308 ms, 0 dropped
+simulator-use: first read 16 ms (the last read again: seed)
+simulator-use:   settle 568 ms: first change 22 ms, 1 read(s) 298 ms, 0 dropped
+simulator-use: step 1 tap #signIn 571 ms
+simulator-use: first read 176 ms (afresh: none kept)
+simulator-use: step 1 fill #email … 424 ms
+simulator-use: step 2 fill #password … 228 ms
+simulator-use:   settle 896 ms: first change 17 ms, 1 read(s) 323 ms, 0 dropped
+simulator-use: step 3 tap #signIn 903 ms
+simulator-use:   xcrun simctl list 95 ms

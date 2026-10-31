@@ -1,0 +1,23 @@
+== round 0
+reads after launch: 1979 ms (kept moving during, still 641 ms), 185 ms (kept just reloaded, still 812 ms), reuse: 174 ms (afresh: none kept)
+tap Sign In: 319 ms, settled true, first change 26 ms, reads 1 (193 ms), dropped 0, kept true; still after
+  read after it: 202 ms (afresh: none kept; kept kept)
+tap Email: 691 ms, settled true, first change 246 ms, reads 1 (351 ms), dropped 0, kept true; still after
+type: 558 ms, settled true, first change 57 ms, reads 1 (289 ms), dropped 0, kept true; still after
+  read after typing: 292 ms (afresh: none kept; kept kept, still 379 ms)
+tap Password: 1151 ms, settled true, first change -1 ms, reads 1 (342 ms), dropped 0, kept true; still after
+type password: 462 ms, settled true, first change 57 ms, reads 1 (283 ms), dropped 0, kept true; still after
+tap Sign In (Password focused): 477 ms, settled true, first change 57 ms, reads 1 (309 ms), dropped 0, kept true; still after
+  read after it: 322 ms (afresh: none kept; kept moving before)
+tap Items tab: 2191 ms, settled true, first change 20 ms, reads 2 (564+386 ms), dropped 1, kept true; still after
+push Item 1: 1158 ms, settled true, first change 88 ms, reads 2 (122+102 ms), dropped 1, kept true; still after
+back: 1292 ms, settled true, first change 78 ms, reads 1 (392 ms), dropped 0, kept true; still after
+scroll the list: 3593 ms, settled true, first change 1337 ms, reads 1 (487 ms), dropped 0, kept true; CHANGED AFTER: [[483,396,240.7,3,254.3],[548,396,240.7,3,254.3],[610,396,240.7,3,254.3],[669,396,240.7,3,254.3]]
+tap Login tab: 2020 ms, settled true, first change 36 ms, reads 2 (359+276 ms), dropped 1, kept true; still after
+nothing (no input): 1084 ms, settled true, first change -1 ms, reads 1 (276 ms), dropped 0, kept true; still after
+lab: Dialogs tab: 1963 ms, settled true, first change 88 ms, reads 1 (300 ms), dropped 0, kept true; still after
+lab: show alert: 960 ms, settled true, first change 64 ms, reads 1 (328 ms), dropped 0, kept true; still after
+lab: cancel alert: 831 ms, settled true, first change 50 ms, reads 1 (241 ms), dropped 0, kept true; still after
+lab: show sheet: 1037 ms, settled true, first change 144 ms, reads 1 (291 ms), dropped 0, kept true; still after
+lab: close sheet: 938 ms, settled true, first change 24 ms, reads 1 (241 ms), dropped 0, kept true; still after
+answered while the screen still changed (not counting timeouts): 1 of 17

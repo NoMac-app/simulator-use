@@ -1,0 +1,94 @@
+{
+ "bin": "/Users/agent/drive/perf/C/bin/simulator-use",
+ "startedAt": "2026-10-31T19:45:37.062Z",
+ "times": 2,
+ "cases": {
+  "late-0.5": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late05"
+       ]
+      },
+      "ms": 894.011542,
+      "isError": false,
+      "text": "1 step done in 0.9 s\nchanged: #lateStatus \"Done after 0.5 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 894.011542
+   }
+  ],
+  "late-1.0": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late10"
+       ]
+      },
+      "ms": 1405.053666,
+      "isError": false,
+      "text": "1 step done in 1.4 s\nchanged: #lateStatus \"Done after 1.0 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 1405.053666
+   }
+  ],
+  "late-1.5": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late15"
+       ]
+      },
+      "ms": 2001.463584,
+      "isError": false,
+      "text": "1 step done in 2.0 s\nchanged: #lateStatus \"Done after 1.5 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 2001.463584
+   }
+  ],
+  "push": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #push"
+       ]
+      },
+      "ms": 804.565166,
+      "isError": false,
+      "text": "1 step done in 0.8 s\nscreen:\nEdgeLab · Detail · Bench iPhone 17 Pro (iOS 27.0)\nback \"Timing\" #BackButton @38,84\ntext \"Detail page\" #detailText @201,480\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More (selected) @339,822"
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "back"
+       ]
+      },
+      "ms": 1089.32675,
+      "isError": false,
+      "text": "1 step done in 1.1 s\nscreen:\nEdgeLab · Timing · Bench iPhone 17 Pro (iOS 27.0)\nback \"More\" #BackButton @38,84\nheading \"Late\" @201,188\nbutton \"Late 0.5\" #late05 @201,234\nbutton \"Late 1.0\" #late10 @201,286\nbutton \"Late 1.5\" #late15 @201,338\ntext \"Waiting\" #lateStatus @201,390\nheading \"Moving\" @201,454\nbutton \"Start ticker\" #ticker @201,500\nbutton \"Count\" #count @201,552\ntext \"Count: 0\" #countLabel @201,604\nheading \"Navigation\" @201,668\nbutton \"Push detail\" #push @201,714\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More (selected) @339,822"
+     }
+    ],
+    "ok": true,
+    "timed": 804.565166
+   }
+  ]
+ }
+}

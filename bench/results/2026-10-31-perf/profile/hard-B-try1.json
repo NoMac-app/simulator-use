@@ -1,0 +1,330 @@
+{
+ "bin": "/Users/agent/drive/perf/B/bin/simulator-use",
+ "startedAt": "2026-10-31T18:51:50.002Z",
+ "times": 1,
+ "cases": {
+  "late-0.5": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late05"
+       ]
+      },
+      "ms": 956.496042,
+      "isError": false,
+      "text": "1 step done in 1.0 s\nchanged: #lateStatus \"Done after 0.5 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 956.496042
+   }
+  ],
+  "late-1.0": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late10"
+       ]
+      },
+      "ms": 3909.96375,
+      "isError": false,
+      "text": "1 step done in 3.9 s\nchanged: #lateStatus \"Done after 1.0 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 3909.96375
+   }
+  ],
+  "late-1.5": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #late15"
+       ]
+      },
+      "ms": 1918.886875,
+      "isError": false,
+      "text": "1 step done in 1.9 s\nchanged: #lateStatus \"Done after 1.5 s\""
+     }
+    ],
+    "ok": true,
+    "timed": 1918.886875
+   }
+  ],
+  "push": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #push"
+       ]
+      },
+      "ms": 835.723667,
+      "isError": false,
+      "text": "1 step done in 0.8 s\nscreen:\nEdgeLab · Detail · Bench iPhone 17 Pro (iOS 27.0)\nback \"Timing\" #BackButton @38,84\ntext \"Detail page\" #detailText @201,480\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More (selected) @339,822"
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "back"
+       ]
+      },
+      "ms": 903.906292,
+      "isError": false,
+      "text": "1 step done in 0.9 s\nscreen:\nEdgeLab · Timing · Bench iPhone 17 Pro (iOS 27.0)\nback \"More\" #BackButton @38,84\nheading \"Late\" @201,188\nbutton \"Late 0.5\" #late05 @201,234\nbutton \"Late 1.0\" #late10 @201,286\nbutton \"Late 1.5\" #late15 @201,338\ntext \"Waiting\" #lateStatus @201,390\nheading \"Moving\" @201,454\nbutton \"Start ticker\" #ticker @201,500\nbutton \"Count\" #count @201,552\ntext \"Count: 0\" #countLabel @201,604\nheading \"Navigation\" @201,668\nbutton \"Push detail\" #push @201,714\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More (selected) @339,822"
+     }
+    ],
+    "ok": true,
+    "timed": 835.723667
+   }
+  ],
+  "alert": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap \"Show alert\""
+       ]
+      },
+      "ms": 1232.569875,
+      "isError": false,
+      "text": "1 step done in 1.2 s\nscreen:\nEdgeLab · Bench iPhone 17 Pro (iOS 27.0)\nAn alert is in front: answer it with one of its buttons.\nalert \"Delete everything?\" @201,451\ntext \"This cannot be undone.\" @201,434\nbutton \"Cancel\" @127,487\nbutton \"Delete\" @275,487"
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap Cancel"
+       ]
+      },
+      "ms": 918.906583,
+      "isError": false,
+      "text": "1 step done in 0.9 s\nscreen:\nEdgeLab · Dialogs · Bench iPhone 17 Pro (iOS 27.0)\nbutton \"Show alert\" @201,194\nbutton \"Show choices\" @201,246\nbutton \"Show sheet\" @201,298\nbutton \"Show full screen\" @201,350\nbutton \"Ask for location\" @201,402\nbutton \"Ask for photos\" @201,454\nbutton \"Ask for notifications\" @201,506\nbutton \"Ask for contacts\" @201,558\ntext \"Result: cancelled\" #dialogResult @201,610\ntabs: Controls @64,822, Dialogs (selected) @132,822, Lists @201,822, Text @270,822, More @339,822"
+     }
+    ],
+    "ok": true,
+    "timed": 1232.569875
+   }
+  ],
+  "keyboard": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #unicode"
+       ]
+      },
+      "ms": 1111.598792,
+      "isError": false,
+      "text": "1 step done in 1.1 s\nno visible change"
+     },
+     {
+      "name": "ui_look",
+      "args": {},
+      "ms": 638.624542,
+      "isError": false,
+      "text": "EdgeLab · Text · Bench iPhone 17 Pro (iOS 27.0)\ntext \"Café crème · 日本語 · 🚀 rocket · مرحبا\" @201,194\ntext \"He said \\\"hi\\\"\\nthen left\" @201,256\ntext \"Long label Long label Long label Long label Long label Long label Long label Lo…\" @201,362\nbutton \"Delete\" @201,457\nbutton \"Delete\" @201,509\ntextfield \"Unicode here\" #unicode @201,561\ntext \"Typed:\" #typed @201,613\ntext \"Deep link: none\" #deepLink @201,665\ntext \"Apple\" @201,717\ntext \"Banana\" @201,767\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text (selected) @270,822, More @339,822\nscroll: 2 pages, at top; 1 below"
+     }
+    ],
+    "ok": true,
+    "timed": 1111.598792,
+    "note": "answer no keyboard, read no keyboard"
+   }
+  ],
+  "ticker": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #count"
+       ]
+      },
+      "ms": 4724.518375,
+      "isError": false,
+      "text": "1 step done in 4.6 s\nstep 1: the screen was still changing after 4 s\nchanged: #ticks \"Tick 85\" · #countLabel \"Count: 1\""
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap #count"
+       ]
+      },
+      "ms": 4613.929,
+      "isError": false,
+      "text": "1 step done in 4.6 s\nstep 1: the screen was still changing after 4 s\nchanged: #ticks \"Tick 129\" · #countLabel \"Count: 2\""
+     }
+    ],
+    "ok": true,
+    "timed": 4724.518375
+   }
+  ],
+  "fill": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "fill #unicode hello world"
+       ]
+      },
+      "ms": 978.518792,
+      "isError": false,
+      "text": "1 step done in 1.0 s\nchanged: #unicode \"hello world\" · #typed \"Typed: hello world\""
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "fill #unicode Café 日本 🚀"
+       ]
+      },
+      "ms": 980.300375,
+      "isError": false,
+      "text": "1 step done in 1.0 s\nchanged: #unicode \"Café 日本 🚀\" · #typed \"Typed: Café 日本 🚀\""
+     }
+    ],
+    "ok": true,
+    "timed": 978.518792
+   }
+  ],
+  "scroll": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "scroll down"
+       ]
+      },
+      "ms": 3594.624625,
+      "isError": false,
+      "text": "1 step done in 3.6 s\nscreen:\nEdgeLab · Lists · Bench iPhone 17 Pro (iOS 27.0)\ntext \"Row 3\" @201,125\ntext \"Row 4\" @201,161\ntext \"Row 5\" @201,213\ntext \"Row 6\" @201,265\ntext \"Row 7\" @201,317\ntext \"Row 8\" @201,369\ntext \"Row 9\" @201,421\ntext \"Row 10\" @201,473\ntext \"Row 11\" @201,525\ntext \"Row 12\" @201,577\ntext \"Row 13\" @201,629\ntext \"Row 14\" @201,681\ntext \"Row 15\" @201,733\ntext \"Row 16\" @201,775\ntabs: Controls @64,822, Dialogs @132,822, Lists (selected) @201,822, Text @270,822, More @339,822\nscroll: 3 pages, at 40%; 2 above; 2 below"
+     },
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "scroll up"
+       ]
+      },
+      "ms": 3951.870417,
+      "isError": false,
+      "text": "1 step done in 3.9 s\nscreen:\nEdgeLab · Lists · Bench iPhone 17 Pro (iOS 27.0)\nheading \"Async\" @201,188\ntext \"Loaded 20 results\" #loaded @201,234\nbutton \"Show toast\" @201,286\nheading \"Carousel\" @201,350\nbutton \"Card 1\" @68,403\nbutton \"Card 2\" @150,403\nbutton \"Card 3\" @233,403\nbutton \"Card 4\" @317,403\nbutton \"Card 5\" @382,403\ntext \"Picked: none\" #picked @201,461\nheading \"Rows\" @201,524\ntext \"Row 1\" @201,570\ntext \"Row 2\" @201,622\ntext \"Row 3\" @201,674\ntext \"Row 4\" @201,726\ntext \"Row 5\" @201,772\ntabs: Controls @64,822, Dialogs @132,822, Lists (selected) @201,822, Text @270,822, More @339,822\nscroll: 4 pages, at top; 2 below; 7 to the right"
+     }
+    ],
+    "ok": true,
+    "timed": 3594.624625
+   }
+  ],
+  "outside": [
+   {
+    "calls": [
+     {
+      "name": "ui_act",
+      "args": {
+       "steps": [
+        "tap Apple"
+       ]
+      },
+      "ms": 4233.832084,
+      "isError": false,
+      "text": "1 step done in 4.2 s\nstep 1 (tap \"Apple\"): no visible change"
+     },
+     {
+      "name": "ui_look",
+      "args": {},
+      "ms": 376.765917,
+      "isError": false,
+      "text": "EdgeLab · Text · Bench iPhone 17 Pro (iOS 27.0)\ntext \"Café crème · 日本語 · 🚀 rocket · مرحبا\" @201,194\ntext \"He said \\\"hi\\\"\\nthen left\" @201,256\ntext \"Long label Long label Long label Long label Long label Long label Long label Lo…\" @201,362\nbutton \"Delete\" @201,457\nbutton \"Delete\" @201,509\ntextfield \"Unicode here\" #unicode @201,561\ntext \"Typed:\" #typed @201,613\ntext \"Deep link: edgelab://item/460273\" #deepLink @201,665\ntext \"Apple\" @201,717\ntext \"Banana\" @201,767\ntabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text (selected) @270,822, More @339,822\nscroll: 2 pages, at top; 1 below"
+     }
+    ],
+    "ok": true,
+    "timed": 4233.832084
+   }
+  ]
+ },
+ "summary": {
+  "late-0.5": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 956.496042,
+   "p90Ms": 956.496042
+  },
+  "late-1.0": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 3909.96375,
+   "p90Ms": 3909.96375
+  },
+  "late-1.5": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 1918.886875,
+   "p90Ms": 1918.886875
+  },
+  "push": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 835.723667,
+   "p90Ms": 835.723667
+  },
+  "alert": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 1232.569875,
+   "p90Ms": 1232.569875
+  },
+  "keyboard": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 1111.598792,
+   "p90Ms": 1111.598792
+  },
+  "ticker": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 4724.518375,
+   "p90Ms": 4724.518375
+  },
+  "fill": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 978.518792,
+   "p90Ms": 978.518792
+  },
+  "scroll": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 3594.624625,
+   "p90Ms": 3594.624625
+  },
+  "outside": {
+   "ok": 1,
+   "n": 1,
+   "medianMs": 4233.832084,
+   "p90Ms": 4233.832084
+  }
+ },
+ "finishedAt": "2026-10-31T18:53:36.497Z"
+}

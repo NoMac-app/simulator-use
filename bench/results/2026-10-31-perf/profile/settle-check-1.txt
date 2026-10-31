@@ -1,0 +1,45 @@
+== round 0
+reads after launch: 2247 ms (kept moving during, still 657 ms), 178 ms (kept just reloaded, still 785 ms), reuse: 179 ms (read afresh)
+tap Sign In: 320 ms, settled true, first change 31 ms, reads 1 (190 ms), dropped 0, kept true; still after
+  read after it: 214 ms (afresh, kept kept)
+tap Email: 1111 ms, settled true, first change 235 ms, reads 1 (783 ms), dropped 0, kept true; still after
+type: 582 ms, settled true, first change 91 ms, reads 1 (291 ms), dropped 0, kept true; still after
+  read after typing: 296 ms (afresh, kept kept, still 391 ms)
+tap Password: 1146 ms, settled true, first change -1 ms, reads 1 (340 ms), dropped 0, kept true; still after
+type password: 493 ms, settled true, first change 62 ms, reads 1 (291 ms), dropped 0, kept true; still after
+tap Sign In (Password focused): 457 ms, settled true, first change 50 ms, reads 1 (304 ms), dropped 0, kept true; still after
+  read after it: 319 ms (afresh, kept moving before)
+tap Items tab: 2275 ms, settled true, first change 20 ms, reads 2 (579+437 ms), dropped 1, kept true; still after
+push Item 1: 1161 ms, settled true, first change 83 ms, reads 2 (122+101 ms), dropped 1, kept true; still after
+back: 1272 ms, settled true, first change 75 ms, reads 1 (380 ms), dropped 0, kept true; still after
+scroll the list: 3593 ms, settled true, first change 1322 ms, reads 1 (495 ms), dropped 0, kept true; CHANGED AFTER: [[508,396,243.3,3,254.3],[573,396,243.3,3,254.3],[638,396,243.3,3,254.3],[692,396,243.3,3,254.3]]
+tap Login tab: 2540 ms, settled true, first change 118 ms, reads 2 (304+262 ms), dropped 1, kept true; CHANGED AFTER: [[289,55,25.7,38.3,13.3]]
+nothing (no input): 1106 ms, settled true, first change -1 ms, reads 1 (300 ms), dropped 0, kept true; still after
+lab: Dialogs tab: 1919 ms, settled true, first change 25 ms, reads 2 (370+246 ms), dropped 1, kept true; still after
+lab: show alert: 967 ms, settled true, first change 65 ms, reads 2 (422+323 ms), dropped 1, kept true; still after
+lab: cancel alert: 843 ms, settled true, first change 44 ms, reads 1 (244 ms), dropped 0, kept true; still after
+lab: show sheet: 1025 ms, settled true, first change 155 ms, reads 1 (287 ms), dropped 0, kept true; still after
+lab: close sheet: 961 ms, settled true, first change 65 ms, reads 1 (241 ms), dropped 0, kept true; still after
+== round 1
+reads after launch: 280 ms (kept kept, still 509 ms), 178 ms (kept kept, still 229 ms), reuse: 192 ms (read afresh)
+tap Sign In: 304 ms, settled true, first change 21 ms, reads 1 (192 ms), dropped 0, kept true; still after
+  read after it: 217 ms (afresh, kept kept)
+tap Email: 667 ms, settled true, first change 218 ms, reads 1 (355 ms), dropped 0, kept true; still after
+type: 574 ms, settled true, first change 53 ms, reads 1 (292 ms), dropped 0, kept true; still after
+  read after typing: 324 ms (afresh, kept kept, still 397 ms)
+tap Password: 1132 ms, settled true, first change -1 ms, reads 1 (325 ms), dropped 0, kept true; still after
+type password: 470 ms, settled true, first change 60 ms, reads 1 (284 ms), dropped 0, kept true; still after
+tap Sign In (Password focused): 472 ms, settled true, first change 60 ms, reads 1 (307 ms), dropped 0, kept true; still after
+  read after it: 325 ms (afresh, kept moving before)
+tap Items tab: 2368 ms, settled true, first change 20 ms, reads 2 (903+357 ms), dropped 1, kept true; still after
+push Item 1: 1136 ms, settled true, first change 85 ms, reads 2 (118+101 ms), dropped 1, kept true; still after
+back: 1286 ms, settled true, first change 74 ms, reads 1 (393 ms), dropped 0, kept true; still after
+scroll the list: 3582 ms, settled true, first change 1340 ms, reads 1 (486 ms), dropped 0, kept true; CHANGED AFTER: [[491,396,240,3,254.3],[557,396,240,3,254.3],[621,396,240,3,254.3],[677,396,240,3,254.3]]
+tap Login tab: 4518 ms, settled false, first change 73 ms, reads 7 (299+265+278+313+277+303+263 ms), dropped 6, kept false; still after
+nothing (no input): 1088 ms, settled true, first change -1 ms, reads 1 (284 ms), dropped 0, kept true; still after
+lab: Dialogs tab: 1972 ms, settled true, first change 88 ms, reads 1 (298 ms), dropped 0, kept true; still after
+lab: show alert: 963 ms, settled true, first change 56 ms, reads 1 (339 ms), dropped 0, kept true; still after
+lab: cancel alert: 844 ms, settled true, first change 49 ms, reads 1 (243 ms), dropped 0, kept true; CHANGED AFTER: [[163,55.3,18,37.7,13.3]]
+lab: show sheet: 1043 ms, settled true, first change 139 ms, reads 1 (287 ms), dropped 0, kept true; still after
+lab: close sheet: 944 ms, settled true, first change 28 ms, reads 1 (239 ms), dropped 0, kept true; still after
+answered while the screen still changed (not counting timeouts): 4 of 34

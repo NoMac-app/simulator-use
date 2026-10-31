@@ -1,0 +1,23 @@
+== soak C (20:31:13)
+minutes	read	fill-email	fill-password	tap	final-read	still-read	rounds
+0-5	2377	1632	973	795	487	494	26
+5-10	1930	1509	915	735	403	421	34
+10-15	2358	1536	909	746	434	428	33
+15-20	977	1184	758	612	317	299	43
+20-25	828	1104	679	595	302	303	47
+25-30	777	1082	675	587	295	296	49
+30-35				579	290	291	0
+rounds checked 232, failed 0, calls with an error 0
+== C with ui_look reuse (21:01:17)
+[simulator-use] quick {"warmup":{"n":1,"ok":1,"medianMs":32606.707667,"p90Ms":32606.707667,"medianTokens":72},"read":{"n":20,"ok":20,"medianMs":36.4054795,"p90Ms":63.366542,"medianTokens":72},"tap":{"n":20,"ok":20,"medianMs":921.1592495,"p90Ms":981.070833,"medianTokens":17},"type":{"n":10,"ok":10,"medianMs":1600.2360625000001,"p90Ms":1620.182041,"medianTokens":14},"flow":{"n":10,"ok":10,"medianMs":5702.042146,"p90Ms":6566.860583,"medianTokens":194},"flowBatch":{"n":10,"ok":10,"medianMs":4689.364750000001,"p90Ms":5078.6302909999995,"medianTokens":179}}
+== keyboard preference, A (21:07:44)
+== minimize: 1
+minutes	read	fill-email	fill-password	tap	final-read	still-read	rounds
+0-5	2598	2207	1613	1850	504	555	4
+rounds checked 4, failed 0, calls with an error 0
+== full: 0
+minutes	read	fill-email	fill-password	tap	final-read	still-read	rounds
+0-5	1276	1449	1282	1831	535	406	5
+rounds checked 5, failed 0, calls with an error 0
+restored: 1
+== done (21:12:13)

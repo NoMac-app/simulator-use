@@ -281,7 +281,8 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
   var lastChange: Double? = nil
   var firstChangeAt = -1.0
   if firstChangeMs <= 0 {
-    // Taken as changing already: still for as long as the seed clock has seen no write (a caret's blink included).
+    // Taken as changing already: still for as long as the seed clock has seen no write that counts (a caret's blink
+    // does not), up to quietMs.
     let still = (writeClock?.sinceSignificantWrite() ?? 0) * 1000
     lastChange = inputEnd - min(max(0, still), quietMs)
   } else if tracker.changed() {

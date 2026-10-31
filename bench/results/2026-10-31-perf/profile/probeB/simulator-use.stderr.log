@@ -1,0 +1,22 @@
+simulator-use:   xcode-select -p 4 ms
+simulator-use:   xcrun simctl list 87 ms
+simulator-use:   xcrun simctl list 96 ms
+simulator-use: first read 181 ms
+simulator-use:   settle 324 ms: first change 42 ms, 1 read(s) 187 ms, 0 dropped
+simulator-use: step 1 tap #signIn 326 ms
+simulator-use:   xcrun simctl list 93 ms
+simulator-use: first read 214 ms
+simulator-use: step 1 fill #email … 475 ms
+simulator-use: first read 181 ms
+simulator-use: step 1 fill #email … 421 ms
+simulator-use: first read 292 ms
+simulator-use: step 1 fill #password … 231 ms
+simulator-use:   xcrun simctl list 91 ms
+simulator-use: first read 291 ms
+simulator-use:   settle 424 ms: first change 25 ms, 1 read(s) 292 ms, 0 dropped
+simulator-use: step 1 tap #signIn 424 ms
+simulator-use: first read 180 ms
+simulator-use: step 1 fill #email … 397 ms
+simulator-use: step 2 fill #password … 270 ms
+simulator-use:   settle 462 ms: first change 28 ms, 1 read(s) 343 ms, 0 dropped
+simulator-use: step 3 tap #signIn 469 ms
