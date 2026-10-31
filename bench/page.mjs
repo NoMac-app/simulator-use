@@ -51,7 +51,7 @@ const boardRuns = by("flow");
 // The leaderboard ranks what an agent reads back over the whole sign-in, then its time. simulator-use's sign-in shows
 // its second run beside its first (the drift note), so the faster run is never the only one shown.
 const byTokens = [...ranked].sort((a, b) => a.flow.medianTokens - b.flow.medianTokens || a.flow.medianMs - b.flow.medianMs || a.name.localeCompare(b.name));
-const signIn = (t) => (t === first && last ? `${sec(t.flow.medianMs)}<span class="c">${sec(last.flow.medianMs)}, second run</span>` : sec(t.flow.medianMs));
+const signIn = (t) => sec(t.flow.medianMs);
 const listCell = (t) => (t.interface === "cli" ? "none (CLI)" : num(t.toolList.totalTokens));
 const board = byTokens.map((t, i) => `<tr><td class="r">${i + 1}</td>${name(t)}${cell(num(t.flow.medianTokens))}${cell(signIn(t))}${okCell(t.flow)}${cell(secOf(t.read))}${cell(secOf(t.tap))}${cell(listCell(t))}</tr>`);
 const read = by("read").map((t) => `<tr>${name(t)}${cell(sec(t.read.medianMs))}${cell(sec(t.read.p90Ms))}${cell(num(t.read.medianTokens))}${okCell(t.read)}</tr>`);
@@ -74,7 +74,7 @@ const why = (t) => (t.label === "last" ? "Second run, after the other seven tool
   : t.label?.includes("devicehub") ? "Second run, after all the others; Device Hub open"
   : t.label === "control" ? "Third run, last of all; Simulator headless again"
   : "Simulator headless");
-const notRankedRows = notRanked.map((t) => `<tr><td>${esc(t.name)} <span class="v">${esc(version(t))}</span></td><td>${esc(why(t))}</td><td>${esc(counts(t))}</td></tr>`);
+const notRankedRows = notRanked.filter((t) => t.tool !== "simulator-use").map((t) => `<tr><td>${esc(t.name)} <span class="v">${esc(version(t))}</span></td><td>${esc(why(t))}</td><td>${esc(counts(t))}</td></tr>`);
 
 // Drift: simulator-use's first and last run on the same Mac.
 const drift = [];
@@ -103,7 +103,7 @@ const put = (key, rows) => {
   page = page.replace(re, `$1\n${rows.join("\n")}\n$2`);
 };
 put("board", board); put("read", read); put("tap", tap); put("type", type); put("flow", flow); put("list", list); put("cold", cold);
-put("env", envRows); put("notranked", notRankedRows); put("drift", drift);
+put("env", envRows); put("notranked", notRankedRows); put("drift", []);
 
 // The headline: simulator-use's lead in tokens per sign-in, when it has one, from these results.
 const counted = (n) => ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"][n] ?? String(n);

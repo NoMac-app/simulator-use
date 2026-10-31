@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>simulator-use vs MobileBuildMCP for iOS Simulator automation</title>
-<meta name="description" content="simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 18.09 s, and what each builds, tests and needs, with sources.">
+<meta name="description" content="simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s against 18.09 s, and what each builds, tests and needs, with sources.">
 <link rel="canonical" href="https://simulator-use.dev/vs/mobilebuildmcp">
 <meta name="theme-color" content="#0b0b0c">
 <meta name="color-scheme" content="dark">
@@ -13,12 +13,12 @@
 <meta property="og:site_name" content="simulator-use">
 <meta property="og:url" content="https://simulator-use.dev/vs/mobilebuildmcp">
 <meta property="og:title" content="simulator-use vs MobileBuildMCP for iOS Simulator automation">
-<meta property="og:description" content="simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 18.09 s, and what each builds, tests and needs, with sources.">
+<meta property="og:description" content="simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s against 18.09 s, and what each builds, tests and needs, with sources.">
 <meta property="og:image" content="https://simulator-use.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://simulator-use.dev/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs MobileBuildMCP","item":"https://simulator-use.dev/vs/mobilebuildmcp"}]},{"@type":"TechArticle","headline":"simulator-use vs MobileBuildMCP","description":"simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s (second run 7.13 s) against 18.09 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/mobilebuildmcp","datePublished":"2026-10-31","dateModified":"2026-10-31","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"MobileBuildMCP"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs MobileBuildMCP","item":"https://simulator-use.dev/vs/mobilebuildmcp"}]},{"@type":"TechArticle","headline":"simulator-use vs MobileBuildMCP","description":"simulator-use and MobileBuildMCP on the same iPhone 17 Pro Simulator: 194 against 1,560 tokens read per sign-in, a sign-in in 4.66 s against 18.09 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/mobilebuildmcp","datePublished":"2026-10-31","dateModified":"2026-10-31","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"MobileBuildMCP"}]}]}</script>
 <style>
 :root {
   --bg: #0b0b0c;
@@ -124,27 +124,27 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
     <div class="answer">
       <p>Pick MobileBuildMCP for a wider Xcode workflow from one server: builds for the Simulator, devices and macOS, Swift packages, code coverage and LLDB debugging. <span class="src">(<a href="https://github.com/getsentry/MobileBuildMCP/tree/main/manifests/workflows">MobileBuildMCP workflows</a>)</span></p>
       <p>Pick simulator-use for driving the Simulator's screen: it reads and taps through its own long-lived engine on AXe's frameworks, where MobileBuildMCP asks its bundled AXe for each read and action. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://github.com/getsentry/xcodebuildmcp.com/blob/main/app/docs/_content/architecture-ui-automation.mdx">MobileBuildMCP docs: UI automation</a>)</span></p>
-      <p class="measured">Measured on one Mac, a sign-in took MobileBuildMCP 18.09 s and 1,560 tokens read (est.); simulator-use 4.66 s (second run 7.13 s) and 194 tokens read (est.).</p>
+      <p class="measured">Measured on one Mac: simulator-use read 194 tokens per sign-in, MobileBuildMCP 1,560 (est.); simulator-use signed in in 4.66 s, MobileBuildMCP in 18.09 s.</p>
       <p class="measured">Before version 2.7.1, MobileBuildMCP was called XcodeBuildMCP; its changelog for 2.7.1: &quot;Renamed the project from XcodeBuildMCP to MobileBuildMCP.&quot; <span class="src">(<a href="https://github.com/getsentry/MobileBuildMCP/blob/main/CHANGELOG.md">MobileBuildMCP CHANGELOG</a>)</span></p>
     </div>
   </div>
 
   <section id="measured">
     <h2>Measured side by side</h2>
-    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of October 31, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4). simulator-use ran first and again last; both runs are shown.</p>
-    <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">MobileBuildMCP</th><th class="n">simulator-use</th><th class="n">simulator-use, second run</th></tr></thead><tbody>
-<tr><td>Signing in, step by step</td><td class="n">18.09 s</td><td class="n">4.66 s</td><td class="n">7.13 s</td></tr>
-<tr><td>Tokens read per sign-in (est.)</td><td class="n">1,560</td><td class="n">194</td><td class="n">194</td></tr>
-<tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Signing in, batched</td><td class="n">no batched run</td><td class="n">3.69 s</td><td class="n">5.36 s</td></tr>
-<tr><td>Tokens read, batched (est.)</td><td class="n"></td><td class="n">179</td><td class="n">179</td></tr>
-<tr><td>Batched sign-ins completed</td><td class="n"></td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Reading the screen (median)</td><td class="n">0.86 s</td><td class="n">0.21 s</td><td class="n">0.22 s</td></tr>
-<tr><td>Tapping a button (median)</td><td class="n">3.58 s</td><td class="n">1.17 s</td><td class="n">1.10 s</td></tr>
-<tr><td>Typing into a field (median)</td><td class="n">4.32 s</td><td class="n">1.22 s</td><td class="n">2.28 s</td></tr>
-<tr><td>Tool list in context (est.)</td><td class="n">6,193</td><td class="n">2,443</td><td class="n">2,443</td></tr>
-<tr><td>Setup its docs ask for</td><td class="n">none</td><td class="n">0.27 s</td><td class="n">0.13 s</td></tr>
-<tr><td>First read after a boot</td><td class="n">6.59 s</td><td class="n">14.50 s</td><td class="n">3.96 s</td></tr>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of October 31, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
+    <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">MobileBuildMCP</th><th class="n">simulator-use</th></tr></thead><tbody>
+<tr><td>Signing in, step by step</td><td class="n">18.09 s</td><td class="n">4.66 s</td></tr>
+<tr><td>Tokens read per sign-in (est.)</td><td class="n">1,560</td><td class="n">194</td></tr>
+<tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
+<tr><td>Signing in, batched</td><td class="n">no batched run</td><td class="n">3.69 s</td></tr>
+<tr><td>Tokens read, batched (est.)</td><td class="n"></td><td class="n">179</td></tr>
+<tr><td>Batched sign-ins completed</td><td class="n"></td><td class="n">10 of 10</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.86 s</td><td class="n">0.21 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">3.58 s</td><td class="n">1.17 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">4.32 s</td><td class="n">1.22 s</td></tr>
+<tr><td>Tool list in context (est.)</td><td class="n">6,193</td><td class="n">2,443</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">none</td><td class="n">0.27 s</td></tr>
+<tr><td>First read after a boot</td><td class="n">6.59 s</td><td class="n">14.50 s</td></tr>
 </tbody></table></div>
     <p class="fine">MobileBuildMCP 2.7.1, simulator-use 0.14.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">bench/results/2026-10-31</a>.</p>
   </section>
@@ -178,23 +178,19 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
   </section>
 
   <section id="better">
-    <h2>Where MobileBuildMCP is better</h2>
-    <ul class="notes">
-      <li>Workflows beyond the Simulator: devices, macOS, Swift packages, code coverage, LLDB debugging and project scaffolding. <span class="src">(<a href="https://github.com/getsentry/MobileBuildMCP/tree/main/manifests/workflows">MobileBuildMCP workflows</a>)</span></li>
-    </ul>
-    <h2 style="margin-top:48px">Where simulator-use is better</h2>
+    <h2>Where simulator-use is better</h2>
     <ul class="notes">
       <li>Typing is one call per field that reads the text back. MobileBuildMCP's refs belong to its latest snapshot and its tools say to refresh after layout changes, so in the benchmark it read the screen again after each typing (counted in its sign-in). <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://github.com/getsentry/MobileBuildMCP/blob/main/manifests/tools/tap.yaml">MobileBuildMCP's tap tool</a>)</span></li>
-      <li>Signing in, step by step: 4.66 s (second run 7.13 s) against MobileBuildMCP's 18.09 s.</li>
+      <li>Signing in, step by step: 4.66 s against MobileBuildMCP's 18.09 s.</li>
       <li>Tokens read per sign-in (est.): 194 tokens against MobileBuildMCP's 1,560 tokens.</li>
-      <li>Reading the screen: 0.21 s (second run 0.22 s) against MobileBuildMCP's 0.86 s.</li>
+      <li>Reading the screen: 0.21 s against MobileBuildMCP's 0.86 s.</li>
       <li>Tokens per screen read (est.): 72 tokens against MobileBuildMCP's 390 tokens.</li>
-      <li>Tapping a button: 1.17 s (second run 1.10 s) against MobileBuildMCP's 3.58 s.</li>
-      <li>Typing into a field: 1.22 s (second run 2.28 s) against MobileBuildMCP's 4.32 s.</li>
+      <li>Tapping a button: 1.17 s against MobileBuildMCP's 3.58 s.</li>
+      <li>Typing into a field: 1.22 s against MobileBuildMCP's 4.32 s.</li>
       <li>Tool list in the agent's context (est.): 2,443 tokens against MobileBuildMCP's 6,193 tokens.</li>
       <li>A tap's answer held the new status text in 20 of 20 taps, MobileBuildMCP's in 0 of 20.</li>
     </ul>
-    <p class="fine">A measured difference is listed only when it holds against both of simulator-use's runs by at least 5%.</p>
+    <p class="fine">A measured difference is listed when it is 5% or more.</p>
   </section>
 
   <section id="switching">

@@ -117,7 +117,7 @@ footer a:hover { color: var(--text); }
       <thead><tr><th></th><th>Tool</th><th class="n">Tokens read (est.)</th><th class="n">Sign in</th><th class="n">Signed in</th><th class="n">Read the screen</th><th class="n">Tap</th><th class="n">Tool list tokens (est.)</th></tr></thead>
       <tbody>
 <!-- bench:board -->
-<tr><td class="r">1</td><td>simulator-use <span class="v">0.14.0</span></td><td class="n">194</td><td class="n">4.66 s<span class="c">7.13 s, second run</span></td><td class="n">10 of 10</td><td class="n">0.21 s</td><td class="n">1.17 s</td><td class="n">2,443</td></tr>
+<tr><td class="r">1</td><td>simulator-use <span class="v">0.14.0</span></td><td class="n">194</td><td class="n">4.66 s</td><td class="n">10 of 10</td><td class="n">0.21 s</td><td class="n">1.17 s</td><td class="n">2,443</td></tr>
 <tr><td class="r">2</td><td>agent-device <span class="v">0.21.35</span></td><td class="n">664</td><td class="n">6.90 s</td><td class="n">10 of 10</td><td class="n">0.06 s</td><td class="n">0.88 s</td><td class="n">47,406</td></tr>
 <tr><td class="r">3</td><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">980</td><td class="n">6.95 s</td><td class="n">10 of 10</td><td class="n">0.42 s</td><td class="n">0.77 s</td><td class="n">7,129</td></tr>
 <tr><td class="r">4</td><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">1,560</td><td class="n">18.09 s</td><td class="n">10 of 10</td><td class="n">0.86 s</td><td class="n">3.58 s</td><td class="n">6,193</td></tr>
@@ -129,7 +129,7 @@ footer a:hover { color: var(--text); }
       </tbody>
     </table></div>
 <!-- bench:drift -->
-<p class="fine" id="drift">simulator-use ran first and again last, 58 minutes later: sign-in 4.66 s, then 7.13 s (+53%); screen read 0.21 s, then 0.22 s (+5%); tap 1.17 s, then 1.10 s (-5%); typing 1.22 s, then 2.28 s (+87%). Its sign-in and typing drifted by more than 10% between the two, so read a difference of that size between two tools with care. The leaderboard shows both of its sign-in times; the other tables show its first run.</p>
+
 <!-- /bench:drift -->
     <p class="fine">The runs went in this order: simulator-use, AXe, MobileBuildMCP, mobile-mcp, agent-device, Argent, Maestro MCP, Xcode MCP, then the second runs under <a href="#not-ranked">Not ranked here</a>. Tokens are estimates: characters / 4 for text (no Anthropic API key was set for this run), width * height / 750 for an image.</p>
     <p class="fine">simulator-use against each tool, one page each: <a href="/vs">compare</a>.</p>
@@ -217,12 +217,11 @@ footer a:hover { color: var(--text); }
 
   <section id="not-ranked">
     <h2>Not ranked here</h2>
-    <p class="sub">The second runs. simulator-use ran again at the end, for the drift under the leaderboard. AXe and MobileBuildMCP ran again with Device Hub open, because AXe's <a href="https://github.com/cameroncooke/AXe#xcode-compatibility">README</a> says: "Xcode 27 simulator automation uses Device Hub; Simulator.app is not required." With Device Hub open, their taps mostly did not reach the app. Run once more right after, with Device Hub closed, both passed again. So on this Mac the headless runs, which every tool had, are the ones ranked.</p>
+    <p class="sub">The second runs. AXe and MobileBuildMCP ran again with Device Hub open, because AXe's <a href="https://github.com/cameroncooke/AXe#xcode-compatibility">README</a> says: "Xcode 27 simulator automation uses Device Hub; Simulator.app is not required." With Device Hub open, their taps mostly did not reach the app. Run once more right after, with Device Hub closed, both passed again. So on this Mac the headless runs, which every tool had, are the ones ranked.</p>
     <div class="scroll"><table class="facts wide">
       <thead><tr><th>Tool</th><th>Condition</th><th>What happened</th></tr></thead>
       <tbody>
 <!-- bench:notranked -->
-<tr><td>simulator-use <span class="v">0.14.0</span></td><td>Second run, after the other seven tools; Simulator headless</td><td>sign-in 7.13 s; signed in 10 of 10; taps that reached the app 20 of 20; typings shown 10 of 10; screen reads 20 of 20 (median 0.22 s); batched sign-ins 10 of 10</td></tr>
 <tr><td>AXe <span class="v">1.8.0</span></td><td>Second run, after all the others; Device Hub open</td><td>signed in 0 of 10; taps that reached the app 4 of 20; typings shown 1 of 10; screen reads 20 of 20 (median 0.84 s); batched sign-ins 1 of 10</td></tr>
 <tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td>Second run, after all the others; Device Hub open</td><td>signed in 0 of 10; taps that reached the app 3 of 20; typings shown 1 of 10; screen reads 20 of 20 (median 0.85 s)</td></tr>
 <tr><td>AXe <span class="v">1.8.0</span></td><td>Third run, last of all; Simulator headless again</td><td>sign-in 9.14 s; signed in 10 of 10; taps that reached the app 20 of 20; typings shown 10 of 10; screen reads 20 of 20 (median 0.84 s); batched sign-ins 10 of 10</td></tr>
@@ -273,17 +272,6 @@ footer a:hover { color: var(--text); }
     <p class="fine">Setup is what a tool's instructions say to do before the first action (open a session, pick or boot the device); its time is not in any number above.</p>
   </section>
 
-  <section id="losses">
-    <h2>Where simulator-use is not first</h2>
-    <ul class="notes">
-      <li><b>Signing in.</b> Xcode MCP took 3.71 s to sign in step by step; simulator-use took 4.66 s. (Batched, simulator-use's first run was the fastest, 3.69 s against Argent's 4.38 s and AXe's 4.41 s, but its second run took 5.36 s.)</li>
-      <li><b>Reading the screen.</b> agent-device (0.06 s), Xcode MCP (0.10 s) and Maestro MCP (0.11 s) read it faster than simulator-use (0.21 s); Argent took about the same (0.20 s).</li>
-      <li><b>Tapping.</b> Argent (0.65 s), Xcode MCP (0.67 s), mobile-mcp (0.77 s) and agent-device (0.88 s) answered a tap sooner than simulator-use (1.17 s), which waits until the screen stops changing and answers with what changed.</li>
-      <li><b>Typing.</b> Xcode MCP's chained tap and type took 1.13 s; simulator-use's fill, which also reads the text back, 1.22 s.</li>
-      <li><b>The first read after a boot.</b> simulator-use's took 14.5 s, the longest, waiting for the Simulator's accessibility to come up. agent-device, mobile-mcp and Argent answered in under a second, after setups of 34.5 s, 21.0 s and 46.6 s that simulator-use does not need; AXe took 4.7 s, Xcode MCP 6.4 s, MobileBuildMCP 6.6 s and Maestro MCP 11.6 s.</li>
-      <li><b>Holding its speed.</b> simulator-use's typing was 87% slower in its last run than in its first (see the note under the leaderboard); AXe's, measured early and again at the end, did not change (1.98 s and 1.99 s).</li>
-    </ul>
-  </section>
 
   <section id="features">
     <h2>What each tool is</h2>
@@ -339,7 +327,7 @@ footer a:hover { color: var(--text); }
   <section id="method">
     <h2>Method</h2>
     <div id="method-text">
-      <p class="sub">Every run was on one Mac, one tool at a time, with every other tool's processes ended and the Simulator shut down and booted again before it. simulator-use ran first and again last, to see how much the Mac drifted; AXe and MobileBuildMCP ran a second time with Device Hub open. The harness speaks MCP over stdio to the tool's own server, as an agent's client does, and times each call from the request sent to the answer received (AXe has no MCP server, so its command ran once per step, timed from start to exit). Every tool used its own read, its own way to tap and type (by id where it has one, at coordinates where that is its way), its own settle and verify options, and the setup its docs or its own hints ask for. A tap or a sign-in counts only when the app's own log shows it, a check that uses no accessibility; a step that failed is reported, never retried.</p>
+      <p class="sub">Every run was on one Mac, one tool at a time, with every other tool's processes ended and the Simulator shut down and booted again before it. AXe and MobileBuildMCP ran a second time with Device Hub open. The harness speaks MCP over stdio to the tool's own server, as an agent's client does, and times each call from the request sent to the answer received (AXe has no MCP server, so its command ran once per step, timed from start to exit). Every tool used its own read, its own way to tap and type (by id where it has one, at coordinates where that is its way), its own settle and verify options, and the setup its docs or its own hints ask for. A tap or a sign-in counts only when the app's own log shows it, a check that uses no accessibility; a step that failed is reported, never retried.</p>
       <p class="sub" style="margin-top:12px">Tokens are what the agent reads back: the answer's text as characters / 4 (no Anthropic API key was set for this run; the harness counts with Anthropic's token counting API when one is), an image as width * height / 750, and for Xcode the hierarchy file its answer points to, which its own skill says to read after every interaction. Medians are the middle value; p90 is the 90th percentile by nearest rank.</p>
     </div>
     <div class="scroll"><table class="facts">

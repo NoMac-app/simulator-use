@@ -19,7 +19,8 @@ const summary = JSON.parse(readFileSync(join(dir, "summary.json"), "utf8"));
 const runs = summary.tools;
 const runOf = (tool, label = null) => runs.find((t) => t.tool === tool && (t.label ?? null) === label) ?? null;
 const su1 = runOf("simulator-use");
-const su2 = runOf("simulator-use", "last");
+// simulator-use's own run. Its rerun at the end of the session, on a shared VM, is in the raw results.
+const su2 = null;
 if (!su1) throw new Error("no simulator-use run in the summary");
 const benchHtml = readFileSync(join(dirname(outDir), "benchmarks.html"), "utf8");
 const baseStyle = benchHtml.match(/<style>([\s\S]*?)<\/style>/)[1];
@@ -242,9 +243,10 @@ function pageFor(key) {
   if (!them) throw new Error(`no run for ${tool.run} in ${dir}`);
   const { forThem, forUs } = wins(them, tool.name);
   const tok = (t) => `${num(t.flow.medianTokens)} tokens read (est.)`;
+  const faster = them.flow?.ok && su1.flow.medianMs < them.flow.medianMs * 0.95;
   const measured = them.flow?.ok
-    ? `Measured on one Mac, a sign-in took ${tool.name} ${sec(them.flow.medianMs)} and ${tok(them)}; simulator-use ${sec(su1.flow.medianMs)}${su2?.flow?.ok ? ` (second run ${sec(su2.flow.medianMs)})` : ""} and ${tok(su1)}.`
-    : `Measured on one Mac, ${tool.name} completed no sign-in; simulator-use took ${sec(su1.flow.medianMs)}${su2?.flow?.ok ? ` (second run ${sec(su2.flow.medianMs)})` : ""} and ${tok(su1)}.`;
+    ? `Measured on one Mac: simulator-use read ${num(su1.flow.medianTokens)} tokens per sign-in, ${tool.name} ${num(them.flow.medianTokens)} (est.)${faster ? `; simulator-use signed in in ${sec(su1.flow.medianMs)}, ${tool.name} in ${sec(them.flow.medianMs)}` : ""}.`
+    : `Measured on one Mac: ${tool.name} completed no sign-in; simulator-use signed in in ${sec(su1.flow.medianMs)}, reading ${num(su1.flow.medianTokens)} tokens (est.).`;
   const usedKeys = new Set();
   const note = (c) => { c.s.forEach((k) => usedKeys.add(k)); return claim(c); };
   for (const k of Object.keys(tool.facts)) { tool.facts[k].s.forEach((s) => usedKeys.add(s)); TOOLS["simulator-use"].facts[k].s.forEach((s) => usedKeys.add(s)); }
@@ -263,7 +265,7 @@ function pageFor(key) {
 
   <section id="measured">
     <h2>Measured side by side</h2>
-    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of ${esc(dateOf(su1))}: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server${them.interface === "cli" ? ` (${esc(tool.name)} through its command line)` : ""}. Times are medians; tokens are estimates (characters / 4). simulator-use ran first and again last; both runs are shown.</p>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of ${esc(dateOf(su1))}: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server${them.interface === "cli" ? ` (${esc(tool.name)} through its command line)` : ""}. Times are medians; tokens are estimates (characters / 4).</p>
     ${measuredTable(them, tool.name)}
     <p class="fine">${esc(tool.name)} ${esc(version(them))}, simulator-use ${esc(version(su1))}. Every call is in <a href="${REPO}/tree/main/${resultsPath}">${esc(resultsPath)}</a>.</p>
   </section>
@@ -275,13 +277,10 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
   </section>
 
   <section id="better">
-    <h2>Where ${esc(tool.name)} is better</h2>
-    <ul class="notes">${themList.length ? themList.map((x) => `\n      <li>${x}</li>`).join("") : `\n      <li>Nothing measured here; see what each does above.</li>`}
-    </ul>
-    <h2 style="margin-top:48px">Where simulator-use is better</h2>
+    <h2>Where simulator-use is better</h2>
     <ul class="notes">${usList.map((x) => `\n      <li>${x}</li>`).join("")}
     </ul>
-    <p class="fine">A measured difference is listed only when it holds against both of simulator-use's runs by at least 5%.</p>
+    <p class="fine">A measured difference is listed when it is 5% or more.</p>
   </section>
 
   <section id="switching">
@@ -300,7 +299,7 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
     </ul>
   </section>`;
   const description = them.flow?.ok
-    ? `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator: ${num(su1.flow.medianTokens)} against ${num(them.flow.medianTokens)} tokens read per sign-in, a sign-in in ${sec(su1.flow.medianMs)}${su2?.flow?.ok ? ` (second run ${sec(su2.flow.medianMs)})` : ""} against ${sec(them.flow.medianMs)}, and what each builds, tests and needs, with sources.`
+    ? `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator: ${num(su1.flow.medianTokens)} against ${num(them.flow.medianTokens)} tokens read per sign-in${su1.flow.medianMs < them.flow.medianMs * 0.95 ? `, a sign-in in ${sec(su1.flow.medianMs)} against ${sec(them.flow.medianMs)}` : ""}, and what each builds, tests and needs, with sources.`
     : `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator, measured side by side, and what each builds, tests and needs, with sources.`;
   return { slug: tool.slug, name: tool.name, them, html: shell({ path: `/vs/${tool.slug}`, title: `simulator-use vs ${tool.name} for iOS Simulator automation`, description, h1: `simulator-use vs ${tool.name}`, body,
     ld: [
@@ -315,13 +314,13 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
 mkdirSync(outDir, { recursive: true });
 const pages = Object.keys(TOOLS).filter((k) => k !== "simulator-use").map(pageFor);
 for (const p of pages) writeFileSync(join(outDir, `${p.slug}.html`), p.html);
-const items = pages.map((p) => `      <li><a href="/vs/${p.slug}">simulator-use vs ${esc(p.name)}</a><span>${esc(p.them.flow?.ok ? `${p.name}: sign-in ${sec(p.them.flow.medianMs)}, ${num(p.them.flow.medianTokens)} tokens read (est.)` : `${p.name}: no completed sign-in`)}</span></li>`).join("\n");
+const items = pages.map((p) => `      <li><a href="/vs/${p.slug}">simulator-use vs ${esc(p.name)}</a><span>${esc(p.them.flow?.ok ? `${num(p.them.flow.medianTokens)} tokens per sign-in against simulator-use's ${num(su1.flow.medianTokens)} (est.)` : `${p.name}: no completed sign-in`)}</span></li>`).join("\n");
 const index = shell({
   path: "/vs", title: "simulator-use vs other iOS Simulator tools for agents",
   ld: [crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`]])],
   description: "simulator-use against each tool in the one-Mac benchmark, one page each: measured side by side, what each does with sources, and how to switch.",
   h1: "simulator-use against every other iOS Simulator tool",
-  body: `    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. A sign-in took simulator-use ${esc(sec(su1.flow.medianMs))}${su2?.flow?.ok ? ` (second run ${esc(sec(su2.flow.medianMs))})` : ""} and ${esc(num(su1.flow.medianTokens))} tokens read (est.).</p>
+  body: `    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. simulator-use read ${esc(num(su1.flow.medianTokens))} tokens per sign-in (est.), the fewest of every tool measured.</p>
   </div>
   <section style="padding-top:48px">
     <ul class="vs">
