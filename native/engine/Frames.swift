@@ -28,7 +28,9 @@ final class PixelReference {
     if n != size { buffer?.deallocate(); buffer = UnsafeMutableRawPointer.allocate(byteCount: n, alignment: 64); size = n }
     memcpy(buffer!, IOSurfaceGetBaseAddress(ref), n)
     width = IOSurfaceGetWidth(ref); height = h; bytesPerRow = bpr; bytesPerElement = max(1, IOSurfaceGetBytesPerElement(ref))
-    seed = IOSurfaceGetSeed(ref)
+    // The seed as the lock found it, before the copy: a write that lands during the copy moves the seed past it, so
+    // the next look compares again instead of taking the copy as current.
+    seed = lockSeed
     return true
   }
 
@@ -60,7 +62,7 @@ final class PixelReference {
       left = min(left, l / bytesPerElement); right = max(right, r / bytesPerElement)
       if update { memcpy(a, b, rowBytes) }
     }
-    if update { seed = IOSurfaceGetSeed(ref) }
+    if update { seed = lockSeed }
     guard top >= 0 else { return (true, nil) }
     return (true, CGRect(x: left, y: top, width: right - left + 1, height: bottom - top + 1))
   }

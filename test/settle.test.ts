@@ -51,6 +51,15 @@ test("an input that went out is never sent again when the read after it failed",
   assert.deepEqual(requests.map((r) => r.op), ["settle_read", "settle", "describe"]);
 });
 
+test("an engine that stops once it has the request is never answered by sending the input again", async () => {
+  const requests = await withFakeEngine({ FAKE_SETTLE: "dies" }, async (udid) => {
+    await settle(udid, "Demo", { steps: ["tap -x 201 -y 350"] });
+  });
+  // The first engine got the request and stopped; a new one then gets the wait and the read, never the tap.
+  assert.equal(requests[0]!.op, "settle_read");
+  assert.ok(!requests.some((r) => r.op === "steps"), JSON.stringify(requests.map((r) => r.op)));
+});
+
 test("a late look waits from the screen last read, for as long as is left", async () => {
   const requests = await withFakeEngine({ FAKE_SETTLE: "ok" }, async (udid) => {
     await settle(udid, "Demo", undefined, { firstChangeMs: 1_234, baseline: "kept" });

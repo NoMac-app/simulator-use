@@ -8,6 +8,7 @@ import { setPasteboard } from "../engine/apps.ts";
 import { batch, elementAt, pressButton, setSlider, typeStep } from "../engine/axe.ts";
 import { ToolError } from "../errors.ts";
 import { withLock } from "../engine/lock.ts";
+import { hasEngine } from "../engine/native.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { heldDevice } from "../engine/state.ts";
 import { type Input, readScreen, readWhenStill, settle, type SettleOptions } from "../look/read.ts";
@@ -25,6 +26,7 @@ const READ_BACK_MS = 2_500;
 const READ_BACK_MAX_MS = 8_000;
 /** A read of the one field under a point takes a few milliseconds with the engine: the text is seen as it lands. */
 const POLL_MS = 30;
+const AXE_POLL_MS = 150;
 /** Half an iOS slider thumb: the track runs this far inside the slider's frame at each end. */
 const SLIDER_THUMB_RADIUS = 14;
 /** After a tap that seems to change nothing, how long to keep looking before saying so. */
@@ -158,7 +160,8 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   /** Sends the input (if any) and waits until the screen holds still, then reads it. */
   const settled = async (n: number, input?: Input, options?: SettleOptions) => {
     const s = await settle(udid, snap.app, input, options);
-    if (!s.settled) notes.push(`step ${n}: the screen was still changing after 4 s`);
+    const note = `step ${n}: the screen was still changing after ${Math.round((options?.timeoutMs ?? 4_000) / 100) / 10} s`;
+    if (!s.settled && !notes.some((x) => x.startsWith(note.replace(/ after .*$/, "")))) notes.push(note);
     snap = s.snap;
     stale = false;
   };
@@ -207,12 +210,14 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
     const started = Date.now();
     let deadline = started + READ_BACK_MS;
     let shown = "";
+    // Every 30 ms with the engine (a point read is a few ms); AXe opens a session per read, so it looks every 150 ms.
+    const poll = (await hasEngine(udid)) ? POLL_MS : AXE_POLL_MS;
     do {
       const before = shown;
       shown = await fieldValue(at, at.element, at.element ? located.filter((e) => e.kind === at.element!.kind).indexOf(at.element) : -1);
       if (check(shown)) return shown;
       if (shown !== before) deadline = Math.min(Math.max(deadline, Date.now() + 1_000), started + READ_BACK_MAX_MS);
-      await sleep(POLL_MS);
+      await sleep(poll);
     } while (Date.now() < deadline);
     return shown;
   };
@@ -239,8 +244,10 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         // Some answers come late: iOS's photo permission prompt showed 2 s after the tap. Watch a little longer
         // before saying nothing happened: until the screen changes from what was last read (and holds still),
         // which the engine sees in the screen's pixels as it happens.
+        // Within the window: a screen that never holds still is read as it is at its end, not 4 s later.
         for (const until = Date.now() + LATE_CHANGE_MS; render(snap) === was && Date.now() < until; ) {
-          await settled(n, undefined, { firstChangeMs: Math.max(1, until - Date.now()), baseline: "kept" });
+          const left = Math.max(1, until - Date.now());
+          await settled(n, undefined, { firstChangeMs: left, baseline: "kept", timeoutMs: Math.max(1_000, left) });
         }
         if (render(snap) === was) {
           // What can't be read (some web views, custom drawing) can't show a tap's effect either.

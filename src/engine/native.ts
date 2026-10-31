@@ -84,7 +84,8 @@ class Engine {
         return parse(await this.next(HUNG_MS)) ?? { ok: false, error: "unreadable answer" };
       } catch (error) {
         this.kill();
-        throw error;
+        // The request went out: the engine may have done it (an input sent) before it stopped.
+        throw Object.assign(error as Error, { written: true });
       }
     });
     this.queue = answer.catch(() => undefined);
@@ -144,12 +145,15 @@ async function engineFor(udid: string): Promise<Engine | undefined> {
  * means the engine is still working on it: the caller goes on without it, never with AXe, whose own automation
  * session would compete with the engine's.
  */
-export async function engineCall(udid: string, request: Record<string, unknown>, timeoutMs = 30_000): Promise<Answer | undefined> {
+export async function engineCall(udid: string, request: Record<string, unknown>, timeoutMs = 30_000, options: { reportLost?: boolean } = {}): Promise<Answer | undefined> {
   const engine = await engineFor(udid);
   if (!engine) return undefined;
   try {
     return await engine.call(request, timeoutMs);
-  } catch {
+  } catch (error) {
+    // reportLost: an engine that stopped after the request went out is said so (lost), not taken for no engine, so a
+    // request that sends input is never sent again another way.
+    if (options.reportLost && (error as { written?: boolean }).written) return { ok: false, lost: true, error: (error as Error).message };
     return undefined;
   }
 }

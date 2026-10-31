@@ -16,8 +16,6 @@ let caretMaxHeight: CGFloat = 60
 
 /** Where a caret can blink: the text fields of the last screen read, in screen points. */
 var caretZones: [CGRect] = [] { didSet { writeClock?.setZones(caretZones) } }
-/** When accessibility was last reloaded for an app. */
-var lastReloadAt = Date.distantPast
 
 /**
  * The seed clock's other half: when the screen was last written to in a way that counts, a caret's blink aside. On
@@ -28,12 +26,13 @@ final class WriteClock: @unchecked Sendable {
   private let lock = NSLock()
   private let reference = PixelReference()
   private var surface: IOSurface?
-  private var seed: UInt32 = 0
   private var zones: [CGRect] = []
-  private var lastWrite = Date.distantPast
+  /** The last change that counted (a write right after one, even of the same pixels, counts too: see transitionTail). */
   private var lastSignificant = Date()
-  /** The last change was looked at and did not count (or the reference is current): look at the next one too. */
-  private var lookNext = true
+  private var lastPixels = Date()
+  private var lastLook = Date.distantPast
+  /** A write not looked at yet: looks are at most one per 50 ms, and one look covers every write since the last. */
+  private var unlooked = false
 
   func setZones(_ frames: [CGRect]) { lock.lock(); zones = frames; lock.unlock() }
 
@@ -43,25 +42,35 @@ final class WriteClock: @unchecked Sendable {
     let now = Date()
     if surface !== current {
       surface = current
-      _ = reference.capture(current); seed = reference.seed
-      lastWrite = now; lastSignificant = now; lookNext = true
+      _ = reference.capture(current)
+      lastSignificant = now; lastPixels = now; unlooked = false
       return
     }
-    let next = surfaceSeed(current)
-    guard next != seed else { return }
-    seed = next
-    let gap = now.timeIntervalSince(lastWrite)
-    lastWrite = now
-    guard lookNext || gap >= 0.05 else { lastSignificant = now; return }
+    if surfaceSeed(current) != reference.seed { unlooked = true }
+    guard unlooked, now.timeIntervalSince(lastLook) >= 0.05 else { return }
+    lastLook = now; unlooked = false
     let (readable, box) = reference.diff(current, update: true)
-    seed = reference.seed
-    if !readable { _ = reference.capture(current); seed = reference.seed; lastSignificant = now; lookNext = false; return }
-    if let box, !caretOnly(box, zones: zones) { lastSignificant = now; lookNext = false } else { lookNext = true }
+    if !readable { _ = reference.capture(current); lastSignificant = now; lastPixels = now; return }
+    if let box {
+      if !caretOnly(box, zones: zones) { lastSignificant = now; lastPixels = now }
+    } else if now.timeIntervalSince(lastPixels) < transitionTail {
+      lastSignificant = now
+    }
   }
 
-  /** Seconds since the screen last changed in a way that counts. */
-  func sinceSignificantWrite() -> TimeInterval { lock.lock(); defer { lock.unlock() }; return Date().timeIntervalSince(lastSignificant) }
+  /** Seconds since the screen last changed in a way that counts; 0 while a write waits to be looked at. */
+  func sinceSignificantWrite() -> TimeInterval {
+    lock.lock(); defer { lock.unlock() }
+    return unlooked ? 0 : Date().timeIntervalSince(lastSignificant)
+  }
 }
+
+/**
+ * How long after a change of pixels a write of the same pixels still counts as the screen changing: a transition's
+ * end is drawn again once more as it completes (its outgoing view removed, its elements unhidden), about 90 ms after
+ * its last moving frame (a push, October 31). Later ones (a view redrawn every frame unchanged) do not count.
+ */
+let transitionTail: TimeInterval = 0.2
 var writeClock: WriteClock?
 
 func textFieldFrames(_ tree: Any) -> [CGRect] {
@@ -95,8 +104,10 @@ final class ChangeTracker {
   /** The last change that counted, as a box in points (for the caller's report). */
   private(set) var lastBox: CGRect?
 
+  private var lastPixels = Date()
+
   init?(zones: [CGRect], reference given: PixelReference? = nil) {
-    guard let surface = screenWatcher?.surface else { return nil }
+    guard let surface = screenWatcher?.currentSurface() else { return nil }
     self.surface = surface
     self.zones = zones
     if let given, given.valid {
@@ -111,20 +122,22 @@ final class ChangeTracker {
   /** Whether the screen changed in a way that counts since the last call; the reference then becomes the screen now. */
   func changed() -> Bool {
     // The simulator gave the screen another buffer: everything may have changed, and the new one is followed.
-    if let now = screenWatcher?.surface, now !== surface {
+    if let now = screenWatcher?.currentSurface(), now !== surface {
       surface = now
       _ = reference.capture(now); seed = reference.seed
-      lastBox = nil
+      lastBox = nil; lastPixels = Date()
       return true
     }
     let now = surfaceSeed(surface)
     if now == seed { return false }
     let (readable, box) = reference.diff(surface, update: true)
     seed = reference.seed
-    guard readable else { _ = reference.capture(surface); seed = reference.seed; return true }
-    guard let box else { return false }
+    guard readable else { _ = reference.capture(surface); seed = reference.seed; lastPixels = Date(); return true }
+    // The same pixels written again right after a change: a transition completing (see transitionTail).
+    guard let box else { return Date().timeIntervalSince(lastPixels) < transitionTail }
     if caretOnly(box, zones: zones) { return false }
     lastBox = CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale)
+    lastPixels = Date()
     return true
   }
 }
@@ -172,7 +185,8 @@ func spotCheck(_ simulator: FBSimulator, _ tree: Any) async -> String? {
   if leaves.count > 2 && probes.count < 4 { probes.append(leaves[leaves.count / 2]) }
   let text = { (n: [String: Any], key: String) in n[key].map { "\($0)" } ?? "" }
   let same = { (a: [String: Any], b: [String: Any]) -> Bool in
-    guard ["AXLabel", "AXValue", "AXUniqueId", "role"].allSatisfy({ text(a, $0) == text(b, $0) }), let fa = frameOf(a), let fb = frameOf(b) else { return false }
+    // pid too: the same screen drawn again by a relaunched app is another app's tree.
+    guard ["AXLabel", "AXValue", "AXUniqueId", "role", "pid"].allSatisfy({ text(a, $0) == text(b, $0) }), let fa = frameOf(a), let fb = frameOf(b) else { return false }
     return abs(fa.minX - fb.minX) <= 1.5 && abs(fa.minY - fb.minY) <= 1.5 && abs(fa.width - fb.width) <= 1.5 && abs(fa.height - fb.height) <= 1.5
   }
   for probe in probes {
@@ -195,12 +209,13 @@ func spotCheck(_ simulator: FBSimulator, _ tree: Any) async -> String? {
  */
 @MainActor
 func trackedRead(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, stillBefore: Bool) async throws -> (tree: Any, kept: String) {
-  let tracker = ChangeTracker(zones: caretZones)
+  // A copy of the screen only when the read can be kept: a screen that was moving before it never is.
+  let tracker = stillBefore ? ChangeTracker(zones: caretZones) : nil
   let options = readOptions(keys: keys, nested: nested)
   let tree = try await readFrontmost(simulator, keys: keys, nested: nested)
   caretZones = textFieldFrames(tree)
   // Why the read is kept for giving again, or why not.
-  let why = tracker == nil ? "no screen buffer" : !stillBefore ? "moving before" : tracker!.changed() ? "moving during" : isEmptyApp(tree) ? "empty"
+  let why = !stillBefore ? "moving before" : tracker == nil ? "no screen buffer" : tracker!.changed() ? "moving during" : isEmptyApp(tree) ? "empty"
     : !lastReadStable ? "reloaded, not yet whole" : "kept"
   keptRead = why == "kept" ? KeptRead(tree: tree, at: Date(), pixels: tracker!.reference, surface: tracker!.surface, zones: caretZones, options: options) : nil
   return (tree, why)
@@ -212,7 +227,7 @@ func reusableRead(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, m
   guard let kept = keptRead else { return (nil, "none kept") }
   guard kept.options == readOptions(keys: keys, nested: nested) else { return (nil, "asked otherwise") }
   guard Date().timeIntervalSince(kept.at) <= maxAge else { return (nil, "too old") }
-  guard screenWatcher?.surface === kept.surface else { return (nil, "another screen buffer") }
+  guard screenWatcher?.currentSurface() === kept.surface else { return (nil, "another screen buffer") }
   var why: String
   if surfaceSeed(kept.surface) == kept.pixels.seed { why = "seed" }
   else {
@@ -242,7 +257,7 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
   // Any input makes the kept read the past; as the baseline, its pixels are the screen the caller last saw.
   let kept = keptRead
   keptRead = nil
-  let baseline = fromKept && kept != nil && screenWatcher?.surface === kept!.surface ? kept!.pixels : nil
+  let baseline = fromKept && kept != nil && screenWatcher?.currentSurface() === kept!.surface ? kept!.pixels : nil
   guard let tracker = ChangeTracker(zones: caretZones, reference: baseline) else {
     // No screen buffer to watch (never seen on iOS 26 or 27): the input, the seed's wait as before, and a read.
     try await input?()
@@ -289,13 +304,23 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
     let start = Date()
     let tree = try await readFrontmost(simulator, keys: keys); reads += 1; readMs.append(ms(start))
     tracker.zones = textFieldFrames(tree)
-    // Kept only after a wait long enough to know the screen was still (a late check's last few milliseconds are not).
-    if !tracker.changed() { return finish(tree, settled: true, changed: false, kept: elapsed() - inputEnd >= 100) }
+    // Still through the read and guardMs after (what changed during it is drawn a frame or two later). Kept only
+    // after a wait long enough to know the screen was still (a late check's last few milliseconds are not).
+    var moved = tracker.changed()
+    let readEnd = elapsed()
+    while !moved && elapsed() - readEnd < guardMs {
+      try? await Task.sleep(nanoseconds: 4_000_000)
+      moved = tracker.changed()
+    }
+    if !moved { return finish(tree, settled: true, changed: false, kept: elapsed() - inputEnd >= 100) }
     // The change came as the screen was read (a late answer): wait for it to hold still, as for any change.
     last = elapsed(); firstChangeAt = last; dropped += 1
   }
+  // The last read dropped and when it ended: at the timeout, one that just ended is the screen as it is.
+  var dropRead: (tree: Any, end: Double)? = nil
   while true {
     if elapsed() - inputEnd >= timeoutMs {
+      if let recent = dropRead, elapsed() - recent.end < 300 { return finish(recent.tree, settled: false, changed: true, kept: false) }
       let start = Date()
       let tree = try await readFrontmost(simulator, keys: keys); reads += 1; readMs.append(ms(start))
       return finish(tree, settled: false, changed: true, kept: false)
@@ -309,14 +334,14 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
     let tree = try await readFrontmost(simulator, keys: keys); reads += 1; readMs.append(ms(start))
     // The fields of the screen as just read: a caret blinking in one (on a screen come back to) is no change.
     tracker.zones = textFieldFrames(tree)
-    if tracker.changed() { last = elapsed(); dropped += 1; continue }
+    if tracker.changed() { last = elapsed(); dropped += 1; dropRead = (tree, last); continue }
     let readEnd = elapsed()
     var moved = false
     while elapsed() - readEnd < guardMs || elapsed() - last < quietMs {
       try? await Task.sleep(nanoseconds: 4_000_000)
       if tracker.changed() { moved = true; break }
     }
-    if moved { last = elapsed(); dropped += 1; continue }
+    if moved { last = elapsed(); dropped += 1; dropRead = (tree, last); continue }
     return finish(tree, settled: true, changed: true, kept: true)
   }
 }

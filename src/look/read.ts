@@ -2,6 +2,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { AccessibilityStarting, batch, describeScreen, describeUi, gesture } from "../engine/axe.ts";
 import { engineCall, engineGesture, engineSteps, hasEngine } from "../engine/native.ts";
+import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
 import { type AxNode, render, type Snapshot, snapshot } from "./snapshot.ts";
 
@@ -125,6 +126,7 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
       },
       // The wait, then a read, which can take long on a web page.
       (options.firstChangeMs ?? FIRST_CHANGE_MS) + (options.timeoutMs ?? SETTLE_TIMEOUT_MS) + 60_000,
+      { reportLost: true },
     );
     if (answer?.ok && answer.tree) {
       const tree = answer.tree as AxNode | AxNode[];
@@ -141,11 +143,15 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
       }
       return { snap, settled: answer.settled !== false };
     }
-    // The engine is still at it (busy): the input went out, and the next request waits for it to finish.
-    if (answer?.busy) return { snap: (await readScreen(udid, false)).snap, settled: false };
-    // An engine without this request (unknown op) took no input; an error after the input went out (input_sent)
-    // must not be answered by sending it again.
-    sent = Boolean(answer && answer.input_sent);
+    // The engine is still at it after a minute (busy): the input went out, or will; it is never sent again.
+    if (answer?.busy) {
+      if (input) throw new ToolError("The Simulator did not finish the input and the wait after it within a minute.", "Call ui_look to see the screen: the phone may still be busy with it.");
+      return { snap: (await readScreen(udid, false)).snap, settled: false };
+    }
+    // The input is sent the old way only when it surely did not go out: no engine took the request, an engine from
+    // before settle_read refused it (unknown op), or this one refused it before sending it (input_sent false). An
+    // engine that stopped after the request went out (lost), or an error after the input (input_sent), sent it.
+    sent = Boolean(answer && (answer.lost || !(answer.input_sent === false || /unknown op/.test(String(answer.error ?? "")))));
   }
   if (input && !sent) await send(udid, input);
   return settleAfter(udid, fromApp, started, options.firstChangeMs ?? FIRST_CHANGE_MS);

@@ -132,19 +132,18 @@ func jpeg(fromPNG data: Data, maxPoints: (Double, Double)?, quality: Double) thr
 /** Counts the Simulator's screen updates: "settled" means no update for a quiet period. */
 final class DamageWatcher: NSObject, FBFramebufferConsumer, @unchecked Sendable {
   private let lock = NSLock(); private var lastUpdate = Date(); private var updates = 0
-  /** The last time the surface's seed moved: a write to the screen (damage callbacks also come without one). */
-  private var lastWrite = Date()
   var surface: IOSurface?; private var lastSeed: UInt32 = 0
   func didChange(_ surface: IOSurface?) { lock.lock(); if let surface { self.surface = surface }; lock.unlock(); mark() }
+  /** The screen's buffer, read under the lock didChange writes it under (it is read from several queues). */
+  func currentSurface() -> IOSurface? { lock.lock(); defer { lock.unlock() }; return surface }
   func didReceiveDamageRect() { mark() }
   private func mark() { lock.lock(); lastUpdate = Date(); updates += 1; lock.unlock() }
   /** The surface's seed changes whenever its contents do: a free check, unlike a screenshot. */
   func pollSeed() { lock.lock(); defer { lock.unlock() }
     guard let surface else { return }
     let seed = IOSurfaceGetSeed(unsafeBitCast(surface, to: IOSurfaceRef.self))
-    if seed != lastSeed { lastSeed = seed; lastUpdate = Date(); lastWrite = lastUpdate; updates += 1 } }
-  /** How long ago the screen was last written to, as the seed clock saw it (polled every 8 ms). */
-  func sinceLastWrite() -> TimeInterval { lock.lock(); defer { lock.unlock() }; return Date().timeIntervalSince(lastWrite) }
+    if seed != lastSeed { lastSeed = seed; lastUpdate = Date(); updates += 1 } }
+
   func snapshot() -> (Date, Int) { lock.lock(); defer { lock.unlock() }; return (lastUpdate, updates) }
   /** The surface's seed now: equal seeds, unchanged pixels (damage callbacks also come without a change). */
   func currentSeed() -> UInt32? { lock.lock(); defer { lock.unlock() }
@@ -685,7 +684,7 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
   for attempt in 0..<2 {
     do {
       var tree = try await serializeFrontmost(simulator, keys: keys, nested: nested)
-      if attempt == 0 && isEmptyApp(tree) { forceBootstrap = true; reloaded = true; lastReloadAt = Date(); continue }
+      if attempt == 0 && isEmptyApp(tree) { forceBootstrap = true; reloaded = true; continue }
       // After accessibility was reloaded (an app that read empty), its elements fill in over a moment: read again
       // until two reads agree, up to 2 s. A newly opened app is read again by simulator-use (opening() in
       // src/look/read.ts); the pid comparison that once did it here never fired (pids came back nil), and every
@@ -708,7 +707,7 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
       lastTreeSignature = signature(tree)
       return tree
     } catch {
-      if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; reloadedAfterError = true; lastReloadAt = Date(); continue }
+      if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; reloadedAfterError = true; continue }
       throw error
     }
   }
@@ -781,14 +780,7 @@ func main() async {
     }
     let surface = framebuffer?.attach(watcher, on: DispatchQueue(label: "damage"))
     watcher.surface = surface
-    // The seed clock: when the screen last changed, known at any moment (a seed read every 8 ms costs nothing).
-    let seedClock = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "seed", qos: .utility))
-    seedClock.schedule(deadline: .now(), repeating: .milliseconds(8), leeway: .milliseconds(2))
-    let clock = WriteClock()
-    writeClock = clock
-    seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.surface) }
-    seedClock.resume()
-    seedClocks.append(seedClock)
+
     // The screen in pixels and its scale (points = pixels / scale), so a live view maps a click to a tap.
     var screen: [String: Any] = [:]
     if let surface {
@@ -797,6 +789,15 @@ func main() async {
     }
     if let scale = (simulator as AnyObject).value(forKeyPath: "device.deviceType.mainScreenScale") as? NSNumber { screen["scale"] = scale.doubleValue }
     if let w = screen["width"] as? Int, let h = screen["height"] as? Int, let scale = screen["scale"] as? Double, scale > 0 { display = CGSize(width: Double(w) / scale, height: Double(h) / scale); pixelScale = scale }
+    // The seed clock: when the screen last changed, known at any moment (a seed read every 8 ms costs nothing). Started
+    // once the screen's scale is known: it tells a caret's blink by its size in points.
+    let seedClock = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "seed", qos: .utility))
+    seedClock.schedule(deadline: .now(), repeating: .milliseconds(8), leeway: .milliseconds(2))
+    let clock = WriteClock()
+    writeClock = clock
+    seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.currentSurface()) }
+    seedClock.resume()
+    seedClocks.append(seedClock)
     emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen])
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
@@ -922,9 +923,9 @@ func main() async {
         case "watch":
           // Where the screen changes over window_ms, each change as [ms, x, y, width, height] in points (the box
           // around what changed since the frame before; [ms] alone: the seed moved but no pixel did). An optional
-          // input first: tap [x, y], or steps as in "steps".
+          // tap [x, y] first.
           let windowMs = req["window_ms"] as? Double ?? 2000
-          guard let surface = watcher.surface else { throw EngineError(message: "no screen buffer") }
+          guard let surface = watcher.currentSurface() else { throw EngineError(message: "no screen buffer") }
           let reference = PixelReference()
           guard reference.capture(surface) else { throw EngineError(message: "the screen buffer can't be read") }
           var lastSeed = reference.seed
