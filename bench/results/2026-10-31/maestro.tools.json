@@ -1,0 +1,237 @@
+{
+ "instructions": "Maestro MCP authors, edits and runs UI tests via declarative YAML flows on Android emulators, iOS simulators, Chromium browsers, or Maestro Cloud. Use when the user wants to write, run, or debug a mobile or web UI test, reproduce a bug, or self-validate a user-facing change you just built.\n\nEvery local tool (`take_screenshot`, `inspect_screen`, `run`) needs a `device_id` from `list_devices` first.\n\nDocs: https://docs.maestro.dev/llms.txt. Call `cheat_sheet` before authoring unfamiliar commands, required args, nested properties, conditionals, or multi-screen flows.\n\n## Local workflow\n\n`list_devices` -> `inspect_screen` -> `run`.\n\n1. `list_devices`: pick a `device_id` (mobile simulator/emulator, or `chromium` for web). If empty, ask the user to boot one. Use only IDs returned.\n2. `inspect_screen`: fetch the current screen's view hierarchy before targeting elements. Use `take_screenshot` when a visual helps. Re-inspect after any UI change.\n3. `run`: pass exactly one of `{ yaml }` (inline, preferred for exploration), `{ files }`, or `{ dir, include_tags, exclude_tags }`. Always include `device_id`. Pass `env` for flow variables. `run` validates syntax.\n\nMobile flows declare `appId` and start with `launchApp`; web flows declare `url` and start with `openLink`. `include_tags`/`exclude_tags` are bare names without `@`. Prefer one full flow over many single-command calls.\n\n## Cloud workflow\n\n`list_cloud_devices` -> `run_on_cloud` -> `get_cloud_run_status` (poll).\n\n`list_cloud_devices` returns valid `{device_model, device_os}` pairs. Pass them verbatim; never lowercase, reformat, or infer. `run_on_cloud` submits a flow or folder, returns `upload_id`, `project_id`, and a dashboard URL (async). Poll `get_cloud_run_status` every 60s until `status` is terminal (SUCCESS, ERROR, CANCELED, WARNING). `describe_cloud_run`: a `run_id`'s (not `upload_id`) metadata + artifacts. Tags only apply with a folder. No tool lists past runs.\n\nAuth: `maestro login` (or `MAESTRO_CLOUD_API_KEY` for non-interactive). Never echo the API key.",
+ "tools": [
+  {
+   "name": "list_devices",
+   "inputSchema": {
+    "properties": {},
+    "required": [],
+    "type": "object"
+   },
+   "description": "List all available devices that can be launched for automation."
+  },
+  {
+   "name": "take_screenshot",
+   "inputSchema": {
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "description": "The ID of the device to take a screenshot from"
+     }
+    },
+    "required": [
+     "device_id"
+    ],
+    "type": "object"
+   },
+   "description": "Take a screenshot of the current device screen"
+  },
+  {
+   "name": "run",
+   "inputSchema": {
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "description": "The ID of the device to run the flow on. Use `list_devices` to see connected devices."
+     },
+     "yaml": {
+      "type": "string",
+      "description": "Inline Maestro flow YAML. Mutually exclusive with `files` and `dir`."
+     },
+     "files": {
+      "type": "array",
+      "description": "List of YAML flow files to execute. Mutually exclusive with `yaml` and `dir`.",
+      "items": {
+       "type": "string"
+      }
+     },
+     "dir": {
+      "type": "string",
+      "description": "Directory containing YAML flow files. Mutually exclusive with `yaml` and `files`."
+     },
+     "include_tags": {
+      "type": "array",
+      "description": "Only run flows with at least one of these tags. Valid only with `dir`.",
+      "items": {
+       "type": "string"
+      }
+     },
+     "exclude_tags": {
+      "type": "array",
+      "description": "Skip flows with any of these tags. Valid only with `dir`.",
+      "items": {
+       "type": "string"
+      }
+     },
+     "env": {
+      "type": "object",
+      "description": "Environment variables to inject into the flow(s).",
+      "additionalProperties": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "device_id"
+    ],
+    "type": "object"
+   },
+   "description": "Simulate user interactions with a mobile device by running raw Maestro commands or Maestro flow files.\n\nExactly one of `yaml`, `files`, or `dir` must be provided:\n\n1) Inline YAML (preferred for exploration/debugging):\n   { \"device_id\": \"...\", \"yaml\": \"- tapOn: 123\" }\n\n2) Specific test files:\n   { \"device_id\": \"...\", \"files\": [\"flow1.yaml\", \"flow2.yaml\"] }\n\n3) Directory with optional tag filtering:\n   { \"device_id\": \"...\", \"dir\": \"tests/\", \"include_tags\": [\"smoke\"], \"exclude_tags\": [\"slow\"] }\n\n`env` is optional in all modes and injects environment variables available to the flow.\n\nSyntax is validated as part of this call; no separate pre-check is needed.\n\nSome commands require arguments and fail to parse when written bare. `assertScreenshot`\nneeds a name (e.g. `assertScreenshot: home_screen` or `assertScreenshot: { path: home_screen }`);\nnever emit `- assertScreenshot` on its own. When in doubt, check `cheat_sheet`.\n\nIf no device is running, ask the user to start one first.\nUse `inspect_screen` to get the current screen before guessing at commands.\nUse `cheat_sheet` for Maestro flow syntax."
+  },
+  {
+   "name": "inspect_screen",
+   "inputSchema": {
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "description": "The ID of the device to get hierarchy from"
+     }
+    },
+    "required": [
+     "device_id"
+    ],
+    "type": "object"
+   },
+   "description": "Get the current screen's view hierarchy as compact JSON. The payload has two top-level keys: `ui_schema` (one-time abbreviations + per-attribute defaults for this platform) and `elements` (the tree, nested via `c` children). Keys on each element are abbreviated (e.g. `b`=bounds, `txt`=text, `rid`=resource-id, `a11y`=accessibilityText/content-desc, `hint`=hintText, `cls`=class, `val`=value, `scroll`=scrollable, `c`=children). Boolean flags (`clickable`, `checked`, `focused`, `selected`, `enabled`) only appear when non-default per `ui_schema.defaults`. Zero-size and empty-container nodes are filtered out. The abbreviated keys above are NOT valid Maestro selector keys. `tapOn` / `assertVisible` / etc. accept `text`, `id`, `index`, and position matchers (`below`, `above`, `leftOf`, `rightOf`). Map `a11y` to `text:` when authoring selectors; never pass `a11y` / `accessibilityText` as a selector. Always copy `txt` values verbatim from this output; never author them from a screenshot, which is a common source of hallucinated strings (e.g. an element showing a heart icon looks like a \"Favorite\" button in a screenshot but has no such text in the hierarchy). Maestro's `text:` matcher is full-string regex with IGNORE_CASE, so a partial string does NOT match: `text: \"RNR 352\"` will miss an element whose real text is `\"RNR 352 - Expo Launch with Cedric van Putten\"`. Use the full on-screen string, or anchor with a regex like `\"RNR 352.*\"`."
+  },
+  {
+   "name": "cheat_sheet",
+   "inputSchema": {
+    "properties": {},
+    "required": [],
+    "type": "object"
+   },
+   "description": "Get the Maestro cheat sheet with common commands and syntax examples. Returns comprehensive documentation on Maestro flow syntax, commands, and best practices."
+  },
+  {
+   "name": "open_maestro_viewer",
+   "inputSchema": {
+    "properties": {},
+    "required": [],
+    "type": "object"
+   },
+   "description": "Returns the Maestro Viewer URL so it can be shared with the user. Maestro Viewer shows live device state, the current flow's commands, and tool activity. In Claude Code desktop, the returned URL can be dropped into a temporary `launch.json` preview config to render Maestro Viewer inside Claude's embedded preview pane."
+  },
+  {
+   "name": "list_cloud_devices",
+   "inputSchema": {
+    "properties": {},
+    "required": [],
+    "type": "object"
+   },
+   "description": "List device models and OS versions available on Maestro Cloud. Call this before `run_on_cloud` to discover valid `device_model` / `device_os` pairs. OS versions are returned in the exact case the cloud API expects (e.g. `iOS-17-5`, `android-34`)."
+  },
+  {
+   "name": "run_on_cloud",
+   "inputSchema": {
+    "properties": {
+     "app_file": {
+      "type": "string",
+      "description": "Path to the app binary (.apk, .ipa, or .zip). Absolute or relative to the current working directory."
+     },
+     "flows": {
+      "type": "string",
+      "description": "Path to a single flow file or a folder containing flows. Absolute or relative to the current working directory."
+     },
+     "name": {
+      "type": "string",
+      "description": "Optional human-readable name for this upload."
+     },
+     "project_id": {
+      "type": "string",
+      "description": "Optional Maestro Cloud project ID. If omitted and the account has exactly one project, it is auto-selected; if the account has multiple projects, this parameter is required."
+     },
+     "env": {
+      "type": "object",
+      "description": "Optional map of environment variables to inject into the flows (e.g. {\"APP_ID\": \"com.example.app\"}).",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "include_tags": {
+      "type": "array",
+      "description": "Only run flows that have any of these tags.",
+      "items": {
+       "type": "string"
+      }
+     },
+     "exclude_tags": {
+      "type": "array",
+      "description": "Skip flows that have any of these tags.",
+      "items": {
+       "type": "string"
+      }
+     },
+     "device_model": {
+      "type": "string",
+      "description": "Cloud device model (e.g. `iPhone-17-Pro`, `pixel_6`). Call `list_cloud_devices` for valid values."
+     },
+     "device_os": {
+      "type": "string",
+      "description": "Cloud device OS version, case-sensitive (e.g. `iOS-17-5`, `android-34`). Call `list_cloud_devices` for valid values."
+     },
+     "priority": {
+      "type": "string",
+      "enum": [
+       "low",
+       "normal",
+       "high"
+      ],
+      "description": "Optional queue priority of this upload within the organization. Higher priority flows start before lower priority flows waiting in the queue. Defaults to `normal`."
+     }
+    },
+    "required": [
+     "app_file",
+     "flows"
+    ],
+    "type": "object"
+   },
+   "description": "Submit a Maestro flow (or folder of flows) to Maestro Cloud for execution on cloud devices. Returns immediately with an upload_id and dashboard URL. Use get_cloud_run_status to poll for results. Requires Maestro Cloud authentication: run `maestro login` (recommended), or set MAESTRO_CLOUD_API_KEY for non-interactive use."
+  },
+  {
+   "name": "get_cloud_run_status",
+   "inputSchema": {
+    "properties": {
+     "upload_id": {
+      "type": "string",
+      "description": "The upload_id returned by run_on_cloud."
+     },
+     "project_id": {
+      "type": "string",
+      "description": "The project_id the upload was submitted to (also returned by run_on_cloud)."
+     },
+     "include_flow_results": {
+      "type": "boolean",
+      "description": "If true, include the per-flow breakdown once the run has completed. Default false."
+     }
+    },
+    "required": [
+     "upload_id",
+     "project_id"
+    ],
+    "type": "object"
+   },
+   "description": "Fetch the current status and (optionally) per-flow results of a Maestro Cloud upload. Use with the upload_id and project_id returned by run_on_cloud. Requires Maestro Cloud authentication: run `maestro login` (recommended), or set MAESTRO_CLOUD_API_KEY for non-interactive use."
+  },
+  {
+   "name": "describe_cloud_run",
+   "inputSchema": {
+    "properties": {
+     "run_id": {
+      "type": "string",
+      "description": "The per-flow run id from a dashboard run URL (NOT the upload_id from run_on_cloud)."
+     },
+     "include_archive": {
+      "type": "boolean",
+      "description": "When true, also build and include the whole-run zip (bundles everything the run produced, incl. the screenshots and, for failed/warned steps, the view hierarchy — not in the individual `artifacts` list) as an `artifactsArchive` artifact. Its signed URL is short-lived (~15 min), so request it only when the archive is needed and use/hand off the fresh link promptly. Slower to build; defaults to false."
+     }
+    },
+    "required": [
+     "run_id"
+    ],
+    "type": "object"
+   },
+   "description": "Fetch metadata and artifacts for a single Maestro Cloud run by its run_id. Returns run status, failure reason, device spec, timing, and `artifacts` — the run's individually-stored files, each with a directly-downloadable signed `url` (e.g. screen recording and device logs). Set `include_archive` to additionally get `artifactsArchive`: a single zip of the ENTIRE run — everything, including the screenshots and, for failed/warned steps, the view hierarchy (none of which are in the individual `artifacts` list) — as a direct url; omit it for a faster response. Signed URLs expire: individual files after ~7 days, but the archive after only ~15 minutes — so request the archive (include_archive=true) when it's actually needed and hand over a fresh link, and call the tool again for a new link if one has expired. When you present the result, make both options clear to the user: the individual files listed in `artifacts` (recording, logs), or the complete archive — call again with include_archive=true — for everything including screenshots and, for failed/warned steps, the view hierarchy. IMPORTANT: run_id is the per-flow run id from a dashboard run URL, NOT the upload_id returned by run_on_cloud. Older runs created before run-scoped artifact storage return no artifacts. Requires Maestro Cloud authentication: run `maestro login` (recommended), or set MAESTRO_CLOUD_API_KEY for non-interactive use."
+  }
+ ]
+}

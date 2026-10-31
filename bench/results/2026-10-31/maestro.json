@@ -1,0 +1,4618 @@
+{
+ "tool": "maestro",
+ "label": null,
+ "name": "Maestro MCP",
+ "interface": "mcp",
+ "startedAt": "2026-10-31T14:57:36.541Z",
+ "counts": {
+  "reads": 20,
+  "taps": 20,
+  "types": 10,
+  "flows": 10
+ },
+ "notes": [],
+ "ops": [
+  {
+   "op": "setup",
+   "ok": true,
+   "error": null,
+   "wallMs": 455.707958,
+   "ms": 455.267541,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "list_devices",
+     "args": {},
+     "ms": 455.267541,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2901,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 0
+    }
+   ],
+   "tokens": 726
+  },
+  {
+   "op": "warmup",
+   "ok": true,
+   "error": null,
+   "wallMs": 11549.876208,
+   "ms": 11549.70025,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 11549.70025,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 124.755708,
+   "ms": 124.624125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 124.624125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 111.073625,
+   "ms": 110.9905,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 110.9905,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 109.62825,
+   "ms": 109.534792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 109.534792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 109.827875,
+   "ms": 109.741416,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 109.741416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 108.564875,
+   "ms": 108.4705,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 108.4705,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 117.573583,
+   "ms": 117.475458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 117.475458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 126.364167,
+   "ms": 126.269375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 126.269375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 113.760084,
+   "ms": 113.673667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 113.673667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 110.15175,
+   "ms": 110.068958,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 110.068958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 113.867625,
+   "ms": 113.801084,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 113.801084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 116.974875,
+   "ms": 116.912916,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 116.912916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 110.491667,
+   "ms": 110.423292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 110.423292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 114.962875,
+   "ms": 114.87175,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 114.87175,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 112.030583,
+   "ms": 111.80075,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 111.80075,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 112.61825,
+   "ms": 112.469458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 112.469458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 121.02125,
+   "ms": 120.942083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 120.942083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 117.57725,
+   "ms": 117.502375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 117.502375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 119.045834,
+   "ms": 118.980917,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 118.980917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 108.596541,
+   "ms": 108.53425,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 108.53425,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 105.931417,
+   "ms": 105.868667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 105.868667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1107,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "tap",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 2250.787375,
+   "ms": 2250.226625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 2250.226625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 594.257,
+    "ms": 594.174,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 594.174,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 1593.8775,
+   "ms": 1593.769834,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1593.769834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 688.559584,
+    "ms": 688.459333,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 688.459333,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 1595.037666,
+   "ms": 1594.960041,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1594.960041,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 710.161166,
+    "ms": 710.080833,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 710.080833,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 1589.642542,
+   "ms": 1589.562875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1589.562875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 707.830333,
+    "ms": 707.749583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 707.749583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 1581.372875,
+   "ms": 1581.242458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1581.242458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 725.268959,
+    "ms": 725.199334,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 725.199334,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 1601.61675,
+   "ms": 1601.488292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1601.488292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 701.923375,
+    "ms": 701.852958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 701.852958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 1644.987291,
+   "ms": 1644.896292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1644.896292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 757.684084,
+    "ms": 757.588208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 757.588208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 1582.848791,
+   "ms": 1582.756583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1582.756583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 707.020709,
+    "ms": 706.948875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 706.948875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 1580.148084,
+   "ms": 1580.057709,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1580.057709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 688.534333,
+    "ms": 688.449167,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 688.449167,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 1587.769959,
+   "ms": 1587.691875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1587.691875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 710.53875,
+    "ms": 710.470083,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 710.470083,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 1588.896875,
+   "ms": 1588.627709,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1588.627709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 696.651333,
+    "ms": 696.536917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 696.536917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 1595.767042,
+   "ms": 1595.6955,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1595.6955,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 666.066375,
+    "ms": 665.943209,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 665.943209,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 1599.611042,
+   "ms": 1599.542417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1599.542417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 684.028334,
+    "ms": 683.957417,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 683.957417,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 1
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 1574.281666,
+   "ms": 1574.212125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1574.212125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 692.196708,
+    "ms": 692.127375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 692.127375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 1570.1325,
+   "ms": 1570.063083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1570.063083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 714.63975,
+    "ms": 714.5405,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 714.5405,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 1589.766708,
+   "ms": 1589.699667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1589.699667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 708.983667,
+    "ms": 708.906708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 708.906708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 1578.954541,
+   "ms": 1578.88525,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1578.88525,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 613.543958,
+    "ms": 613.443625,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 613.443625,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 1594.471416,
+   "ms": 1594.403292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1594.403292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 653.277042,
+    "ms": 653.19925,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 653.19925,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 1588.674625,
+   "ms": 1588.603458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1588.603458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 670.611958,
+    "ms": 670.513875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 670.513875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 1563.257041,
+   "ms": 1563.188583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1563.188583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 666.486625,
+    "ms": 666.411834,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 666.411834,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "type",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 3881.819041,
+   "ms": 3881.65175,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3881.65175,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 652.347625,
+    "ms": 652.276708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 652.276708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 148.035583,
+    "ms": 147.974,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 147.974,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 3659.295542,
+   "ms": 3659.221875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3659.221875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 625.986,
+    "ms": 625.91725,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 625.91725,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 147.546041,
+    "ms": 147.483584,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 147.483584,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 4040.382917,
+   "ms": 4040.306833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 4040.306833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 709.882459,
+    "ms": 709.815292,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 709.815292,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 149.652958,
+    "ms": 149.591375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 149.591375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 3670.14825,
+   "ms": 3670.068042,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3670.068042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 685.220666,
+    "ms": 685.134667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 685.134667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 156.067292,
+    "ms": 156.008208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 156.008208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 3630.134792,
+   "ms": 3630.056333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3630.056333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 708.846666,
+    "ms": 708.770084,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 708.770084,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 149.458375,
+    "ms": 149.399625,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 149.399625,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 3689.666625,
+   "ms": 3689.589209,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3689.589209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 832.788334,
+    "ms": 832.715333,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 832.715333,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 148.739667,
+    "ms": 148.677917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 148.677917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 3641.520792,
+   "ms": 3641.447459,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3641.447459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 766.359958,
+    "ms": 766.287459,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 766.287459,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 150.635209,
+    "ms": 150.5345,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 150.5345,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 3687.597875,
+   "ms": 3687.52475,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3687.52475,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 619.570042,
+    "ms": 619.501458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 619.501458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 147.727917,
+    "ms": 147.668,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 147.668,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 3658.764041,
+   "ms": 3658.684459,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3658.684459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 699.522125,
+    "ms": 699.453084,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 699.453084,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 146.316334,
+    "ms": 146.254584,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 146.254584,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 4056.704583,
+   "ms": 4056.624958,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 4056.624958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 51,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 702.003375,
+    "ms": 701.930875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 701.930875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 4427,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 1107,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 152.52,
+    "ms": 152.458458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "inspect_screen",
+      "args": {
+       "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+      },
+      "ms": 152.458458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 7024,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 1756,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "flow",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 9034.274375,
+   "ms": 9033.33325,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 721.238792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 4
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3626.301625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2909.142208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1642.827,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 133.823625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 8953.421167,
+   "ms": 8953.04325,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 666.059333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 4
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3615.137833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2937.718125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1597.948834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 136.179125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 9024.096459,
+   "ms": 9023.639499,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 719.394167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 4
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3668.428167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2908.084666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1594.121916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 133.610583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 9004.70725,
+   "ms": 9004.280584,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 695.532333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3689.862917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2889.236167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1596.111792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 133.537375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 9200.983333,
+   "ms": 9200.611167,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 686.271584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3862.68075,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2912.002833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1598.8025,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 140.8535,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 8966.1245,
+   "ms": 8965.754377,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 699.796209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3608.728875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2925.470209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1591.784667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 139.974417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 8983.265625,
+   "ms": 8982.856917,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 698.909459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3645.733541,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2892.409666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1610.641209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 135.163042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 9003.269417,
+   "ms": 9002.887833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 724.2815,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3652.798083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2896.37575,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1595.800542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 133.631958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 9398.82975,
+   "ms": 9398.466083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 715.988375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 4063.957583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2883.243917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1598.420875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 136.855333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 8994.044834,
+   "ms": 8993.635417000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 670.557083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\""
+     },
+     "ms": 3657.686709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\""
+     },
+     "ms": 2949.3995,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":3,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 1578.664,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":2,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 137.328125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2987,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 7659.081125,
+   "ms": 7658.79025,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 684.546709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6835.367833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 138.875708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 8033.658541,
+   "ms": 8033.417874999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 692.594375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 7200.971417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 139.852083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 7697.496375,
+   "ms": 7697.286083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 674.265292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6883.072208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 139.948583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 7666.914625,
+   "ms": 7666.7018339999995,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 677.718875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6848.943167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 140.039792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 7713.148583,
+   "ms": 7712.922376,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 687.366042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6884.477125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 141.079209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 7603.651166,
+   "ms": 7603.438499999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 678.509375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 12
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6786.244667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 138.684458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 7638.096125,
+   "ms": 7637.861457999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 695.594166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 12
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6804.517875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 137.749417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 7865.715625,
+   "ms": 7865.507957,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 640.424958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 12
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 7083.412083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 141.670916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 7690.485083,
+   "ms": 7690.267835000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 716.657292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 12
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6833.640959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 139.969584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 7736.385375,
+   "ms": 7736.167874999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 746.14575,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4427,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 12
+    },
+    {
+     "kind": "mcp",
+     "tool": "run",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2",
+      "yaml": "appId: dev.simtap.demo\n---\n- tapOn:\n    id: \"email\"\n- inputText: \"gary@example.com\"\n- tapOn:\n    id: \"password\"\n- inputText: \"secret1\"\n- tapOn:\n    id: \"signIn\""
+     },
+     "ms": 6853.345375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"success\":true,\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"commands_executed\":6,\"message\":\"Flow executed successfully\",\"env_vars\":{\"MAESTRO_BIN\":\"/Users/agent/bench-tools/maestro/bin/maestro\"}}",
+     "chars": 202,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "inspect_screen",
+     "args": {
+      "device_id": "1A20998B-274B-4832-B494-97A85E150DF2"
+     },
+     "ms": 136.67675,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 6907,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    }
+   ],
+   "tokens": 2885,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  }
+ ],
+ "condition": {
+  "deviceHubAsked": false,
+  "deviceHubRunning": true,
+  "simulator": "headless (simctl boot, no Device Hub)"
+ },
+ "environment": {
+  "date": "2026-10-31T14:58:39.052Z",
+  "macos": "26.6.2 (25G83)",
+  "hardware": {
+   "model": "VirtualMac2,1",
+   "cpu": "Apple M5 Pro (Virtual)",
+   "cores": 6,
+   "memoryGB": 8
+  },
+  "xcode": "Xcode 27.0, Build version 27A266a",
+  "node": "v24.20.0",
+  "simulator": {
+   "udid": "1A20998B-274B-4832-B494-97A85E150DF2",
+   "name": "Bench iPhone 17 Pro",
+   "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "runtime": "iOS 27.0 (24A434)"
+  }
+ },
+ "version": "2.12.0",
+ "server": {
+  "startToListMs": 1101.184791,
+  "initMs": 1067.069875,
+  "listMs": 15.644125,
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+   "name": "maestro",
+   "version": "1.0.0"
+  },
+  "toolCount": 10,
+  "toolNames": [
+   "list_devices",
+   "take_screenshot",
+   "run",
+   "inspect_screen",
+   "cheat_sheet",
+   "open_maestro_viewer",
+   "list_cloud_devices",
+   "run_on_cloud",
+   "get_cloud_run_status",
+   "describe_cloud_run"
+  ],
+  "definitionsChars": 10207,
+  "instructionsChars": 2042,
+  "outputSchemaChars": 51,
+  "env": [],
+  "command": "maestro mcp"
+ },
+ "leftoversKilled": [],
+ "finishedAt": "2026-10-31T15:04:55.460Z",
+ "mcpNotifications": 0,
+ "strayStdout": [],
+ "quick": {
+  "warmup": {
+   "n": 1,
+   "ok": 1,
+   "medianMs": 11549.70025,
+   "p90Ms": 11549.70025,
+   "medianTokens": 1107
+  },
+  "read": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 113.0715625,
+   "p90Ms": 120.942083,
+   "medianTokens": 1107
+  },
+  "tap": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 1589.095292,
+   "p90Ms": 1601.488292,
+   "medianTokens": 51
+  },
+  "type": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 3678.7963959999997,
+   "p90Ms": 4040.306833,
+   "medianTokens": 51
+  },
+  "flow": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 9003.5842085,
+   "p90Ms": 9200.611167,
+   "medianTokens": 2987
+  },
+  "flowBatch": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 7693.776959000001,
+   "p90Ms": 7865.507957,
+   "medianTokens": 2885
+  }
+ },
+ "conditionAtEnd": {
+  "deviceHubRunning": true
+ },
+ "texts": [
+  "Important: Maestro Viewer is available at http://127.0.0.1:9999/. Open it in the embedded browser or share it with the user before running flows. Make sure to surface this link to the user before proceeding with your task.\n{\"devices\":[{\"device_id\":\"1A20998B-274B-4832-B494-97A85E150DF2\",\"name\":\"Bench iPhone 17 Pro - iOS 27.0 - 1A20998B-274B-4832-B494-97A85E150DF2\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":true},{\"device_id\":\"9D8D9A30-91C6-4F72-B1C2-BB4AFEAA89A4\",\"name\":\"iPhone 18 Pro - iOS 27.0 - 9D8D9A30-91C6-4F72-B1C2-BB4AFEAA89A4\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"26932386-4DF4-4246-A330-4285F5509E72\",\"name\":\"iPhone 18 Pro Max - iOS 27.0 - 26932386-4DF4-4246-A330-4285F5509E72\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"AEC2FF2B-062A-405C-BEE5-B9E867776B6A\",\"name\":\"iPhone 17 Pro - iOS 27.0 - AEC2FF2B-062A-405C-BEE5-B9E867776B6A\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"DC9ED402-B7D4-4039-AB94-406BA61565DD\",\"name\":\"iPhone 17 Pro Max - iOS 27.0 - DC9ED402-B7D4-4039-AB94-406BA61565DD\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"919BDBF3-FB19-45F0-B667-5868F5D6C418\",\"name\":\"iPhone 17e - iOS 27.0 - 919BDBF3-FB19-45F0-B667-5868F5D6C418\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"26B63D7A-A5B4-4D74-95A3-098C288B1CEE\",\"name\":\"iPhone Air - iOS 27.0 - 26B63D7A-A5B4-4D74-95A3-098C288B1CEE\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"3B6EA914-BC99-424D-B76A-AF9A76B05D60\",\"name\":\"iPhone 17 - iOS 27.0 - 3B6EA914-BC99-424D-B76A-AF9A76B05D60\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"7F6BE7F2-E458-45DA-BE6B-312DDEE6799C\",\"name\":\"iPad Pro 13-inch (M5) - iOS 27.0 - 7F6BE7F2-E458-45DA-BE6B-312DDEE6799C\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"0F708C55-A405-45E2-A50D-CC7B85DB384B\",\"name\":\"iPad Pro 11-inch (M5) - iOS 27.0 - 0F708C55-A405-45E2-A50D-CC7B85DB384B\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"DB77395F-1307-4839-BA5B-4812AC536C07\",\"name\":\"iPad mini (A17 Pro) - iOS 27.0 - DB77395F-1307-4839-BA5B-4812AC536C07\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"E2BD7D71-2340-4F58-A054-B514526C871D\",\"name\":\"iPad Air 13-inch (M4) - iOS 27.0 - E2BD7D71-2340-4F58-A054-B514526C871D\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"8D99BDD2-C67F-443D-BC4C-45C8E52D9DE7\",\"name\":\"iPad Air 11-inch (M4) - iOS 27.0 - 8D99BDD2-C67F-443D-BC4C-45C8E52D9DE7\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"B3EF14AA-E9B5-4A92-8422-A331887A71C1\",\"name\":\"iPad (A16) - iOS 27.0 - B3EF14AA-E9B5-4A92-8422-A331887A71C1\",\"platform\":\"ios\",\"type\":\"simulator\",\"connected\":false},{\"device_id\":\"chromium\",\"name\":\"Chromium Web Browser\",\"platform\":\"web\",\"type\":\"browser\",\"connected\":false}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][93,43]\",\"a11y\":\"2:59 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][94,43]\",\"a11y\":\"3:00 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][202,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[202,759][251,813]\",\"a11y\":\"@\"},{\"b\":\"[251,759][300,813]\",\"a11y\":\".\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[8,805][76,874]\",\"a11y\":\"Emoji\"},{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\"},{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\"}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][94,43]\",\"a11y\":\"3:00 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[55,14][92,51]\"},{\"b\":\"[55,21][92,43]\",\"a11y\":\"3:01 PM\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][202,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[202,759][251,813]\",\"a11y\":\"@\"},{\"b\":\"[251,759][300,813]\",\"a11y\":\".\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[8,805][76,874]\",\"a11y\":\"Emoji\"},{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\"},{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\"}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[55,14][92,51]\"},{\"b\":\"[55,21][92,43]\",\"a11y\":\"3:01 PM\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,257]\",\"txt\":\"•••••••\",\"val\":\"•••••••\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Welcome, gary@example.com\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][300,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\",\"enabled\":false}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[55,14][92,51]\"},{\"b\":\"[55,21][92,43]\",\"a11y\":\"3:01 PM\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,257]\",\"txt\":\"•••••••\",\"val\":\"•••••••\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Welcome, gary@example.com\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][300,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\",\"enabled\":false}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][93,43]\",\"a11y\":\"3:02 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][93,43]\",\"a11y\":\"3:02 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,257]\",\"txt\":\"•••••••\",\"val\":\"•••••••\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Welcome, gary@example.com\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][300,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\",\"enabled\":false}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][93,43]\",\"a11y\":\"3:03 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][93,43]\",\"a11y\":\"3:03 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,586][402,741]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"txt\":\"gary@example.com\",\"val\":\"gary@example.com\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,257]\",\"txt\":\"•••••••\",\"val\":\"•••••••\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Welcome, gary@example.com\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]},{\"b\":\"[369,116][399,546]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,217][399,543]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"rid\":\"person\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"rid\":\"list.bullet\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"rid\":\"inputView\"}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,546][402,874]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"SystemInputAssistantView\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"rid\":\"CenterPageView\",\"c\":[{\"b\":\"[0,-54][402,1190]\",\"c\":[{\"b\":\"[0,546][402,590]\"}]},{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[0,546][402,590]\",\"a11y\":\"Typing Predictions\",\"c\":[{\"b\":\"[0,546][402,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"c\":[{\"b\":\"[30,546][372,590]\",\"a11y\":\"Passwords\",\"c\":[{\"b\":\"[150,560][163,583]\",\"rid\":\"kb-autofill-key\"}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\",\"c\":[{\"b\":\"[0,546][402,875]\"}]}]},{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"c\":[{\"b\":\"[0,590][402,816]\",\"rid\":\"UIKeyboardLayoutStar Preview\",\"c\":[{\"b\":\"[4,597][44,651]\",\"a11y\":\"q\"},{\"b\":\"[44,597][83,651]\",\"a11y\":\"w\"},{\"b\":\"[83,597][123,651]\",\"a11y\":\"e\"},{\"b\":\"[123,597][162,651]\",\"a11y\":\"r\"},{\"b\":\"[162,597][202,651]\",\"a11y\":\"t\"},{\"b\":\"[202,597][241,651]\",\"a11y\":\"y\"},{\"b\":\"[241,597][281,651]\",\"a11y\":\"u\"},{\"b\":\"[281,597][320,651]\",\"a11y\":\"i\"},{\"b\":\"[320,597][360,651]\",\"a11y\":\"o\"},{\"b\":\"[360,597][399,651]\",\"a11y\":\"p\"},{\"b\":\"[24,651][63,705]\",\"a11y\":\"a\"},{\"b\":\"[63,651][103,705]\",\"a11y\":\"s\"},{\"b\":\"[103,651][142,705]\",\"a11y\":\"d\"},{\"b\":\"[142,651][182,705]\",\"a11y\":\"f\"},{\"b\":\"[182,651][221,705]\",\"a11y\":\"g\"},{\"b\":\"[221,651][261,705]\",\"a11y\":\"h\"},{\"b\":\"[261,651][300,705]\",\"a11y\":\"j\"},{\"b\":\"[300,651][340,705]\",\"a11y\":\"k\"},{\"b\":\"[340,651][379,705]\",\"a11y\":\"l\"},{\"b\":\"[4,705][56,759]\",\"a11y\":\"shift\",\"rid\":\"shift\"},{\"b\":\"[63,705][103,759]\",\"a11y\":\"z\"},{\"b\":\"[103,705][142,759]\",\"a11y\":\"x\"},{\"b\":\"[142,705][182,759]\",\"a11y\":\"c\"},{\"b\":\"[182,705][221,759]\",\"a11y\":\"v\"},{\"b\":\"[221,705][261,759]\",\"a11y\":\"b\"},{\"b\":\"[261,705][300,759]\",\"a11y\":\"n\"},{\"b\":\"[300,705][340,759]\",\"a11y\":\"m\"},{\"b\":\"[348,705][399,759]\",\"a11y\":\"delete\",\"rid\":\"delete\"},{\"b\":\"[4,759][103,813]\",\"a11y\":\"numbers\",\"rid\":\"more\"},{\"b\":\"[103,759][300,813]\",\"a11y\":\"space\",\"rid\":\"space\"},{\"b\":\"[300,759][399,813]\",\"a11y\":\"return\",\"rid\":\"Return\"}]}]}]}]},{\"b\":\"[0,590][402,874]\",\"c\":[{\"b\":\"[325,805][393,874]\",\"a11y\":\"Dictate\",\"rid\":\"dictation\",\"enabled\":false}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][94,43]\",\"a11y\":\"3:04 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}",
+  "{\"ui_schema\":{\"platform\":\"ios\",\"abbreviations\":{\"b\":\"bounds\",\"txt\":\"text\",\"rid\":\"resource-id\",\"a11y\":\"accessibilityText\",\"hint\":\"hintText\",\"val\":\"value\",\"c\":\"children\"},\"defaults\":{\"enabled\":true,\"focused\":false,\"selected\":false,\"checked\":false,\"txt\":\"\",\"hint\":\"\",\"rid\":\"\",\"val\":\"\",\"a11y\":\"\"}},\"elements\":[{\"b\":\"[0,0][402,874]\",\"a11y\":\"Demo\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,62][402,168]\",\"rid\":\"Sign In\",\"c\":[{\"b\":\"[16,119][123,160]\",\"a11y\":\"Sign In\"}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[-16,-1580][418,2196]\"},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,0][402,102]\"},{\"b\":\"[0,741][402,874]\"}]},{\"b\":\"[0,0][402,874]\"},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\"}]},{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[16,168][386,220]\",\"c\":[{\"b\":\"[32,183][370,205]\",\"rid\":\"email\",\"hint\":\"Email\"}]}]}]}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\"}]},{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[16,220][386,272]\",\"c\":[{\"b\":\"[32,235][370,256]\",\"rid\":\"password\",\"hint\":\"Password\"}]}]}]}]},{\"b\":\"[32,219][370,220]\"},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\"}]},{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"c\":[{\"b\":\"[16,272][386,324]\",\"a11y\":\"Remember me\",\"txt\":\"0\",\"val\":\"0\",\"rid\":\"remember\",\"c\":[{\"b\":\"[32,287][143,308]\",\"a11y\":\"Remember me\"},{\"b\":\"[309,284][372,312]\",\"txt\":\"0\",\"val\":\"0\"}]}]}]}]}]},{\"b\":\"[32,271][370,272]\"},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\"}]},{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"c\":[{\"b\":\"[16,324][386,376]\",\"a11y\":\"Sign In\",\"rid\":\"signIn\"}]}]}]}]},{\"b\":\"[32,323][370,324]\"},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\"}]},{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"c\":[{\"b\":\"[16,376][386,428]\",\"a11y\":\"Not signed in\",\"rid\":\"status\"}]}]}]}]},{\"b\":\"[32,375][370,376]\"},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]},{\"b\":\"[369,116][399,791]\",\"a11y\":\"Vertical scroll bar, 1 page\",\"txt\":\"0%\",\"val\":\"0%\",\"c\":[{\"b\":\"[396,781][399,788]\"}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"a11y\":\"Toolbar\",\"rid\":\"Toolbar\",\"c\":[{\"b\":\"[0,0][402,874]\"}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,0][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"a11y\":\"Tab Bar\",\"c\":[{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[107,791][201,845]\"},{\"b\":\"[107,791][295,853]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"a11y\":\"Login\",\"selected\":true,\"c\":[{\"b\":\"[145,802][170,827]\",\"a11y\":\"Person silhouette, filled\",\"rid\":\"person.fill\"}]},{\"b\":\"[197,795][291,849]\",\"a11y\":\"Items\",\"c\":[{\"b\":\"[229,804][258,825]\",\"a11y\":\"List\",\"rid\":\"list.bullet\"}]}]},{\"b\":\"[107,791][295,853]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"},{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\",\"c\":[{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]},{\"b\":\"[111,795][205,849]\"}]}]}]}]}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]},{\"b\":\"[0,791][402,874]\",\"c\":[{\"b\":\"[0,791][402,874]\"}]}]}]}]}]}]}]}]}]}]}]}]}]},{\"b\":\"[0,0][402,54]\"},{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[0,0][402,54]\",\"c\":[{\"b\":\"[54,21][94,43]\",\"a11y\":\"3:04 PM\"},{\"b\":\"[55,14][92,51]\"},{\"b\":\"[309,14][345,51]\"},{\"b\":\"[284,25][305,38]\",\"a11y\":\"Cellular\",\"txt\":\"No signal\",\"val\":\"No signal\"},{\"b\":\"[314,26][331,38]\",\"txt\":\"SSID, 3 of 3 Wi-Fi bars\",\"val\":\"SSID, 3 of 3 Wi-Fi bars\",\"rid\":\"3 of 3 Wi-Fi bars\",\"c\":[{\"b\":\"[311,23][334,41]\",\"a11y\":\"Wi-Fi\",\"rid\":\"wifi\"}]},{\"b\":\"[340,25][369,39]\",\"a11y\":\"100% battery power\",\"txt\":\"Not charging\",\"val\":\"Not charging\"}]}]}]}]}"
+ ]
+}

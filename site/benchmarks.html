@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarks: iOS Simulator tools for agents · simulator-use</title>
+<meta name="description" content="Eight iOS Simulator tools for coding agents on the same app and the same iPhone 17 Pro Simulator: time and tokens to read the screen, tap, type and sign in. Every call measured and published.">
+<link rel="canonical" href="https://simulator-use.dev/benchmarks">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simulator-use.dev/benchmarks">
+<meta property="og:title" content="Benchmarks: iOS Simulator tools for agents">
+<meta property="og:description" content="The same sign-in on the same Simulator through eight tools' own MCP servers. Time, tokens and failures, with the harness and the raw data.">
+<meta property="og:image" content="https://simulator-use.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --bg: #0b0b0c;
+  --surface: #121214;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ededef;
+  --muted: #a1a1a6;
+  --faint: #6e6e73;
+  --accent: #0a84ff;
+  --amber: #ffd60a;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, pre { font-family: var(--mono); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+
+header { border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; height: 56px; gap: 24px; }
+.name { font: 600 15px var(--mono); text-decoration: none; letter-spacing: -0.01em; }
+header nav { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+header nav a { color: var(--muted); text-decoration: none; }
+header nav a:hover, header nav a[aria-current] { color: var(--text); }
+
+.hero { padding: 72px 0 0; }
+h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0 0 18px; max-width: 20ch; }
+.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; line-height: 1.5; }
+
+section { padding-top: 80px; }
+h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0 0 10px; }
+.sub { color: var(--muted); max-width: 680px; margin: 0; }
+.sub code, .fine code, td code, li code { font-size: 0.9em; color: var(--text); }
+.fine { color: var(--faint); font-size: 13px; margin: 14px 0 0; max-width: 760px; }
+.fine a, .sub a, li a { color: var(--muted); }
+
+.scroll { margin-top: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.scroll table.wide { min-width: 640px; }
+th { text-align: left; font-weight: 500; color: var(--faint); font-size: 13px; padding: 0 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); vertical-align: top; }
+td:first-child { color: var(--text); }
+th.n, td.n { text-align: right; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+td.r { width: 28px; color: var(--faint); font-family: var(--mono); font-size: 13px; }
+tr:first-child td.r { color: var(--text); }
+.v { color: var(--faint); font: 12px var(--mono); }
+.na { color: var(--faint); }
+td.bad, td.part { color: var(--amber); }
+.c { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.facts td { font-size: 14px; }
+.facts td:first-child { white-space: nowrap; }
+
+ul.notes { margin: 20px 0 0; padding: 0; list-style: none; max-width: 760px; border-top: 1px solid var(--line); }
+ul.notes li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+ul.notes li b { color: var(--text); font-weight: 500; }
+
+footer { margin-top: 112px; border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--faint); font-size: 13.5px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+footer nav { margin-left: auto; display: flex; gap: 20px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 640px) { table { font-size: 13.5px; } th.n, td.n { font-size: 11px; letter-spacing: -0.02em; } th.n { white-space: normal; } td, th { padding-right: 5px; } td:first-child { font-size: 13px; } td:last-child, th:last-child { padding-right: 0; } .v { display: block; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="name" href="/">simulator-use</a>
+    <nav><a href="/benchmarks" aria-current="page">Benchmarks</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Eight Simulator tools, one sign-in screen.</h1>
+    <p class="lead">Eight tools drove the same app on the same iPhone 17 Pro Simulator, on one Mac, through their own MCP servers (AXe, which has none, through its command line), the way an agent uses them. Every call was timed and saved, failures included.</p>
+  </div>
+
+  <section id="leaderboard">
+    <h2>Leaderboard</h2>
+    <p class="sub">All on one Mac, one tool at a time. Ranked by what the agent reads back over the whole sign-in (read the screen, type the email, type the password, tap Sign In, read the screen to see "Welcome"), since every token of it goes through the model; ties by time. Median of 10 runs, each on a freshly started app. Sign-in times step by step and batched are in <a href="#flow">The whole sign-in</a>.</p>
+    <div class="scroll"><table class="wide">
+      <thead><tr><th></th><th>Tool</th><th class="n">Tokens read (est.)</th><th class="n">Sign in</th><th class="n">Signed in</th><th class="n">Read the screen</th><th class="n">Tap</th><th class="n">Tool list tokens (est.)</th></tr></thead>
+      <tbody>
+<!-- bench:board -->
+<tr><td class="r">1</td><td>simulator-use <span class="v">0.14.0</span></td><td class="n">194</td><td class="n">4.66 s<span class="c">7.13 s, second run</span></td><td class="n">10 of 10</td><td class="n">0.21 s</td><td class="n">1.17 s</td><td class="n">2,443</td></tr>
+<tr><td class="r">2</td><td>agent-device <span class="v">0.21.35</span></td><td class="n">664</td><td class="n">6.90 s</td><td class="n">10 of 10</td><td class="n">0.06 s</td><td class="n">0.88 s</td><td class="n">47,406</td></tr>
+<tr><td class="r">3</td><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">980</td><td class="n">6.95 s</td><td class="n">10 of 10</td><td class="n">0.42 s</td><td class="n">0.77 s</td><td class="n">7,129</td></tr>
+<tr><td class="r">4</td><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">1,560</td><td class="n">18.09 s</td><td class="n">10 of 10</td><td class="n">0.86 s</td><td class="n">3.58 s</td><td class="n">6,193</td></tr>
+<tr><td class="r">5</td><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">2,987</td><td class="n">9.00 s</td><td class="n">10 of 10</td><td class="n">0.11 s</td><td class="n">1.59 s</td><td class="n">3,063</td></tr>
+<tr><td class="r">6</td><td>Argent <span class="v">0.31.0</span></td><td class="n">7,129</td><td class="n">6.61 s</td><td class="n">10 of 10</td><td class="n">0.20 s</td><td class="n">0.65 s</td><td class="n">42,531</td></tr>
+<tr><td class="r">7</td><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">12,732</td><td class="n">3.71 s</td><td class="n">10 of 10</td><td class="n">0.10 s</td><td class="n">0.67 s</td><td class="n">19,620</td></tr>
+<tr><td class="r">8</td><td>AXe <span class="v">1.8.0</span></td><td class="n">110,319</td><td class="n">9.22 s</td><td class="n">10 of 10</td><td class="n">0.84 s</td><td class="n">1.67 s</td><td class="n">none (CLI)</td></tr>
+<!-- /bench:board -->
+      </tbody>
+    </table></div>
+<!-- bench:drift -->
+<p class="fine" id="drift">simulator-use ran first and again last, 58 minutes later: sign-in 4.66 s, then 7.13 s (+53%); screen read 0.21 s, then 0.22 s (+5%); tap 1.17 s, then 1.10 s (-5%); typing 1.22 s, then 2.28 s (+87%). Its sign-in and typing drifted by more than 10% between the two, so read a difference of that size between two tools with care. The leaderboard shows both of its sign-in times; the other tables show its first run.</p>
+<!-- /bench:drift -->
+    <p class="fine">The runs went in this order: simulator-use, AXe, MobileBuildMCP, mobile-mcp, agent-device, Argent, Maestro MCP, Xcode MCP, then the second runs under <a href="#not-ranked">Not ranked here</a>. Tokens are estimates: characters / 4 for text (no Anthropic API key was set for this run), width * height / 750 for an image.</p>
+  </section>
+
+  <section id="read">
+    <h2>Read the screen</h2>
+    <p class="sub">The tool's own screen read, 20 times on the unchanged sign-in screen, after one warm-up read.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Tool</th><th class="n">Median</th><th class="n">p90</th><th class="n">Tokens (est.)</th><th class="n">Showed the screen</th></tr></thead>
+      <tbody>
+<!-- bench:read -->
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">0.06 s</td><td class="n">0.06 s</td><td class="n">131</td><td class="n">20 of 20</td></tr>
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">0.10 s</td><td class="n">0.11 s</td><td class="n">2,410</td><td class="n">20 of 20</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">0.11 s</td><td class="n">0.12 s</td><td class="n">1,107</td><td class="n">20 of 20</td></tr>
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">0.20 s</td><td class="n">0.23 s</td><td class="n">658</td><td class="n">20 of 20</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">0.21 s</td><td class="n">0.27 s</td><td class="n">72</td><td class="n">20 of 20</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">0.42 s</td><td class="n">0.46 s</td><td class="n">375</td><td class="n">20 of 20</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">0.84 s</td><td class="n">0.90 s</td><td class="n">44,869</td><td class="n">20 of 20</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">0.86 s</td><td class="n">0.92 s</td><td class="n">390</td><td class="n">20 of 20</td></tr>
+<!-- /bench:read -->
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="tap">
+    <h2>Tap a button</h2>
+    <p class="sub">Sign In with empty fields, 20 times, each after a fresh start of the app and an untimed read. The app's own log confirms each tap. "Shows the result" counts answers that hold the new status text, "Invalid email or password", in the answer itself or in the file it names for the agent to open.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Tool</th><th class="n">Median</th><th class="n">p90</th><th class="n">Shows the result</th><th class="n">Tokens (est.)</th><th class="n">Landed</th></tr></thead>
+      <tbody>
+<!-- bench:tap -->
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">0.65 s</td><td class="n">0.68 s</td><td class="n">19 of 20</td><td class="n">647</td><td class="n">20 of 20</td></tr>
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">0.67 s</td><td class="n">0.78 s</td><td class="n">20 of 20</td><td class="n">2,408</td><td class="n">20 of 20</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">0.77 s</td><td class="n">0.77 s</td><td class="n">0 of 20</td><td class="n">6</td><td class="n">20 of 20</td></tr>
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">0.88 s</td><td class="n">1.24 s</td><td class="n">20 of 20</td><td class="n">38</td><td class="n">20 of 20</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">1.17 s</td><td class="n">1.24 s</td><td class="n">20 of 20</td><td class="n">17</td><td class="n">20 of 20</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">1.59 s</td><td class="n">1.60 s</td><td class="n">0 of 20</td><td class="n">51</td><td class="n">20 of 20</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">1.67 s</td><td class="n">1.83 s</td><td class="n">0 of 20</td><td class="n">18</td><td class="n">20 of 20</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">3.58 s</td><td class="n">3.73 s</td><td class="n">0 of 20</td><td class="n">88</td><td class="n">20 of 20</td></tr>
+<!-- /bench:tap -->
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="type">
+    <h2>Type into a field</h2>
+    <p class="sub">gary@example.com into Email, 10 times, each on a fresh app: the tool's fill call, or a tap on the field and a type call where that is its way. The tool's next read must show the text.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Tool</th><th class="n">Median</th><th class="n">p90</th><th class="n">Calls</th><th class="n">Tokens (est.)</th><th class="n">Text shown</th></tr></thead>
+      <tbody>
+<!-- bench:type -->
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">1.13 s</td><td class="n">1.15 s</td><td class="n">1</td><td class="n">2,579</td><td class="n">10 of 10</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">1.22 s</td><td class="n">1.37 s</td><td class="n">1</td><td class="n">14</td><td class="n">10 of 10</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">1.98 s</td><td class="n">2.02 s</td><td class="n">2</td><td class="n">18</td><td class="n">10 of 10</td></tr>
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">2.49 s</td><td class="n">2.53 s</td><td class="n">1</td><td class="n">167</td><td class="n">10 of 10</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">2.52 s</td><td class="n">2.55 s</td><td class="n">2</td><td class="n">13</td><td class="n">10 of 10</td></tr>
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">3.59 s</td><td class="n">3.62 s</td><td class="n">2</td><td class="n">2,190</td><td class="n">10 of 10</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">3.68 s</td><td class="n">4.04 s</td><td class="n">1</td><td class="n">51</td><td class="n">10 of 10</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">4.32 s</td><td class="n">4.43 s</td><td class="n">1</td><td class="n">93</td><td class="n">10 of 10</td></tr>
+<!-- /bench:type -->
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="flow">
+    <h2>The whole sign-in</h2>
+    <p class="sub">Step by step, one call per action; and batched, the three actions in the tool's own batch or sequence call where it has one. Signed in means the final read showed "Welcome, gary@example.com" and the app logged the sign-in.</p>
+    <div class="scroll"><table class="wide">
+      <thead><tr><th>Tool</th><th class="n">Step by step</th><th class="n">Tokens (est.)</th><th class="n">Signed in</th><th class="n">Batched</th><th class="n">Tokens (est.)</th><th class="n">Signed in</th></tr></thead>
+      <tbody>
+<!-- bench:flow -->
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">3.71 s</td><td class="n">12,732</td><td class="n">10 of 10</td><td class="n na" colspan="3">no batched run</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">4.66 s</td><td class="n">194</td><td class="n">10 of 10</td><td class="n">3.69 s</td><td class="n">179</td><td class="n">10 of 10</td></tr>
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">6.61 s</td><td class="n">7,129</td><td class="n">10 of 10</td><td class="n">4.38 s</td><td class="n">2,971</td><td class="n">10 of 10</td></tr>
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">6.90 s</td><td class="n">664</td><td class="n">10 of 10</td><td class="n">5.98 s</td><td class="n">327</td><td class="n">10 of 10</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">6.95 s</td><td class="n">980</td><td class="n">10 of 10</td><td class="n">6.91 s</td><td class="n">1,029</td><td class="n">10 of 10</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">9.00 s</td><td class="n">2,987</td><td class="n">10 of 10</td><td class="n">7.69 s</td><td class="n">2,885</td><td class="n">10 of 10</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">9.22 s</td><td class="n">110,319</td><td class="n">10 of 10</td><td class="n">4.41 s</td><td class="n">110,273</td><td class="n">10 of 10</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">18.09 s</td><td class="n">1,560</td><td class="n">10 of 10</td><td class="n na" colspan="3">no batched run</td></tr>
+<!-- /bench:flow -->
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="not-ranked">
+    <h2>Not ranked here</h2>
+    <p class="sub">The second runs. simulator-use ran again at the end, for the drift under the leaderboard. AXe and MobileBuildMCP ran again with Device Hub open, because AXe's <a href="https://github.com/cameroncooke/AXe#xcode-compatibility">README</a> says: "Xcode 27 simulator automation uses Device Hub; Simulator.app is not required." With Device Hub open, their taps mostly did not reach the app. Run once more right after, with Device Hub closed, both passed again. So on this Mac the headless runs, which every tool had, are the ones ranked.</p>
+    <div class="scroll"><table class="facts wide">
+      <thead><tr><th>Tool</th><th>Condition</th><th>What happened</th></tr></thead>
+      <tbody>
+<!-- bench:notranked -->
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td>Second run, after the other seven tools; Simulator headless</td><td>sign-in 7.13 s; signed in 10 of 10; taps that reached the app 20 of 20; typings shown 10 of 10; screen reads 20 of 20 (median 0.22 s); batched sign-ins 10 of 10</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td>Second run, after all the others; Device Hub open</td><td>signed in 0 of 10; taps that reached the app 4 of 20; typings shown 1 of 10; screen reads 20 of 20 (median 0.84 s); batched sign-ins 1 of 10</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td>Second run, after all the others; Device Hub open</td><td>signed in 0 of 10; taps that reached the app 3 of 20; typings shown 1 of 10; screen reads 20 of 20 (median 0.85 s)</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td>Third run, last of all; Simulator headless again</td><td>sign-in 9.14 s; signed in 10 of 10; taps that reached the app 20 of 20; typings shown 10 of 10; screen reads 20 of 20 (median 0.84 s); batched sign-ins 10 of 10</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td>Third run, last of all; Simulator headless again</td><td>sign-in 18.23 s; signed in 10 of 10; taps that reached the app 20 of 20; typings shown 10 of 10; screen reads 20 of 20 (median 0.82 s)</td></tr>
+<!-- /bench:notranked -->
+      </tbody>
+    </table></div>
+    <ul class="notes">
+      <li><b>AXe with Device Hub open.</b> Each <code>axe tap</code> answered that it tapped the right point, and 4 of the 20 reached the app. In <code>axe batch</code> the taps landed, but the first letters typed into the email were lost in 9 of 10 runs ("@example.com", "y@example.com"), so the screen never showed "Welcome, gary@example.com".</li>
+      <li><b>MobileBuildMCP with Device Hub open</b>, which taps through a bundled AXe: 3 of 20 taps reached the app, each answered as done.</li>
+      <li>simulator-use's own engine is built on AXe's frameworks; these rows are AXe's command line and MobileBuildMCP, as their users run them.</li>
+    </ul>
+  </section>
+
+  <section id="tool-list">
+    <h2>Before the first call</h2>
+    <p class="sub">What the server's tool list and instructions cost an agent's context in every session, before it does anything.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Tool</th><th class="n">Tools</th><th class="n">Definitions</th><th class="n">Instructions</th><th class="n">Tokens in all (est.)</th></tr></thead>
+      <tbody>
+<!-- bench:list -->
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">CLI</td><td class="n"></td><td class="n"></td><td class="n">none</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">12</td><td class="n">2,075</td><td class="n">368</td><td class="n">2,443</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">10</td><td class="n">2,552</td><td class="n">511</td><td class="n">3,063</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">36</td><td class="n">5,616</td><td class="n">577</td><td class="n">6,193</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">35</td><td class="n">6,852</td><td class="n">277</td><td class="n">7,129</td></tr>
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">53</td><td class="n">19,608</td><td class="n">12</td><td class="n">19,620</td></tr>
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">77</td><td class="n">42,277</td><td class="n">254</td><td class="n">42,531</td></tr>
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">62</td><td class="n">46,998</td><td class="n">408</td><td class="n">47,406</td></tr>
+<!-- /bench:list -->
+      </tbody>
+    </table></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Tool</th><th class="n">Setup its docs ask for</th><th class="n">First read after a boot</th></tr></thead>
+      <tbody>
+<!-- bench:cold -->
+<tr><td>agent-device <span class="v">0.21.35</span></td><td class="n">34.54 s</td><td class="n">0.37 s</td></tr>
+<tr><td>Argent <span class="v">0.31.0</span></td><td class="n">46.57 s</td><td class="n">0.70 s</td></tr>
+<tr><td>AXe <span class="v">1.8.0</span></td><td class="n">none</td><td class="n">4.66 s</td></tr>
+<tr><td>Maestro MCP <span class="v">2.12.0</span></td><td class="n">0.46 s</td><td class="n">11.55 s</td></tr>
+<tr><td>mobile-mcp <span class="v">1.0.15</span></td><td class="n">21.03 s</td><td class="n">0.56 s</td></tr>
+<tr><td>MobileBuildMCP <span class="v">2.7.1</span></td><td class="n">none</td><td class="n">6.59 s</td></tr>
+<tr><td>simulator-use <span class="v">0.14.0</span></td><td class="n">0.27 s</td><td class="n">14.50 s</td></tr>
+<tr><td>Xcode MCP <span class="v">27.0 (27A266a)</span></td><td class="n">8.57 s</td><td class="n">6.41 s</td></tr>
+<!-- /bench:cold -->
+      </tbody>
+    </table></div>
+    <p class="fine">Setup is what a tool's instructions say to do before the first action (open a session, pick or boot the device); its time is not in any number above.</p>
+  </section>
+
+  <section id="losses">
+    <h2>Where simulator-use is not first</h2>
+    <ul class="notes">
+      <li><b>Signing in.</b> Xcode MCP took 3.71 s to sign in step by step; simulator-use took 4.66 s. (Batched, simulator-use's first run was the fastest, 3.69 s against Argent's 4.38 s and AXe's 4.41 s, but its second run took 5.36 s.)</li>
+      <li><b>Reading the screen.</b> agent-device (0.06 s), Xcode MCP (0.10 s) and Maestro MCP (0.11 s) read it faster than simulator-use (0.21 s); Argent took about the same (0.20 s).</li>
+      <li><b>Tapping.</b> Argent (0.65 s), Xcode MCP (0.67 s), mobile-mcp (0.77 s) and agent-device (0.88 s) answered a tap sooner than simulator-use (1.17 s), which waits until the screen stops changing and answers with what changed.</li>
+      <li><b>Typing.</b> Xcode MCP's chained tap and type took 1.13 s; simulator-use's fill, which also reads the text back, 1.22 s.</li>
+      <li><b>The first read after a boot.</b> simulator-use's took 14.5 s, the longest, waiting for the Simulator's accessibility to come up. agent-device, mobile-mcp and Argent answered in under a second, after setups of 34.5 s, 21.0 s and 46.6 s that simulator-use does not need; AXe took 4.7 s, Xcode MCP 6.4 s, MobileBuildMCP 6.6 s and Maestro MCP 11.6 s.</li>
+      <li><b>Holding its speed.</b> simulator-use's typing was 87% slower in its last run than in its first (see the note under the leaderboard); AXe's, measured early and again at the end, did not change (1.98 s and 1.99 s).</li>
+    </ul>
+  </section>
+
+  <section id="features">
+    <h2>What each tool is</h2>
+    <p class="sub">From each tool's own README, license and docs, read on October 31, 2026; the sources are linked in each row.</p>
+    <div class="scroll"><table class="facts wide">
+      <thead><tr><th>Tool</th><th>License</th><th>Builds the app</th><th>Runs tests</th><th>Screen as text</th><th>Cloud option</th><th>Sources</th></tr></thead>
+      <tbody>
+        <tr><td>simulator-use</td><td>MIT</td><td>Yes, Xcode projects (<code>app_run</code>)</td><td>XCTest and XCUITest, case by case</td><td>One line per element</td><td>NoMac's cloud iPhone</td><td><a href="https://github.com/NoMac-app/simulator-use">README</a>, <a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">LICENSE</a></td></tr>
+        <tr><td>AXe</td><td>MIT</td><td>No</td><td>No</td><td>The accessibility tree as JSON</td><td>None in its docs</td><td><a href="https://github.com/cameroncooke/AXe">README</a>, <a href="https://github.com/cameroncooke/AXe/blob/main/LICENSE">LICENSE</a>, <a href="https://axe-cli.com/docs">docs</a></td></tr>
+        <tr><td>MobileBuildMCP</td><td>MIT</td><td>Yes, for the Simulator</td><td>Yes, on the Simulator</td><td>Tap targets with refs</td><td>None in its README</td><td><a href="https://github.com/getsentry/MobileBuildMCP">README</a>, <a href="https://github.com/getsentry/MobileBuildMCP/blob/main/LICENSE">LICENSE</a></td></tr>
+        <tr><td>mobile-mcp</td><td>Apache 2.0; built on mobilecli, which is under the Functional Source License 1.1</td><td>No; installs an .app, .ipa, .apk or .zip</td><td>None in its README</td><td>One line per element, with refs</td><td>Mobile Next Cloud, real iOS and Android devices</td><td><a href="https://github.com/mobile-next/mobile-mcp">README</a>, <a href="https://github.com/mobile-next/mobile-mcp/blob/main/LICENSE">LICENSE</a>, <a href="https://github.com/mobile-next/mobilecli/blob/main/LICENSE">mobilecli LICENSE</a></td></tr>
+        <tr><td>agent-device</td><td>MIT</td><td>No; installs a built app</td><td>Replays its own .ad scripts</td><td>Snapshots with refs, and diffs after actions</td><td>A remote proxy, or device clouds (BrowserStack, AWS Device Farm, TestMu AI, Limrun)</td><td><a href="https://github.com/callstack/agent-device">README</a>, <a href="https://github.com/callstack/agent-device/blob/main/LICENSE">LICENSE</a></td></tr>
+        <tr><td>Argent</td><td>Apache 2.0 source; its simulator-server and ax-service binaries are proprietary</td><td>React Native projects</td><td>Records and replays its own e2e tests</td><td>An element tree, and a screenshot after each action</td><td>Argent Cloud</td><td><a href="https://github.com/software-mansion/argent">README</a>, <a href="https://github.com/software-mansion/argent/blob/main/LICENSE.txt">LICENSE</a>, <a href="https://docs.swmansion.com/argent/docs/reference/tools">tools</a></td></tr>
+        <tr><td>Maestro MCP</td><td>Apache 2.0</td><td>No</td><td>Maestro flows</td><td>A compact JSON view hierarchy</td><td>Maestro Cloud runs flows</td><td><a href="https://github.com/mobile-dev-inc/Maestro">README</a>, <a href="https://docs.maestro.dev/get-started/maestro-mcp">MCP docs</a></td></tr>
+        <tr><td>Xcode MCP</td><td>Part of Xcode</td><td>Yes (<code>BuildProject</code>)</td><td>Yes (<code>RunAllTests</code>, <code>RunSomeTests</code>)</td><td>A UI hierarchy file per interaction, by path</td><td>None in its docs</td><td><a href="https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode">Apple docs</a>, <a href="https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes">Xcode 27 notes</a>, its tool list</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="setup">
+    <h2>What each tool needs</h2>
+    <p class="sub">Every tool here needs a Mac with Xcode and an iOS Simulator runtime for the iOS Simulator. Quoted needs come from the sources above.</p>
+    <div class="scroll"><table class="facts wide">
+      <thead><tr><th>Tool</th><th>Version tested</th><th>How it was run</th><th>Needs besides Xcode</th></tr></thead>
+      <tbody>
+        <tr><td>simulator-use</td><td>0.14.0</td><td><code>simulator-use mcp</code></td><td>Node 20. Its engine is built on AXe's frameworks, bundled; "there is no test runner to build"</td></tr>
+        <tr><td>AXe</td><td>1.8.0</td><td>the <code>axe</code> command, one process per step (it has no MCP server)</td><td>macOS 14 or later. "Xcode 27 simulator automation uses Device Hub; Simulator.app is not required"</td></tr>
+        <tr><td>MobileBuildMCP</td><td>2.7.1</td><td><code>mobilebuildmcp mcp</code> with its <code>ui-automation</code> workflow on (off by default)</td><td>macOS 14.5, Xcode 16, Node 18. Reads and taps through its bundled AXe (<a href="https://github.com/getsentry/xcodebuildmcp.com/blob/main/app/docs/_content/architecture-ui-automation.mdx">its docs</a>)</td></tr>
+        <tr><td>mobile-mcp</td><td>1.0.15</td><td>its npm package's server (<code>npx @mobilenext/mobile-mcp</code> in its README)</td><td>Node 20 and the Xcode command line tools. On iOS, mobilecli's on-device agent "is required for touch input ... and UI tree inspection" (<a href="https://github.com/mobile-next/mobilecli">mobilecli README</a>)</td></tr>
+        <tr><td>agent-device</td><td>0.21.35</td><td><code>agent-device mcp</code></td><td>Node 22.12. "A local accessibility bridge for iOS Simulator snapshots and XCTest for iOS interactions"</td></tr>
+        <tr><td>Argent</td><td>0.31.0</td><td><code>argent mcp</code></td><td>Node 20.12 (<a href="https://docs.swmansion.com/argent/docs/fundamentals/installation">its docs</a>). Software Mansion's proprietary simulator-server and ax-service binaries</td></tr>
+        <tr><td>Maestro MCP</td><td>Maestro 2.12.0</td><td><code>maestro mcp</code></td><td>Java 17. It "installs and communicates with a small companion driver app on the device" (<a href="https://docs.maestro.dev/get-started/how-maestro-works">its docs</a>)</td></tr>
+        <tr><td>Xcode MCP</td><td>Xcode 27.0 (27A266a)</td><td><code>xcrun mcpbridge</code>, headless</td><td>Xcode 27 with <code>sudo xcrun mcp-server enable</code> (Xcode 27 release notes), or Xcode open with "Allow external agents to use Xcode tools" turned on</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="driven">
+    <h2>How each tool was driven</h2>
+    <p class="sub">Each tool's own calls, chosen from its README, its tool descriptions or the hints in its answers. The code is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/tools">bench/tools</a>.</p>
+    <ul class="notes">
+      <li><b>simulator-use.</b> Read with <code>ui_look</code>; <code>ui_act</code> with <code>tap #signIn</code> or <code>fill #email ...</code>. Batched: one <code>ui_act</code> with the three steps.</li>
+      <li><b>AXe.</b> No MCP server, so one <code>axe</code> process per step: <code>describe-ui</code>, <code>tap --id</code>, and <code>tap --id</code> then <code>type</code>. Batched: one <code>axe batch</code> with the five steps, as in its help. It ran twice: with the Simulator headless, like every tool, and again with Device Hub open, since its README says "Xcode 27 simulator automation uses Device Hub".</li>
+      <li><b>MobileBuildMCP.</b> Run twice, like AXe, which it taps and reads through: headless, and with Device Hub open. Its <code>ui-automation</code> workflow turned on. <code>snapshot_ui</code>, then <code>tap</code> and <code>type_text</code> by elementRef, and <code>snapshot_ui</code> again after each <code>type_text</code> (its descriptions say to refresh after layout changes, and the keyboard is one). Its read lists only tap targets, so the last step checks "Welcome" with its <code>wait_for_ui</code> textContains, as its tips say. No batched run: its <code>batch</code> takes taps, not typing.</li>
+      <li><b>mobile-mcp.</b> <code>mobile_list_elements_on_screen</code>, then <code>mobile_click_on_screen_at_coordinates</code> by @ref, and a click then <code>mobile_type_keys</code>. Batched: <code>mobile_batch_commands</code>. Its first read starts its on-device agent, which left the Home Screen in front; the setup starts the agent and the app is then started again, as before every step.</li>
+      <li><b>agent-device.</b> Setup: <code>open</code> with <code>foreground: true</code>, as its instructions say. <code>snapshot</code> with <code>interactiveOnly</code>, <code>press</code> and <code>fill</code> by <code>id="..."</code> selector with <code>settle: true</code>. Batched: its <code>batch</code>.</li>
+      <li><b>Argent.</b> Setup: the Simulator booted by Argent's <code>boot-device</code> (its first <code>describe</code> said it needs that for its accessibility settings), then <code>launch-app</code>. <code>describe</code>, then <code>gesture-tap</code> at the centre of the element's frame, and a tap then <code>keyboard</code>. Batched: <code>run-sequence</code>.</li>
+      <li><b>Maestro MCP.</b> <code>inspect_screen</code>, then <code>run</code> with inline YAML: <code>tapOn</code> by id, and <code>tapOn</code> then <code>inputText</code> in one call. Batched: one <code>run</code> with every step.</li>
+      <li><b>Xcode MCP.</b> Headless (<code>sudo xcrun mcp-server enable</code>). <code>DeviceInteractionStartSession</code>, then <code>DeviceInteractionSynthesize</code>: with no command to read (the agent opens the hierarchy file it names), <code>t x y</code> at the element's hitPoint, and <code>t x y sender keyboard kbd ...</code> to tap a field and type, from Xcode's own device-interaction skill. No batched run: typing must come last in a command.</li>
+    </ul>
+  </section>
+
+  <section id="method">
+    <h2>Method</h2>
+    <div id="method-text">
+      <p class="sub">Every run was on one Mac, one tool at a time, with every other tool's processes ended and the Simulator shut down and booted again before it. simulator-use ran first and again last, to see how much the Mac drifted; AXe and MobileBuildMCP ran a second time with Device Hub open. The harness speaks MCP over stdio to the tool's own server, as an agent's client does, and times each call from the request sent to the answer received (AXe has no MCP server, so its command ran once per step, timed from start to exit). Every tool used its own read, its own way to tap and type (by id where it has one, at coordinates where that is its way), its own settle and verify options, and the setup its docs or its own hints ask for. A tap or a sign-in counts only when the app's own log shows it, a check that uses no accessibility; a step that failed is reported, never retried.</p>
+      <p class="sub" style="margin-top:12px">Tokens are what the agent reads back: the answer's text as characters / 4 (no Anthropic API key was set for this run; the harness counts with Anthropic's token counting API when one is), an image as width * height / 750, and for Xcode the hierarchy file its answer points to, which its own skill says to read after every interaction. Medians are the middle value; p90 is the 90th percentile by nearest rank.</p>
+    </div>
+    <div class="scroll"><table class="facts">
+      <tbody>
+<!-- bench:env -->
+<tr><td>Mac</td><td>Apple M5 Pro (Virtual), 6 cores, 8 GB of memory (VirtualMac2,1, a NoMac Session Mac)</td></tr>
+<tr><td>macOS</td><td>26.6.2 (25G83)</td></tr>
+<tr><td>Xcode</td><td>Xcode 27.0 (27A266a)</td></tr>
+<tr><td>Simulator</td><td>iPhone 17 Pro, iOS 27.0 (24A434), booted with simctl; Device Hub closed unless a row says otherwise</td></tr>
+<tr><td>Node</td><td>24.20.0</td></tr>
+<tr><td>Date</td><td>2026-10-31</td></tr>
+<tr><td>Tokens</td><td>estimates: text as characters / 4 (no Anthropic API key was set for this run), images as width * height / 750</td></tr>
+<!-- /bench:env -->
+      </tbody>
+    </table></div>
+    <p class="fine">The harness and every call it made: <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench">bench</a>, with the raw results in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">bench/results/2026-10-31</a> (each file records its Mac, Simulator, versions and whether Device Hub was open). <code>bash bench/setup.sh</code>, then <code>bash bench/run-all.sh</code>, runs it again on any Mac with Xcode; <code>node bench/summarize.mjs</code> and <code>node bench/page.mjs</code> turn the results into these tables.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT. Made at <a href="https://nomac.app">NoMac</a>.</span>
+    <nav><a href="/">simulator-use</a><a href="https://github.com/NoMac-app/simulator-use">GitHub</a><a href="https://www.npmjs.com/package/simulator-use">npm</a></nav>
+  </div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

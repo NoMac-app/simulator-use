@@ -1,0 +1,13 @@
+import { McpClient } from "../lib/mcp.mjs";
+import { resetApp } from "../lib/sim.mjs";
+const udid = process.env.UDID;
+const c = new McpClient({ command: process.env.BENCH_TOOLS + "/bin/agent-device", args: ["mcp"] });
+await c.initialize(); await c.listTools();
+const t = (r) => r.content.map((x) => x.text).join("\n");
+console.log(t(await c.call("open", { app: "dev.simtap.demo", platform: "ios", udid, foreground: true }, 300000)).slice(0, 300));
+await resetApp(udid, "dev.simtap.demo");
+console.log("SNAP1", t(await c.call("snapshot", { interactiveOnly: true })).slice(0, 600));
+console.log("FILL", t(await c.call("fill", { target: { kind: "selector", selector: 'id="email"' }, text: "gary@example.com", settle: true })).slice(0, 300));
+console.log("SNAP2", t(await c.call("snapshot", { interactiveOnly: true })));
+console.log("SNAP3 full", t(await c.call("snapshot", {})).slice(0, 1500));
+await c.call("close", {}); await c.close(); process.exit(0);

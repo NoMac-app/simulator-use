@@ -1,0 +1,2998 @@
+{
+ "instructions": "Argent — iOS Simulator, Android Emulator, and Chromium app control for interacting, testing, profiling and debugging mobile and Chromium applications. Interaction tools return the screen after the action: a screenshot plus the accessibility element tree with normalized tap frames. Take coordinates from that tree; call describe (or debugger-component-tree) only when no fresh tree is available — never guess coordinates from pixels. Do not stop simulator servers when a task finishes: the next task reuses them. Call stop-all-simulator-servers when the user asks to clean up or ends the session, or when a skill tells you to recycle a device's services, always with devices: [...] naming the devices this session used. Never stop a Metro the user started unless they ask. One tool-server is shared by every agent using this argent install, so an unscoped call tears down their devices too — reserve it for a deliberate machine-wide cleanup. Full guidance is in the argent rule loaded from .claude/rules/argent.md.",
+ "tools": [
+  {
+   "name": "list-devices",
+   "description": "List iOS simulators, Android emulators, connected physical Android devices, running Chromium apps, and Vega (Fire TV) devices in one place.\nUse at the start of a session to pick a target id ('udid' for iOS entries, 'serial' for Android/Vega entries, 'id' for Chromium) to pass to interaction tools, and to see which targets are already running.\nReturns { devices, avds } where each device carries a 'platform' discriminator ('ios', 'android', 'chromium', or 'vega'); 'avds' lists Android AVDs bootable via boot-device. A Vega VVD is listed under 'devices' whether running or stopped (state 'running'/'stopped'); start a stopped one with boot-device using its 'vvdImage'.\nAndroid entries also carry a 'kind' ('emulator' for a local AVD, 'device' for a physical phone connected over USB / wireless adb). Physical phones are detected from `adb devices` (any serial that is not an `emulator-*` one) and are driven through the same interaction tools as emulators; they do not need boot-device (just connect the phone with USB debugging authorised).\nPhysical iPhones appear as iOS entries with kind 'device' (no iPads); no boot-device. State 'connected' = cabled and usable; 'paired' = not reachable over USB, never auto-bound.\nTV targets are tagged with runtimeKind 'tv' (Apple TV simulators on iOS, Android TV / leanback devices on Android). These are focus-driven, not touch-driven: use `describe` to read focus, `tv-remote` for remote presses (up/down/left/right/select/back/menu/home), and `keyboard` to type, rather than the coordinate/gesture tools.\niOS simulators from an additional CoreSimulator device set (the 'ios.additionalDeviceSets' configuration, e.g. devices created by Radon IDE) are listed alongside default-set ones, tagged with their owning 'deviceSet' path; they are driven through the same tools by udid, but run headless (no Simulator.app window attaches to them).\nA foldable iOS simulator (the iPhone Duo) or Android emulator (and its AVD) has 'foldable: true'. Use the `fold` tool to fold or unfold it.\nChromium apps are discovered by probing CDP debugging ports (default 9222; extend via the ARGENT_CHROMIUM_PORTS=<comma-separated-ports> env var). They must already be running with --remote-debugging-port=<port>; use boot-device with electronAppPath to launch one.\nBooted/ready devices are listed first. Platforms whose CLI is unavailable are silently omitted; an empty result usually means xcode-select, Android platform-tools, or the Vega SDK is not installed.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "list devices simulators emulators avd serial udid ios android chromium vega app fire tv session start"
+   }
+  },
+  {
+   "name": "boot-device",
+   "description": "Start an iOS simulator, launch an Android emulator, start a Vega (Fire TV) Virtual Device, or spawn an Electron app and wait until it is ready to accept interactions.\nPick the platform by which argument you pass: 'udid' for an iOS simulator from list-devices, 'avdName' for an Android AVD (a serial is assigned automatically), 'vvdImage' for a Vega VVD (the 'vvdImage' of a vega device from list-devices, e.g. 'tv'), or 'electronAppPath' for an Electron app (a CDP remote-debugging port is picked automatically, or pass 'electronPort' to fix one).\nUse at the start of a session once you have picked a target.\nReturns a tagged payload: { platform: 'ios', udid, booted } or { platform: 'android', serial, avdName, booted, note? } or { platform: 'vega', serial, vvdImage, booted } or { platform: 'chromium', id, port, pid, booted } (an Electron app boots as a Chromium/CDP device).\nAndroid boots take 2–10 minutes depending on machine and cold/warm state; the tool transparently hot-boots from the AVD's default_boot snapshot when usable and falls back to cold boot otherwise. Vega starts the single SDK-managed VVD via the vega CLI (~10s) and returns once it reports running. If an Android/Electron boot stage fails, the tool terminates the device it spawned so the next retry starts clean.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "description": "iOS: simulator UDID to boot (from `list-devices`). Provide exactly one of `udid`, `avdName`, `vvdImage`, or `electronAppPath`.",
+      "type": "string"
+     },
+     "avdName": {
+      "description": "Android: AVD name to launch a new emulator from (from `list-devices` → `avds[].name`). Provide exactly one of `udid`, `avdName`, `vvdImage`, or `electronAppPath`.",
+      "type": "string"
+     },
+     "vvdImage": {
+      "description": "Vega (Fire TV): VVD image to boot: the `vvdImage` of a Vega device from `list-devices` (e.g. `tv`). Starts the single SDK-managed Vega Virtual Device. Provide exactly one of `udid`, `avdName`, `vvdImage`, or `electronAppPath`.",
+      "type": "string"
+     },
+     "bootTimeoutMs": {
+      "description": "Android/Vega: overall budget for the boot sequence. Default 480000 (8 min) on Android, 120000 (2 min) on Vega. Clamped to [30s, 15min]. Ignored on iOS.",
+      "type": "integer",
+      "minimum": 30000,
+      "maximum": 900000
+     },
+     "force": {
+      "description": "Shut down and re-boot the device even if already running. Ignored for Electron, which always spawns a fresh process.",
+      "type": "boolean"
+     },
+     "sound": {
+      "description": "Android only: boot the emulator with audio output enabled. Defaults to false: argent boots emulators MUTED so several agent-driven devices don't all play sound on the host machine; pass `true` when the task involves playing, hearing, or testing audio. Takes effect at boot: if the emulator is already running muted, add `force: true` to reboot it with sound. A boot snapshot saved in the other audio mode can't be reused, so the first boot after toggling is a slower cold boot. The `boot-sound` argent flag flips this default to true. Ignored on iOS/Vega/Electron, which argent never mutes.",
+      "type": "boolean"
+     },
+     "guestVulkan": {
+      "description": "Android on a macOS host only: boot the emulator with guest Vulkan. Defaults to false: guest Vulkan crashes Chrome's GPU process, which breaks Chrome and Custom Tab sign-in flows. Without it apps find no Vulkan device, although the guest still lists the Vulkan features, so a Vulkan-only renderer such as WebGPU (react-native-wgpu) draws nothing; pass `true` to test one. Takes effect at boot: an emulator already running in the other mode is reused with a `note`, and `force: true` reboots it. A boot snapshot saved in the other mode can't be reused, so the first boot after toggling is a slower cold boot. The `ARGENT_EMULATOR_GUEST_VULKAN` env var flips this default to true. Ignored on other hosts and platforms.",
+      "type": "boolean"
+     },
+     "headless": {
+      "description": "iOS only: boot the simulator core WITHOUT opening its GUI window (Simulator.app, or Device Hub on Xcode 27+). The device still streams via simulator-server; used by Argent Lens. Set the `ARGENT_SIMULATOR_NO_WINDOW` env var (1/true/yes) to force this host-wide without passing the flag per call (the iOS analog of `ARGENT_EMULATOR_NO_WINDOW`). Ignored on Android/Vega/Electron, which have no equivalent GUI step.",
+      "type": "boolean"
+     },
+     "electronAppPath": {
+      "description": "Electron: path to the Electron app to launch. Either a packaged .app bundle / executable, or a project directory whose package.json points the Electron binary at the entry script. Provide exactly one of `udid`, `avdName`, `vvdImage`, or `electronAppPath`.",
+      "type": "string"
+     },
+     "electronPort": {
+      "description": "Electron-only: CDP remote-debugging port to expose. Defaults to a free port; the resulting device id is `chromium-cdp-<port>`.",
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 65535
+     },
+     "electronArgs": {
+      "description": "Electron-only: extra CLI arguments forwarded to the Electron binary after the app path.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "boot start launch simulator emulator avd device session ios android vega vvd firetv cold hot"
+   }
+  },
+  {
+   "name": "launch-app",
+   "description": "Open an app by its bundle id (iOS) or package name (Android), or confirm the running renderer (Chromium).\nUse when starting any app; prefer this over tapping home-screen / launcher icons. Also prepares the native-devtools injection before the app starts (the iOS slice on iOS, the tvOS slice on Apple TV); on tvOS, interaction is focus-driven; use the tv-* tools rather than coordinate taps.\nReturns { launched, bundleId, note? }. Fails if the app is not installed on the target device (iOS / Android). On a physical iPhone this registers the app every other tool acts on; com.apple.springboard and com.apple.Spotlight register without launching. note warns when runner signing is not ready.\nFor Chromium, the app is already running behind a CDP port; this call simply refreshes the cached viewport and acknowledges the bundleId tag. To change the visible route, use `open-url`.\nOn Vega (Fire TV), pass the interactive component app id from manifest.toml (e.g. com.example.app.main) as bundleId.\n\nCommon iOS bundle ids: com.apple.MobileSMS, com.apple.mobilesafari, com.apple.Preferences, com.apple.Maps, com.apple.mobileslideshow (Photos), com.apple.MobileAddressBook\nCommon Android packages: com.android.settings, com.android.chrome, com.google.android.apps.maps, com.google.android.gm, com.android.vending, com.google.android.dialer, com.google.android.apps.messaging",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, or Chromium id)."
+     },
+     "bundleId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$",
+      "description": "App identifier. iOS: bundle id (e.g. com.apple.MobileSMS). Android: package name from build.gradle `applicationId` (e.g. com.android.settings). Chromium: any tag matching the same alphabet (letters, digits, '.', '_' and '-'); the call is a no-op since the renderer is already running."
+     },
+     "activity": {
+      "description": "Android-only: fully-qualified Activity name (e.g. `.MainActivity` or `com.example/com.example.MainActivity`). If omitted on Android, the app's default launcher activity is used. Ignored on iOS / Chromium.",
+      "type": "string",
+      "pattern": "^[A-Za-z_.][A-Za-z0-9._/-]*$"
+     },
+     "launchArgs": {
+      "description": "Apple simulators and physical iPhones: arguments passed to the app process at launch, e.g. `[\"-FeatureFlag\", \"YES\"]` to override UserDefaults. A running app is relaunched to apply them. Ignored on other targets.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "open start app bundle id package simulator emulator chromium vega launch tvos apple tv fire tv"
+   }
+  },
+  {
+   "name": "restart-app",
+   "description": "Terminate then relaunch an app by its bundle id (iOS, Vega) or package name (Android).\nUse when you need a clean in-memory state without a full reinstall. Also refreshes the native-devtools injection before the relaunch (the iOS slice on iOS, the tvOS slice on Apple TV); on tvOS, interaction is focus-driven; use the tv-* tools rather than coordinate taps.\nReturns { restarted, bundleId }. Fails if the app is not installed.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "bundleId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$",
+      "description": "App identifier. iOS: bundle id. Android: package name."
+     },
+     "activity": {
+      "description": "Android-only: relaunch a non-launcher Activity (e.g. `.SettingsActivity` or `com.example/com.example.SettingsActivity`). If omitted, the app's default launcher activity is used. Ignored on iOS.",
+      "type": "string",
+      "pattern": "^[A-Za-z_.][A-Za-z0-9._/-]*$"
+     },
+     "launchArgs": {
+      "description": "Apple simulators and physical iPhones: arguments passed to the app process at launch, e.g. `[\"-FeatureFlag\", \"YES\"]` to override UserDefaults. Ignored on other targets.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "terminate relaunch restart reset app bundle id package simulator emulator vega tvos fire tv"
+   }
+  },
+  {
+   "name": "reinstall-app",
+   "description": "Install or reinstall an app on the device. The previous installation (if any) is uninstalled first so app data and runtime permissions are cleared.\nUse for a full reinstall after rebuilding, or to start from a clean app state.\nReturns { reinstalled, bundleId }. Fails before uninstalling anything if the app path does not exist, is not the platform's package (.app for iOS, .apk for Android, .vpkg for Vega), or bundleId does not match it.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "bundleId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$",
+      "description": "App identifier that matches the bundle at `appPath`. iOS: bundle id (used to uninstall first). Android: package name (used to uninstall first; the install itself identifies the app from the APK). Vega: interactive component app id (e.g. com.example.app.main), used to uninstall first."
+     },
+     "appPath": {
+      "type": "string",
+      "description": "Path to the app bundle. iOS: `.app` directory (e.g. ./build/.../MyApp.app). Android: `.apk` file (e.g. android/app/build/outputs/apk/debug/app-debug.apk). Vega: `.vpkg` file. Relative paths are resolved from the current working directory."
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId",
+     "appPath"
+    ]
+   }
+  },
+  {
+   "name": "settings-permissions",
+   "description": "Grant, deny, or reset a runtime permission for an app without navigating the system Settings UI. Use during test setup to pre-authorize (or explicitly deny) a service before the app asks, or `reset` so the permission dialog appears again on next use. Always per-app: bundleId is required.\nPermissions: camera, microphone, photos, contacts, notifications, calendar, location, location-always, media-library, motion, reminders.\niOS simulator: edits the simulator's TCC store, always per-app. `notifications` is not supported (no iOS equivalent). `reset` is per-app: a device-wide reset is a no-op for existing grants on recent iOS, so it is not offered. `grant location`/`location-always` needs the app already installed (location auth isn't stored in TCC and isn't applied to a bundle id until the app exists). This is enforced on local simulators; a remote simulator can't be probed for install state, so ensure the app is installed there first. Other services can be granted before install.\nAndroid: changes the mapped `android.permission.*` runtime permissions (reset also best-effort clears the user-set permission flags). The app must be installed and declare them in its manifest; `reminders` has no Android equivalent.\nSome permission changes terminate the app if it is running (system behavior on both platforms), so set permissions before launching, or relaunch after.\nReturns { action, permission, bundleId, applied, skipped? }: `applied` lists the platform-level services/permissions actually changed; `skipped` (Android) lists mapped permissions the package manager rejected, e.g. ones the manifest doesn't declare. Fails if nothing could be applied.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS simulator UDID or Android serial)."
+     },
+     "action": {
+      "type": "string",
+      "enum": [
+       "grant",
+       "deny",
+       "reset"
+      ],
+      "description": "`grant` pre-authorizes the permission, `deny` refuses it, `reset` returns it to the not-yet-asked state so the app prompts on next use."
+     },
+     "permission": {
+      "type": "string",
+      "enum": [
+       "camera",
+       "microphone",
+       "photos",
+       "contacts",
+       "notifications",
+       "calendar",
+       "location",
+       "location-always",
+       "media-library",
+       "motion",
+       "reminders"
+      ],
+      "description": "The permission to change. `notifications` is Android-only (iOS has no simctl service for it); `reminders` is iOS-only; `camera` works on Android and on iOS only when the target simulator's runtime models the service (varies by simruntime, not by the installed Xcode)."
+     },
+     "bundleId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$",
+      "description": "App to change the permission for, required for every action. iOS: bundle id (e.g. com.example.app). Android: package name. `reset` is per-app too: simctl's device-wide reset (no bundleId) silently leaves existing per-app grants untouched on recent iOS, so the permission is always reset for this one app."
+     }
+    },
+    "required": [
+     "udid",
+     "action",
+     "permission",
+     "bundleId"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "grant deny reset revoke app permissions privacy camera microphone location settings"
+   }
+  },
+  {
+   "name": "open-url",
+   "description": "Open a URL or URL scheme on the device.\nUse to navigate to a web page or deep-link into an app. On Chromium, this navigates the primary renderer to the given URL.\nCross-platform schemes: https://, tel:, mailto:. iOS also: messages://, settings://, maps://. Android also: geo:, plus any app-specific deep link.\nDeep-linking caveat: an https:// link opens the native app only when an installed app is verified for the link's domain (iOS Universal Links / Android App Links); otherwise it opens in the browser, and on iOS simulators it may open in Safari even when the owning app is installed. To reliably open an installed app, use its custom scheme (scheme://path) or launch-app with its bundle id.\nOn a physical iPhone, http(s) URLs default to Safari and any other scheme needs bundleId; the receiving app becomes the app under automation.\nReturns { opened, url, note? }. note carries the deep-linking caveat when a web URL was opened on a native device. Fails if no app is registered to handle the URI (iOS/Android) or the renderer rejects the navigation (Chromium).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, or Chromium id)."
+     },
+     "url": {
+      "type": "string",
+      "description": "URL or scheme to open (e.g. https://example.com, messages://, tel:555, geo:37.0,-122.0). For Chromium this navigates the renderer."
+     },
+     "bundleId": {
+      "description": "Physical iOS only: the app that receives the URL. Defaults to Safari for http(s); required for any other scheme. Ignored elsewhere.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$"
+     }
+    },
+    "required": [
+     "udid",
+     "url"
+    ]
+   }
+  },
+  {
+   "name": "screenshot",
+   "description": "Capture a screenshot of the device screen (iOS simulator or physical device, Android emulator, Apple TV simulator, Vega, or Chromium app). Returns { image }; the MCP adapter renders it as a visible image unless the caller passed includeImageInContext: false.\nUse when you need a baseline image before an interaction or to inspect the current screen state after a delay.\nFails if the simulator-server / emulator backend / Chromium CDP is not reachable for the given device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, Apple TV UDID, Vega serial, or Chromium id)."
+     },
+     "rotation": {
+      "description": "Orientation override for the screenshot (rotates the captured image after Page.captureScreenshot on Chromium). On Android the capture already follows the device's rotation. Ignored on physical iPhones.",
+      "type": "string",
+      "enum": [
+       "Portrait",
+       "LandscapeLeft",
+       "LandscapeRight",
+       "PortraitUpsideDown"
+      ]
+     },
+     "scale": {
+      "description": "Scale factor (0.01-1.0). Defaults to ARGENT_SCREENSHOT_SCALE env var, or 0.25 if unset for iOS/Android. On a local Apple TV simulator, an Android TV or Vega, with neither set, the capture is downscaled to a 576 px long side (0.15 of a 4K capture); an Android TV whose form factor or display size cannot be read in time keeps 0.25. On Chromium the default is 1.0 (no downscale); pass <1 to opt in. Downscaling on Chromium requires the optional `sharp` dependency.",
+      "type": "number",
+      "minimum": 0.01,
+      "maximum": 1
+     },
+     "includeImageInContext": {
+      "default": true,
+      "description": "Default true. Set false only when capturing a full-resolution PNG (scale: 1.0) to save as a baseline/current for screenshot-diff. The file is still written, but the image bytes are not attached to the agent context.",
+      "type": "boolean"
+     },
+     "downscaler": {
+      "description": "Downscaling algorithm when scale<1 on Chromium. Defaults to lanczos3 (highest quality). Mirrors sim-server's wire enum. Ignored on physical iPhones.",
+      "type": "string",
+      "enum": [
+       "lanczos3",
+       "box",
+       "bilinear",
+       "nearest"
+      ]
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "device simulator emulator chromium screen image capture baseline tvos apple tv"
+   }
+  },
+  {
+   "name": "screenshot-diff",
+   "description": "Compare two PNG screenshots and return a compact visual-diff summary.\nAccepts saved baseline/current PNG paths, or one saved PNG plus one live full-resolution capture from a device. Always provide udid so the capture backend can be resolved.\nUse when stable before/after screenshots exist and the expected result is pixel-visible: layout, spacing, color, typography, image/icon rendering, clipping, overflow, or text rendering.\nFor live captures, set exactly one of captureBaseline or captureCurrent; use baselinePath + captureCurrent for the common visual-regression flow.\nPhysical iPhones: live captures are device-wide and need no registered app. Keep baselines per device model; different aspect ratios fail as a dimension mismatch.\nReturns { summary, diffPath, contextDiffPath }. The summary uses normalized [0,1] screen locations matching describe coordinates; diffPath is the full-size diff image and contextDiffPath is a downscaled image for MCP/agent display.\nIgnores the fixed top status-bar band for both pixel and OCR text comparisons.\nFails if the input sources are invalid, PNG files cannot be read, outputDir cannot be written, or the simulator-server / emulator backend is not reachable.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "baselinePath": {
+      "description": "Path to the baseline PNG file. Required unless captureBaseline is true.",
+      "type": "string",
+      "minLength": 1
+     },
+     "currentPath": {
+      "description": "Path to the current PNG file. Required unless captureCurrent is true.",
+      "type": "string",
+      "minLength": 1
+     },
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "captureBaseline": {
+      "description": "Capture the baseline screenshot live at full resolution before diffing. Cannot be combined with captureCurrent.",
+      "type": "boolean"
+     },
+     "captureCurrent": {
+      "description": "Capture the current screenshot live at full resolution before diffing. Cannot be combined with captureBaseline.",
+      "type": "boolean"
+     },
+     "rotation": {
+      "description": "Orientation override for live baseline/current captures. Ignored on physical iPhones.",
+      "type": "string",
+      "enum": [
+       "Portrait",
+       "LandscapeLeft",
+       "LandscapeRight",
+       "PortraitUpsideDown"
+      ]
+     },
+     "outputDir": {
+      "description": "Directory where diff artifacts should be written. Optional: defaults to a temp directory; the diff images are returned in the result either way.",
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "required": [
+     "udid"
+    ],
+    "additionalProperties": false
+   },
+   "_meta": {
+    "anthropic/searchHint": "compare screenshots png diff visual UI changes UI regression visual regression screenshot diff changed regions text ocr live capture"
+   }
+  },
+  {
+   "name": "screen-recording-start",
+   "description": "Start recording the device screen to a video file (h264 mp4, 30fps at the device's native resolution).\nBy default stretches where the screen does not change are trimmed out (see trimStatic), so a long session with only brief activity comes back as a short clip instead of minutes of dead air.\nBy default every tap, swipe, drag, pinch and rotate is drawn into the video as an on-screen touch marker (see showTouches), so the recording shows where each interaction landed.\nThe recording keeps running across other tool calls (every result carries a reminder) until `screen-recording-stop` is called or timeLimitSeconds elapses. Immediately after starting, set yourself a reminder/wakeup for the expected end of the recording so it is never left running.\nUse when the user wants a video of an interaction, animation, or app behavior; for a single still frame use `screenshot` instead.\nReturns { status: \"recording\", timeLimitSeconds, outputFile }. The video is retrieved later by `screen-recording-stop`, not by reading outputFile directly.\nFails if a recording is already running on the device, the device is not booted, ffmpeg is not installed, or the platform cannot be recorded (tvOS, Chromium, Vega and remote simulators are unsupported).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS Simulator UDID or Android serial)."
+     },
+     "timeLimitSeconds": {
+      "description": "Auto-stop cap in seconds (default 180, max 600). Set it to slightly more than the interaction you plan to capture.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600
+     },
+     "trimStatic": {
+      "description": "Default true. Collapse stretches where the screen does not change: the first second of each still stretch is kept, then unchanged frames are dropped until something moves again, so a long recording with brief activity comes back short instead of full of dead air. The returned durationMs is the trimmed length; wallClockMs/trimmedMs report what was removed. Set false to keep a faithful real-time recording.",
+      "type": "boolean"
+     },
+     "showTouches": {
+      "description": "Default true. Draw simulator-server's touch visualizer into the recording: a pulse marks each tap, a comet trail follows swipes and drags, and paired markers show two-finger pinch/rotate, so the video makes clear where every interaction landed. Set false to record the raw screen with no overlay.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "record video screen capture movie mp4 start filming screencast"
+   }
+  },
+  {
+   "name": "screen-recording-stop",
+   "description": "Stop the screen recording started by `screen-recording-start` and retrieve the video: frame capture ends and ffmpeg finalizes the mp4.\nAlso retrieves the video when the recording already ended on its own (time limit reached, capture process died); call it even after the cap fired.\nUse when the interaction being captured is finished, or a tool-result note reminds you a recording is still running.\nReturns { video, durationMs, wallClockMs?, trimmedMs?, panelSwitches?, warning? }; video is a downloadable artifact materialized to a local path. When static-frame trimming removed dead air, durationMs is the trimmed video length and wallClockMs/trimmedMs report the real duration and how much was cut. On a foldable simulator, the recording follows the panel that shows the UI. panelSwitches gives the number of panel changes. The video keeps the size of the first panel. warning is set when argent could not find that panel during the recording.\nFails if no recording (running or finished-but-unretrieved) exists for the given udid.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS Simulator UDID or Android serial)."
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "stop end finish screen recording video capture save retrieve"
+   }
+  },
+  {
+   "name": "gesture-tap",
+   "description": "Press the device screen (iOS simulator or physical device, Android emulator, or Chromium app) at normalized coordinates: x and y are fractions of screen width and height in 0.0–1.0 (not pixels).\nSends a Down event followed by an Up event at the same point. For Chromium, this dispatches a CDP mouse-press/release on the renderer.\nSet clickCount: 2 for a double-tap / double-click: the taps are dispatched as one gesture with proper click counting, which two separate tap calls cannot guarantee.\nUse when you need to tap a button, link, or any tappable element on the screen.\nReturns { tapped: true, timestampMs }. On physical iOS, reactivated: true = app was re-fronted; re-describe. Fails if the simulator-server / emulator backend / Chromium CDP is not reachable for the given device.\nOn a physical iPhone use `describe`; `native-describe-screen` is simulator-only.\nBefore tapping, determine the correct coordinates by using discovery tools. Pick by platform: iOS / Android use `describe`, `native-describe-screen`, or `debugger-component-tree`; Chromium uses `describe` (the DOM walker), since the native and RN-specific discovery tools don't apply. More information in `argent-device-interact` skill",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, or Chromium id)."
+     },
+     "x": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized horizontal position 0.0–1.0 (left=0, right=1), not pixels"
+     },
+     "y": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized vertical position 0.0–1.0 (top=0, bottom=1), not pixels"
+     },
+     "clickCount": {
+      "description": "Number of taps/clicks dispatched as ONE multi-tap gesture (2 = double-tap / double-click). The taps land inside the OS double-tap window; on Chromium each click carries an escalating CDP clickCount so dblclick actually fires; on physical iOS 2 is the native double-tap and higher counts land as separate taps. Default 1.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+     }
+    },
+    "required": [
+     "udid",
+     "x",
+     "y"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "tap press button element device simulator emulator chromium touch down up click"
+   }
+  },
+  {
+   "name": "chromium-tabs",
+   "description": "List and switch the tabs / windows of a Chromium (CDP) app (an Electron app's BrowserWindows or a Chromium browser's tabs), and open or close them.\n- action=\"list\": enumerate page targets with stable ids (`t1`, `t2`, …), title, url, and which is active.\n- action=\"select\" (tab=<tabId|label>): make that tab the active one. The active tab is what describe / gesture-tap / screenshot / debugger-evaluate / open-url all operate on, so switch before driving a different tab.\n- action=\"new\" (url?, label?): open a new tab/page and activate it.\n- action=\"close\" (tab?=<tabId|label>): close a tab (defaults to the active one); if the active tab is closed, another live tab becomes active.\nUse when an app exposes multiple windows or tabs and you need to inspect or drive one other than the current page, or to open/close a page during an e2e test. tabIds are stable for the session and never reused.\nReturns { tabs: [{ tabId, targetId, title, url, active, label? }] }. Fails if the device is not a Chromium (CDP) device, or the requested tabId/label no longer matches a live tab. Chromium-only.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Chromium device id from `list-devices` (e.g. `chromium-cdp-9222`)."
+     },
+     "action": {
+      "type": "string",
+      "enum": [
+       "list",
+       "select",
+       "new",
+       "close"
+      ],
+      "description": "list: enumerate tabs/windows. select: make a tab active (every other tool then acts on it). new: open a tab. close: close a tab."
+     },
+     "tab": {
+      "description": "Target tab for `select` / `close`: a tabId like `t2` or a label. `close` defaults to the active tab.",
+      "type": "string"
+     },
+     "url": {
+      "description": "`new` only: URL to open (defaults to about:blank).",
+      "type": "string"
+     },
+     "label": {
+      "description": "`new` only: a memorable label usable interchangeably with the tabId.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "udid",
+     "action"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "tab tabs window windows switch select close new open multi-tab chromium electron"
+   }
+  },
+  {
+   "name": "chromium-cookies",
+   "description": "Read and write cookies of a Chromium (CDP) app (via the Network domain, so HttpOnly cookies are included).\n- action=\"get\" (url?): list cookies, optionally restricted to given URLs (defaults to the active page).\n- action=\"set\" (name, value, + url OR domain, optional path/secure/httpOnly/sameSite/expires): create or update a cookie.\n- action=\"delete\" (name, + url/domain/path): remove a matching cookie.\n- action=\"clear\": remove ALL browser cookies.\nUse when seeding an authenticated session before an e2e test (set the session cookie, then navigate) or asserting cookie state after one.\nReturns { cookies, count } for get, or a small status object ({ set } / { deleted } / { cleared }) otherwise. Fails if the device is not a Chromium (CDP) device, or set is missing name/value. Chromium-only.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Chromium device id from `list-devices` (e.g. `chromium-cdp-9222`)."
+     },
+     "action": {
+      "type": "string",
+      "enum": [
+       "get",
+       "set",
+       "delete",
+       "clear"
+      ],
+      "description": "get: read cookies. set: create/update a cookie. delete: remove a named cookie. clear: remove all browser cookies."
+     },
+     "name": {
+      "description": "set/delete: cookie name.",
+      "type": "string"
+     },
+     "value": {
+      "description": "set: cookie value.",
+      "type": "string"
+     },
+     "url": {
+      "description": "get: restrict to these URLs (defaults to the active page). set/delete: scope the cookie by URL.",
+      "type": "string"
+     },
+     "domain": {
+      "description": "set/delete: scope the cookie by domain (alt to url).",
+      "type": "string"
+     },
+     "path": {
+      "description": "set/delete: cookie path (default /).",
+      "type": "string"
+     },
+     "secure": {
+      "description": "set: mark Secure.",
+      "type": "boolean"
+     },
+     "httpOnly": {
+      "description": "set: mark HttpOnly.",
+      "type": "boolean"
+     },
+     "sameSite": {
+      "description": "set: SameSite policy.",
+      "type": "string",
+      "enum": [
+       "Strict",
+       "Lax",
+       "None"
+      ]
+     },
+     "expires": {
+      "description": "set: expiry as a Unix timestamp (seconds). Omit for a session cookie.",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid",
+     "action"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "cookies cookie get set delete clear httponly samesite session auth chromium"
+   }
+  },
+  {
+   "name": "chromium-storage",
+   "description": "Read and write localStorage / sessionStorage of a Chromium (CDP) app's active page.\n- action=\"get\": with `key`, returns that value; without `key`, returns all entries.\n- action=\"set\" (key, value): write an entry.\n- action=\"remove\" (key): delete an entry.\n- action=\"clear\": empty the store.\nSet `store` to \"local\" or \"session\". Storage is per-origin, so it reflects the active tab's document.\nUse when seeding feature flags / auth tokens before an e2e test or asserting persisted app state after one.\nReturns { value } for a single key, { entries, count } for all, or a status object ({ set } / { removed } / { cleared }) otherwise. Fails if the device is not a Chromium (CDP) device, or set is missing key/value. Chromium-only.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Chromium device id from `list-devices` (e.g. `chromium-cdp-9222`)."
+     },
+     "store": {
+      "type": "string",
+      "enum": [
+       "local",
+       "session"
+      ],
+      "description": "Which Web Storage area: `local` (localStorage) or `session` (sessionStorage)."
+     },
+     "action": {
+      "type": "string",
+      "enum": [
+       "get",
+       "set",
+       "remove",
+       "clear"
+      ],
+      "description": "get: read one key (with `key`) or all entries. set: write `key`=`value`. remove: delete `key`. clear: empty the store."
+     },
+     "key": {
+      "description": "get (optional) / set / remove: the storage key.",
+      "type": "string"
+     },
+     "value": {
+      "description": "set: the value to store.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "udid",
+     "store",
+     "action"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "storage localstorage sessionstorage local session get set remove clear key value chromium"
+   }
+  },
+  {
+   "name": "gesture-swipe",
+   "description": "Execute a smooth swipe / drag touch gesture between two points on the device (iOS simulator or physical device, or Android emulator). All from/to positions are normalized 0.0–1.0 (fractions of screen width/height, not pixels), same as gesture-tap.\nGenerates interpolated Move events for a natural feel (~60fps).\nSwipe up (fromY > toY) to scroll content down.\nUse when you need to scroll a list, dismiss a modal, drag an element, or navigate between pages. Not supported on Chromium; use gesture-scroll there instead.\nPhysical iOS: an edge gesture (back-swipe) needs fromX 0 exactly; durationMs sets drag speed, not time; momentum:false only rests 300ms at the end and does not damp.\nPass momentum:false for a momentum-free swipe that lands where the finger lifts (little to no fling at the 300 default), when you need a deterministic scroll distance; it needs durationMs >= 150 and is rejected below that, a shorter ease-out leaving the OS too little wall clock to read the deceleration as a stop. At 150 it lands short of the lift point instead, and 2 of 47 runs still flung backwards. A plain swipe takes any duration up to 10000ms and is delivered as close to the speed it was authored as a 16ms frame allows: below ~32ms the whole travel lands in one or two frames, which the OS flings as hard as it flings anything. Returns { swiped: true, timestampMs }. On physical iOS, reactivated: true = app was re-fronted; re-describe. Fails if the simulator-server / emulator backend is not reachable for the given device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "fromX": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Start x: normalized 0.0–1.0 (not pixels; same as tap)"
+     },
+     "fromY": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Start y: normalized 0.0–1.0 (not pixels; same as tap)"
+     },
+     "toX": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "End x: normalized 0.0–1.0 (not pixels; same as tap)"
+     },
+     "toY": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "End y: normalized 0.0–1.0 (not pixels; same as tap)"
+     },
+     "durationMs": {
+      "description": "Total gesture duration in milliseconds (default 300, at most 10000 - the gesture holds a finger down for exactly this long)",
+      "type": "number",
+      "maximum": 10000
+     },
+     "momentum": {
+      "description": "Whether the swipe releases with momentum; default true (a natural flinging swipe). Pass false for a momentum-free swipe at the default durationMs: the finger decelerates into the end point (ease-out) so the OS reads ~0 release velocity and applies little to no fling. Use false for scroll-to-element loops. momentum: false needs durationMs >= 150 and is rejected below it: a shorter ease-out gives the OS velocity fit too little wall clock to read the deceleration as a stop, and it flings harder than a plain swipe instead (on Android, backwards). At 150 itself the swipe lands short of where the finger stopped, and 2 of 47 runs still flung backwards.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "udid",
+     "fromX",
+     "fromY",
+     "toX",
+     "toY"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "swipe scroll drag pan gesture device simulator emulator touch move"
+   }
+  },
+  {
+   "name": "gesture-scroll",
+   "description": "Scroll content in a Chromium app by dispatching mouse-wheel events at a point. Anchor x/y are normalized 0.0–1.0 (fractions of the window, not pixels), same coordinate space as gesture-tap and describe. Deltas are fractions of the window too: deltaY 0.5 scrolls down half a window; negative scrolls back up.\nUse when content is below/above the fold (describe shows off-screen elements with zero height) or a list needs scrolling. Chromium only: on iOS/Android use gesture-swipe.\nReturns { scrolled: true, timestampMs }. Fails if the Chromium CDP session is not reachable for the given device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target Chromium device id from `list-devices` (chromium-cdp-<port>)."
+     },
+     "x": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Anchor x: normalized 0.0–1.0 (fraction of window width, not pixels). The wheel events land here; put it over the element you want to scroll."
+     },
+     "y": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Anchor y: normalized 0.0–1.0 (fraction of window height, not pixels)."
+     },
+     "deltaX": {
+      "description": "Horizontal scroll distance as a fraction of the window width (e.g. 0.5 = half a window). Positive scrolls content right (reveals content to the right).",
+      "type": "number"
+     },
+     "deltaY": {
+      "description": "Vertical scroll distance as a fraction of the window height (e.g. 0.5 = half a window). Positive scrolls content down (reveals content below), like rolling a mouse wheel toward you.",
+      "type": "number"
+     },
+     "durationMs": {
+      "description": "Spread the scroll over this many milliseconds in wheel-event steps (default 300) so scroll handlers fire progressively.",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid",
+     "x",
+     "y"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "scroll wheel list page chromium mouse down up content fold"
+   }
+  },
+  {
+   "name": "gesture-drag",
+   "description": "Press the left mouse button at a start point, move to an end point, and release: a desktop mouse drag in a Chromium app. All positions are normalized 0.0–1.0 (fractions of the window, not pixels), same coordinate space as gesture-tap and describe, except that a coordinate of exactly 1.0 lands one pixel inside the window edge (gesture-tap maps it to the edge itself). Interpolates mouse-move events at ~60fps over durationMs for a natural drag (a momentum-free drag samples more finely when durationMs is short, so its ease-out has a curve).\nUse for slider thumbs, drag-and-drop, text selection, or draggable UI elements. Dragging never scrolls content on desktop; use gesture-scroll for lists/pages. Chromium only: on iOS/Android use gesture-swipe.\nPass momentum:false for a momentum-free drag that decelerates into the release, so apps that compute a fling from the pointer stream read ~0 velocity and the drag ends where it was aimed instead of flinging past it (a durationMs under ~100ms is too short for the deceleration to suppress the fling entirely). Returns { dragged: true, timestampMs }. Fails if the Chromium CDP session is not reachable for the given device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target Chromium device id from `list-devices` (chromium-cdp-<port>)."
+     },
+     "fromX": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Press x: normalized 0.0–1.0 (fraction of window width, not pixels)."
+     },
+     "fromY": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Press y: normalized 0.0–1.0 (fraction of window height, not pixels)."
+     },
+     "toX": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Release x: normalized 0.0–1.0 (not pixels; same space as tap)."
+     },
+     "toY": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Release y: normalized 0.0–1.0 (not pixels; same space as tap)."
+     },
+     "durationMs": {
+      "description": "Total drag duration in milliseconds (default 300, at most 10000 - the button stays down for exactly this long), interpolated at ~60fps.",
+      "type": "number",
+      "maximum": 10000
+     },
+     "momentum": {
+      "description": "Whether the drag releases with momentum; default true (a constant-speed drag). Pass false to decelerate into the release point (ease-out) so an app deriving fling from pointer release velocity (carousels, drag libraries) reads ~0 and applies little to no momentum. Use it when the drag must stop where it was aimed rather than fling past. Deceleration needs wall clock: under ~100ms the whole drag fits inside the velocity window a page averages over (tens of ms), so some fling survives, and under ~70ms its extra frames cannot dispatch fast enough to fit durationMs. Keep durationMs at its default when the fling must be fully suppressed.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "udid",
+     "fromX",
+     "fromY",
+     "toX",
+     "toY"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "drag drop slider mouse press move release chromium select"
+   }
+  },
+  {
+   "name": "gesture-custom",
+   "description": "Send a sequence of touch events for complex gestures.\nUse for: long press, drag-and-drop, custom scroll, pinch (second touch point).\nFor simple taps use the gesture-tap tool. For straight-line scrolling use the gesture-swipe tool.\nFor pinch gestures use gesture-pinch. For rotation gestures use gesture-rotate.\nAll x/y values are normalized 0.0–1.0 (screen fractions, not pixels). delayMs controls the delay before each event (default 16ms ≈ 60fps).\nSet interpolate to auto-generate smooth intermediate Move events between your keyframes.\nPhysical iOS: Down then Up only. Same point = press-hold. Other point = drag (Up delayMs = rest before the move). One Move at the Down point between them = long-press pickup (Move delayMs = hold, Up delayMs = move time). No second finger, no other waypoints; scroll with gesture-swipe.\nReturns { events: number } with the total count of events dispatched. On physical iOS, reactivated: true = app was re-fronted; re-describe. Fails if the target device is not booted or an event type is invalid.\n\nExample long-press at center:\n  [{\"type\":\"Down\",\"x\":0.5,\"y\":0.5},{\"type\":\"Up\",\"x\":0.5,\"y\":0.5,\"delayMs\":800}]\n\nExample pick up a list item with a long press, then drag it up:\n  [{\"type\":\"Down\",\"x\":0.5,\"y\":0.6},{\"type\":\"Move\",\"x\":0.5,\"y\":0.6,\"delayMs\":800},{\"type\":\"Up\",\"x\":0.5,\"y\":0.3,\"delayMs\":500}]\n\nExample smooth scroll down:\n  [{\"type\":\"Down\",\"x\":0.5,\"y\":0.7},\n   {\"type\":\"Move\",\"x\":0.5,\"y\":0.6},{\"type\":\"Move\",\"x\":0.5,\"y\":0.5},{\"type\":\"Move\",\"x\":0.5,\"y\":0.4},\n   {\"type\":\"Up\",\"x\":0.5,\"y\":0.3}]\n\nExample pinch-to-zoom (with interpolate:10 for smoothness):\n  events: [{\"type\":\"Down\",\"x\":0.4,\"y\":0.5,\"x2\":0.6,\"y2\":0.5},\n           {\"type\":\"Up\",\"x\":0.2,\"y\":0.5,\"x2\":0.8,\"y2\":0.5}]\n  interpolate: 10",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "events": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "type": {
+         "type": "string",
+         "enum": [
+          "Down",
+          "Move",
+          "Up"
+         ],
+         "description": "Touch event type"
+        },
+        "x": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1,
+         "description": "Normalized x 0.0–1.0 (not pixels; same as tap/swipe)"
+        },
+        "y": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1,
+         "description": "Normalized y 0.0–1.0 (not pixels; same as tap/swipe)"
+        },
+        "x2": {
+         "description": "Second touch x for two-finger gestures: normalized 0.0–1.0 (not pixels)",
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        },
+        "y2": {
+         "description": "Second touch y for two-finger gestures: normalized 0.0–1.0 (not pixels)",
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        },
+        "delayMs": {
+         "description": "Delay before this event in milliseconds (default 16ms ≈ 60fps)",
+         "type": "number"
+        }
+       },
+       "required": [
+        "type",
+        "x",
+        "y"
+       ]
+      },
+      "description": "Sequence of touch events; x/y (and optional second touch) are normalized 0.0–1.0, not pixels"
+     },
+     "interpolate": {
+      "description": "Number of intermediate Move events to auto-insert between each pair of consecutive events. Smooths out gestures by linearly interpolating both primary (x,y) and secondary (x2,y2) coordinates. The delay is split evenly across interpolated frames. Default: no interpolation.",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid",
+     "events"
+    ]
+   }
+  },
+  {
+   "name": "gesture-pinch",
+   "description": "Execute a pinch-to-zoom gesture by moving two fingers toward or away from a center point to change the scale of on-screen content. All positions and distances are normalized 0.0–1.0 (fractions of screen width/height, not pixels), same coordinate space as gesture-tap and gesture-swipe.\nstartDistance > endDistance = pinch in (zoom out). startDistance < endDistance = pinch out (zoom in).\nTypical values: startDistance 0.2, endDistance 0.6 for a zoom-in pinch at screen center.\nAuto-generates interpolated frames at ~60fps. The angle parameter controls the axis (0 = horizontal, 90 = vertical). Optional endCenterX/endCenterY drift the centroid linearly over the gesture (omitted = fixed center).\nUse when you need to zoom in or out on a map, image, or zoomable view. Returns { pinched: true, timestampMs }. Fails if the simulator-server / emulator backend is not reachable for the given device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "centerX": {
+      "type": "number",
+      "description": "Center of pinch, horizontal: normalized 0.0–1.0 (fraction of screen width, not pixels)"
+     },
+     "centerY": {
+      "type": "number",
+      "description": "Center of pinch, vertical: normalized 0.0–1.0 (fraction of screen height, not pixels)"
+     },
+     "startDistance": {
+      "type": "number",
+      "description": "Initial distance between the two fingers: normalized 0.0–1.0 (fraction of screen, not pixels). E.g. 0.2 = fingers 20% of screen apart. Use a larger startDistance than endDistance to pinch in (zoom out)."
+     },
+     "endDistance": {
+      "type": "number",
+      "description": "Final distance between the two fingers: normalized 0.0–1.0 (fraction of screen, not pixels). E.g. 0.6 = fingers 60% of screen apart. Use a larger endDistance than startDistance to pinch out (zoom in)."
+     },
+     "endCenterX": {
+      "description": "Final horizontal center of the pinch: normalized 0.0–1.0. When set, the centroid drifts linearly from centerX to endCenterX over the gesture (e.g. to keep expanding fingers on-screen near an edge). Omit for a fixed center.",
+      "type": "number"
+     },
+     "endCenterY": {
+      "description": "Final vertical center of the pinch: normalized 0.0–1.0. When set, the centroid drifts linearly from centerY to endCenterY over the gesture. Omit for a fixed center.",
+      "type": "number"
+     },
+     "angle": {
+      "description": "Axis angle in degrees along which the fingers are placed (default 0 = horizontal).",
+      "type": "number"
+     },
+     "durationMs": {
+      "description": "Total gesture duration in milliseconds (default 300)",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid",
+     "centerX",
+     "centerY",
+     "startDistance",
+     "endDistance"
+    ]
+   }
+  },
+  {
+   "name": "gesture-rotate",
+   "description": "Send a two-finger circular arc gesture to rotate on-screen content by a specified angle. Two fingers are placed opposite each other at a fixed radius from the center, then swept from startAngle to endAngle degrees. All positions and radii are normalized 0.0–1.0 (fractions of screen width/height, not pixels), same coordinate space as gesture-tap and gesture-swipe.\nendAngle > startAngle = clockwise rotation. Typical values: radius 0.15, startAngle 0, endAngle 90 for a 90° clockwise turn. A single radius applies to both axes, so on a non-square screen it traces a physical ellipse (finger separation varies through the turn); pass radiusX+radiusY (fractions of width/height with radiusX·width = radiusY·height) for a physically circular orbit instead.\nAuto-generates interpolated frames at ~60fps.\nUnlike gesture-pinch which moves fingers linearly to zoom, this orbits fingers in an arc to change orientation.\nUse when you need to rotate a map, image picker, or any rotateable UI element. Returns { rotated: true, timestampMs }. Fails if the simulator-server / emulator backend is not reachable for the given device.\nSize the orbit with radius, or with radiusX and radiusY together (the pair overrides radius); one half of the pair alone, or none of the three, is rejected.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "centerX": {
+      "type": "number",
+      "description": "Center of rotation, horizontal: normalized 0.0–1.0 (fraction of screen width, not pixels)"
+     },
+     "centerY": {
+      "type": "number",
+      "description": "Center of rotation, vertical: normalized 0.0–1.0 (fraction of screen height, not pixels)"
+     },
+     "radius": {
+      "description": "Distance from center to each finger: normalized 0.0–1.0 (fraction of screen, not pixels). E.g. 0.15 = fingers placed 15% of screen away from center. One value for both axes, so on a non-square screen the orbit is a physical ellipse; pass radiusX+radiusY instead for a true circle. Required unless radiusX and radiusY are given.",
+      "type": "number"
+     },
+     "radiusX": {
+      "description": "Per-axis finger distance, horizontal: normalized 0.0–1.0 fraction of screen WIDTH. Give both radiusX and radiusY (they override radius) with radiusX·screenWidth = radiusY·screenHeight for a physically circular orbit: constant finger separation, no pinch coupled into the turn.",
+      "type": "number"
+     },
+     "radiusY": {
+      "description": "Per-axis finger distance, vertical: normalized 0.0–1.0 fraction of screen HEIGHT. Always paired with radiusX; see radiusX.",
+      "type": "number"
+     },
+     "startAngle": {
+      "type": "number",
+      "description": "Starting angle in degrees (0 = right, 90 = down)"
+     },
+     "endAngle": {
+      "type": "number",
+      "description": "Ending angle in degrees. endAngle > startAngle = clockwise."
+     },
+     "durationMs": {
+      "description": "Total gesture duration in milliseconds (default 300)",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid",
+     "centerX",
+     "centerY",
+     "startAngle",
+     "endAngle"
+    ]
+   }
+  },
+  {
+   "name": "button",
+   "description": "Press a device hardware button (iOS simulator or physical device, Android emulator or device). iOS simulators send a Down then Up event automatically; Android injects a single `adb` key event.\nSupported buttons depend on the platform: home, back, power, volumeUp, volumeDown, appSwitch, actionButton; buttons not present on the target platform (e.g. 'back' on iOS, 'actionButton' on Android, 'power' or 'appSwitch' on a physical iPhone) are rejected with a clear error.\nUse when you need to trigger hardware button events.\nReturns { pressed: buttonName }.\nFails if the device backend is not reachable: the simulator-server for iOS, or `adb` for Android (Android presses are injected with `adb shell input keyevent`).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "button": {
+      "type": "string",
+      "enum": [
+       "home",
+       "back",
+       "power",
+       "volumeUp",
+       "volumeDown",
+       "appSwitch",
+       "actionButton"
+      ],
+      "description": "Hardware button to press"
+     }
+    },
+    "required": [
+     "udid",
+     "button"
+    ]
+   }
+  },
+  {
+   "name": "keyboard",
+   "description": "Type text or press special keys on the device (iOS simulator, Android emulator or device, Chromium app, Vega Virtual Device, or Apple TV / Android TV) using keyboard events.\nUse when you need to enter text or trigger a named key such as enter, escape, or arrow keys. On Vega and Apple TV / Android TV, prefer the remote tools for D-pad navigation; use keyboard to type into a focused text field (e.g. a search or login box).\nReturns { typed: string, keys: number }. On physical iOS, reactivated: true = app was re-fronted; re-describe. Fails if text and key are both given in one call (rejected before anything is typed), if an unsupported key name is provided, or if the device's input backend is not reachable.\nA failure is not rolled back. An unsupported key name is always rejected before anything is sent. Un-typeable text is not: the iOS simulator and Chromium reject it mid-string and leave the characters before it in the field (Android, Vega and TV targets check the whole string up front). A transport failure partway also leaves the text already sent. On a retry, read the field's actual contents; do not assume it is unchanged.\n- text: types a string (supports uppercase, digits, common punctuation). To type a credential, use `{{secret:<NAME>}}`, resolved server-side from the `ARGENT_SECRET_<NAME>` env var or an argent secrets file (`.argent/secrets.env` in the project, `~/.argent/secrets.env`, or an `ARGENT_SECRET_`-prefixed key in the project's `.env`/`.env.local`), so the plaintext never enters agent context; the result echoes the placeholder, not the value, and the after-typing auto-screenshot is skipped. To submit after typing a secret, put both steps in ONE `run-sequence`: that keeps the skip covering the Enter, which a second bare `keyboard` call would not.\n- key: presses a single named key (enter, escape, backspace, tab, arrow-up/down/left/right, f1-f12). NOT supported on TV targets; move focus with `tv-remote` instead. Physical iOS: only `enter` and `backspace`.\nOn a TV target (runtimeKind 'tv') only `text` applies. Focus a text field first (with `tv-remote`), then type into it (injected HID keyboard on Apple TV, `adb input text` on Android TV).\nOne call does one action: pass text OR key, never both. To type and then press a key, send two `keyboard` steps in one `run-sequence` ({ text: \"hello\" } then { key: \"enter\" }), which also keeps it to a single round-trip.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, Vega serial, or Chromium id)."
+     },
+     "text": {
+      "description": "Text to type character by character. Cannot be combined with `key` in one call (one call per action); to type and then press a key, put two `keyboard` steps in one `run-sequence`. Handles uppercase and common punctuation. To type a credential without its plaintext ever entering your context, use a secret placeholder: `{{secret:<NAME>}}`, e.g. text: \"{{secret:APP_PASSWORD}}\". The value is resolved on the machine running the tool-server, from the first source that defines the name: the `ARGENT_SECRET_<NAME>` environment variable, `.argent/secrets.env` in the project, the project's `.env.local` / `.env` (only their `ARGENT_SECRET_`-prefixed keys), then `~/.argent/secrets.env`. Nothing else on the host is reachable. Placeholders can be embedded in longer text and are never echoed back resolved. If the secret you need is not set, the failure lists the available names and every source it looked in; ask the user to add it to one of them (a secrets file applies immediately; an env var needs a restart), NEVER ask the user to paste the secret value into the conversation.",
+      "type": "string"
+     },
+     "key": {
+      "description": "Named key to press: enter, escape, backspace, tab, space, arrow-up, arrow-down, arrow-left, arrow-right, f1-f12. Cannot be combined with `text` in one call: one call per action; to type and then press a key, put two `keyboard` steps in one `run-sequence`. Not supported on TV targets; move focus with `tv-remote` (up/down/left/right) instead. Physical iOS: only `enter` and `backspace`.",
+      "type": "string"
+     },
+     "delayMs": {
+      "description": "Delay in ms between key presses (default 50). Ignored on Android phones/tablets (typed via `adb input text`, which has no per-key cadence), on Vega (text/keys injected in a single shot), on TV targets (Apple TV / Android TV type the whole string at the daemon's own cadence), and on physical iOS.",
+      "type": "number"
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "type text keyboard input named key enter escape arrow tv vega fire tv search field hid leanback"
+   }
+  },
+  {
+   "name": "paste",
+   "description": "Paste text into the focused field: puts `text` on the DEVICE clipboard, then triggers the platform's paste shortcut (iOS simulator, Android emulator).\nDo NOT use this in place of `keyboard`. `keyboard` types as a user would and is the default for all text entry; use `paste` only where a real user would paste: a 2FA/OTP code copied from another app, a long link or token, or when testing the app's own paste handling.\nTap the field first so it has focus. Returns { pasted: true }, plus via: \"keyboard\" when a secret was typed instead of pasted. Fails on a TV target, when the device clipboard cannot be set, when a secret that has to be typed holds a character that cannot be typed, or when the simulator-server build lacks clipboard support.\nSupports `{{secret:<NAME>}}` placeholders like `keyboard`; the value is never echoed back.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS simulator UDID or Android emulator serial)."
+     },
+     "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Text to put on the device clipboard and paste into the focused field. Supports `{{secret:<NAME>}}` placeholders, resolved on the tool-server from the `ARGENT_SECRET_<NAME>` environment variable or an argent secrets file (the same sources as `keyboard`), so a credential never enters your context. If the secret is not set, the failure lists the available names and every source it looked in; ask the user to add it there, NEVER ask for the value in the conversation."
+     }
+    },
+    "required": [
+     "udid",
+     "text"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "paste clipboard pasteboard otp 2fa code fill field"
+   }
+  },
+  {
+   "name": "rotate",
+   "description": "Set the device orientation to Portrait, LandscapeLeft, LandscapeRight, or PortraitUpsideDown.\nUse to test layout in a different orientation. Re-run `describe` afterwards: frame coordinates change with the orientation.\nOn an unfolded foldable iOS simulator (the iPhone Duo), the value sets the orientation of the device, not of the UI: `Portrait` gives a landscape UI and `LandscapeLeft` gives a portrait UI. To fold or unfold the device, use `fold`.\nReturns { orientation }. Fails if the target device is not booted.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "orientation": {
+      "type": "string",
+      "enum": [
+       "Portrait",
+       "LandscapeLeft",
+       "LandscapeRight",
+       "PortraitUpsideDown"
+      ],
+      "description": "Target orientation"
+     }
+    },
+    "required": [
+     "udid",
+     "orientation"
+    ]
+   }
+  },
+  {
+   "name": "shake",
+   "description": "Shake the device (iOS simulator or Android emulator).\nUse to trigger anything bound to the shake gesture: iOS's \"Undo Typing\" / \"Redo Typing\" prompt in a text field, React Native's developer menu in a debug build, or an app's own shake-to-report handler.\niOS delivers one discrete shake per gesture (the same motion event a physical device raises). Android has no OS-level shake event: the accelerometer is driven through a burst of hard direction changes so app-side detectors fire, and the resting orientation is restored afterwards.\nSet `count` above 1 when a detector needs sustained motion before it triggers.\nReturns { shaken: true, count }.\nWorks on local and remote (sim-remote) iOS simulators.\nOnly phone/tablet simulators and emulators are supported.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS simulator UDID or Android emulator serial)."
+     },
+     "count": {
+      "description": "How many shake gestures to deliver back-to-back (default 1, max 10). Raise it for apps whose shake detector needs sustained motion before it fires.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "shake motion accelerometer undo typing dev menu gesture"
+   }
+  },
+  {
+   "name": "fold",
+   "description": "Move the hinge of a foldable iOS simulator (the iPhone Duo) or Android emulator (a Pixel Fold or generic foldable AVD) to a `posture` (closed, half-open, open) or to an `angle` (0-180°). The tool returns when the device accepts input again, so the next tap lands.\nUse when you must see or test an app in a different posture: closed shows the cover panel, half-open and open show the inner panel. `list-devices` marks foldable devices with `foldable: true`. To turn a device without a fold, use `rotate`.\nAll tools use the active panel (the panel that shows the UI), also after a fold made outside argent. The coordinates and the screenshot size change with the panel. Before you tap, read the element tree in this result or run `describe` again.\niOS: unfolded, the UI is landscape, as on a rotated iPhone. A fold between two angles that are not closed or open can keep the current panel. To change panels, fold to closed or open.\niOS returns { activeScreen, screen: { id, panel, width, height }, posture?, hingeAngle, warning? }. screen names the active panel and gives its size in pixels. posture is set only at 0°, 120° and 180°. warning is set when argent cannot find the active panel, or when the device did not change to the expected panel.\nAndroid returns { posture?, deviceState, hingeAngle?, warning? }. deviceState is the state Android committed (CLOSED, HALF_OPENED, OPENED), and posture is the matching preset. A lock screen the fold raises is dismissed; warning is set when it cannot be, or when a lock screen is showing or the screen is off after the fold. On a generic foldable AVD, closed shows only the left part of the display and describe frames do not match tap coordinates; use a Pixel Fold AVD to test the cover panel.\nFails if the device is not foldable, is a remote simulator or a physical Android device.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (a foldable iOS simulator UDID or Android emulator serial)."
+     },
+     "posture": {
+      "description": "Where to move the hinge: `closed` (the cover panel), `half-open` or `open` (the inner panel). Exactly one of `posture` and `angle`.",
+      "type": "string",
+      "enum": [
+       "closed",
+       "half-open",
+       "open"
+      ]
+     },
+     "angle": {
+      "description": "The hinge angle in degrees, 0 (closed) to 180 (open). Exactly one of `posture` and `angle`.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 180
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "fold unfold hinge foldable duo posture open closed half-open panel screen"
+   }
+  },
+  {
+   "name": "tv-remote",
+   "description": "Press a TV remote / D-pad button (or a whole path of them) on a TV device: Apple TV (tvOS), Android TV (leanback), or Vega (Fire TV).\nA TV is navigated with a directional remote, not touch. Use this instead of gesture-tap/swipe (which do not apply on a TV). Move focus with up/down/left/right, confirm with select, go back with back/menu, exit with home, and use playPause/rewind/fastForward/next/previous/volumeUp/volumeDown/mute for the corresponding remote keys. (On the Apple TV simulator the media-transport and volume keys are rejected (its HID stack ignores them); they work on Android TV and Vega.)\nSingle press: { button: \"down\" }. Repeat the same button: { button: \"down\", repeat: 3 }.\nMulti-step navigation: pass a path as { button: [\"up\",\"right\",\"right\",\"select\"] }. It runs in one tool call, far cheaper than separate presses.\nRead the screen with `describe` before and after to see where focus landed.\nReturns { pressed, count }.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target TV device id from `list-devices` (Apple TV, Android TV, or Vega)."
+     },
+     "button": {
+      "description": "A single TV-remote button, or a path of them run in one call. Buttons: up/down/left/right (D-pad), select (OK), back, home, menu, playPause, rewind, fastForward, next, previous, volumeUp, volumeDown, mute. The media-transport and volume keys work on Android TV and Vega; on the Apple TV simulator they are rejected (its HID stack ignores them). The D-pad/select/back/menu/home/playPause core works on all three. For multi-step navigation pass an array, e.g. [\"up\",\"right\",\"right\",\"select\"]; strongly prefer this over multiple `tv-remote` calls: the whole path runs in a single call.",
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "up",
+         "down",
+         "left",
+         "right",
+         "select",
+         "back",
+         "home",
+         "menu",
+         "playPause",
+         "rewind",
+         "fastForward",
+         "next",
+         "previous",
+         "volumeUp",
+         "volumeDown",
+         "mute"
+        ]
+       },
+       {
+        "minItems": 1,
+        "maxItems": 64,
+        "type": "array",
+        "items": {
+         "type": "string",
+         "enum": [
+          "up",
+          "down",
+          "left",
+          "right",
+          "select",
+          "back",
+          "home",
+          "menu",
+          "playPause",
+          "rewind",
+          "fastForward",
+          "next",
+          "previous",
+          "volumeUp",
+          "volumeDown",
+          "mute"
+         ]
+        }
+       }
+      ]
+     },
+     "repeat": {
+      "description": "Repeat the whole `button` value this many times (default 1). Compact for long same-button runs, e.g. { button: \"down\", repeat: 12 }.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+     }
+    },
+    "required": [
+     "udid",
+     "button"
+    ]
+   },
+   "_meta": {
+    "anthropic/searchHint": "tv remote dpad d-pad navigate focus up down left right select ok back home menu play pause rewind fast forward sequence path apple tv tvos android tv leanback vega fire tv"
+   }
+  },
+  {
+   "name": "run-sequence",
+   "description": "Execute multiple device interaction steps in a single call (iOS simulator or physical device, Android emulator, Apple TV / Android TV, or Chromium app).\nOn a physical iOS device only gesture-tap, gesture-swipe, gesture-custom, button, keyboard, and await-ui-element steps run; others fail at their own gate.\nUse when you need sequential actions and do NOT need to observe the screen between them\n(e.g. scrolling multiple times, typing then pressing enter, rotating back and forth).\nReturns { completed, total, steps } with per-step results. Fails if an unrecognised tool name is used in a step (error returned at that step, execution stops).\nOne screenshot is captured automatically after the whole sequence (not per step). Call screenshot separately only for a baseline BEFORE it, or to observe an intermediate step.\nThat single capture is also why a secret belongs in this call rather than in two bare ones: the skip is decided from the whole request, so a `{{secret:...}}` in any step suppresses the capture that would otherwise follow the submit.\n\nONLY use this when every step is known in advance. If any step depends on the\nresult of a previous one (e.g. tapping a menu item that only appears after\na prior tap), use individual tool calls instead.\n\nAllowed tools and their args (udid is auto-injected, do NOT include it in args):\n\n  gesture-tap:    { x: number, y: number, clickCount?: number }                                                        [ios/android/chromium]\n  gesture-swipe:  { fromX: number, fromY: number, toX: number, toY: number, durationMs?: number, momentum?: boolean }   [ios/android]\n  gesture-scroll: { x: number, y: number, deltaX?: number, deltaY?: number, durationMs?: number }                       [chromium only]\n  gesture-drag:   { fromX: number, fromY: number, toX: number, toY: number, durationMs?: number, momentum?: boolean }   [chromium only]\n  gesture-custom: { events: [{ type: \"Down\"|\"Move\"|\"Up\", x: number, y: number, x2?: number, y2?: number, delayMs?: number }], interpolate?: number }  [ios/android]\n  gesture-pinch:  { centerX: number, centerY: number, startDistance: number, endDistance: number, endCenterX?: number, endCenterY?: number, angle?: number, durationMs?: number }  [ios/android]\n  gesture-rotate: { centerX: number, centerY: number, radius?: number, radiusX?: number, radiusY?: number, startAngle: number, endAngle: number, durationMs?: number }  [ios/android]\n  button:         { button: \"home\"|\"back\"|\"power\"|\"volumeUp\"|\"volumeDown\"|\"appSwitch\"|\"actionButton\" }                  [ios/android]\n  keyboard:       { text?: string, key?: string, delayMs?: number }  (text OR key per step, never both; TV: text only)  [ios/android/chromium/vega/tv]\n                  text supports {{secret:<NAME>}} placeholders, resolved server-side from ARGENT_SECRET_<NAME> env vars or an argent secrets file; credentials never enter agent context\n  paste:          { text: string }  (device clipboard + paste shortcut; only where a user would paste, e.g. an OTP; keyboard otherwise)   [ios sim/android emu]\n  rotate:         { orientation: \"Portrait\"|\"LandscapeLeft\"|\"LandscapeRight\"|\"PortraitUpsideDown\" }                     [ios/android]\n  shake:          { count?: number }                                                                                    [ios sim/android emu]\n  fold:           { posture?: \"closed\"|\"half-open\"|\"open\", angle?: 0-180 }  (one of posture/angle; the next step lands on the new panel, whose coordinates are different)  [foldable ios sim/android emu]\n  tv-remote:      { button: <remote button | array of them>, repeat?: number }                                          [apple tv/android tv/vega]\n                  buttons: up/down/left/right/select/back/home/menu/playPause (+ rewind/fastForward/next/previous/volumeUp/volumeDown/mute work on Android TV and Vega; rejected on the Apple TV simulator)\n  await-ui-element: { condition: \"exists\"|\"visible\"|\"hidden\"|\"text\", selector: {text?,identifier?,role?}, expectedText?, timeoutMs?, pollIntervalMs? }  [ios/android/chromium]\n\nExample: scroll down three times (use gesture-scroll with positive deltaY on Chromium):\n  { \"udid\": \"<UDID>\", \"steps\": [\n    { \"tool\": \"gesture-swipe\", \"args\": { \"fromX\": 0.5, \"fromY\": 0.7, \"toX\": 0.5, \"toY\": 0.3 } },\n    { \"tool\": \"gesture-swipe\", \"args\": { \"fromX\": 0.5, \"fromY\": 0.7, \"toX\": 0.5, \"toY\": 0.3 } },\n    { \"tool\": \"gesture-swipe\", \"args\": { \"fromX\": 0.5, \"fromY\": 0.7, \"toX\": 0.5, \"toY\": 0.3 } }\n  ]}\n\nExample: type text and submit (two keyboard steps; one call cannot carry both):\n  { \"udid\": \"<UDID>\", \"steps\": [\n    { \"tool\": \"keyboard\", \"args\": { \"text\": \"hello world\" } },\n    { \"tool\": \"keyboard\", \"args\": { \"key\": \"enter\" } }\n  ]}\n\nExample (TV): move focus right twice then activate (one tv-remote step with a path is cheaper):\n  { \"udid\": \"<TV-TARGET-ID>\", \"steps\": [\n    { \"tool\": \"tv-remote\", \"args\": { \"button\": [\"right\", \"right\", \"select\"] } }\n  ]}\n\nExample: tap, wait for the next screen's element, then tap it:\n  { \"udid\": \"<UDID>\", \"steps\": [\n    { \"tool\": \"gesture-tap\", \"args\": { \"x\": 0.5, \"y\": 0.9 } },\n    { \"tool\": \"await-ui-element\", \"args\": { \"condition\": \"visible\", \"selector\": { \"text\": \"Continue\" } } },\n    { \"tool\": \"gesture-tap\", \"args\": { \"x\": 0.5, \"y\": 0.5 } }\n  ]}\nIf the await-ui-element condition is not met before its timeout, the sequence stops there and the\nfollowing steps do NOT run, so the tap above only fires once \"Continue\" is actually on screen.\n\nStops on the first error (or unmet await-ui-element condition) and returns partial results.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, Vega serial, or Chromium id), shared across all steps."
+     },
+     "steps": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "tool": {
+         "type": "string",
+         "description": "Tool name, one of: gesture-tap, gesture-swipe, gesture-scroll, gesture-drag, gesture-custom, gesture-pinch, gesture-rotate, button, keyboard, paste, rotate, shake, fold, tv-remote, await-ui-element. On a TV target (Apple TV / Android TV / Vega) use tv-remote (remote presses) and keyboard (text)."
+        },
+        "args": {
+         "type": "object",
+         "propertyNames": {
+          "type": "string"
+         },
+         "additionalProperties": {},
+         "description": "Tool arguments (excluding udid, which is injected automatically)"
+        },
+        "delayMs": {
+         "description": "Wait time in ms after this step before the next (default 100)",
+         "type": "number"
+        }
+       },
+       "required": [
+        "tool",
+        "args"
+       ]
+      },
+      "description": "Ordered list of interaction steps to execute sequentially"
+     }
+    },
+    "required": [
+     "udid",
+     "steps"
+    ]
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "batch sequence multiple gesture steps sequentially"
+   }
+  },
+  {
+   "name": "debugger-connect",
+   "description": "Connect to a JS runtime CDP debugger.\niOS / Android / Vega: connects to Metro's CDP endpoint on the given port. Chromium: re-uses the page CDP session opened by boot-device; port is ignored.\nReturns connection info including port, projectRoot (empty on Chromium and on legacy Metro, e.g. Vega), deviceName, appName, logicalDeviceId (absent on Vega), and isNewDebugger, plus a note naming the kept log file when the previous session ended because the app crashed. If already connected, returns the existing connection.\nUse when starting a debug session or before calling other debugger-* tools. Fails if the runtime is unreachable (Metro down, or Chromium CDP terminated).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: iOS simulator UDID, Android serial, Vega serial (amazon-...), or Chromium device id (chromium-cdp-<port>). Pass this SAME id as device_id to every subsequent debugger-* call to pin them to this device. The returned logicalDeviceId is informational (Metro's own per-connection handle, absent on Vega); you do not switch to it. Forwarding it still resolves here, but the list-devices id is the stable one."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "debugger-status",
+   "description": "Get JS runtime debugger connection status and diagnostic info.\nUse when you need to verify connectivity before using other debugger tools. Never fails when the runtime is simply unreachable: it returns a discriminated result instead:\n- { status: \"connected\", ... } with port, projectRoot (empty on Chromium and on legacy Metro, e.g. Vega), deviceName, appName, logicalDeviceId (absent on Vega), isNewDebugger (false on the legacy inspector), connected flag, loadedScripts count, and sourceMapReady (always true: waits for pending source maps before returning; no-op on Chromium).\n- { status: \"not_connected\", connected: false, reason, detail, guidance } (port omitted on Chromium) when Metro is not running (reason \"metro_not_running\"), no app is attached (\"no_app_connected\"), the device_id matches no target (\"device_mismatch\"), the CDP endpoint is unreachable or answered malformed (\"cdp_unreachable\"), the runtime accepted the connection but never answered (\"runtime_unresponsive\"), the cached connection went stale (\"stale_connection\"), or a reconnect is in flight (\"reconnecting\"). Follow the guidance field; do not retry in a loop.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID, Android serial, Vega serial, or Chromium device id). The logicalDeviceId debugger-connect returns also resolves here, but prefer the stable list-devices id."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "debugger-evaluate",
+   "description": "Execute arbitrary JavaScript in the app's JS runtime via CDP: Hermes on iOS / Android / Vega, V8 on Chromium.\nReturns the evaluation result as a JSON-serializable value, along with deviceName, appName, and logicalDeviceId for context. Use when you need to read app state, call app functions, or test logic at runtime. The result is serialized by value, so cyclic objects (many RN runtime values, such as fiber nodes, navigation refs and global, are cyclic) fail with a serialization error rather than returning silently. Fails if the expression throws or the runtime is not connected.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID, Android serial, Vega serial, or Chromium device id). The logicalDeviceId debugger-connect returns also resolves here, but prefer the stable list-devices id."
+     },
+     "expression": {
+      "type": "string",
+      "description": "JavaScript expression to evaluate in the app runtime"
+     }
+    },
+    "required": [
+     "device_id",
+     "expression"
+    ]
+   }
+  },
+  {
+   "name": "debugger-reload-metro",
+   "description": "Restart the Metro JS bundle in the connected React Native app without restarting the native process.\nUse when you want to apply code changes or reset JS state. Returns { reloaded, port, method, deviceName, appName, logicalDeviceId } indicating which reload path was used and which device/app was targeted. Fails if Metro is not running on the given port.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID or Android serial)."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "debugger-component-tree",
+   "description": "Fetch the current screen of a running React Native app as a compact component text tree.\nOnly shows on-screen components with unique positions. Off-screen (scrolled) content,\nfull-screen transparent wrappers, and implementation-detail components are pruned.\n\nEach visible component is listed with its name, text content, and normalized\ntap coordinates in [0,1] space (fractions of the screen, not pixels; same space as tap/swipe/gesture).\nOn an iOS simulator with a landscape UI (a rotated device, or an unfolded foldable), the tap\ncoordinates are on the screen's axes, which the gesture tools use. When two or more devices share\none Metro, pass the simulator's udid too. If the result says that the orientation could not be\nread, take tap coordinates from describe.\n\nThis is the preferred element discovery tool for React Native apps. More information in argent-react-native-app-workflow skill.\n\nWorkflow:\n  1. Call this tool to get the component tree.\n  2. Find the desired element by name, text, testID, or accessibilityLabel.\n  3. Use the (tap: x,y) coordinates directly with the tap tool.\n\nCall again after navigation or state changes since positions may shift.\nSet includeSkipped=true to see a summary of all filtered components.\nUse when you need tap coordinates for a React Native UI element. Returns a compact text tree with (tap: x,y) coords. Fails if Metro debugger is not connected.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID or Android serial)."
+     },
+     "udid": {
+      "description": "iOS simulator UDID from list-devices. Pass it when device_id is a logicalDeviceId (two or more devices share one Metro), so that the tap coordinates of a landscape UI are on the screen's axes. Give the UDID of the simulator that shows the app.",
+      "type": "string"
+     },
+     "onScreenOnly": {
+      "default": true,
+      "description": "When true (default), only components visible on screen are returned. Set to false to include all mounted components including those scrolled off-screen. Useful when you need to understand the full page structure.",
+      "type": "boolean"
+     },
+     "maxNodes": {
+      "description": "Maximum total nodes to include. When exceeded, intermediate single-child wrapper chains are collapsed to preserve both root structure and leaf elements. Default: no limit.",
+      "type": "number"
+     },
+     "includeSkipped": {
+      "default": false,
+      "description": "When true, appends a summary of all filtered components: total fiber count, JS-side skip counts by name, and TS-side filter pass removals. Useful for understanding what was pruned from the tree.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "react native component tree discovery tap coordinates"
+   }
+  },
+  {
+   "name": "debugger-inspect-element",
+   "description": "Inspect the React component hierarchy at a screen coordinate (x, y).\nReturns components from the tapped element upward through its parent hierarchy,\neach with its source file:line and a code fragment.\n\nThe first items (lowest indices) are the most specific: the exact component under\nthe tap point and its direct parents. Higher indices are broader context (page, navigator).\nDefault shows 35 items which covers all app-specific code; use maxItems=70+ to also\nsee the navigation/screen structure.\n\nUses getInspectorDataForViewAtPoint + _debugStack + Metro /symbolicate.\nSet resolveSourceMaps to false to skip symbolication and get raw bundled locations instead.\nSet includeSkipped=true to see filtered items annotated with skip reasons.\nUse when you need the source file and line for a component at a tap coordinate. Fails if the app is not connected or the coordinate is outside the screen.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID or Android serial)."
+     },
+     "x": {
+      "type": "number",
+      "description": "Logical X coordinate on device screen"
+     },
+     "y": {
+      "type": "number",
+      "description": "Logical Y coordinate on device screen"
+     },
+     "contextLines": {
+      "default": 3,
+      "description": "Lines of source context to include around the component definition",
+      "type": "number"
+     },
+     "resolveSourceMaps": {
+      "default": true,
+      "description": "When true, resolves bundled frame locations to original source files via Metro symbolication and includes a code fragment. When false, returns the raw bundled frame info (file, line, column) without symbolication or source reading.",
+      "type": "boolean"
+     },
+     "maxItems": {
+      "default": 35,
+      "description": "Maximum number of hierarchy items to return, counted from the bottom (most specific component first). The hierarchy walks from the tapped element up to the root, so the first items are the most relevant for editing. Increase to 70+ if you need to understand the broader navigation/screen structure.",
+      "type": "number"
+     },
+     "includeSkipped": {
+      "default": false,
+      "description": "When true, items that would normally be filtered are kept in the response with skipped=true and a skipReason. Useful for understanding what was pruned.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id",
+     "x",
+     "y"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "debugger-log-registry",
+   "description": "Get a summary of all console logs captured from the app's JS runtime.\nReturns the log file path, entry counts by level, and message clusters (grouped by similarity). Works against Hermes (iOS / Android / Vega) and V8 (Chromium).\nUse when investigating warnings, errors, or unexpected output. Call this first for an overview, then read the returned file for details. Returns empty stats if no log data has been captured yet, but check { note }, which is present only when the stats are empty BECAUSE the previous debugger session ended: torn down (e.g. by stop-all-simulator-servers) with its log file deleted, or cut off by the app crashing with its log file kept at the path the note names. Absent that note, empty really does mean the app has logged nothing.\nWhen the debugger cannot be reached, this tool does not fail: it returns { status: \"not_connected\", reason, detail, guidance } with NO log file. Follow the guidance (do not retry in a loop). Read a log file in this state only when a { note } names one kept from before the app crashed. A \"connected\" result's stats may come from a session whose socket has since died. Use debugger-status, not this tool, to judge debugger health.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID, Android serial, Vega serial, or Chromium device id). The logicalDeviceId debugger-connect returns also resolves here, but prefer the stable list-devices id."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "view-network-logs",
+   "description": "Retrieve captured network (HTTP) requests from the running app.\nReturns a paginated list of requests with method, URL, status, resource type, size, and duration.\nA size with \"~\" is estimated from the body's length in characters; on React Native, \"→ <url>\" is the final URL after a redirect.\nEach entry includes a requestId that can be passed to view-network-request-details for full details.\nOn React Native (iOS / Android / Vega) interception is injected into the JS runtime: it records each request once: XMLHttpRequest (axios included), React Native's fetch, Expo's fetch, and a fetch library that sends through React Native's network module itself, such as react-native-fetch-api (found in a Metro development build). Capture starts at the first network-tool call; a reload clears it. On Chromium it reads the browser's native CDP Network domain (the active tab; all request types).\nUse when inspecting outbound HTTP traffic or debugging API calls in the running app.\nFails if the app is not connected (RN) or the device is not reachable (Chromium).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices (iOS simulator UDID or Android serial), the same id used with debugger-connect."
+     },
+     "pageIndex": {
+      "default": "latest",
+      "description": "Page index (0-based) or \"latest\" for the most recent page. Each page contains up to 50 entries.",
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+       },
+       {
+        "type": "string",
+        "const": "latest"
+       }
+      ]
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "view-network-request-details",
+   "description": "Get full details of a specific network request by its requestId (from view-network-logs).\nReturns request/response headers (sensitive headers redacted), status, timing, the request body, and optionally the response body.\nRequest and response bodies over 1000 chars are cut to 1000 under a \"[TRUNCATED: ...]\" line that gives the full size; a binary response body is replaced by \"[body omitted: binary <mime>, N bytes]\". Use when you need headers, body, or timing for a specific request after listing logs.\nReturns an error message string if the requestId is not found: use view-network-logs to get valid requestId values.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices (iOS simulator UDID or Android serial), the same id used with debugger-connect."
+     },
+     "requestId": {
+      "type": "string",
+      "description": "The requestId from view-network-logs to get full details for"
+     },
+     "includeBody": {
+      "default": true,
+      "description": "Whether to include the response body (if captured). Defaults to true.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id",
+     "requestId"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "describe",
+   "description": "Get the accessibility / DOM element tree for the current screen.\nOn iOS, uses the AXRuntime accessibility service to inspect whatever is currently visible, including\nsystem dialogs, permission prompts, and any foreground app content. On a physical iOS device the tree\ncovers only the app registered by launch-app. On Android, runs `uiautomator dump`.\nOn Chromium, walks the renderer's DOM via Chrome DevTools Protocol: every visible element with its ARIA\nrole, accessible name, and bounding rect (normalized to 0–1).\nOn Vega (Fire TV), reads the on-device automation toolkit (`getPageSource`); each element carries\n`[focused]`/`[selected]` so you can see where the D-pad cursor is, then move it with the `tv-remote` tool\n(Vega is remote-driven, not touch). If describe returns an empty tree on Vega, relaunch the foreground\napp (the toolkit attaches at launch) and try again.\n\nWhen a system dialog is visible, describe returns the dialog's interactive elements (buttons, text)\nwith tap coordinates. When no dialog is present, it returns the foreground app's accessible elements.\nOn a physical iOS device, launch-app `com.apple.springboard` first to read system dialogs.\n\nReturns `{ description, source }` where `description` is a text rendering of the UI tree, one\nline per element with its role, label/value/id, interactivity flags, and frame. Frame coordinates\nare normalized [0,1] fractions of the screen / window width/height (not pixels), the same space as\ngesture-tap / gesture-swipe / gesture-pinch.\n\nTo tap an element use the centre of its frame: `tap_x = frame.x + frame.width / 2`,\n`tap_y = frame.y + frame.height / 2`. The same formula appears in the response header so it\ncan be applied to a line in isolation.\nThe tree carries no z-order or occlusion information: an element listed at a point may be covered\nby an overlay (e.g. a toolbar over list rows), so check a screenshot when a tap lands unexpectedly.\n\nFor app-scoped inspection with full UIKit properties (accessibilityIdentifier, viewClassName),\nuse native-describe-screen with an explicit bundleId instead (iOS simulator only).\nFor React Native apps, debugger-component-tree returns React component names with tap coordinates.\n\nOn a TV target (Apple TV / Android TV: a `list-devices` entry with runtimeKind 'tv') this returns\nthe focus-driven view instead: the currently FOCUSED element and the list of FOCUSABLE elements,\nsince a TV UI has no tap coordinates. Move the highlight with `tv-remote` (up/down/left/right/select/\nback/menu/home), then call describe again to confirm where focus landed.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, Vega serial, or Chromium id)."
+     },
+     "bundleId": {
+      "description": "Optional app bundle ID. Used as a target hint on iOS when the AX-service returns no elements and the describe tool falls back to native-devtools inspection. If omitted, the fallback auto-detects the frontmost connected app. Ignored on every other platform, including a physical iOS device.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "accessibility element tree ui hierarchy tap coordinates ios android chromium vega dom tv tvos apple tv android tv fire tv focus focusable remote dpad"
+   }
+  },
+  {
+   "name": "await-ui-element",
+   "description": "Block until a UI element reaches an expected state or a timeout elapses, so you don't have to poll screenshot/describe yourself.\n\nConditions:\n  exists:    the selector matches an element anywhere in the tree.\n  visible:   the selector matches an element with a non-zero on-screen frame.\n  hidden:    the selector matches nothing, or only a zero-area element (e.g. a spinner that disappeared).\n  text:      the first VISIBLE match in reading order (topmost, then leftmost; falling back to the first match\n             overall if none is visible) contains expectedText (case-insensitive substring), or exactly matches\n             it when textMatch is `equals`. A loose selector can match several elements; only that one is\n             inspected, so if a different match is the one holding the text the wait still reports failure;\n             narrow the selector to target it.\n\nThe selector is { text?, identifier?, role? }; every provided field must match. text and role match as\ncase-insensitive substrings of the element's label/value and role; identifier matches exactly (case-insensitive),\nalso accepting the unqualified Android resource-id name ('submit' matches 'com.example.app:id/submit').\nIt polls the same accessibility / DOM tree as `describe`\n(iOS simulator AXRuntime, physical-iOS runner snapshot, Android uiautomator, Chromium CDP,\nVega automation toolkit) every pollIntervalMs\n(default 400ms) until timeoutMs (default 5000ms).\n\nReturns { success: boolean, elapsed: number, note?, cause? }. success=false means the wait ended without the\ncondition holding, which is not always a verdict on the condition: `cause` says which it was: `unmet` (the tree\nwas read and the condition was false there), `unreadable` (no trustworthy read, so nothing was judged) or\n`cancelled`. `note` describes what was seen. Only `unmet` licenses rewriting the check. Use this\nafter a tap/navigation to wait for the next screen, or before tapping an element that appears asynchronously.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, or Chromium id)."
+     },
+     "condition": {
+      "type": "string",
+      "enum": [
+       "exists",
+       "visible",
+       "hidden",
+       "text"
+      ],
+      "description": "What to wait for. `exists`: selector is anywhere in the tree. `visible`: selector is present with a non-zero on-screen frame. `hidden`: selector is absent or zero-area. `text`: the first visible match in reading order (topmost), falling back to the first match overall if none is visible, contains (or, with textMatch `equals`, exactly matches) expectedText. If a loose selector hits several elements, only that one is checked, so narrow it to target the intended element."
+     },
+     "selector": {
+      "type": "object",
+      "properties": {
+       "text": {
+        "description": "Case-insensitive substring of the element's visible label or value.",
+        "type": "string",
+        "minLength": 1
+       },
+       "identifier": {
+        "description": "The element's identifier (accessibilityIdentifier / resource-id / testid), matched case-insensitively as the exact identifier or the unqualified resource-id name ('submit' matches 'com.example.app:id/submit').",
+        "type": "string",
+        "minLength": 1
+       },
+       "role": {
+        "description": "Case-insensitive substring of the element's role (e.g. AXButton, button, TextView).",
+        "type": "string",
+        "minLength": 1
+       }
+      },
+      "additionalProperties": false,
+      "description": "Element to match (text / identifier / role)."
+     },
+     "expectedText": {
+      "description": "For condition `text`: the string the first visible matched element (topmost in reading order; the first match overall if none is visible) must contain (default) or equal (see `textMatch`). Case-insensitive.",
+      "type": "string",
+      "minLength": 1
+     },
+     "textMatch": {
+      "description": "For condition `text`: how expectedText is compared. `contains` (default) is a case-insensitive substring; `equals` is a case-insensitive full-string match.",
+      "type": "string",
+      "enum": [
+       "contains",
+       "equals"
+      ]
+     },
+     "bundleId": {
+      "description": "Optional iOS app bundle id, passed to the describe fallback (see `describe`). Ignored on every other platform, including physical iOS.",
+      "type": "string"
+     },
+     "timeoutMs": {
+      "description": "Max time to wait for the condition before giving up (default 5000).",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 120000
+     },
+     "pollIntervalMs": {
+      "description": "How often to re-check the tree (default 400).",
+      "type": "integer",
+      "minimum": 50,
+      "maximum": 5000
+     }
+    },
+    "required": [
+     "udid",
+     "condition",
+     "selector"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/alwaysLoad": true,
+    "anthropic/searchHint": "wait await poll until visible hidden exists text appears disappears timeout element condition settle"
+   }
+  },
+  {
+   "name": "await-screen-idle",
+   "description": "Block until the screen has rendered content and stopped changing, or a timeout elapses.\n\nPolls the same accessibility / DOM tree as `describe` every pollIntervalMs (default 200ms) until it\nhas content and that content holds identical for minStableMs (default 250ms), or timeoutMs (default\n3000ms) is reached. Returns { settled, waitedMs, polls }; settled=false means the screen never went\nstill before the timeout. Use after a launch/navigation to wait for the UI to render before screenshotting or tapping.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID, Android serial, or Chromium id)."
+     },
+     "timeoutMs": {
+      "description": "Max time to wait for the screen to settle before giving up (default 3000).",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 120000
+     },
+     "pollIntervalMs": {
+      "description": "How often to re-read the tree (default 200).",
+      "type": "integer",
+      "minimum": 50,
+      "maximum": 5000
+     },
+     "minStableMs": {
+      "description": "The screen must hold the same content for at least this long to count as settled (default 250).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+     }
+    },
+    "required": [
+     "udid"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true
+   },
+   "_meta": {
+    "anthropic/searchHint": "wait until screen settles idle stable stops changing animation transition rendered ready before screenshot"
+   }
+  },
+  {
+   "name": "react-profiler-start",
+   "description": "Start CPU profiling + React commit capture on the connected Hermes runtime.\nDelegates React commit capture to the in-app React DevTools backend (ri.startProfiling).\nIf another tool-server already owns the session, returns { already_running: true, owner, stale, how_to_reclaim } without clobbering their data. Pass { force: true } to reclaim a fresh owner's session, but BEFORE OVERTAKING - ask the user for approval first, see relevant skill for guidance.\nBefore calling this, ask the user if they also want native profiling (native-profiler-start), and recommend running both in parallel for a complete picture.\nAfter starting, ask the user to perform the interaction to profile, then call react-profiler-stop.\nReturns { started_at, startedAtEpochMs, hermes_version, detected_architecture } on success, or the already_running payload described above.\nFails if the Hermes runtime is not reachable or the Metro CDP connection cannot be established.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID or Android serial)."
+     },
+     "sample_interval_us": {
+      "default": 100,
+      "description": "CPU sampling interval in microseconds (default 100)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     },
+     "force": {
+      "default": false,
+      "description": "Take over an active profiling session even when it is owned by another tool-server and still fresh. Set to true only when you know the prior owner is gone.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "react-profiler-stop",
+   "description": "Stop CPU profiling and collect the cpuProfile + React commit tree.\nReads commit data from the in-app React DevTools backend.\nStores results in the ReactProfilerSession for later use by react-profiler-analyze or react-profiler-cpu-summary.\nCall react-profiler-start first, then exercise the app, then call this.\nReturns { duration_ms, sample_count, fiber_renders_captured, total_react_commits, hot_commit_indices } summarizing the session.\nWhen any commit had fibers whose display name could not be resolved at stop time (typically transient components like modals/tooltips/animations that unmounted before stop), the response also includes { unattributed_ms, unattributed_fiber_count, unattributed_commit_count }. These quantify how much work is not accounted for in the per-component breakdown (the per-commit duration itself remains correct).\nFails if no active profiling session exists or the CDP connection was lost during recording.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device id from list-devices: the SAME id you passed to debugger-connect (iOS simulator UDID or Android serial)."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "react-profiler-status",
+   "description": "Check the state of the React profiler session without side effects. Use after an interruption (debugger disconnect, unexpected error, agent pause) to decide whether to continue with react-profiler-stop, start a new session, or reconnect the debugger. Ownership is verified server-side against this tool-server's in-memory session, so no token-threading is required. Returns { session_status, is_running, current_owner, … }. If this tool-server process restarted after react-profiler-start, status will report 'taken_over'; use react-profiler-start { force: true } to reclaim.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "react-profiler-analyze",
+   "description": "Analyze stored profiling data and return a markdown performance report.\nReturns { report, reportFile, hotCommitsTotal, hotCommitsShown, sessionFiles }.\nThe report is structured around hot React commits (≥16ms absolute floor) with per-commit\nrender cascades, root cause identification, and a top components table.\nRaw profiling data is saved to disk with a unique session timestamp for later reload via profiler-load.\nAfter presenting the report, ask the user whether to investigate further (drill-down with\nprofiler-cpu-query / profiler-commit-query) or implement fixes and re-profile for comparison.\nRequires react-profiler-stop to have been called first.\nOptional annotations param: provide Array<{offsetMs, label}> to annotate commits with\nthe user action that preceded them. Compute offsetMs = tapTimestampMs - startedAtEpochMs\nwhere tapTimestampMs is the timestampMs returned by the tap/swipe tool and startedAtEpochMs\nis returned by react-profiler-start.\nUse when the profiling session is complete and you need to interpret the collected data.\nFails if react-profiler-stop has not been called or no profiling data is stored.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the RN project root for session context detection"
+     },
+     "platform": {
+      "default": "ios",
+      "description": "Target platform",
+      "type": "string",
+      "enum": [
+       "ios",
+       "android"
+      ]
+     },
+     "rn_version": {
+      "default": "unknown",
+      "description": "React Native version (e.g. \"0.73.4\")",
+      "type": "string"
+     },
+     "annotations": {
+      "description": "Optional list of user actions with their time offset from profiling start. Compute offsetMs = tapTimestampMs - startedAtEpochMs, where tapTimestampMs comes from the tap/swipe tool return value and startedAtEpochMs comes from react-profiler-start return value.",
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "offsetMs": {
+         "type": "number",
+         "description": "Milliseconds since profiling started. Compute as: tapTimestampMs - startedAtEpochMs, using the timestampMs returned by tap/swipe and the startedAtEpochMs returned by react-profiler-start."
+        },
+        "label": {
+         "type": "string",
+         "description": "Description of the action performed"
+        }
+       },
+       "required": [
+        "offsetMs",
+        "label"
+       ]
+      }
+     }
+    },
+    "required": [
+     "device_id",
+     "project_root"
+    ]
+   }
+  },
+  {
+   "name": "react-profiler-component-source",
+   "description": "Find a React component's source via tree-sitter AST lookup: returns file path, line number, memoization status (isMemoized, hasUseCallback, hasUseMemo), and 50 lines of source for a named React component.\nCall this per-finding after react-profiler-analyze to inspect source before proposing a fix.\nReturns found: false if the component is not found in user-owned code (e.g. lives in node_modules).\nWhen several files define a component with the same name (e.g. platform variants like List.tsx and List.web.tsx), returns the primary match and lists the rest under otherMatches[] (file/line/col). Check it before assuming the returned file is the one you meant.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "component_name": {
+      "type": "string",
+      "description": "Name of the React component to look up"
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the RN project root"
+     }
+    },
+    "required": [
+     "component_name",
+     "project_root"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "react-profiler-cpu-summary",
+   "description": "Return a raw Hermes CPU flamegraph summary (top hotspot functions by self-time).\nFOR DEDICATED CPU INVESTIGATION ONLY: do NOT call this as part of a normal profiling session.\nUse react-profiler-analyze instead; it covers all React rendering performance analysis.\nUse when you specifically need to investigate JS CPU hotspots that are NOT tied to React rendering (e.g. regex slowness, cryptography, heavy computations).\nCall react-profiler-stop first. Reads directly from the stored cpuProfile.\nReturns a markdown table of the top hotspot functions with self-time, total-time, and location.\nFails if react-profiler-stop has not been called or no CPU profile is stored.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "top_n": {
+      "default": 20,
+      "description": "Number of top hotspot functions to return (default 20)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     },
+     "react_only": {
+      "default": false,
+      "description": "If true, only show React component functions (PascalCase names)",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "react-profiler-renders",
+   "description": "Scan the live React fiber tree to collect component render counts and durations.\nReturns a markdown table of the top re-rendering components. No profiling session required; works on a live connected app.\nUse when you want a quick snapshot of render counts without a full profiling session.\nFails if the React DevTools hook is not present in the runtime or the app is not connected.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "top_n": {
+      "default": 20,
+      "description": "Number of top re-rendering components to return (default 20)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "react-profiler-fiber-tree",
+   "description": "Inspect the React fiber tree and return a JSON representation of the component hierarchy.\nUse when tracing ancestry of a library component or checking for useMemoCache hook (confirms React Compiler is active on a component).\nReturns a nested JSON tree of fiber nodes with name, tag, actualDuration, selfBaseDuration, and children.\nFails if the React DevTools hook is not present or no fiber roots have been committed yet.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "max_depth": {
+      "default": 10,
+      "description": "Maximum tree depth to traverse (default 10)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     },
+     "filter": {
+      "description": "Regex string to filter component names",
+      "type": "string"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-profiler-start",
+   "description": "Start native profiling on a booted device. iOS: Instruments via xctrace (CPU, hangs, memory). Android: Perfetto (CPU, jank, RSS-growth weak signal).\nAuto-detects the running app process unless app_process is explicitly provided.\nAfter starting, let the user interact with the app, then call native-profiler-stop.\nUse when you want to capture native CPU, hang, and memory data for a running app.\nReturns { status, pid, traceFile } confirming the recording has started.\nFails if no app is running on the device, or the profiler cannot attach to the process.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     },
+     "app_process": {
+      "description": "iOS: the CFBundleExecutable or display name of the app to profile. Android: the app's package name. If omitted, auto-detects the currently running foreground app. Only provide this if auto-detection picks the wrong app.",
+      "type": "string"
+     },
+     "template_path": {
+      "description": "iOS-only: path to an Instruments .tracetemplate file (defaults to bundled Argent template). Ignored on Android.",
+      "type": "string"
+     },
+     "malloc_stack_logging": {
+      "description": "iOS-only. When true, cold-launches the app under the profiler with Malloc Stack Logging enabled so memory leaks carry an allocation backtrace (responsible frame + library). Without it, leaks are still detected but unattributable: Instruments reports '<Call stack limit reached>'. Trade-offs: this RESTARTS the app (current state is lost), adds memory/CPU overhead, and makes the app noticeably slow to launch (every startup allocation records a backtrace), so leave it off for pure CPU/hang profiling. Requires a non-degraded Xcode: on Xcode 26.4 and later the cold-launch path is broken, so the call is rejected up front (re-run without the flag, or set ARGENT_IOS_CAPTURE=device to override if the device path works on your host). ARGENT_IOS_CAPTURE=all-processes (e.g. exported globally for the normal capture path) also rejects this flag up front, since that fallback cannot cold-launch; unset it (or set it to device) first. Ignored on Android.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "native-profiler-stop",
+   "description": "Stop native profiling and export trace data.\niOS: sends SIGINT to xctrace, waits for packaging, then exports CPU, hangs, and leaks XML.\nAndroid: sends SIGTERM to the perfetto daemon, polls /proc/<pid>, then `adb pull`s the .pftrace.\nCall native-profiler-start first.\nUse when the user has finished the interaction to profile and you need to export the trace.\nReturns { traceFile, exportedFiles, exportDiagnostics? }; traceFile is the raw trace bundle and exportedFiles the exports, all downloadable artifacts materialized to local paths.\nFails if no active native-profiler-start session exists for the given device_id.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "native-profiler-analyze",
+   "description": "Analyze exported native trace data and return an LLM-optimized markdown report.\niOS: parses CPU time profile, UI hangs, and memory leaks from the exported XML files.\nAndroid: queries the Perfetto .pftrace via the in-process Perfetto trace-processor engine for CPU hotspots, UI hangs with jank reason + main-thread state breakdown, GC annotation, and an RSS-growth weak signal.\nReturns a structured markdown report with severity indicators, tables, and actionable suggestions.\nAfter presenting the report, ask the user whether to investigate further (drill-down with\nprofiler-stack-query for hang stacks, CPU context, leak details) or implement fixes and re-profile.\nCall native-profiler-stop first to export the trace data.\nUse when you need to interpret a completed native profiling recording.\nFails if native-profiler-stop has not been called first to export trace data.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices` (iOS UDID or Android serial)."
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "profiler-cpu-query",
+   "description": "Query Hermes CPU profile data with targeted modes for iterative investigation.\nRequires react-profiler-stop (and ideally react-profiler-analyze) to have been called first.\nModes:\n- top_functions: Global CPU hotspots ranked by self-time. Optional time_window_ms to filter.\n- time_window: CPU breakdown for a specific time range (e.g. during a slow commit or hang).\n\nSelf-times are the summed sampling intervals of the samples that landed in the window, so they\nmeasure sampled coverage rather than the window's width and do not change if you widen the query.\nEvery table states how many samples it covers and how much of that was idle.\n- call_tree: For a given function_name, show its callees and optionally callers.\n- component_cpu: For a given component_name, aggregate CPU activity across all its commits.\nUse when investigating JS CPU hotspots or correlating CPU cost with specific components.\nReturns a markdown table of CPU hotspots, call tree, or per-component CPU breakdown.\nFails if no CPU profile is stored; run react-profiler-stop first.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "top_functions",
+       "time_window",
+       "call_tree",
+       "component_cpu"
+      ],
+      "description": "Query mode: top_functions (global hotspots), time_window (CPU in a time range), call_tree (callers/callees of a function), component_cpu (CPU during a component's commits)"
+     },
+     "time_window_ms": {
+      "description": "Time window filter for time_window mode (ms since profiling started, the same clock profiler-commit-query prints)",
+      "type": "object",
+      "properties": {
+       "start": {
+        "type": "number",
+        "description": "Start of window in ms since profiling started, the same clock profiler-commit-query prints"
+       },
+       "end": {
+        "type": "number",
+        "description": "End of window in ms since profiling started, the same clock profiler-commit-query prints"
+       }
+      },
+      "required": [
+       "start",
+       "end"
+      ]
+     },
+     "component_name": {
+      "description": "Component name for component_cpu mode",
+      "type": "string"
+     },
+     "function_name": {
+      "description": "Function name for call_tree mode",
+      "type": "string"
+     },
+     "top_n": {
+      "default": 15,
+      "description": "Number of results to return (default 15)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     },
+     "include_callers": {
+      "default": false,
+      "description": "For call_tree mode: also show callers of the function",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "device_id",
+     "mode"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "profiler-commit-query",
+   "description": "Query React commit data for iterative investigation of render performance.\nRequires react-profiler-stop to have been called first.\nModes:\n- by_component: All commits where a specific component rendered, with causes and durations.\n- by_time_range: What happened in a specific time window.\n- by_index: Full detail dump of a single commit (all components, props changed, parent cascade).\n- cascade_tree: Parent-child cascade tree for a commit showing who triggered whom.\nUse when drilling into specific components or time windows after react-profiler-analyze.\nReturns a markdown table or tree of commit data matching the requested mode.\nFails if react-profiler-stop has not been called or no commit data is stored.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Device logicalDeviceId from debugger-connect (iOS simulator UDID or Android logicalDeviceId)."
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "by_component",
+       "by_time_range",
+       "by_index",
+       "cascade_tree"
+      ],
+      "description": "Query mode: by_component (commits for a component), by_time_range (commits in a window), by_index (full detail for one commit), cascade_tree (parent-child cascade for a commit)"
+     },
+     "component_name": {
+      "description": "Component name for by_component mode",
+      "type": "string"
+     },
+     "time_range_ms": {
+      "description": "Time range filter for by_time_range mode",
+      "type": "object",
+      "properties": {
+       "start": {
+        "type": "number",
+        "description": "Start of range in ms since profiling started, the same clock profiler-commit-query prints"
+       },
+       "end": {
+        "type": "number",
+        "description": "End of range in ms since profiling started, the same clock profiler-commit-query prints"
+       }
+      },
+      "required": [
+       "start",
+       "end"
+      ]
+     },
+     "commit_index": {
+      "description": "Commit index for by_index and cascade_tree modes",
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+     },
+     "top_n": {
+      "description": "Max results to return. Defaults to 20 for by_component / by_time_range, which count commits. by_index counts individual fibers and returns all of them unless this is set, because one commit's fibers collapse to far fewer distinct components, and a small cap there can show less than the analyze report it is meant to expand on.",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "device_id",
+     "mode"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "profiler-stack-query",
+   "description": "Query native profiler trace data for iterative investigation of native performance.\nRequires native-profiler-stop → native-profiler-analyze to have been called first.\nModes:\n- hang_stacks: Full CPU context during a specific hang (by hang_index).\n- function_callers: Who calls a specific native function and what it calls.\n- thread_breakdown: CPU time split by thread, optionally filtered.\n- leak_stacks: Memory leak details (iOS only), optionally filtered by object_type.\nUse when drilling into native hang stacks, thread CPU breakdown, or memory leaks after native-profiler-analyze.\nReturns a markdown report with native call stacks, thread weights, or leak details for the selected mode.\nFails if native-profiler-analyze has not been run or no parsed trace data is in memory.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "iOS Simulator UDID or Android serial."
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "hang_stacks",
+       "function_callers",
+       "thread_breakdown",
+       "leak_stacks"
+      ],
+      "description": "Query mode: hang_stacks (full CPU context during a hang), function_callers (who calls a native function), thread_breakdown (CPU split by thread), leak_stacks (leak details by object type)"
+     },
+     "hang_index": {
+      "description": "0-based index into the hang list for hang_stacks mode",
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+     },
+     "function_name": {
+      "description": "Function name for function_callers mode",
+      "type": "string"
+     },
+     "thread": {
+      "description": "Thread filter. thread_breakdown: case-insensitive substring match. function_callers: exact raw thread name (e.g. \".blueskyweb.app\"), or \"main\" for the UI thread; omit to search ALL threads (each result is tagged with its thread). Run thread_breakdown first to see the exact raw names.",
+      "type": "string"
+     },
+     "object_type": {
+      "description": "Object type filter for leak_stacks mode",
+      "type": "string"
+     },
+     "top_n": {
+      "default": 15,
+      "description": "Max results to return (default 15)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "device_id",
+     "mode"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "profiler-combined-report",
+   "description": "Generate a cross-correlated report combining React Profiler and native profiler data.\nMaps native hangs to React commits using wall-clock time alignment.\nRequires both react-profiler-analyze and native-profiler-analyze to have been called first.\nCall this tool when both profilers were run in parallel on the same session.\nReturns a markdown report correlating hangs with React commits, memory leaks, and investigation hints.\nFails if either react-profiler-analyze or native-profiler-analyze has not been called first.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "iOS Simulator/device UDID or Android serial"
+     }
+    },
+    "required": [
+     "device_id"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "profiler-load",
+   "description": "Fetch and restore a previously captured profiling session from disk into memory so query tools can operate on it.\nThis is the disk-restore counterpart to react-profiler-stop/native-profiler-stop, which write data, and to the query tools (profiler-cpu-query, profiler-commit-query, profiler-stack-query), which read it.\nUse when you need to revisit past session data without capturing a new recording.\nModes:\n- list: Show all available profiling sessions in the project's debug directory.\n- load_react: Load a React profiler session (CPU profile + commit tree) into memory. Requires session_id.\n- load_native: Re-parse native profiler XML files into memory. Requires session_id and device_id.\n  For Android .pftrace restores, pass app_process for older sessions that do not have a metadata sidecar.\nReturns a summary of the loaded session or a session list for the list mode.\nFails if the session_id is not found or required XML files are missing from disk.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "mode": {
+      "type": "string",
+      "enum": [
+       "list",
+       "load_react",
+       "load_native"
+      ],
+      "description": "list: show available sessions on disk. load_react: load a React profiler session into memory for query tools. load_native: re-parse native profiler XML files (xctrace on iOS) into memory for query tools."
+     },
+     "session_id": {
+      "description": "Timestamp-based session identifier (e.g. '20250313-143022') from the list output. Required for load_react and load_native modes.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+     },
+     "port": {
+      "description": "Metro server port. Optional: omit it to use this device's port, 8081 by default. Ignored for Chromium, whose CDP port is encoded in device_id.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     },
+     "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target device id from `list-devices`. Used to cache the loaded React session under the correct port+device key, and required to resolve the native profiler session for load_native."
+     },
+     "app_process": {
+      "description": "Android package name to use when restoring older load_native .pftrace sessions that do not have a metadata sidecar.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode",
+     "device_id"
+    ]
+   }
+  },
+  {
+   "name": "gather-workspace-data",
+   "description": "Fetch a structured snapshot of a mobile app project's workspace.\n\nReturns package.json contents, metro/babel config text, app.json, eas.json, tsconfig,\nplatform directory presence (ios/, android/), presence of android/gradlew (android_has_gradle),\niOS .xcworkspace name and Podfile presence, lockfile type, .env file keys (no values),\ninstalled CLI tool versions, scripts/ directory listing, husky hooks, CI config type,\nMakefile targets, lint-staged config, and a list of detected config files.\n\nDO NOT RUN THIS TOOL IF YOU ARE THE MAIN AGENT AND THIS TASK CAN BE DELEGATED TO A SUBAGENT.\n\nIf you are a subagent tasked with exploring the project environment, run this as the first step. The snapshot\nprovides the raw data needed to determine the project type (React Native, Expo,\nFlutter, native iOS/Android, or other), build commands, startup scripts, platform\nsupport, package manager, and QA tooling. Follow up with Read/Glob/Grep for deeper\nexploration of anything the snapshot surfaces.\nUse when you need to inspect project configuration without manually reading multiple files.\nReturns partial data if workspacePath does not exist or is not readable; missing items are represented as null or empty collections.\nFails if the workspacePath is not an absolute path or the directory cannot be accessed.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "workspacePath": {
+      "type": "string",
+      "description": "Absolute path to the project root directory to inspect (e.g. /Users/dev/MyApp)"
+     }
+    },
+    "required": [
+     "workspacePath"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-devtools-status",
+   "description": "Check whether native devtools are connected to a specific app and whether the next launch is prepared for injection.\nUse when you need to verify native devtools readiness before calling native-full-hierarchy, native-describe-screen, or native-network-logs.\n\nReturns { envSetup, appRunning, connected, requiresRestart, state, message, nextLaunchWillBeInjected, injectable }:\n- envSetup: DYLD_INSERT_LIBRARIES is configured in the simulator's launchd environment\n- appRunning: the target bundle currently has a running UIKit process on the simulator\n- connected: the dylib is active in the current running process for this bundleId\n- requiresRestart: the app is already running and a fresh process would reach this simulator's devtools endpoint where the current one does not: it carries no argent injection, was pointed at an earlier tool-server's listener, or could not be inspected to tell. Always false for a non-injectable app, and false when state is unregistered or connecting, where a relaunch cannot help.\n- state: why devtools are or aren't live, measured from the running process. \"connected\"; \"not_running\"; \"stale_process\" (the process cannot reach this simulator's devtools endpoint, launched either before argent's instrumentation was in place or against an earlier tool-server's listener, so restart-app fixes it); \"unregistered\" (the process IS injected and pointed at this simulator's devtools endpoint yet the service never registered it, so restarting the app cannot help); \"connecting\" (the process IS injected but launched moments ago and is still connecting, so waiting is what helps); \"indeterminate\" (the process could not be inspected). Omitted when injectable is false, which is terminal on its own.\n- message: the remedy for that state, in full, including for a state not listed above. Omitted when connected or non-injectable. Prefer it over inferring one from the booleans: it is the only field that can tell you to stop restarting the app.\n- nextLaunchWillBeInjected: if you launch this bundle now, native devtools env setup is already in place (always false for a non-injectable app)\n- injectable: whether this app is a supported target for Argent native devtools. Apple system apps (bundle ids under com.apple.) are not: they are never the app under test, so the native tools refuse to read one.\n\nCall this before using app-scoped native hierarchy tools or native-network-logs.\nIf injectable is false: treat this as TERMINAL. The app is not a supported native-devtools target, and no relaunch changes that. Do NOT restart/retry. Use the standard `describe` tool (its accessibility path reads the screen without injection) or `screenshot` (then interact by coordinate). Do not fall back to the native-devtools feature tools (native-describe-screen, native-find-views, native-full-hierarchy, native-network-logs, native-view-at-point, native-user-interactable-view-at-point): they run the same injection precheck and fail with the same non-injectable error.\nIf appRunning is false and nextLaunchWillBeInjected is true: use launch-app normally.\nIf requiresRestart is true: call restart-app once, then proceed with the native feature. Read state before acting on a second such reading. Indeterminate reaches this rule too, and its line below bounds it at that one restart.\nIf state is unregistered: do NOT restart the app again: it already launched under the terms a restart would recreate. Restart the tool-server (`argent server stop && argent server start --detach`), then retry. If it reads unregistered again after that restart, stop: the process loads argent's dylib but never dials, and no further restart on either side changes it. Treat native devtools as unavailable, then use `describe` or `screenshot` and drive by coordinate.\nIf state is connecting: do NOT restart the app. Launching it is what starts the connection, so a relaunch discards the one in progress and returns this same state. Wait a few seconds and repeat this call.\nIf state is indeterminate: the process could not be inspected, so restart-app is worth one attempt. If this call still reports it after that restart, do NOT restart the app again: the service is stale rather than the app uninjected, so restart the tool-server (`argent server stop && argent server start --detach`) and retry. Remote simulators can never inspect the process, so this is the only unconnected state a running app reaches there.\nReturns { status: \"init_failed\", message, attempts } instead when the simulator's native-devtools environment failed to initialize.\nFails if the simulator server is not running for the given UDID.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app to check (e.g. com.example.MyApp)"
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-network-logs",
+   "description": "Retrieve network requests captured at the native NSURLProtocol level. \nUnlike the JS-level network inspector (view-network-logs), this captures ALL network traffic from the app including native modules, Swift/Objective-C networking, and background transfers that never pass through JS XMLHttpRequest or fetch. \nUse when you need to inspect native-level HTTP traffic that is invisible to the JS-level capture. \nReturns { status, count, events } where each event contains URL, method, status code, headers, and timing.\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-running app comes back as one of those statuses rather than a failure. An app that is not connected does too, except on a device whose devtools agent argent attached to rather than armed itself: there it fails with `NATIVE_DEVTOOLS_NOT_CONNECTED`, since no restart of ours can complete a handshake we do not own. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), while a missing host dependency or a udid that is not an Apple device is not.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "limit": {
+      "default": 50,
+      "description": "Maximum number of events to return (most recent first)",
+      "type": "number"
+     },
+     "clear": {
+      "default": false,
+      "description": "Clear the log after reading",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   }
+  },
+  {
+   "name": "native-find-views",
+   "description": "Search for specific UIViews in the running app by class name, accessibility identifier, label, tag, or React Native nativeID.\nUse when you need to locate a specific view by its properties without dumping the entire hierarchy.\nReturns { status: \"ok\", matches } with matching views including their frames, properties, optional ancestors, and optional children. Much more targeted than native-full-hierarchy.\nAt least one of className, identifier, label, tag, or nativeID must be provided.\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-connected or not-running app comes back as one of those statuses rather than a failure. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), and the hierarchy query itself can error or time out.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "className": {
+      "description": "UIView class name to match (exact, e.g. UIButton)",
+      "type": "string"
+     },
+     "identifier": {
+      "description": "Accessibility identifier to match (exact)",
+      "type": "string"
+     },
+     "label": {
+      "description": "Accessibility label to match (exact)",
+      "type": "string"
+     },
+     "tag": {
+      "description": "UIView tag integer to match",
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+     },
+     "nativeID": {
+      "description": "React Native nativeID prop to match (exact)",
+      "type": "string"
+     },
+     "includeAncestors": {
+      "description": "Include ancestor chain for each matched view (default true)",
+      "type": "boolean"
+     },
+     "includeChildren": {
+      "description": "Include child views for each matched view (default true)",
+      "type": "boolean"
+     },
+     "fields": {
+      "description": "View fields to include. Defaults: className, frame, hidden, alpha, identifier, label, nativeID, userInteractionEnabled, depth. Additional: pointer, tag, windowFrame, screenFrame, bounds, center, opaque, clipsToBounds, transform, contentMode, backgroundColor, tintColor, layerName",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-full-hierarchy",
+   "description": "Get the complete UIKit view tree for the running app.\nWARNING: Output can be extremely large (100KB–500KB+) for complex apps, especially those built with SwiftUI. Prefer native-find-views for targeted queries.\nUse skipClasses / skipClassPrefixes to prune SwiftUI internal subtrees and reduce output size. Use the fields param to request only the properties you need.\nUse when you need deep layout debugging, finding views with no accessibility labels, or verifying view structure not exposed through the accessibility tree.\nReturns { status: \"ok\", windows, screen } with the full view hierarchy. screen gives the screen size in points on its portrait axes, and the interfaceOrientation of the UI (portrait, portraitUpsideDown, landscapeLeft, landscapeRight). Each screenFrame uses the portrait axes of the screen. Each windowFrame uses the axes of its window, which turn with the UI.\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-connected or not-running app comes back as one of those statuses rather than a failure. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), and the hierarchy query itself can error or time out.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "fields": {
+      "description": "View fields to include. Use EXACT names: className, frame, hidden, alpha, identifier, label, nativeID, userInteractionEnabled, depth, pointer, tag, windowFrame, screenFrame, bounds, center, opaque, clipsToBounds, transform, contentMode, backgroundColor, tintColor, layerName. Defaults to all of the first group when omitted.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClasses": {
+      "description": "Exact UIView class names whose entire subtree should be pruned (e.g. [\"UIImageView\"] to drop image leaf nodes)",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClassPrefixes": {
+      "description": "Class name prefixes to prune entire subtrees. For SwiftUI apps use [\"_TtGC7SwiftUI\"] to drop mangled SwiftUI generic type subtrees while keeping _UIHostingView and UIKit bridges. Avoid broad prefixes like \"_UI\": they prune useful system views.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "maxDepth": {
+      "description": "Maximum recursion depth (default 8). Increase for deeper inspection, decrease to reduce output size.",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-describe-screen",
+   "description": "Read the running app's native accessibility screen description via injected native devtools.\n\nReturns a flat list of accessibility leaf elements with:\n- raw frame and tapPoint in points, on the portrait axes of the screen\n- normalizedFrame and normalizedTapPoint on the same axes. gesture-tap uses\n  these axes, also when the UI is landscape\n- top-level screenFrame metadata: the screen bounds on these axes\n- traits and optional labels/identifiers\n\nThis is a low-level native inspection tool. The normalized fields are intended to help\nwith backend migration work, but the public describe contract is still separate.\n\nUse when you are evaluating or debugging the lower-level native data behind the public\ndescribe tool, or when you need its raw point-space geometry rather than describe's\nnormalized contract.\n\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-connected or not-running app comes back as one of those statuses rather than a failure. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), and the screen query itself can error or time out.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "skipClasses": {
+      "description": "Exact UIView class names whose entire subtree should be pruned (e.g. [\"UIImageView\"] to drop image-heavy branches)",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClassPrefixes": {
+      "description": "Class name prefixes to prune entire subtrees. For SwiftUI apps use [\"_TtGC7SwiftUI\"] to drop mangled SwiftUI generic type subtrees while keeping UIKit bridges.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-view-at-point",
+   "description": "Inspect the deepest visible UIView at a raw native window point.\n\nUnlike native-user-interactable-view-at-point, this ignores userInteractionEnabled,\nso it answers \"what is visually here?\" rather than \"what would receive the touch?\".\n\nUse when a screenshot shows something the accessibility tree does not name (an\nunlabeled icon, a decorative overlay, a custom-drawn cell) and you need the class,\nidentifier or nativeID of whatever draws it.\n\nReturns { status: \"ok\", view }: the matched view with its class name, frames,\nidentifier, label and layer name, its ancestor chain by default, and its subviews on\nrequest. view is null when nothing is drawn at that point.\n\nIMPORTANT: x and y are raw points on the portrait axes of the screen, NOT\nnormalized [0,1] simulator tap coordinates. To get them from a describe frame,\nmultiply the normalized values by the screen size in points. Do this also when\nthe UI is landscape.\n\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-connected or not-running app comes back as one of those statuses rather than a failure. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), and the point query itself can error or time out.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "x": {
+      "type": "number",
+      "description": "Raw X coordinate in points, on the portrait axes of the screen (the axes of native-describe-screen frames). NOT normalized [0,1] tap space."
+     },
+     "y": {
+      "type": "number",
+      "description": "Raw Y coordinate in points, on the portrait axes of the screen (the axes of native-describe-screen frames). NOT normalized [0,1] tap space."
+     },
+     "includeAncestors": {
+      "description": "Include ancestor chain for the matched view (default true)",
+      "type": "boolean"
+     },
+     "includeChildren": {
+      "description": "Include child views for the matched view (default false)",
+      "type": "boolean"
+     },
+     "fields": {
+      "description": "View fields to include. Defaults: pointer, className, tag, frame, windowFrame, screenFrame, bounds, hidden, alpha, opaque, clipsToBounds, userInteractionEnabled, depth, identifier, label, layerName, nativeID. Additional: center, transform, contentMode, backgroundColor, tintColor",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClasses": {
+      "description": "Exact UIView class names whose entire subtree should be pruned",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClassPrefixes": {
+      "description": "Class name prefixes to prune entire subtrees",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "maxDepth": {
+      "description": "Maximum depth for returned child/ancestor serialization (default 150)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId",
+     "x",
+     "y"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "native-user-interactable-view-at-point",
+   "description": "Inspect the deepest UIView at a raw native window point that would actually receive touch input.\n\nUnlike native-view-at-point, this respects userInteractionEnabled and is closer to\nUIKit hit-testing semantics.\n\nUse when a tap lands somewhere unexpected or does nothing, to see which control\nUIKit would hand the touch to: a transparent overlay swallowing it, a parent\nrecognizer, a disabled button.\n\nReturns { status: \"ok\", view }: the hit-test winner with its class name, frames,\nidentifier, label and layer name, its ancestor chain by default, and its subviews on\nrequest. view is null when no touchable view sits under that point.\n\nIMPORTANT: x and y are raw points on the portrait axes of the screen, NOT\nnormalized [0,1] simulator tap coordinates. To get them from a describe frame,\nmultiply the normalized values by the screen size in points. Do this also when\nthe UI is landscape.\n\nIf status is restart_required: follow the message (usually restart-app), then retry. If status is service_stale: the app is already injected, so restarting it cannot help. Restart the tool-server (`argent server stop && argent server start --detach`) and retry. If the same status comes back after that restart, stop restarting: follow the message, which names the terminal fallback. If status is connect_pending: the app is injected and still connecting. Do not restart it, wait a few seconds and retry. If status is init_failed: the simulator's native-devtools environment could not be initialised. Follow the message (re-boot the simulator) rather than retrying this tool.\nA not-connected or not-running app comes back as one of those statuses rather than a failure. Failures are separate: an Apple system app is rejected outright (terminal: never retry it), and the point query itself can error or time out.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Simulator UDID"
+     },
+     "bundleId": {
+      "type": "string",
+      "description": "Bundle ID of the app"
+     },
+     "x": {
+      "type": "number",
+      "description": "Raw X coordinate in points, on the portrait axes of the screen (the axes of native-describe-screen frames). NOT normalized [0,1] tap space."
+     },
+     "y": {
+      "type": "number",
+      "description": "Raw Y coordinate in points, on the portrait axes of the screen (the axes of native-describe-screen frames). NOT normalized [0,1] tap space."
+     },
+     "includeAncestors": {
+      "description": "Include ancestor chain for the matched view (default true)",
+      "type": "boolean"
+     },
+     "includeChildren": {
+      "description": "Include child views for the matched view (default false)",
+      "type": "boolean"
+     },
+     "fields": {
+      "description": "View fields to include. Defaults: pointer, className, tag, frame, windowFrame, screenFrame, bounds, hidden, alpha, opaque, clipsToBounds, userInteractionEnabled, depth, identifier, label, layerName, nativeID. Additional: center, transform, contentMode, backgroundColor, tintColor",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClasses": {
+      "description": "Exact UIView class names whose entire subtree should be pruned",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "skipClassPrefixes": {
+      "description": "Class name prefixes to prune entire subtrees",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "maxDepth": {
+      "description": "Maximum depth for returned child/ancestor serialization (default 150)",
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "udid",
+     "bundleId",
+     "x",
+     "y"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "stop-simulator-server",
+   "description": "Stop the transport session for a specific device (iOS simulator / Android: simulator-server process; physical iOS: the on-device runner; Chromium: CDP WebSocket) and free its resources; on a TV target it also reaps that device's TV-control daemons. Use to restart a wedged transport, or when the user is done with one device but wants to keep others running - not just because a task on it finished, since the next task on that device would start cold again. On iOS / Android / TV it deliberately leaves this device's native-devtools, accessibility, profiler and debugger services running - to drain those as well, use stop-all-simulator-servers with `devices`. On CHROMIUM that does not hold: the JS-runtime debugger declares the CDP session as a dependency, so stopping the transport cascades to it and its captured console history goes with it - reconnect with debugger-connect afterwards. Returns { stopped, udid }. Fails silently if no session is open for the given id.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "udid": {
+      "type": "string",
+      "description": "Target device id (iOS UDID, Android serial, or Chromium id) whose transport session to stop"
+     }
+    },
+    "required": [
+     "udid"
+    ]
+   }
+  },
+  {
+   "name": "stop-all-simulator-servers",
+   "description": "Stop the services a device owns - simulator-server processes (iOS + Android), native devtools, the iOS accessibility service, TV-control daemons, Chromium CDP sessions, screen recordings, native profiler sessions, and JS-runtime debugger sessions along with the network inspectors and React profiler sessions that ride on them - freeing their spawned processes, sockets and ports. Call this when the user asks to clean up or ends the session, or when a skill tells you to recycle a device's services mid-flow - not just because a task finished, since the next task reuses these services and would start cold again.\nPASS `devices` with the device ids this session used: one tool-server serves every agent, subagent and CLI call using this argent install, and an unscoped call tears down THEIR devices too (a mid-recording devtools teardown degrades another agent's e2e test to brittle coordinate taps; that agent is warned, but its recorded steps are already the worse kind). Omit `devices` only when a machine-wide cleanup is what you actually want. Passing an EMPTY array scopes to nothing and stops nothing - it is not a way to ask for the machine-wide sweep.\nA JS-runtime debugger session is keyed by the id you called `debugger-connect` with. On a Metro serving two or more devices that id is not a udid or serial - connect refuses those and tells you to re-target with the `logicalDeviceId` it returns - so a scope built from `list-devices` ids cannot reach that session. Pass any such `logicalDeviceId` in `devices` ALONGSIDE the device id; { left_running } names the ones you missed.\nReturns { stopped } - the URNs of the services that were actually live and got shut down; an ERROR node is disposed too but never appears there, so an empty `stopped` only means nothing was still running. { unmatched } lists supplied ids that own no service here, so a mistyped id - or a device NAME passed where an id was expected - does not read as a clean machine. It is NOT proof the id is wrong: a Vega device is driven through CLI/adb shell-outs, so one you only booted and drove with the remote registers no service and always lands here, as does a real device of any platform this session never started anything on. Present ONLY when `devices` was supplied AND at least one id matched nothing - absent on an unscoped call and when every id matched. Stopping the same device twice does not report it unmatched: ownership counts regardless of service state. { left_running } lists the URNs of live debugger sessions (and the network inspectors / React profiler sessions riding on them) whose id no device scope can name - re-call with the id after each URN's `<namespace>:<port>:` prefix to reap them. { aborted: true } means the caller cancelled the request part-way, so the rest of the machine was left untouched and neither of the other two fields was computed. Past the schema - which rejects an unknown key outright, so the `udids` slip is an error rather than a silent machine-wide sweep - the call always succeeds; reaping nothing is a result, not a failure.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "devices": {
+      "description": "Device ids (iOS UDID / Android serial / Chromium id) to scope the teardown to. Pass the devices THIS session actually used. Omit only for a deliberate machine-wide cleanup: one tool-server serves every agent using this argent install, so an unscoped stop also kills devices another agent is mid-session on.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "stop-metro",
+   "description": "Stop the Metro bundler process listening on a given port (default 8081). Use when the user asks to stop Metro or when Metro must be restarted - do not offer it when a task wraps up, since the next task would wait on a cold Metro start. Returns { stopped, port, pids }; stopped=false if no process is found on the port. Fails if the port lookup command times out or the process cannot be killed. This is DESTRUCTIVE: always ask the user for confirmation before calling this tool.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "port": {
+      "default": 8081,
+      "description": "TCP port Metro is listening on (default 8081)",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+     }
+    }
+   }
+  },
+  {
+   "name": "e2e-start-recording",
+   "description": "Start recording a new e2e test, resetting .argent/e2e/<name>.yaml to an empty e2e test and replacing any existing one.\nUse when you want to capture a reusable sequence of device interactions for later replay.\nReturns { message, flowFile, savedTo } and optionally { restarted, discardedSteps } if a live recording of the same e2e test was discarded.\nWithout a link, it creates that file and fails if the .argent/e2e/ directory cannot be created or the file cannot be written. Over a link (argent link or ARGENT_TOOLS_URL, also to 127.0.0.1), your client writes the file, and `savedTo` is its path on your computer, or null when that write failed.\n\nSeveral e2e tests can be recorded at once, each keyed by the `name` + `project_root`\nthat every subsequent recording tool repeats, and one recording's steps never\nland in another's file. Steps still run LIVE, so give each concurrent recording\nits own device and pick a name unique to your task.\n\nAfter starting, use e2e-add-step to append tool calls. Each step is executed\nLIVE so you can verify it works before it gets recorded. Read each step's\n`message`: an await-ui-element whose condition never held is still recorded (it\nreturns success:false rather than failing), and a check that passes live can\nstill fail once polished into an `await:`/`assert:` directive, which resolves\nagainst a different tree. e2e-add-step warns about both when you record the\nwait DIRECTLY. A wait nested inside a recorded run-sequence gets neither warning\n(that tool reports its own shape), so for those, read `toolResult`. For a standalone\ne2e test, record a restart-app of the app under test as the FIRST step (captured\nas the e2e test's `launch` step); for a reusable fragment, skip that and pass\nexecutionPrerequisite instead. Use e2e-add-echo to add labels, and\ne2e-add-script to run a local .mjs file and record it as a `script:` step.\nCall e2e-finish-recording when done.\n\nIf a recorded step turns out to be wrong, edit the .yaml file directly to\nremove or reorder steps - after e2e-finish-recording, not during the\nrecording. Over a link, the next recorded step writes over your edit.\nWithout a link, the recorder reads the file again before each step, but an\nedit that renumbers the steps drops the warnings that e2e-finish-recording\nreports for those steps.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "Name for this e2e test (e.g. \"settings-explore\"): letters, digits, underscore and hyphen only."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the project root directory (the directory that contains or should contain `.argent/e2e/`). The e2e test file is created at `<project_root>/.argent/e2e/<name>.yaml`."
+     },
+     "executionPrerequisite": {
+      "description": "Fragments only: the app/device state assumed on entry (e.g. \"Settings app open on General page\"). For a standalone e2e test, omit this and record a `restart-app` as the first step instead; it is captured as the e2e test's `launch` step. restart-app has no chromium support, so a chromium e2e test records as a fragment; add the `launch: { chromium: <app path> }` line to the YAML afterward, deleting the executionPrerequisite line if you passed one, since an e2e test that starts with a launch must not declare it.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "project_root"
+    ]
+   }
+  },
+  {
+   "name": "e2e-add-step",
+   "description": "Execute one MCP tool and record its step in the e2e test named by `name` + `project_root`. Use when recording and you want each action run and captured; the recording must already be open.\nA coordinate `gesture-tap` records as a portable `tap` selector step; `restart-app` as a `launch`.\nReturns { message, stepCount, recorded, savedTo }; `recorded`, not the status, says whether a step was appended. Fails with an error, recording nothing. Call recording tools, including `e2e-add-script`, directly.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "Name of the e2e test being recorded: the one passed to e2e-start-recording."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the project root of the e2e test being recorded: the same value passed to e2e-start-recording. Together with `name` it identifies which recording this step belongs to."
+     },
+     "command": {
+      "type": "string",
+      "description": "MCP tool to execute and record, for example \"gesture-tap\". Do not pass an e2e test directive or a recording tool. Call e2e-add-script directly for a requested script step."
+     },
+     "args": {
+      "description": "Tool arguments as a JSON string, e.g. '{\"udid\": \"ABC\", \"x\": 0.5, \"y\": 0.3}'. Omit for tools with no arguments.",
+      "type": "string"
+     },
+     "delayMs": {
+      "description": "Milliseconds to sleep before executing this step during replay.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+     }
+    },
+    "required": [
+     "name",
+     "project_root",
+     "command"
+    ]
+   }
+  },
+  {
+   "name": "e2e-add-echo",
+   "description": "Record an echo step in the e2e test named by `name` + `project_root`. Echo steps print a message when the e2e test is replayed, useful as labels between tool calls.\nUse when you want to annotate a recorded e2e test with a human-readable label or checkpoint message.\nReturns { message, stepCount, savedTo }. Fails if that e2e test has no recording in progress.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "Name of the e2e test being recorded: the one passed to e2e-start-recording."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the project root of the e2e test being recorded: the same value passed to e2e-start-recording. Together with `name` it identifies which recording this echo belongs to."
+     },
+     "message": {
+      "type": "string",
+      "description": "Message to echo when the e2e test is replayed"
+     }
+    },
+    "required": [
+     "name",
+     "project_root",
+     "message"
+    ]
+   }
+  },
+  {
+   "name": "e2e-add-script",
+   "description": "Run a local .mjs file and record it as a `script:` step in an active e2e test. Use when the user requests a local script in the e2e test, and only then. Pass the same `name` and `project_root` as `e2e-start-recording`, and call it where the script must run. Returns `status`, `reason` and `stepCount`. A failed script is not recorded. Check `reason` and the affected state before you retry. Over a link (argent link or ARGENT_TOOLS_URL), the tool refuses the call: record such an e2e test with no link.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "E2E test name passed to e2e-start-recording."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute project root passed to e2e-start-recording."
+     },
+     "path": {
+      "type": "string",
+      "description": "Path to the .mjs file, relative to the e2e test YAML. For example: \"../../scripts/seed-order.mjs\"."
+     },
+     "timeout": {
+      "description": "Optional time limit in milliseconds. The default is 30000 and the minimum is 100.",
+      "type": "number"
+     }
+    },
+    "required": [
+     "name",
+     "project_root",
+     "path"
+    ]
+   }
+  },
+  {
+   "name": "e2e-finish-recording",
+   "description": "Finish recording the e2e test named by `name` + `project_root`, leaving recordings under any other key untouched. Returns { message, path, executionPrerequisite, steps, summary, flowFile, savedTo } - a summary of all recorded steps plus the final YAML. Use when you have added all desired steps and want to finalize the e2e test file. Fails if that e2e test has no recording in progress.\nA warning e2e-add-step raised on a recorded `await-ui-element` is repeated in `summary` as a `warning:` line of its own, right below the step it judges, and `message` counts them by kind. A warning is repeated only while the step it judges is still identifiable by its number: hand-editing the .yaml during the recording moves the steps, so those warnings are DROPPED rather than pinned on whichever step inherited the number, and `message` says how many were dropped. A step that carries a cross-tree warning was re-probed against the runner's tree: read it before converting that wait to `await:`/`assert:`, which is what the verdict is about and what this moment is for. A step that recorded a wait which did not pass was never probed at all, and its own warning names the CAUSE, because only one of them judges the condition: an unmet wait was read and found false, and it stops the run at replay; a wait whose tree source could not be read, or one that was cancelled, observed nothing and leaves the condition UNKNOWN rather than known-bad. Read those before replaying.\nYou can still edit the .yaml file directly afterwards to remove or reorder steps.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "description": "Name of the e2e test being recorded: the one passed to e2e-start-recording."
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the project root of the e2e test being recorded: the same value passed to e2e-start-recording. Together with `name` it identifies which recording to finish."
+     }
+    },
+    "required": [
+     "name",
+     "project_root"
+    ]
+   }
+  },
+  {
+   "name": "e2e-read-prerequisite",
+   "description": "Read the execution prerequisite of an e2e test without running it: a saved e2e test from the .argent/e2e/ directory (or the older .argent/flows/), or an explicit boundary-managed flow_path.\nReturns { flow, executionPrerequisite, warning? }: the logical name, plus the precondition its author recorded\nverbatim. Empty when none was declared, which is always so for a self-contained scenario: one opening\non a launch may declare no prerequisite, because it builds its own start state.\nUse when deciding whether the device already sits where a fragment expects it (correct app foregrounded,\ncorrect account, correct screen) before committing to a run, or when relaying that requirement to a human.\nTouches no device: nothing is launched, tapped, dispatched or torn down, and no simulator or emulator\nneeds booting, so calling this costs nothing but a file read.\nFails if the e2e test file does not exist.\nAddress the e2e test exactly as you will address it in e2e-execute: name or flow_path, one and only one; supplying both or neither is rejected. The name goes in `name`, which resolves <project_root>/.argent/e2e/<name>.yaml, else .argent/flows/<name>.yaml.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "description": "Name of a saved e2e test to inspect from `.argent/e2e`, or `.argent/flows` when it is not there (e.g. \"settings-explore\"). Omit when flow_path is set.",
+      "type": "string"
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the calling agent's project root: the cwd it is working in. With name, the saved e2e test is read from `.argent/e2e/<name>.yaml`, else `.argent/flows/<name>.yaml`, under this root; with flow_path, the prerequisite is read from that YAML instead, so pass the agent's cwd."
+     },
+     "flow_file": {
+      "description": "Path to the e2e test .yaml as readable by the tool-server. Internal: the argent client derives it from project_root and name automatically; leave unset.",
+      "type": "string"
+     },
+     "flow_path": {
+      "description": "Omit when name is set. Absolute path to an e2e test .yaml on the client. Over a link (argent link or ARGENT_TOOLS_URL), the argent client uploads the file and the tool-server reads the uploaded copy; without a link, the tool-server reads the file in place. Pass the path through the argent client; a raw path that the file-input boundary did not verify is rejected. Pass the same e2e test source here as to e2e-execute, so the prerequisite you read belongs to the e2e test that will run.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_root"
+    ]
+   },
+   "annotations": {
+    "readOnlyHint": true
+   }
+  },
+  {
+   "name": "e2e-execute",
+   "description": "Run a saved YAML e2e test end to end. Use when\nasked to replay a recorded path, re-run a QA regression, or check that a known journey still passes; for a\none-off interaction use the gesture tools instead, and to author an e2e test use e2e-start-recording. Pass\nexactly one e2e test source: name (under project_root) or flow_path.\nReturns a per-step report: the first failure stops the run and the rest report as skipped.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "description": "Name of a saved e2e test to run from `.argent/e2e`, or `.argent/flows` when it is not there (e.g. \"settings-explore\"). Omit when flow_path is set.",
+      "type": "string"
+     },
+     "project_root": {
+      "type": "string",
+      "description": "Absolute path to the calling agent's project root: the cwd it is working in. With name, the saved e2e test is read from `.argent/e2e/<name>.yaml`, else `.argent/flows/<name>.yaml`, under this root; with flow_path, the e2e test, its run: siblings, its script: paths and baselines all resolve beside the YAML instead, so pass the agent's cwd. A script still RUNS in this root whichever source was used."
+     },
+     "flow_file": {
+      "description": "Path to the e2e test .yaml as readable by the tool-server. Internal: the argent client derives it from project_root and name automatically; leave unset.",
+      "type": "string"
+     },
+     "flow_path": {
+      "description": "Omit when name is set. Absolute path to an e2e test .yaml on the client. Over a link (argent link or ARGENT_TOOLS_URL), the argent client uploads the file, its run: fragments and the snapshot baselines of each run, and the tool-server runs those copies. Keep run: fragments under project_root or beside the e2e test file. With updateBaselines, the client writes the new baselines when the run ends. The client also uploads each absolute .png or .yaml path that a tool: step takes as a file argument, when the file is under project_root or beside the e2e test file. A tool: e2e-execute step that names an e2e test with name and an absolute project_root without a .. segment runs: the client also uploads that e2e test and its own files. Over a link, the uploaded e2e tests must not have: script: steps; tool: steps that run an e2e test another way or record an e2e test; tool: steps that take a directory, an app or an output directory; tool: steps whose tool builds a file path from several arguments; tool: steps that name a relative path or a file other than .png or .yaml. Without a link, the tool-server reads the files in place and all step kinds run.",
+      "type": "string"
+     },
+     "device": {
+      "description": "Device id to run against (iOS UDID, Android/Vega serial, Chromium id), as list-devices reports it. Auto-detected when omitted, but only when exactly one booted device matches (optionally narrowed by `platform`); with several booted the run fails and lists them, so pass this explicitly whenever more than one device is up.",
+      "type": "string"
+     },
+     "platform": {
+      "description": "Restrict auto-detection to this platform when several devices are booted. `ios` selects local simulators only; pass `ios-remote` to select a remote one. `chromium` does more than filter: with no `device` it SELECTS the self-boot branch for a standalone e2e test - the runner boots an Electron instance from the `launch` step's chromium value and tears it down after the run (a single-key `launch: { chromium: … }` map selects it on its own, without this parameter). When it selects that branch it never falls back to device auto-detection (a fragment, or a standalone e2e test's launch map with no `chromium` key, still does), and the launch value must be a real Electron app path on the tool-server host: a bare-string `launch:` - what the recorder writes - holds an installed-app bundle id, so passing `chromium` for one fails the whole run with `Electron boot: path does not exist`. Edit the launch to `{ chromium: <app path> }` first.",
+      "type": "string",
+      "enum": [
+       "ios",
+       "android",
+       "chromium",
+       "vega",
+       "ios-remote"
+      ]
+     },
+     "updateBaselines": {
+      "description": "Write/refresh screenshot baselines for `snapshot` steps instead of diffing against them, also in the e2e tests that tool: e2e-execute steps run, unless such a step sets updateBaselines itself.",
+      "type": "boolean"
+     },
+     "prerequisiteAcknowledged": {
+      "description": "Set to true to confirm the execution prerequisite has been met. Required (LLM path) when a fragment defines an executionPrerequisite.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "project_root"
+    ]
+   }
+  },
+  {
+   "name": "update-argent",
+   "description": "Apply a pending Argent update. Only call this tool when the user has explicitly consented to updating Argent in this conversation. Use when an update notification indicates a new version is available and the user agrees to update. By default updates the install serving this session; pass `target` to choose global/local/both. Returns { message } with the update status and version info. The tool server will restart automatically after the update. Fails if no update is available or an update is already in progress.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "target": {
+      "description": "Which install to update. 'auto' (default) updates the install serving this session: the global PATH install or this project's local devDependency, whichever this server runs from. Pass 'global' / 'local' to force one, or 'both' when the user has both and wants each updated.",
+      "type": "string",
+      "enum": [
+       "auto",
+       "global",
+       "local",
+       "both"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "dismiss-update",
+   "description": "Clear the Argent update notification for the given number of hours. Use when the user asks to postpone or silence update reminders. Returns { message } confirming the suppression duration. Fails if the hours value is negative or the suppression state cannot be persisted.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Number of hours to suppress the update notification"
+     }
+    },
+    "required": [
+     "hours"
+    ]
+   }
+  }
+ ]
+}
