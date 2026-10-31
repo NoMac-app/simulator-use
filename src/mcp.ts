@@ -10,6 +10,7 @@ import { cancelAllJobs } from "./engine/jobs.ts";
 import { hosted, hostedAnswer, noteCall } from "./hosted.ts";
 import { callTool, INSTRUCTIONS, toContent, TOOLS, VERSION } from "./registry.ts";
 import { setting } from "./settings.ts";
+import { setNotifier } from "./space.ts";
 
 const STATELESS = "2026-07-28";
 const HANDSHAKE_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
@@ -80,6 +81,8 @@ export async function handle(message: Request): Promise<Response | null> {
 
 export function serve(input: NodeJS.ReadableStream = process.stdin, output: NodeJS.WritableStream = process.stdout): Promise<void> {
   const write = (response: Response) => output.write(`${JSON.stringify(response)}\n`);
+  // NoMac Simulator's host logs what a phone's workspace had cleared to make room: sizes and counts only (src/space.ts).
+  if (setting("HOSTED")) setNotifier((report) => output.write(`${JSON.stringify({ jsonrpc: "2.0", method: "notifications/simulator-use/space", params: report })}\n`));
   const lines = createInterface({ input, crlfDelay: Infinity });
   const pending = new Set<Promise<void>>();
   lines.on("line", (raw) => {

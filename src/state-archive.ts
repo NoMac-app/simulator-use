@@ -156,11 +156,19 @@ export async function uploadState(statesDir: string, name: string, url: string, 
 
 /**
  * The state at url (sealed under key) unpacked into statesDir as name, replacing a copy there only once all of it
- * opened: it is unpacked beside it first, then moved into place.
+ * opened: it is unpacked beside it first, then moved into place. room, given the sealed state's size, makes room for
+ * it before anything is written.
  */
-export async function fetchState(statesDir: string, name: string, url: string, key: string): Promise<void> {
+export async function fetchState(statesDir: string, name: string, url: string, key: string, room?: (bytes: number) => Promise<void>): Promise<void> {
   const response = await fetch(url);
   if (!response.ok || !response.body) throw new Error(`the state's download failed: storage answered ${response.status}`);
+  const length = Number(response.headers.get("content-length") ?? 0);
+  if (room && length > 0) {
+    await room(length).catch(async (error: Error) => {
+      await response.body?.cancel().catch(() => undefined);
+      throw error;
+    });
+  }
   const into = await mkdtemp(join(statesDir, `.${name}.fetching-`));
   try {
     // bsdtar keeps entries inside into: no absolute paths, no .., no writes through a symlink.

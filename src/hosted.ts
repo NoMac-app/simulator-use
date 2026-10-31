@@ -21,6 +21,7 @@ import { heldDevice, stateDir } from "./engine/state.ts";
 import { describeTarget, parseStep } from "./act/steps.ts";
 import { normalizeRemote, SKIP_DIRS } from "./cloud/sync.ts";
 import { callTool } from "./registry.ts";
+import { ensureRoom, hold, markStored, markUsed, retryWithRoom, setWorkspace, withRoom } from "./space.ts";
 import { fetchState, uploadState } from "./state-archive.ts";
 
 type Kind = "file" | "executable" | "symlink";
@@ -42,6 +43,8 @@ let workspace: string | undefined;
 const syncs = new Map<string, Sync>();
 
 const invalid = (message: string) => Object.assign(new Error(message), { code: -32602 });
+/** A failed operation's words for the host: cut short, but a full workspace's whole answer (src/space.ts). */
+const failure = (error: Error) => ((error as { code?: unknown }).code === "workspace_full" ? error.message : error.message.slice(0, 300));
 const absolute = (value: unknown): value is string =>
   typeof value === "string" && value.startsWith("/") && !value.includes("\0") && !value.split("/").includes("..") && value.length <= 1024;
 const safePath = (path: unknown): path is string =>
@@ -62,13 +65,25 @@ export async function realFolders(root: string, rel: string): Promise<boolean> {
   return true;
 }
 
-/** The host tells a warm server, at hand-over, the account's build cache and workspace. */
+/**
+ * The host tells a warm server, at hand-over, the account's build cache and workspace. The workspace's room is seen
+ * to at once (src/space.ts), in the background: the first operation that needs the workspace waits for it.
+ */
 export function configure(params: Record<string, unknown>): Record<string, never> {
   for (const key of ["cache_dir", "workspace"]) if (params[key] !== undefined && !absolute(params[key])) throw invalid(`${key} must be an absolute path`);
   if (params.cache_dir !== undefined) process.env.SIMULATOR_USE_CACHE_DIR = params.cache_dir as string;
-  if (params.workspace !== undefined) workspace = params.workspace as string;
+  if (params.workspace !== undefined) {
+    workspace = params.workspace as string;
+    setWorkspace(workspace, process.env.SIMULATOR_USE_CACHE_DIR);
+  }
   return {};
 }
+
+/**
+ * Room for a download of a known size before it is written (src/space.ts): about three times its size (the archive,
+ * then what it unpacks to), and at the least the download itself, or it fails at once, saying the workspace is full.
+ */
+const roomFor = (reason: string) => (bytes: number) => ensureRoom(reason, 3 * bytes, bytes);
 
 const srcRoot = () => {
   if (!workspace) throw Object.assign(new Error("no_workspace"), { code: -32000 });
@@ -132,9 +147,10 @@ async function place(params: Record<string, unknown>): Promise<Placed> {
   if (!sync.place) {
     sync.place = { state: "running" };
     const placed = sync.place;
-    write(sync, params.archive as Record<string, unknown> | undefined).then(
+    // A sync that runs out of room clears what may go and writes again (src/space.ts).
+    withRoom("sync", () => write(sync, params.archive as Record<string, unknown> | undefined)).then(
       (result) => Object.assign(placed, { state: "done" }, result),
-      (error: Error) => Object.assign(placed, { state: "failed", error: error.message.slice(0, 300) }),
+      (error: Error) => Object.assign(placed, { state: "failed", error: failure(error) }),
     );
   }
   const deadline = Date.now() + ANSWER_WITHIN_MS;
@@ -196,7 +212,7 @@ async function write(sync: Sync, archive: Record<string, unknown> | undefined): 
       if (typeof archive.base64 === "string") {
         await writeFile(file, Buffer.from(archive.base64, "base64"));
       } else if (typeof archive.url === "string" && archive.url.startsWith("https://")) {
-        await download(archive.url, file, "archive");
+        await download(archive.url, file, "archive", roomFor("sync"));
       } else {
         throw new Error("archive_invalid");
       }
@@ -325,7 +341,7 @@ async function get(params: Record<string, unknown>): Promise<Got> {
     while (gets.size > KEEP_GETS) gets.delete(gets.keys().next().value!);
     upload(path, url).then(
       (size) => Object.assign(started, { state: "done", size }),
-      (error: Error) => Object.assign(started, { state: "failed", error: error.message.slice(0, 300) }),
+      (error: Error) => Object.assign(started, { state: "failed", error: failure(error) }),
     );
     got = started;
   }
@@ -381,9 +397,9 @@ async function clone(params: Record<string, unknown>): Promise<Cloned> {
     const started: Cloned = { state: "running" };
     clones.set(id, started);
     while (clones.size > KEEP_CLONES) clones.delete(clones.keys().next().value!);
-    fetchRepository(url, ref as string | undefined, token as string | undefined).then(
+    withRoom("clone", () => fetchRepository(url, ref as string | undefined, token as string | undefined)).then(
       (result) => Object.assign(started, { state: "done" }, result),
-      (error: Error) => Object.assign(started, { state: "failed", error: error.message.slice(0, 300) }),
+      (error: Error) => Object.assign(started, { state: "failed", error: failure(error) }),
     );
     job = started;
   }
@@ -518,9 +534,11 @@ async function fetchUpload(params: Record<string, unknown>): Promise<Fetched> {
     const started: Fetched = { state: "running" };
     fetches.set(id, started);
     while (fetches.size > KEEP_FETCHES) fetches.delete(fetches.keys().next().value!);
-    unpackUpload(url, sha256, (name as string | undefined) ?? "upload").then(
+    // The October 31 upload that found no room: room is made first, and an unpack that still runs out of it clears
+    // what may go and unpacks again (src/space.ts).
+    withRoom("upload", () => unpackUpload(url, sha256, (name as string | undefined) ?? "upload")).then(
       (result) => Object.assign(started, { state: "done" }, result),
-      (error: Error) => Object.assign(started, { state: "failed", error: error.message.slice(0, 300) }),
+      (error: Error) => Object.assign(started, { state: "failed", error: failure(error) }),
     );
     job = started;
   }
@@ -536,7 +554,7 @@ async function unpackUpload(url: string, sha256: string, name: string): Promise<
   const work = await mkdtemp(join(srcRoot(), ".nomac-upload-"));
   try {
     const file = join(work, "archive");
-    if ((await download(url, file, "upload")) !== sha256) throw new Error("upload_checksum_mismatch: the file is not the one its sha256 names");
+    if ((await download(url, file, "upload", roomFor("upload"))) !== sha256) throw new Error("upload_checksum_mismatch: the file is not the one its sha256 names");
     const out = join(work, "out");
     await mkdir(out);
     const head = await firstBytes(file, 4);
@@ -560,14 +578,21 @@ export const setDownloadLimit = (bytes: number) => (DOWNLOAD_MAX_BYTES = bytes);
 
 /**
  * Downloads a link NoMac signed to file, streamed (never whole in memory), within DOWNLOAD_MS and DOWNLOAD_MAX_BYTES;
- * answers its sha256.
+ * answers its sha256. room, given its size, makes room for it before anything is written.
  */
-async function download(url: string, file: string, what: string): Promise<string> {
+async function download(url: string, file: string, what: string, room?: (bytes: number) => Promise<void>): Promise<string> {
   const response = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_MS) }).catch((error: Error) => {
     throw new Error(`${what}_download_failed: ${error.name === "TimeoutError" ? "timed out" : error.message}`);
   });
   if (!response.ok || !response.body) throw new Error(`${what}_download_failed: ${response.status}`);
-  if (Number(response.headers.get("content-length") ?? 0) > DOWNLOAD_MAX_BYTES) throw new Error(`${what}_too_large: at most ${Math.round(DOWNLOAD_MAX_BYTES / 1024 ** 2)} MiB`);
+  const length = Number(response.headers.get("content-length") ?? 0);
+  if (length > DOWNLOAD_MAX_BYTES) throw new Error(`${what}_too_large: at most ${Math.round(DOWNLOAD_MAX_BYTES / 1024 ** 2)} MiB`);
+  if (room && length > 0) {
+    await room(length).catch(async (error: Error) => {
+      await response.body?.cancel().catch(() => undefined);
+      throw error;
+    });
+  }
   const hash = createHash("sha256");
   let bytes = 0;
   await pipeline(Readable.fromWeb(response.body as never), async function* (chunks: AsyncIterable<Buffer>) {
@@ -923,21 +948,28 @@ async function saveState(name: string, upload?: StateTransfer): Promise<StateJob
   const device = pickDevice(await listDevices(true), undefined, await heldDevice());
   const data = await dataPathOf(device.udid);
   const dir = join(statesDir(), name), saving = `${dir}.saving`;
+  // Room for the copy before the phone goes down (src/space.ts): about the largest copy here, the same phone's state
+  // again most often.
+  await ensureRoom("save", Math.max(0, ...(await listStates()).map((s) => s.bytes)));
   await shutDown(device.udid);
   let uploading: Promise<number> | undefined, result: StateJob;
   try {
-    await rm(saving, { recursive: true, force: true });
-    await mkdir(saving, { recursive: true });
-    await copyExcept(data, join(saving, "data"), [...REBUILT, SYSTEM_ASSETS]);
-    const bytes = Number((await run("/usr/bin/du", ["-sk", saving], { timeoutMs: 60_000 })).stdout.split(/\s/)[0]) * 1024;
-    const meta: SavedState = { name, bytes, saved_at: new Date().toISOString(), device: device.name, runtime: device.runtime };
-    await writeFile(join(saving, "state.json"), JSON.stringify(meta));
+    // A copy that runs out of room clears what may go and copies again, from the start.
+    const meta = await retryWithRoom("save", async () => {
+      await rm(saving, { recursive: true, force: true });
+      await mkdir(saving, { recursive: true });
+      await copyExcept(data, join(saving, "data"), [...REBUILT, SYSTEM_ASSETS]);
+      const bytes = Number((await run("/usr/bin/du", ["-sk", saving], { timeoutMs: 60_000 })).stdout.split(/\s/)[0]) * 1024;
+      const saved: SavedState = { name, bytes, saved_at: new Date().toISOString(), device: device.name, runtime: device.runtime };
+      await writeFile(join(saving, "state.json"), JSON.stringify(saved));
+      return saved;
+    });
     await rm(dir, { recursive: true, force: true });
     await rename(saving, dir);
     // Kept in NoMac's storage too, so it restores on any phone: it uploads while the phone boots again.
     uploading = upload ? uploadState(statesDir(), name, upload.url, upload.key, tmpdir()) : undefined;
     uploading?.catch(() => {});
-    result = { state: "done", bytes, device: `${device.name} (${device.runtime})`, saved_at: meta.saved_at };
+    result = { state: "done", bytes: meta.bytes, device: `${device.name} (${device.runtime})`, saved_at: meta.saved_at };
   } finally {
     await rm(saving, { recursive: true, force: true });
     await bootAgain(device.udid);
@@ -945,23 +977,32 @@ async function saveState(name: string, upload?: StateTransfer): Promise<StateJob
   if (uploading) {
     await uploading.catch((error: Error) => { throw new Error(`saved on this phone, but not kept for other phones: ${error.message}`); });
     result.uploaded = true;
+    // In NoMac's storage now, so the copy here is a cache of it, cleared when the workspace needs the room.
+    await markStored(dir, result.saved_at!);
   }
   return result;
 }
 
 async function restoreState(name: string, fetch?: StateTransfer & { savedAt: string }): Promise<StateJob> {
   const dir = join(statesDir(), name);
+  // Room first (src/space.ts): a clearing under way ends before the copy here is read, and this state is never cleared.
+  await ensureRoom("restore");
   const local = async () => JSON.parse(await readFile(join(dir, "state.json"), "utf8")) as SavedState;
   let meta = await local().catch(() => undefined);
   // A copy here is the state only if it is the same save; otherwise the account's copy in NoMac's storage comes down.
   let fetched = false;
   if (fetch && meta?.saved_at !== fetch.savedAt) {
-    await fetchState(statesDir(), name, fetch.url, fetch.key);
+    // About three times the sealed state's size once unpacked; a fetch that runs out of room clears and fetches again.
+    await retryWithRoom("restore", () => fetchState(statesDir(), name, fetch.url, fetch.key, (bytes) => ensureRoom("restore", 3 * bytes)));
     meta = await local();
     if (meta.saved_at !== fetch.savedAt) throw new Error(`the stored ${name} is not the save asked for`);
     fetched = true;
   }
   if (!meta) throw new Error(`no saved state named ${name}`);
+  // NoMac sent this save, so its storage has it: the copy here is a cache of it from now on. One restored without
+  // (saved before states went to NoMac's storage) is only here and stays.
+  if (fetch) await markStored(dir, meta.saved_at);
+  else await markUsed(dir);
   const device = pickDevice(await listDevices(true), undefined, await heldDevice());
   // A state goes back onto the phone it came from: the same model and iOS.
   if (meta.device !== device.name || meta.runtime !== device.runtime) throw new Error(`${name} was saved on ${meta.device} (${meta.runtime}); this phone is ${device.name} (${device.runtime})`);
@@ -1005,11 +1046,13 @@ async function phoneState(params: Record<string, unknown>): Promise<StateJob> {
     stateJobs.set(id, started);
     while (stateJobs.size > KEEP_STATE_JOBS) stateJobs.delete(stateJobs.keys().next().value!);
     const began = Date.now();
+    // Held from now until it ends, so no clearing of the workspace takes its copy (src/space.ts).
+    const release = hold("state", name);
     (action === "save" ? saveState(name, transfer) : restoreState(name, transfer ? { ...transfer, savedAt: savedAt as string } : undefined)).then(
       // The whole of it: the copy and the phone booted and readable again.
       (result) => Object.assign(started, result, { ms: Date.now() - began }),
-      (error: Error) => Object.assign(started, { state: "failed", error: error.message.slice(0, 300) }),
-    );
+      (error: Error) => Object.assign(started, { state: "failed", error: failure(error) }),
+    ).finally(release);
     job = started;
   }
   const deadline = Date.now() + ANSWER_WITHIN_MS;
