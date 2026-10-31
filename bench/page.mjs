@@ -104,5 +104,21 @@ const put = (key, rows) => {
 };
 put("board", board); put("read", read); put("tap", tap); put("type", type); put("flow", flow); put("list", list); put("cold", cold);
 put("env", envRows); put("notranked", notRankedRows); put("drift", drift);
+
+// The headline: simulator-use's lead in tokens per sign-in, when it has one, from these results.
+const counted = (n) => ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"][n] ?? String(n);
+const byTok = [...ranked].sort((a, b) => a.flow.medianTokens - b.flow.medianTokens);
+const su = byTok[0]?.tool === "simulator-use" ? byTok[0] : null;
+const times = (t) => `${(t.flow.medianTokens / su.flow.medianTokens).toFixed(t.flow.medianTokens / su.flow.medianTokens < 10 ? 1 : 0)}x`;
+const xcodeRun = ranked.find((t) => t.tool === "xcode-mcp"), worst = byTok.at(-1), next = byTok[1];
+const claim = su && next ? `simulator-use read ${num(su.flow.medianTokens)} tokens per sign-in: ${times(next)} fewer than the next tool${xcodeRun && xcodeRun !== next ? `, ${times(xcodeRun)} fewer than Xcode MCP` : ""}${worst !== next && worst !== xcodeRun ? ` and ${times(worst)} fewer than ${worst.name}` : ""}.` : "";
+put("hero", [su
+  ? `    <h1>The most token-efficient iOS Simulator tool for agents.</h1>
+    <p class="lead">${counted(byTok.length)} tools signed in to the same app on the same iPhone 17 Pro Simulator, on one Mac, each through its own MCP server (AXe, which has none, through its command line). ${esc(claim)} Every call was timed and saved, failures included.</p>`
+  : `    <h1>Eight Simulator tools, one sign-in screen.</h1>
+    <p class="lead">Eight tools drove the same app on the same iPhone 17 Pro Simulator, on one Mac, through their own MCP servers (AXe, which has none, through its command line), the way an agent uses them. Every call was timed and saved, failures included.</p>`]);
+const metaText = su ? `${claim} ${counted(byTok.length)} iOS Simulator tools for AI agents on one sign-in flow: time, tokens and reliability, every call published.` : "Eight iOS Simulator tools for coding agents on the same app and the same iPhone 17 Pro Simulator: time and tokens to read the screen, tap, type and sign in. Every call measured and published.";
+put("meta", [`<meta name="description" content="${esc(metaText)}">`]);
+put("ogdesc", [`<meta property="og:description" content="${esc(metaText)}">`]);
 writeFileSync(pagePath, page);
 console.log(`ranked: ${ranked.map((t) => t.tool + (t.label ? `@${t.label}` : "")).join(", ")}; not ranked: ${notRanked.map((t) => t.tool + (t.label ? `@${t.label}` : "")).join(", ") || "none"}`);

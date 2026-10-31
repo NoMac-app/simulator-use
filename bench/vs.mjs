@@ -180,7 +180,12 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
 @media (max-width: 640px) { table.two td { width: auto; } table.two td:first-child { width: 24%; white-space: normal; } .answer p { font-size: 16px; } header .wrap { gap: 16px; } header nav { gap: 14px; font-size: 13.5px; } }
 `;
 
-function shell({ path, title, description, h1, body }) {
+// The date the results were measured, from their folder (bench/results/YYYY-MM-DD), for the structured data.
+const MEASURED_ON = (/(\d{4}-\d{2}-\d{2})/.exec(resultsPath) ?? [])[1];
+const crumb = (items) => ({ "@type": "BreadcrumbList", itemListElement: items.map(([name, item], i) => ({ "@type": "ListItem", position: i + 1, name, item })) });
+const ldScript = (graph) => `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")}</script>`;
+
+function shell({ path, title, description, h1, body, ld = [] }) {
   const url = `${SITE}${path}`;
   return `<!doctype html>
 <html lang="en">
@@ -192,13 +197,17 @@ function shell({ path, title, description, h1, body }) {
 <link rel="canonical" href="${url}">
 <meta name="theme-color" content="#0b0b0c">
 <meta name="color-scheme" content="dark">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="simulator-use">
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${SITE}/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+${ld.length ? ldScript(ld) : ""}
 <style>${baseStyle}${EXTRA_CSS}</style>
 </head>
 <body>
@@ -293,7 +302,13 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
   const description = them.flow?.ok
     ? `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator: ${num(su1.flow.medianTokens)} against ${num(them.flow.medianTokens)} tokens read per sign-in, a sign-in in ${sec(su1.flow.medianMs)}${su2?.flow?.ok ? ` (second run ${sec(su2.flow.medianMs)})` : ""} against ${sec(them.flow.medianMs)}, and what each builds, tests and needs, with sources.`
     : `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator, measured side by side, and what each builds, tests and needs, with sources.`;
-  return { slug: tool.slug, name: tool.name, them, html: shell({ path: `/vs/${tool.slug}`, title: `simulator-use vs ${tool.name}`, description, h1: `simulator-use vs ${tool.name}`, body }) };
+  return { slug: tool.slug, name: tool.name, them, html: shell({ path: `/vs/${tool.slug}`, title: `simulator-use vs ${tool.name} for iOS Simulator automation`, description, h1: `simulator-use vs ${tool.name}`, body,
+    ld: [
+      crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`], [`simulator-use vs ${tool.name}`, `${SITE}/vs/${tool.slug}`]]),
+      { "@type": "TechArticle", headline: `simulator-use vs ${tool.name}`, description, url: `${SITE}/vs/${tool.slug}`, ...(MEASURED_ON ? { datePublished: MEASURED_ON, dateModified: MEASURED_ON } : {}),
+        author: { "@type": "Organization", name: "NoMac", url: "https://nomac.app" }, publisher: { "@type": "Organization", name: "NoMac", url: "https://nomac.app" },
+        about: [{ "@type": "SoftwareApplication", name: "simulator-use", url: `${SITE}/` }, { "@type": "SoftwareApplication", name: tool.name }] },
+    ] }) };
 }
 
 // ---- write -----------------------------------------------------------------------------------------------------------
@@ -302,9 +317,10 @@ const pages = Object.keys(TOOLS).filter((k) => k !== "simulator-use").map(pageFo
 for (const p of pages) writeFileSync(join(outDir, `${p.slug}.html`), p.html);
 const items = pages.map((p) => `      <li><a href="/vs/${p.slug}">simulator-use vs ${esc(p.name)}</a><span>${esc(p.them.flow?.ok ? `${p.name}: sign-in ${sec(p.them.flow.medianMs)}, ${num(p.them.flow.medianTokens)} tokens read (est.)` : `${p.name}: no completed sign-in`)}</span></li>`).join("\n");
 const index = shell({
-  path: "/vs", title: "simulator-use compared",
+  path: "/vs", title: "simulator-use vs other iOS Simulator tools for agents",
+  ld: [crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`]])],
   description: "simulator-use against each tool in the one-Mac benchmark, one page each: measured side by side, what each does with sources, and how to switch.",
-  h1: "simulator-use compared",
+  h1: "simulator-use against every other iOS Simulator tool",
   body: `    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. A sign-in took simulator-use ${esc(sec(su1.flow.medianMs))}${su2?.flow?.ok ? ` (second run ${esc(sec(su2.flow.medianMs))})` : ""} and ${esc(num(su1.flow.medianTokens))} tokens read (est.).</p>
   </div>
   <section style="padding-top:48px">
@@ -314,4 +330,38 @@ ${items}
   </section>`,
 });
 writeFileSync(join(outDir, "index.html"), index);
+
+// llms.txt (llmstxt.org) beside the pages: what simulator-use is, how to install it, and where everything is, for agents.
+const ranks = runs.filter((t) => !t.label && t.flow?.ok).sort((x, y) => x.flow.medianTokens - y.flow.medianTokens);
+const nextTool = ranks[1], xc = ranks.find((t) => t.tool === "xcode-mcp");
+const lead = ranks[0]?.tool === "simulator-use" && nextTool
+  ? `- Benchmark (one Mac, ${ranks.length} tools, the same sign-in flow): simulator-use read ${num(su1.flow.medianTokens)} tokens per sign-in, ${(nextTool.flow.medianTokens / su1.flow.medianTokens).toFixed(1)}x fewer than the next tool${xc ? ` and ${Math.round(xc.flow.medianTokens / su1.flow.medianTokens)}x fewer than Xcode MCP` : ""}; its tool list and instructions take ${num(su1.toolList.totalTokens)} tokens.\n`
+  : "";
+const llms = `# simulator-use
+
+> The fastest, most token-efficient way for an AI agent to use the iOS Simulator. An open-source (MIT) MCP server and CLI for Claude Code, Codex, Cursor and any MCP client: it builds and runs Xcode projects, reads the screen as a few lines of text, taps and types by label or id, and runs XCTest and XCUITest case by case.
+
+- Claude Code: \`claude mcp add simulator-use -- npx -y simulator-use mcp\`
+- Codex: \`codex mcp add simulator-use -- npx -y simulator-use mcp\`
+- Any MCP client: run \`npx -y simulator-use mcp\` as a stdio server. Agents with a shell can use the CLI: \`npx simulator-use look\`.
+- Needs macOS with Xcode, a Simulator runtime and Node 20 or newer. From Linux, Windows or a cloud agent, \`npx simulator-use cloud start\` runs the same tools on a NoMac cloud iPhone, billed per minute.
+- Twelve tools: app_run, devices, device_use, app_control, ui_look, ui_act, app_logs, tests_run, screen_record, job_status, job_cancel, cloud.
+${lead}
+## Docs
+
+- [README](https://raw.githubusercontent.com/NoMac-app/simulator-use/main/README.md): every tool, the screen format, building and running, tests, logs, the cloud, and what it can't do yet
+- [Agent skill](https://raw.githubusercontent.com/NoMac-app/simulator-use/main/skill/SKILL.md): how an agent uses the CLI, in under 2 KB
+- [Source on GitHub](${REPO})
+- [npm package](https://www.npmjs.com/package/simulator-use)
+
+## Benchmarks and comparisons
+
+- [Benchmark](${SITE}/benchmarks): eight iOS Simulator tools on one sign-in flow, every call timed and published
+${pages.map((pg) => `- [simulator-use vs ${pg.name}](${SITE}/vs/${pg.slug})`).join("\n")}
+
+## Optional
+
+- [NoMac](https://nomac.app): cloud Macs and iOS Simulators for AI agents, billed per minute
+`;
+writeFileSync(join(outDir, "..", "llms.txt"), llms);
 console.log(`wrote ${pages.length} pages and the index into ${outDir}: ${pages.map((p) => p.slug).join(", ")}`);

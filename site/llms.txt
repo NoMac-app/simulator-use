@@ -1,0 +1,32 @@
+# simulator-use
+
+> The fastest, most token-efficient way for an AI agent to use the iOS Simulator. An open-source (MIT) MCP server and CLI for Claude Code, Codex, Cursor and any MCP client: it builds and runs Xcode projects, reads the screen as a few lines of text, taps and types by label or id, and runs XCTest and XCUITest case by case.
+
+- Claude Code: `claude mcp add simulator-use -- npx -y simulator-use mcp`
+- Codex: `codex mcp add simulator-use -- npx -y simulator-use mcp`
+- Any MCP client: run `npx -y simulator-use mcp` as a stdio server. Agents with a shell can use the CLI: `npx simulator-use look`.
+- Needs macOS with Xcode, a Simulator runtime and Node 20 or newer. From Linux, Windows or a cloud agent, `npx simulator-use cloud start` runs the same tools on a NoMac cloud iPhone, billed per minute.
+- Twelve tools: app_run, devices, device_use, app_control, ui_look, ui_act, app_logs, tests_run, screen_record, job_status, job_cancel, cloud.
+- Benchmark (one Mac, 8 tools, the same sign-in flow): simulator-use read 194 tokens per sign-in, 3.4x fewer than the next tool and 66x fewer than Xcode MCP; its tool list and instructions take 2,443 tokens.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/NoMac-app/simulator-use/main/README.md): every tool, the screen format, building and running, tests, logs, the cloud, and what it can't do yet
+- [Agent skill](https://raw.githubusercontent.com/NoMac-app/simulator-use/main/skill/SKILL.md): how an agent uses the CLI, in under 2 KB
+- [Source on GitHub](https://github.com/NoMac-app/simulator-use)
+- [npm package](https://www.npmjs.com/package/simulator-use)
+
+## Benchmarks and comparisons
+
+- [Benchmark](https://simulator-use.dev/benchmarks): eight iOS Simulator tools on one sign-in flow, every call timed and published
+- [simulator-use vs Xcode MCP](https://simulator-use.dev/vs/xcode-mcp)
+- [simulator-use vs Argent](https://simulator-use.dev/vs/argent)
+- [simulator-use vs agent-device](https://simulator-use.dev/vs/agent-device)
+- [simulator-use vs mobile-mcp](https://simulator-use.dev/vs/mobile-mcp)
+- [simulator-use vs Maestro MCP](https://simulator-use.dev/vs/maestro-mcp)
+- [simulator-use vs AXe](https://simulator-use.dev/vs/axe)
+- [simulator-use vs MobileBuildMCP](https://simulator-use.dev/vs/mobilebuildmcp)
+
+## Optional
+
+- [NoMac](https://nomac.app): cloud Macs and iOS Simulators for AI agents, billed per minute
