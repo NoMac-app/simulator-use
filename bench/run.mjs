@@ -96,15 +96,19 @@ const LEFTOVERS = ["bench-tools/bin/", "bench-tools/lib/node_modules/", "bench-t
 const stale = killMatching(LEFTOVERS);
 if (stale.length) log(`killed ${stale.length} leftover processes: ${stale.join(" | ").slice(0, 600)}`);
 if (adapter.prepare) adapter.prepare(ctx);
-if (!flag("no-reboot")) { log("rebooting the Simulator"); await reboot(udid); }
-// Device Hub (Xcode 27's Simulator app): open only for a --devicehub run, closed otherwise.
+// Device Hub (Xcode 27's Simulator app): open only for a --devicehub run, closed otherwise. It is closed before the
+// reboot and opened after it: quitting it after the reboot shut the new boot down (November 1, 2026, the first tries of
+// Maestro's and AXe's control run, each after a run that left Device Hub open).
 const hubRunning = () => sh("pgrep", ["-x", "DeviceHub"], { allowFail: true }).status === 0;
-if (deviceHub) { sh("open", ["-a", "DeviceHub"], { allowFail: true }); await sleep(8000); }
-else if (hubRunning()) {
+if (!deviceHub && hubRunning()) {
   sh("osascript", ["-e", 'quit app "DeviceHub"'], { allowFail: true });
   for (let i = 0; i < 20 && hubRunning(); i++) { if (i === 5) sh("killall", ["-9", "DeviceHub"], { allowFail: true }); await sleep(500); }
   await sleep(2000);
 }
+if (!flag("no-reboot")) { log("rebooting the Simulator"); await reboot(udid); }
+if (deviceHub) { sh("open", ["-a", "DeviceHub"], { allowFail: true }); await sleep(8000); }
+// Booted either way before the first call (bootstatus -b boots a Simulator something shut down).
+sh("xcrun", ["simctl", "bootstatus", udid, "-b"], { timeout: 300_000 });
 results.condition = { deviceHubAsked: deviceHub, deviceHubRunning: hubRunning(), simulator: deviceHub ? "Device Hub open" : "headless (simctl boot, no Device Hub)" };
 log("condition", JSON.stringify(results.condition));
 await resetApp(udid, BUNDLE, 3000);
