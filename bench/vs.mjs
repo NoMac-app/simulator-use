@@ -66,7 +66,6 @@ function callsOf(tool) {
 }
 
 // ---- the measured comparison --------------------------------------------------------------------------------------
-const coldMs = (t) => (t?.cold?.firstReadMs ?? 0) + (t?.cold?.setupMs ?? 0);
 const METRICS = [
   { key: "flow", label: "Signing in, step by step", kind: "time", get: (t) => t?.flow?.ok ? t.flow.medianMs : null },
   { key: "flowTokens", label: "Tokens read per sign-in (est.)", kind: "tokens", get: (t) => t?.flow?.ok ? t.flow.medianTokens : null },
@@ -76,7 +75,8 @@ const METRICS = [
   { key: "tap", label: "Tapping a button", kind: "time", get: (t) => t?.tap?.ok ? t.tap.medianMs : null },
   { key: "type", label: "Typing into a field", kind: "time", get: (t) => t?.type?.ok ? t.type.medianMs : null },
   { key: "list", label: "Tool list in the agent's context (est.)", kind: "tokens", get: (t) => (t?.interface === "cli" ? 0 : t?.toolList?.totalTokens ?? null) },
-  { key: "cold", label: "Setup and first read after a boot", kind: "time", get: (t) => (t?.cold?.firstReadOk ? coldMs(t) : null) },
+  // A tool whose docs ask for no setup has none to compare. The first read after a boot is one sample, left to the raw results.
+  { key: "setup", label: "Setup its docs ask for", kind: "time", get: (t) => t?.cold?.setupMs || null },
 ];
 const fmtOf = (m, v) => (m.kind === "time" ? sec(v) : `${num(v)} tokens`);
 // A difference is claimed only when it holds against both of simulator-use's runs, by at least 5%.
@@ -113,7 +113,6 @@ function measuredTable(them, name) {
     ["Typing into a field (median)", (t) => (t.type?.ok ? `${sec(t.type.medianMs)}${t.type.ok < t.type.n ? ` (${ofN(t.type)})` : ""}` : "none shown")],
     ["Tool list in context (est.)", (t) => (t.interface === "cli" ? "none (CLI)" : num(t.toolList.totalTokens))],
     ["Setup its docs ask for", (t) => (t.cold?.setupMs ? sec(t.cold.setupMs) : "none")],
-    ["First read after a boot", (t) => `${sec(t.cold?.firstReadMs)}${t.cold?.firstReadOk ? "" : " (failed)"}`],
   ];
   const head = `<tr><th></th><th class="n">${esc(name)}</th><th class="n">simulator-use</th>${su2 ? `<th class="n">simulator-use, second run</th>` : ""}</tr>`;
   const body = rows.map(([label, f]) => `<tr><td>${esc(label)}</td>${cols.map((t) => `<td class="n">${esc(v(t, f))}</td>`).join("")}</tr>`).join("\n");
@@ -333,8 +332,11 @@ writeFileSync(join(outDir, "index.html"), index);
 // llms.txt (llmstxt.org) beside the pages: what simulator-use is, how to install it, and where everything is, for agents.
 const ranks = runs.filter((t) => !t.label && t.flow?.ok).sort((x, y) => x.flow.medianTokens - y.flow.medianTokens);
 const nextTool = ranks[1], xc = ranks.find((t) => t.tool === "xcode-mcp");
+// Its sign-in time too, when it is the fastest step by step and batched (where tools have a batch).
+const quickest = (get) => ranks.filter((t) => get(t) != null).sort((x, y) => get(x) - get(y))[0];
+const fastestBoth = quickest((t) => t.flow.medianMs) === ranks[0] && ranks[0].flowBatch?.ok && quickest((t) => (t.flowBatch?.ok ? t.flowBatch.medianMs : null)) === ranks[0];
 const lead = ranks[0]?.tool === "simulator-use" && nextTool
-  ? `- Benchmark (one Mac, ${ranks.length} tools, the same sign-in flow): simulator-use read ${num(su1.flow.medianTokens)} tokens per sign-in, ${(nextTool.flow.medianTokens / su1.flow.medianTokens).toFixed(1)}x fewer than the next tool${xc ? ` and ${Math.round(xc.flow.medianTokens / su1.flow.medianTokens)}x fewer than Xcode MCP` : ""}; its tool list and instructions take ${num(su1.toolList.totalTokens)} tokens.\n`
+  ? `- Benchmark (one Mac, ${ranks.length} tools, the same sign-in flow): simulator-use read ${num(su1.flow.medianTokens)} tokens per sign-in, ${(nextTool.flow.medianTokens / su1.flow.medianTokens).toFixed(1)}x fewer than the next tool${xc ? ` and ${Math.round(xc.flow.medianTokens / su1.flow.medianTokens)}x fewer than Xcode MCP` : ""}${fastestBoth ? `, and signed in fastest (${sec(su1.flow.medianMs)} step by step, ${sec(su1.flowBatch.medianMs)} batched)` : ""}; its tool list and instructions take ${num(su1.toolList.totalTokens)} tokens.\n`
   : "";
 const llms = `# simulator-use
 

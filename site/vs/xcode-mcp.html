@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://simulator-use.dev/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs Xcode MCP","item":"https://simulator-use.dev/vs/xcode-mcp"}]},{"@type":"TechArticle","headline":"simulator-use vs Xcode MCP","description":"simulator-use and Xcode MCP on the same iPhone 17 Pro Simulator: 194 against 12,732 tokens read per sign-in, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/xcode-mcp","datePublished":"2026-10-31","dateModified":"2026-10-31","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"Xcode MCP"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs Xcode MCP","item":"https://simulator-use.dev/vs/xcode-mcp"}]},{"@type":"TechArticle","headline":"simulator-use vs Xcode MCP","description":"simulator-use and Xcode MCP on the same iPhone 17 Pro Simulator: 194 against 12,732 tokens read per sign-in, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/xcode-mcp","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"Xcode MCP"}]}]}</script>
 <style>
 :root {
   --bg: #0b0b0c;
@@ -131,22 +131,21 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
 
   <section id="measured">
     <h2>Measured side by side</h2>
-    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of October 31, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of November 1, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
     <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">Xcode MCP</th><th class="n">simulator-use</th></tr></thead><tbody>
-<tr><td>Signing in, step by step</td><td class="n">3.71 s</td><td class="n">4.66 s</td></tr>
+<tr><td>Signing in, step by step</td><td class="n">3.58 s</td><td class="n">3.50 s</td></tr>
 <tr><td>Tokens read per sign-in (est.)</td><td class="n">12,732</td><td class="n">194</td></tr>
 <tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Signing in, batched</td><td class="n">no batched run</td><td class="n">3.69 s</td></tr>
+<tr><td>Signing in, batched</td><td class="n">no batched run</td><td class="n">2.87 s</td></tr>
 <tr><td>Tokens read, batched (est.)</td><td class="n"></td><td class="n">179</td></tr>
 <tr><td>Batched sign-ins completed</td><td class="n"></td><td class="n">10 of 10</td></tr>
-<tr><td>Reading the screen (median)</td><td class="n">0.10 s</td><td class="n">0.21 s</td></tr>
-<tr><td>Tapping a button (median)</td><td class="n">0.67 s</td><td class="n">1.17 s</td></tr>
-<tr><td>Typing into a field (median)</td><td class="n">1.13 s</td><td class="n">1.22 s</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.09 s</td><td class="n">0.19 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">0.71 s</td><td class="n">0.68 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">1.13 s</td><td class="n">1.14 s</td></tr>
 <tr><td>Tool list in context (est.)</td><td class="n">19,620</td><td class="n">2,443</td></tr>
-<tr><td>Setup its docs ask for</td><td class="n">8.57 s</td><td class="n">0.27 s</td></tr>
-<tr><td>First read after a boot</td><td class="n">6.41 s</td><td class="n">14.50 s</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">4.21 s</td><td class="n">0.12 s</td></tr>
 </tbody></table></div>
-    <p class="fine">Xcode MCP 27.0 (27A266a), simulator-use 0.14.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">bench/results/2026-10-31</a>.</p>
+    <p class="fine">Xcode MCP 27.0 (27A266a), simulator-use 0.15.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">bench/results/2026-11-01</a>.</p>
   </section>
 
   <section id="what">
@@ -171,6 +170,7 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
       <li>Tokens read per sign-in (est.): 194 tokens against Xcode MCP's 12,732 tokens.</li>
       <li>Tokens per screen read (est.): 72 tokens against Xcode MCP's 2,410 tokens.</li>
       <li>Tool list in the agent's context (est.): 2,443 tokens against Xcode MCP's 19,620 tokens.</li>
+      <li>Setup its docs ask for: 0.12 s against Xcode MCP's 4.21 s.</li>
     </ul>
     <p class="fine">A measured difference is listed when it is 5% or more.</p>
   </section>
@@ -193,7 +193,7 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
 
   <section id="sources">
     <h2>Sources</h2>
-    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-10-31">the raw results</a>.</p>
+    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">the raw results</a>.</p>
     <ul class="notes">
       <li><a href="https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode">Apple: Giving external agents access to Xcode</a></li>
       <li><a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a></li>

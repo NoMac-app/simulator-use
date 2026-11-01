@@ -66,13 +66,14 @@ const flow = boardRuns.map((t) => `<tr>${name(t)}${cell(sec(t.flow.medianMs))}${
 const oncePerTool = tools.map((tool) => ranked.find((t) => t.tool === tool) ?? runs.find((t) => t.tool === tool && !t.label) ?? runs.find((t) => t.tool === tool));
 const plain = (t) => `<td>${esc(t.name)} <span class="v">${esc(version(t))}</span></td>`;
 const list = [...oncePerTool].sort((a, b) => a.toolList.totalTokens - b.toolList.totalTokens).map((t) => `<tr>${plain(t)}<td class="n">${t.interface === "cli" ? "CLI" : num(t.toolList.count)}</td><td class="n">${t.interface === "cli" ? "" : num(t.toolList.definitionsTokens)}</td><td class="n">${t.interface === "cli" ? "" : num(t.toolList.instructionsTokens)}</td><td class="n">${t.interface === "cli" ? "none" : num(t.toolList.totalTokens)}</td></tr>`);
-const cold = [...oncePerTool].sort((a, b) => a.name.localeCompare(b.name)).map((t) => `<tr>${name(t)}<td class="n">${t.cold.setupMs ? sec(t.cold.setupMs) : "none"}</td><td class="n">${sec(t.cold.firstReadMs)}${t.cold.firstReadOk ? "" : " (the read failed)"}</td></tr>`);
+// Setup only: the first read after a boot is one sample per tool, kept in the raw results.
+const cold = [...oncePerTool].sort((a, b) => (a.cold.setupMs ?? 0) - (b.cold.setupMs ?? 0)).map((t) => `<tr>${name(t)}<td class="n">${t.cold.setupMs ? sec(t.cold.setupMs) : "none"}</td></tr>`);
 
 // Not ranked: the plain counts of each such run, and its condition.
 const counts = (t) => [...(t.flow?.ok ? [`sign-in ${sec(t.flow.medianMs)}`] : []), `signed in ${ofN(t.flow)}`, `taps that reached the app ${ofN(t.tap)}`, `typings shown ${ofN(t.type)}`, `screen reads ${ofN(t.read)}${t.read?.ok ? ` (median ${sec(t.read.medianMs)})` : ""}`, ...(t.flowBatch ? [`batched sign-ins ${ofN(t.flowBatch)}`] : [])].join("; ");
 const why = (t) => (t.label === "last" ? "Second run, after the other seven tools; Simulator headless"
-  : t.label?.includes("devicehub") ? "Second run, after all the others; Device Hub open"
-  : t.label === "control" ? "Third run, last of all; Simulator headless again"
+  : t.label?.includes("devicehub") ? "Second run; Device Hub open"
+  : t.label === "control" ? "Third run; Simulator headless again"
   : "Simulator headless");
 const notRankedRows = notRanked.filter((t) => t.tool !== "simulator-use").map((t) => `<tr><td>${esc(t.name)} <span class="v">${esc(version(t))}</span></td><td>${esc(why(t))}</td><td>${esc(counts(t))}</td></tr>`);
 
@@ -111,7 +112,14 @@ const byTok = [...ranked].sort((a, b) => a.flow.medianTokens - b.flow.medianToke
 const su = byTok[0]?.tool === "simulator-use" ? byTok[0] : null;
 const times = (t) => `${(t.flow.medianTokens / su.flow.medianTokens).toFixed(t.flow.medianTokens / su.flow.medianTokens < 10 ? 1 : 0)}x`;
 const xcodeRun = ranked.find((t) => t.tool === "xcode-mcp"), worst = byTok.at(-1), next = byTok[1];
-const claim = su && next ? `simulator-use read ${num(su.flow.medianTokens)} tokens per sign-in: ${times(next)} fewer than the next tool${xcodeRun && xcodeRun !== next ? `, ${times(xcodeRun)} fewer than Xcode MCP` : ""}${worst !== next && worst !== xcodeRun ? ` and ${times(worst)} fewer than ${worst.name}` : ""}.` : "";
+// And its sign-in time, when it is the fastest of the ranked runs: step by step, and batched where tools have a batch.
+const fastest = (get) => ranked.filter((t) => get(t) != null).sort((a, b) => get(a) - get(b))[0];
+const stepFirst = su && fastest((t) => (t.flow?.ok ? t.flow.medianMs : null)) === su;
+const batchFirst = su && su.flowBatch?.ok && fastest((t) => (t.flowBatch?.ok ? t.flowBatch.medianMs : null)) === su;
+const speed = stepFirst && batchFirst ? ` It also signed in fastest: ${sec(su.flow.medianMs)} step by step and ${sec(su.flowBatch.medianMs)} batched.`
+  : stepFirst ? ` It also signed in fastest step by step, in ${sec(su.flow.medianMs)}.`
+  : batchFirst ? ` Batched, it also signed in fastest, in ${sec(su.flowBatch.medianMs)}.` : "";
+const claim = su && next ? `simulator-use read ${num(su.flow.medianTokens)} tokens per sign-in: ${times(next)} fewer than the next tool${xcodeRun && xcodeRun !== next ? `, ${times(xcodeRun)} fewer than Xcode MCP` : ""}${worst !== next && worst !== xcodeRun ? ` and ${times(worst)} fewer than ${worst.name}` : ""}.${speed}` : "";
 put("hero", [su
   ? `    <h1>The most token-efficient iOS Simulator tool for agents.</h1>
     <p class="lead">${counted(byTok.length)} tools signed in to the same app on the same iPhone 17 Pro Simulator, on one Mac, each through its own MCP server (AXe, which has none, through its command line). ${esc(claim)} Every call was timed and saved, failures included.</p>`

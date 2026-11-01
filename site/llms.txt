@@ -7,7 +7,7 @@
 - Any MCP client: run `npx -y simulator-use mcp` as a stdio server. Agents with a shell can use the CLI: `npx simulator-use look`.
 - Needs macOS with Xcode, a Simulator runtime and Node 20 or newer. From Linux, Windows or a cloud agent, `npx simulator-use cloud start` runs the same tools on a NoMac cloud iPhone, billed per minute.
 - Twelve tools: app_run, devices, device_use, app_control, ui_look, ui_act, app_logs, tests_run, screen_record, job_status, job_cancel, cloud.
-- Benchmark (one Mac, 8 tools, the same sign-in flow): simulator-use read 194 tokens per sign-in, 3.4x fewer than the next tool and 66x fewer than Xcode MCP; its tool list and instructions take 2,443 tokens.
+- Benchmark (one Mac, 8 tools, the same sign-in flow): simulator-use read 194 tokens per sign-in, 3.4x fewer than the next tool and 66x fewer than Xcode MCP, and signed in fastest (3.50 s step by step, 2.87 s batched); its tool list and instructions take 2,443 tokens.
 
 ## Docs
 

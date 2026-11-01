@@ -8,7 +8,7 @@ export BENCH_TOOLS=${BENCH_TOOLS:-$HOME/bench-tools}
 mkdir -p "$BENCH_TOOLS"
 
 # The versions tested (bench/results/<date>/*.json record what actually ran).
-SIMULATOR_USE=0.14.0
+SIMULATOR_USE=0.15.0
 MOBILEBUILDMCP=2.7.1
 MOBILE_MCP=1.0.15
 AGENT_DEVICE=0.21.35
