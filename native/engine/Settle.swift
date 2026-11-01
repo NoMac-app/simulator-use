@@ -169,7 +169,9 @@ func readOptions(keys: Set<FBAXKeys>, nested: Bool) -> String {
 /**
  * A few points of the kept read's screen, read again one point each (a few milliseconds): it is given again only when
  * what the phone says is at each point is an element the kept read has there, with the same label, value, id, role
- * and frame. The points: up to two text fields (their text), and the top, bottom and middle labelled leaves. A hit
+ * and frame. The points: every text field on the display, up to ten (their text: a character added at a field's end
+ * is as narrow as a caret, so only a field's own value tells them apart), and the top, bottom and middle labelled
+ * leaves. A hit
  * test answers the element that takes a touch there (a tab's button, not its icon), so any element of the kept read
  * at that point may be the answer. Nil when all agree, else what differed.
  */
@@ -187,10 +189,10 @@ func spotCheck(_ simulator: FBSimulator, _ tree: Any) async -> String? {
   let fields = all.filter { ["AXTextField", "AXTextArea", "AXSearchField", "AXSecureTextField"].contains($0["role"] as? String ?? "") && frameOf($0).map(onDisplay) == true }
   let leaves = all.filter { (($0["children"] as? [Any]) ?? []).isEmpty && !(($0["AXLabel"] as? String) ?? "").isEmpty && frameOf($0).map(onDisplay) == true }
     .sorted { (frameOf($0)?.midY ?? 0) < (frameOf($1)?.midY ?? 0) }
-  // At most four: two fields, the top and bottom labelled leaves, and the middle one while there is room.
-  var probes = Array(fields.prefix(2))
+  // Every field (ten at most, a few milliseconds each), then the top, bottom and middle labelled leaves.
+  var probes = Array(fields.prefix(10))
   if !leaves.isEmpty { probes.append(leaves[0]); if leaves.count > 1 { probes.append(leaves[leaves.count - 1]) } }
-  if leaves.count > 2 && probes.count < 4 { probes.append(leaves[leaves.count / 2]) }
+  if leaves.count > 2 { probes.append(leaves[leaves.count / 2]) }
   let text = { (n: [String: Any], key: String) in n[key].map { "\($0)" } ?? "" }
   let same = { (a: [String: Any], b: [String: Any]) -> Bool in
     // pid too: the same screen drawn again by a relaunched app is another app's tree.
