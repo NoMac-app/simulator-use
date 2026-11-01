@@ -430,7 +430,9 @@ test("the replay lists every call without what was typed, and its stop leaves th
   assert.deepEqual(log.calls.map((c) => c.what), ['fill #password … · tap "Sign in" · type …', "open_url (a link)", "ui_look", "fill #password … · fill #pin … · type … · fill #code … · (a step that did not parse)", "app_logs"]);
   assert.deepEqual(log.calls.map((c) => c.said), ["Step 1 failed", "Opened the link.", "Home screen", "Step 2 failed", "Read the app's logs."]);
   assert.equal(log.calls[0]!.ok, false);
-  assert.ok((log.calls[0]!.at_ms as number) >= 300);
+  // Counted from the recording's start: 300 ms of waiting, give or take the timer's millisecond (Linux runners with
+  // Node 24 woke a hair early on November 1, 2026).
+  assert.ok((log.calls[0]!.at_ms as number) >= 290);
   assert.doesNotMatch(readFileSync(join(replayDir(), "log.json"), "utf8"), /hunter|secret words|token=abc/);
   // A call after the stop is not listed anywhere.
   noteCall("ui_look", {}, Date.now(), { content: [] });
