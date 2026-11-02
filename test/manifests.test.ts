@@ -13,4 +13,10 @@ test("the plugin, the registry entry and the package name one version and one co
   assert.deepEqual(server.packages.map((p: { identifier: string; version: string }) => [p.identifier, p.version]), [[pkg.name, pkg.version]]);
   assert.deepEqual(read(".mcp.json").mcpServers["simulator-use"], { command: "npx", args: ["-y", "simulator-use", "mcp"] });
   assert.equal(read(".claude-plugin/marketplace.json").plugins[0].name, read(".claude-plugin/plugin.json").name);
+  // Cursor's marketplace and Gemini CLI's gallery read these two from the repo.
+  assert.equal(read(".cursor-plugin/plugin.json").version, pkg.version, "bump .cursor-plugin/plugin.json with the package");
+  assert.equal(read(".cursor-plugin/plugin.json").mcpServers, ".mcp.json");
+  const gemini = read("gemini-extension.json");
+  assert.equal(gemini.version, pkg.version, "bump gemini-extension.json with the package");
+  assert.deepEqual(gemini.mcpServers["simulator-use"], read(".mcp.json").mcpServers["simulator-use"]);
 });
