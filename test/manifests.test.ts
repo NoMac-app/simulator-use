@@ -11,7 +11,8 @@ test("the plugin, the registry entry and the package name one version and one co
   assert.equal(server.name, pkg.mcpName);
   assert.equal(server.version, pkg.version, "bump server.json (and its package's version) with the package");
   assert.deepEqual(server.packages.map((p: { identifier: string; version: string }) => [p.identifier, p.version]), [[pkg.name, pkg.version]]);
-  assert.deepEqual(read(".mcp.json").mcpServers["simulator-use"], { command: "npx", args: ["-y", "simulator-use", "mcp"] });
+  // Pinned: the Claude directory refuses an npx launcher without an exact version, and plugin users update with the repo.
+  assert.deepEqual(read(".mcp.json").mcpServers["simulator-use"], { command: "npx", args: ["-y", `simulator-use@${pkg.version}`, "mcp"] });
   assert.equal(read(".claude-plugin/marketplace.json").plugins[0].name, read(".claude-plugin/plugin.json").name);
   // Cursor's marketplace and Gemini CLI's gallery read these two from the repo.
   assert.equal(read(".cursor-plugin/plugin.json").version, pkg.version, "bump .cursor-plugin/plugin.json with the package");
