@@ -200,6 +200,8 @@ $ simulator-use call ui_look '{"find":"Sign In"}'
 
 ## Install
 
+Support: [GitHub issues](https://github.com/NoMac-app/simulator-use/issues) or support@nomac.app. Privacy policy: https://nomac.app/privacy (the local tools send nothing anywhere; cloud mode runs on NoMac).
+
 Needs macOS with Xcode and a Simulator runtime, and Node 20 or newer.
 
 **No Mac?** If your agent works on Linux, Windows or in a cloud sandbox, [NoMac](https://nomac.app) gives it a real Mac in the cloud, with Xcode and the iOS Simulator, billed per minute.
@@ -212,7 +214,7 @@ claude mcp add simulator-use -- npx -y simulator-use mcp
 codex mcp add simulator-use -- npx -y simulator-use mcp
 ```
 
-Claude Code also takes it as a plugin: `/plugin install simulator-use --marketplace NoMac-app/simulator-use`. Gemini CLI as an extension: `gemini extensions install https://github.com/NoMac-app/simulator-use`.
+Claude Code also takes it as a plugin: `/plugin install simulator-use --marketplace NoMac-app/simulator-use`. Gemini CLI as an extension: `gemini extensions install https://github.com/NoMac-app/simulator-use`. Clients of the open [Agent Plugins](https://agent-plugins.org) format (Kiro and others) read `plugin.json` and `mcp.json` at the root.
 
 Cursor, Windsurf, VS Code and other clients that take a JSON config:
 

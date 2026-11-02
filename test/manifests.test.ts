@@ -20,4 +20,7 @@ test("the plugin, the registry entry and the package name one version and one co
   const gemini = read("gemini-extension.json");
   assert.equal(gemini.version, pkg.version, "bump gemini-extension.json with the package");
   assert.deepEqual(gemini.mcpServers["simulator-use"], read(".mcp.json").mcpServers["simulator-use"]);
+  // The open Agent Plugins format (Kiro, Codex and others) at the root.
+  assert.equal(read("plugin.json").version, pkg.version, "bump plugin.json with the package");
+  assert.deepEqual(read("mcp.json").mcpServers["simulator-use"], { type: "stdio", ...read(".mcp.json").mcpServers["simulator-use"] });
 });
