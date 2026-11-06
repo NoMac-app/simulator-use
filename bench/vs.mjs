@@ -123,7 +123,7 @@ function factsTable(tool) {
   const us = TOOLS["simulator-use"].facts, them = tool.facts;
   const rows = [["License", "license"], ["Builds the app", "builds"], ["Runs tests", "tests"], ["Screen as text", "screen"], ["How it taps", "taps"], ["Cloud option", "cloud"], ["Needs besides Xcode", "needs"]];
   const body = rows.map(([label, k]) => `<tr><td>${esc(label)}</td><td>${claim(them[k])}</td><td>${claim(us[k])}</td></tr>`).join("\n");
-  return `<div class="scroll"><table class="facts two"><thead><tr><th></th><th>${esc(tool.name)}</th><th>simulator-use</th></tr></thead><tbody>\n${body}\n</tbody></table></div>`;
+  return `<div class="scroll"><table class="facts two"><thead><tr><th></th><th>${esc(tool.long ?? tool.name)}</th><th>simulator-use</th></tr></thead><tbody>\n${body}\n</tbody></table></div>`;
 }
 
 function switchingTable(tool) {
@@ -132,7 +132,7 @@ function switchingTable(tool) {
   const cell = (list) => (list?.length ? list.map((c) => `<code class="call">${esc(c)}</code>`).join("") : `<span class="na">none</span>`);
   const body = steps.filter(([, k]) => them[k] || us[k]).map(([label, k]) => `<tr><td>${esc(label)}</td><td>${cell(them[k])}</td><td>${cell(us[k])}</td></tr>`).join("\n");
   const extra = (tool.calls ?? []).map((r) => `<tr><td>${esc(r.step)}</td><td>${claim(r.them)}</td><td>${claim(r.us)}</td></tr>`).join("\n");
-  return `<div class="scroll"><table class="facts two"><thead><tr><th></th><th>${esc(tool.name)}</th><th>simulator-use</th></tr></thead><tbody>\n${body}${extra ? `\n${extra}` : ""}\n</tbody></table></div>`;
+  return `<div class="scroll"><table class="facts two"><thead><tr><th></th><th>${esc(tool.long ?? tool.name)}</th><th>simulator-use</th></tr></thead><tbody>\n${body}${extra ? `\n${extra}` : ""}\n</tbody></table></div>`;
 }
 
 function deviceHubSection(tool) {
@@ -238,6 +238,9 @@ ${body}
 
 function pageFor(key) {
   const tool = TOOLS[key];
+  // The name in the page's title, heading and links; prose uses the short name.
+  const long = tool.long ?? tool.name;
+  const readOn = tool.readOn ?? READ_ON;
   const them = runOf(tool.run);
   if (!them) throw new Error(`no run for ${tool.run} in ${dir}`);
   const { forThem, forUs } = wins(them, tool.name);
@@ -265,13 +268,13 @@ function pageFor(key) {
   <section id="measured">
     <h2>Measured side by side</h2>
     <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of ${esc(dateOf(su1))}: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server${them.interface === "cli" ? ` (${esc(tool.name)} through its command line)` : ""}. Times are medians; tokens are estimates (characters / 4).</p>
-    ${measuredTable(them, tool.name)}
+    ${measuredTable(them, long)}
     <p class="fine">${esc(tool.name)} ${esc(version(them))}, simulator-use ${esc(version(su1))}. Every call is in <a href="${REPO}/tree/main/${resultsPath}">${esc(resultsPath)}</a>.</p>
   </section>
 ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
   <section id="what">
     <h2>What each does</h2>
-    <p class="sub">From each tool's own README, license and docs, read on ${esc(READ_ON)}.</p>
+    <p class="sub">From each tool's own README, license and docs, read on ${esc(readOn)}.</p>
     ${factsTable(tool)}
   </section>
 
@@ -292,20 +295,20 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
 
   <section id="sources">
     <h2>Sources</h2>
-    <p class="sub">Read on ${esc(READ_ON)}. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="${REPO}/tree/main/${resultsPath}">the raw results</a>.</p>
+    <p class="sub">Read on ${esc(readOn)}. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="${REPO}/tree/main/${resultsPath}">the raw results</a>.</p>
     <ul class="notes">
       ${sources}
     </ul>
   </section>`;
   const description = them.flow?.ok
-    ? `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator: ${num(su1.flow.medianTokens)} against ${num(them.flow.medianTokens)} tokens read per sign-in${su1.flow.medianMs < them.flow.medianMs * 0.95 ? `, a sign-in in ${sec(su1.flow.medianMs)} against ${sec(them.flow.medianMs)}` : ""}, and what each builds, tests and needs, with sources.`
-    : `simulator-use and ${tool.name} on the same iPhone 17 Pro Simulator, measured side by side, and what each builds, tests and needs, with sources.`;
-  return { slug: tool.slug, name: tool.name, them, html: shell({ path: `/vs/${tool.slug}`, title: `simulator-use vs ${tool.name} for iOS Simulator automation`, description, h1: `simulator-use vs ${tool.name}`, body,
+    ? `simulator-use and ${long} on the same iPhone 17 Pro Simulator: ${num(su1.flow.medianTokens)} against ${num(them.flow.medianTokens)} tokens read per sign-in${su1.flow.medianMs < them.flow.medianMs * 0.95 ? `, a sign-in in ${sec(su1.flow.medianMs)} against ${sec(them.flow.medianMs)}` : ""}, and what each builds, tests and needs, with sources.`
+    : `simulator-use and ${long} on the same iPhone 17 Pro Simulator, measured side by side, and what each builds, tests and needs, with sources.`;
+  return { slug: tool.slug, name: tool.name, long, them, html: shell({ path: `/vs/${tool.slug}`, title: `simulator-use vs ${long} for iOS Simulator automation`, description, h1: `simulator-use vs ${long}`, body,
     ld: [
-      crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`], [`simulator-use vs ${tool.name}`, `${SITE}/vs/${tool.slug}`]]),
-      { "@type": "TechArticle", headline: `simulator-use vs ${tool.name}`, description, url: `${SITE}/vs/${tool.slug}`, ...(MEASURED_ON ? { datePublished: MEASURED_ON, dateModified: MEASURED_ON } : {}),
+      crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`], [`simulator-use vs ${long}`, `${SITE}/vs/${tool.slug}`]]),
+      { "@type": "TechArticle", headline: `simulator-use vs ${long}`, description, url: `${SITE}/vs/${tool.slug}`, ...(MEASURED_ON ? { datePublished: MEASURED_ON, dateModified: MEASURED_ON } : {}),
         author: { "@type": "Organization", name: "NoMac", url: "https://nomac.app" }, publisher: { "@type": "Organization", name: "NoMac", url: "https://nomac.app" },
-        about: [{ "@type": "SoftwareApplication", name: "simulator-use", url: `${SITE}/` }, { "@type": "SoftwareApplication", name: tool.name }] },
+        about: [{ "@type": "SoftwareApplication", name: "simulator-use", url: `${SITE}/` }, { "@type": "SoftwareApplication", name: long }] },
     ] }) };
 }
 
@@ -313,13 +316,13 @@ ${tool.deviceHub ? `\n  ${deviceHubSection(tool)}\n` : ""}
 mkdirSync(outDir, { recursive: true });
 const pages = Object.keys(TOOLS).filter((k) => k !== "simulator-use").map(pageFor);
 for (const p of pages) writeFileSync(join(outDir, `${p.slug}.html`), p.html);
-const items = pages.map((p) => `      <li><a href="/vs/${p.slug}">simulator-use vs ${esc(p.name)}</a><span>${esc(p.them.flow?.ok ? `${num(p.them.flow.medianTokens)} tokens per sign-in against simulator-use's ${num(su1.flow.medianTokens)} (est.)` : `${p.name}: no completed sign-in`)}</span></li>`).join("\n");
+const items = pages.map((p) => `      <li><a href="/vs/${p.slug}">simulator-use vs ${esc(p.long)}</a><span>${esc(p.them.flow?.ok ? `${num(p.them.flow.medianTokens)} tokens per sign-in against simulator-use's ${num(su1.flow.medianTokens)} (est.)` : `${p.name}: no completed sign-in`)}</span></li>`).join("\n");
 const index = shell({
   path: "/vs", title: "simulator-use vs other iOS Simulator tools for agents",
   ld: [crumb([["simulator-use", `${SITE}/`], ["Compare", `${SITE}/vs`]])],
   description: "simulator-use against each tool in the one-Mac benchmark, one page each: measured side by side, what each does with sources, and how to switch.",
   h1: "simulator-use against every other iOS Simulator tool",
-  body: `    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. simulator-use read ${esc(num(su1.flow.medianTokens))} tokens per sign-in (est.), the fewest of every tool measured.</p>
+  body: `    <p class="lead">One page per tool from the <a href="/benchmarks">benchmark</a>: the numbers side by side, what each does from its own docs, and the calls to switch. simulator-use read ${esc(num(su1.flow.medianTokens))} tokens per sign-in (est.)${runs.filter((t) => !t.label && t.flow?.ok).every((t) => t.flow.medianTokens >= su1.flow.medianTokens) ? ", the fewest of every tool measured" : ""}.</p>
   </div>
   <section style="padding-top:48px">
     <ul class="vs">
@@ -338,6 +341,7 @@ const fastestBoth = quickest((t) => t.flow.medianMs) === ranks[0] && ranks[0].fl
 const lead = ranks[0]?.tool === "simulator-use" && nextTool
   ? `- Benchmark (one Mac, ${ranks.length} tools, the same sign-in flow): simulator-use read ${num(su1.flow.medianTokens)} tokens per sign-in, ${(nextTool.flow.medianTokens / su1.flow.medianTokens).toFixed(1)}x fewer than the next tool${xc ? ` and ${Math.round(xc.flow.medianTokens / su1.flow.medianTokens)}x fewer than Xcode MCP` : ""}${fastestBoth ? `, and signed in fastest (${sec(su1.flow.medianMs)} step by step, ${sec(su1.flowBatch.medianMs)} batched)` : ""}; its tool list and instructions take ${num(su1.toolList.totalTokens)} tokens.\n`
   : "";
+const toolCount = (["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"])[new Set(runs.map((t) => t.tool)).size] ?? String(new Set(runs.map((t) => t.tool)).size);
 const llms = `# simulator-use
 
 > The fastest, most token-efficient way for an AI agent to use the iOS Simulator. An open-source (MIT) MCP server and CLI for Claude Code, Codex, Cursor and any MCP client: it builds and runs Xcode projects, reads the screen as a few lines of text, taps and types by label or id, and runs XCTest and XCUITest case by case.
@@ -357,8 +361,8 @@ ${lead}
 
 ## Benchmarks and comparisons
 
-- [Benchmark](${SITE}/benchmarks): eight iOS Simulator tools on one sign-in flow, every call timed and published
-${pages.map((pg) => `- [simulator-use vs ${pg.name}](${SITE}/vs/${pg.slug})`).join("\n")}
+- [Benchmark](${SITE}/benchmarks): ${toolCount} iOS Simulator tools on one sign-in flow, every call timed and published
+${pages.map((pg) => `- [simulator-use vs ${pg.long}](${SITE}/vs/${pg.slug})`).join("\n")}
 
 ## Optional
 

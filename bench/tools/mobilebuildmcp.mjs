@@ -8,7 +8,7 @@ import { lineFor, need } from "./lib.mjs";
 const bin = () => join(process.env.BENCH_TOOLS ?? "", "bin", "mobilebuildmcp");
 const ref = (ctx, what) => need(lineFor(ctx.lastRead, what)?.match(/\b(e\d+)\b/)?.[1], what, "MobileBuildMCP");
 export default {
-  id: "mobilebuildmcp", name: "MobileBuildMCP", kind: "mcp",
+  id: "mobilebuildmcp", name: "MobileBuildMCP (formerly XcodeBuildMCP)", kind: "mcp",
   server: (ctx) => ({ command: bin(), args: ["mcp"], env: { MOBILEBUILDMCP_ENABLED_WORKFLOWS: "simulator,ui-automation", MOBILEBUILDMCP_SIMULATOR_ID: ctx.udid } }),
   version: () => JSON.parse(readFileSync(join(process.env.BENCH_TOOLS ?? "", "lib", "node_modules", "mobilebuildmcp", "package.json"), "utf8")).version,
   async read(ctx) { await ctx.call("snapshot_ui", {}); },

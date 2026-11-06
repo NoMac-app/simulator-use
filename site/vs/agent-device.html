@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>simulator-use vs agent-device for iOS Simulator automation</title>
-<meta name="description" content="simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 3.50 s against 6.85 s, and what each builds, tests and needs, with sources.">
+<meta name="description" content="simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 4.28 s against 7.62 s, and what each builds, tests and needs, with sources.">
 <link rel="canonical" href="https://simulator-use.dev/vs/agent-device">
 <meta name="theme-color" content="#0b0b0c">
 <meta name="color-scheme" content="dark">
@@ -13,12 +13,12 @@
 <meta property="og:site_name" content="simulator-use">
 <meta property="og:url" content="https://simulator-use.dev/vs/agent-device">
 <meta property="og:title" content="simulator-use vs agent-device for iOS Simulator automation">
-<meta property="og:description" content="simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 3.50 s against 6.85 s, and what each builds, tests and needs, with sources.">
+<meta property="og:description" content="simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 4.28 s against 7.62 s, and what each builds, tests and needs, with sources.">
 <meta property="og:image" content="https://simulator-use.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://simulator-use.dev/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs agent-device","item":"https://simulator-use.dev/vs/agent-device"}]},{"@type":"TechArticle","headline":"simulator-use vs agent-device","description":"simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 3.50 s against 6.85 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/agent-device","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"agent-device"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs agent-device","item":"https://simulator-use.dev/vs/agent-device"}]},{"@type":"TechArticle","headline":"simulator-use vs agent-device","description":"simulator-use and agent-device on the same iPhone 17 Pro Simulator: 194 against 664 tokens read per sign-in, a sign-in in 4.28 s against 7.62 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/agent-device","datePublished":"2026-11-06","dateModified":"2026-11-06","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"agent-device"}]}]}</script>
 <style>
 :root {
   --bg: #0b0b0c;
@@ -124,28 +124,28 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
     <div class="answer">
       <p>Pick agent-device if your agent works across platforms (Android, HarmonyOS, TV, macOS, Linux, web) or several agents share one machine: it scopes sessions to each git worktree and replays saved .ad scripts in CI. <span class="src">(<a href="https://github.com/callstack/agent-device">agent-device README</a>)</span></p>
       <p>Pick simulator-use to build and test the Xcode project with the same tool that drives the screen. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://agent-device.dev/docs/commands">agent-device docs: commands (app install)</a>)</span></p>
-      <p class="measured">Measured on one Mac: simulator-use read 194 tokens per sign-in, agent-device 664 (est.); simulator-use signed in in 3.50 s, agent-device in 6.85 s.</p>
+      <p class="measured">Measured on one Mac: simulator-use read 194 tokens per sign-in, agent-device 664 (est.); simulator-use signed in in 4.28 s, agent-device in 7.62 s.</p>
       
     </div>
   </div>
 
   <section id="measured">
     <h2>Measured side by side</h2>
-    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of November 1, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of November 6, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
     <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">agent-device</th><th class="n">simulator-use</th></tr></thead><tbody>
-<tr><td>Signing in, step by step</td><td class="n">6.85 s</td><td class="n">3.50 s</td></tr>
+<tr><td>Signing in, step by step</td><td class="n">7.62 s</td><td class="n">4.28 s</td></tr>
 <tr><td>Tokens read per sign-in (est.)</td><td class="n">664</td><td class="n">194</td></tr>
 <tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Signing in, batched</td><td class="n">5.99 s</td><td class="n">2.87 s</td></tr>
+<tr><td>Signing in, batched</td><td class="n">6.72 s</td><td class="n">3.62 s</td></tr>
 <tr><td>Tokens read, batched (est.)</td><td class="n">327</td><td class="n">179</td></tr>
 <tr><td>Batched sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Reading the screen (median)</td><td class="n">0.05 s</td><td class="n">0.19 s</td></tr>
-<tr><td>Tapping a button (median)</td><td class="n">0.88 s</td><td class="n">0.68 s</td></tr>
-<tr><td>Typing into a field (median)</td><td class="n">2.48 s</td><td class="n">1.14 s</td></tr>
-<tr><td>Tool list in context (est.)</td><td class="n">47,406</td><td class="n">2,443</td></tr>
-<tr><td>Setup its docs ask for</td><td class="n">34.72 s</td><td class="n">0.12 s</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.08 s</td><td class="n">0.30 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">1.31 s</td><td class="n">0.72 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">2.59 s</td><td class="n">1.21 s</td></tr>
+<tr><td>Tool list in context (est.)</td><td class="n">47,544</td><td class="n">2,443</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">59.80 s</td><td class="n">0.19 s</td></tr>
 </tbody></table></div>
-    <p class="fine">agent-device 0.21.35, simulator-use 0.15.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">bench/results/2026-11-01</a>.</p>
+    <p class="fine">agent-device 0.21.36, simulator-use 0.15.1. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-06">bench/results/2026-11-06</a>.</p>
   </section>
 
   <section id="what">
@@ -166,14 +166,14 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
     <h2>Where simulator-use is better</h2>
     <ul class="notes">
       <li>Builds the Xcode project, installs and launches it, and runs its XCTest and XCUITest cases. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></li>
-      <li>Signing in, step by step: 3.50 s against agent-device's 6.85 s.</li>
+      <li>Signing in, step by step: 4.28 s against agent-device's 7.62 s.</li>
       <li>Tokens read per sign-in (est.): 194 tokens against agent-device's 664 tokens.</li>
-      <li>Signing in, batched: 2.87 s against agent-device's 5.99 s.</li>
+      <li>Signing in, batched: 3.62 s against agent-device's 6.72 s.</li>
       <li>Tokens per screen read (est.): 72 tokens against agent-device's 131 tokens.</li>
-      <li>Tapping a button: 0.68 s against agent-device's 0.88 s.</li>
-      <li>Typing into a field: 1.14 s against agent-device's 2.48 s.</li>
-      <li>Tool list in the agent's context (est.): 2,443 tokens against agent-device's 47,406 tokens.</li>
-      <li>Setup its docs ask for: 0.12 s against agent-device's 34.72 s.</li>
+      <li>Tapping a button: 0.72 s against agent-device's 1.31 s.</li>
+      <li>Typing into a field: 1.21 s against agent-device's 2.59 s.</li>
+      <li>Tool list in the agent's context (est.): 2,443 tokens against agent-device's 47,544 tokens.</li>
+      <li>Setup its docs ask for: 0.19 s against agent-device's 59.80 s.</li>
     </ul>
     <p class="fine">A measured difference is listed when it is 5% or more.</p>
   </section>
@@ -194,7 +194,7 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
 
   <section id="sources">
     <h2>Sources</h2>
-    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">the raw results</a>.</p>
+    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-06">the raw results</a>.</p>
     <ul class="notes">
       <li><a href="https://github.com/callstack/agent-device/blob/main/LICENSE">agent-device LICENSE</a></li>
       <li><a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a></li>

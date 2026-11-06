@@ -1,0 +1,554 @@
+{
+ "instructions": "",
+ "tools": [
+  {
+   "name": "get_booted_sim_id",
+   "description": "Get the ID of the currently booted iOS simulator",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   },
+   "annotations": {
+    "title": "Get Booted Simulator ID",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "open_simulator",
+   "description": "Opens the iOS Simulator application",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   },
+   "annotations": {
+    "title": "Open Simulator",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_describe_all",
+   "description": "Describes accessibility information for the entire screen in the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Describe All UI Elements",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_tap",
+   "description": "Tap on the screen in the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "duration": {
+      "description": "Press duration",
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?$"
+     },
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "x": {
+      "type": "number",
+      "description": "The x-coordinate"
+     },
+     "y": {
+      "type": "number",
+      "description": "The x-coordinate"
+     }
+    },
+    "required": [
+     "x",
+     "y"
+    ]
+   },
+   "annotations": {
+    "title": "UI Tap",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_type",
+   "description": "Input text into the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "text": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Text to input"
+     },
+     "method": {
+      "default": "type",
+      "description": "\"type\" (default): presses keys as on a US keyboard; printable ASCII only. \"paste\": use when the keyboard layout is not US (e.g. AZERTY, where \"type\" types wrong characters) or the text is non-ASCII; pastes into the focused field (tap it first), ~2-11 s",
+      "type": "string",
+      "enum": [
+       "type",
+       "paste"
+      ]
+     },
+     "replace": {
+      "default": false,
+      "description": "Paste only: clear the focused field first, e.g. after \"type\" produced wrong characters",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "text"
+    ]
+   },
+   "annotations": {
+    "title": "UI Type",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_swipe",
+   "description": "Swipe on the screen in the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "duration": {
+      "description": "Swipe duration in seconds (e.g., 0.1)",
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?$"
+     },
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "x_start": {
+      "type": "number",
+      "description": "The starting x-coordinate"
+     },
+     "y_start": {
+      "type": "number",
+      "description": "The starting y-coordinate"
+     },
+     "x_end": {
+      "type": "number",
+      "description": "The ending x-coordinate"
+     },
+     "y_end": {
+      "type": "number",
+      "description": "The ending y-coordinate"
+     },
+     "delta": {
+      "default": 1,
+      "description": "The size of each step in the swipe (default is 1)",
+      "type": "number"
+     }
+    },
+    "required": [
+     "x_start",
+     "y_start",
+     "x_end",
+     "y_end"
+    ]
+   },
+   "annotations": {
+    "title": "UI Swipe",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_describe_point",
+   "description": "Returns the accessibility element at given co-ordinates on the iOS Simulator's screen",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "x": {
+      "type": "number",
+      "description": "The x-coordinate"
+     },
+     "y": {
+      "type": "number",
+      "description": "The y-coordinate"
+     }
+    },
+    "required": [
+     "x",
+     "y"
+    ]
+   },
+   "annotations": {
+    "title": "Describe UI Point",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_find_element",
+   "description": "Searches the accessibility tree and returns elements matching the given criteria",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "search": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "minLength": 1
+      },
+      "description": "Array of search strings. An element matches if ANY string matches against its AXLabel or AXUniqueId"
+     },
+     "type": {
+      "description": "Filter by element type (e.g. 'Button', 'StaticText', 'Group'). Case-insensitive exact match",
+      "type": "string"
+     },
+     "matchMode": {
+      "default": "substring",
+      "description": "Match mode for search strings: 'substring' (default) or 'exact'",
+      "type": "string",
+      "enum": [
+       "substring",
+       "exact"
+      ]
+     },
+     "caseSensitive": {
+      "default": false,
+      "description": "Whether search matching is case-sensitive (default: false)",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "search"
+    ]
+   },
+   "annotations": {
+    "title": "Find UI Element",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "ui_view",
+   "description": "Get the image content of a compressed screenshot of the current simulator view",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "View Screenshot",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "screenshot",
+   "description": "Takes a screenshot of the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "output_path": {
+      "type": "string",
+      "maxLength": 1024,
+      "description": "File path where the screenshot will be saved. If relative, it uses the directory specified by the `IOS_SIMULATOR_MCP_DEFAULT_OUTPUT_DIR` env var, or `~/Downloads` if not set."
+     },
+     "type": {
+      "description": "Image format (png, tiff, bmp, gif, or jpeg). Default is png.",
+      "type": "string",
+      "enum": [
+       "png",
+       "tiff",
+       "bmp",
+       "gif",
+       "jpeg"
+      ]
+     },
+     "display": {
+      "description": "Display to capture (internal or external). Default depends on device type.",
+      "type": "string",
+      "enum": [
+       "internal",
+       "external"
+      ]
+     },
+     "mask": {
+      "description": "For non-rectangular displays, handle the mask by policy (ignored, alpha, or black)",
+      "type": "string",
+      "enum": [
+       "ignored",
+       "alpha",
+       "black"
+      ]
+     }
+    },
+    "required": [
+     "output_path"
+    ]
+   },
+   "annotations": {
+    "title": "Take Screenshot",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "record_video",
+   "description": "Records a video of the iOS Simulator using simctl directly",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "output_path": {
+      "description": "Optional output path. If not provided, a default name will be used. The file will be saved in the directory specified by `IOS_SIMULATOR_MCP_DEFAULT_OUTPUT_DIR` or in `~/Downloads` if the environment variable is not set.",
+      "type": "string",
+      "maxLength": 1024
+     },
+     "codec": {
+      "description": "Specifies the codec type: \"h264\" or \"hevc\". Default is \"hevc\".",
+      "type": "string",
+      "enum": [
+       "h264",
+       "hevc"
+      ]
+     },
+     "display": {
+      "description": "Display to capture: \"internal\" or \"external\". Default depends on device type.",
+      "type": "string",
+      "enum": [
+       "internal",
+       "external"
+      ]
+     },
+     "mask": {
+      "description": "For non-rectangular displays, handle the mask by policy: \"ignored\", \"alpha\", or \"black\".",
+      "type": "string",
+      "enum": [
+       "ignored",
+       "alpha",
+       "black"
+      ]
+     },
+     "force": {
+      "description": "Force the output file to be written to, even if the file already exists.",
+      "type": "boolean"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Record Video",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "stop_recording",
+   "description": "Stops the simulator video recording using killall",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {}
+   },
+   "annotations": {
+    "title": "Stop Recording",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "install_app",
+   "description": "Installs an app bundle (.app or .ipa) on the iOS Simulator",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "app_path": {
+      "type": "string",
+      "maxLength": 1024,
+      "description": "Path to the app bundle (.app directory or .ipa file) to install"
+     }
+    },
+    "required": [
+     "app_path"
+    ]
+   },
+   "annotations": {
+    "title": "Install App",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "launch_app",
+   "description": "Launches an app on the iOS Simulator by bundle identifier",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "bundle_id": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "Bundle identifier of the app to launch (e.g., com.apple.mobilesafari)"
+     },
+     "terminate_running": {
+      "description": "Terminate the app if it is already running before launching",
+      "type": "boolean"
+     },
+     "env": {
+      "description": "Environment variables to pass to simctl launch",
+      "type": "object",
+      "propertyNames": {
+       "type": "string"
+      },
+      "additionalProperties": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "bundle_id"
+    ]
+   },
+   "annotations": {
+    "title": "Launch App",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "terminate_app",
+   "description": "Terminates a running app on the iOS Simulator by bundle identifier",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "bundle_id": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "Bundle identifier of the app to terminate (e.g., com.apple.mobilesafari)"
+     }
+    },
+    "required": [
+     "bundle_id"
+    ]
+   },
+   "annotations": {
+    "title": "Terminate App",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "open_url",
+   "description": "Opens a URL in the iOS Simulator, useful for testing deep links and universal links",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     },
+     "url": {
+      "type": "string",
+      "maxLength": 2048,
+      "description": "The URL or deep link to open (e.g., https://example.com or myapp://screen/detail)"
+     }
+    },
+    "required": [
+     "url"
+    ]
+   },
+   "annotations": {
+    "title": "Open URL",
+    "readOnlyHint": false,
+    "openWorldHint": true
+   }
+  },
+  {
+   "name": "list_apps",
+   "description": "Lists all installed apps on the iOS Simulator with their bundle identifiers and display names",
+   "inputSchema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "udid": {
+      "description": "Udid of target, can also be set with the IDB_UDID env var",
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "List Installed Apps",
+    "readOnlyHint": true,
+    "openWorldHint": true
+   }
+  }
+ ]
+}

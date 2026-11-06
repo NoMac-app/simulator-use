@@ -14,9 +14,14 @@ export default {
   version: () => JSON.parse(readFileSync(join(root(), "package.json"), "utf8")).version,
   // Its first screen read starts its on-device agent, which leaves the Home Screen in front (seen in every probe);
   // its instructions say to open apps with mobile_launch_app, so the setup does that after the agent is up.
+  // On the November 6, 2026 Mac that first read failed twice ("failed to start agent ... timed out waiting for
+  // WebDriverAgent to be ready", after 37 s and 23 s) and the next read worked, with the Home Screen in front, so the
+  // setup reads once more when the first read fails, as an agent would after that error, then opens the app. Setup
+  // only: no measured step is ever tried again.
   async setup(ctx) {
     await ctx.call("mobile_list_available_devices", {});
-    await ctx.call("mobile_list_elements_on_screen", { device: ctx.udid }, { timeoutMs: 300_000 });
+    const first = await ctx.call("mobile_list_elements_on_screen", { device: ctx.udid }, { timeoutMs: 300_000, allowError: true });
+    if (first.isError) await ctx.call("mobile_list_elements_on_screen", { device: ctx.udid }, { timeoutMs: 300_000 });
     await ctx.call("mobile_launch_app", { device: ctx.udid, packageName: ctx.bundleId });
   },
   async read(ctx) { await ctx.call("mobile_list_elements_on_screen", { device: ctx.udid }); },

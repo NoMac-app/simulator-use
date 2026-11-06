@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>simulator-use vs Maestro MCP for iOS Simulator automation</title>
-<meta name="description" content="simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 3.50 s against 9.19 s, and what each builds, tests and needs, with sources.">
+<meta name="description" content="simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 4.28 s against 10.21 s, and what each builds, tests and needs, with sources.">
 <link rel="canonical" href="https://simulator-use.dev/vs/maestro-mcp">
 <meta name="theme-color" content="#0b0b0c">
 <meta name="color-scheme" content="dark">
@@ -13,12 +13,12 @@
 <meta property="og:site_name" content="simulator-use">
 <meta property="og:url" content="https://simulator-use.dev/vs/maestro-mcp">
 <meta property="og:title" content="simulator-use vs Maestro MCP for iOS Simulator automation">
-<meta property="og:description" content="simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 3.50 s against 9.19 s, and what each builds, tests and needs, with sources.">
+<meta property="og:description" content="simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 4.28 s against 10.21 s, and what each builds, tests and needs, with sources.">
 <meta property="og:image" content="https://simulator-use.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://simulator-use.dev/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs Maestro MCP","item":"https://simulator-use.dev/vs/maestro-mcp"}]},{"@type":"TechArticle","headline":"simulator-use vs Maestro MCP","description":"simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 3.50 s against 9.19 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/maestro-mcp","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"Maestro MCP"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"simulator-use","item":"https://simulator-use.dev/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://simulator-use.dev/vs"},{"@type":"ListItem","position":3,"name":"simulator-use vs Maestro MCP","item":"https://simulator-use.dev/vs/maestro-mcp"}]},{"@type":"TechArticle","headline":"simulator-use vs Maestro MCP","description":"simulator-use and Maestro MCP on the same iPhone 17 Pro Simulator: 194 against 2,987 tokens read per sign-in, a sign-in in 4.28 s against 10.21 s, and what each builds, tests and needs, with sources.","url":"https://simulator-use.dev/vs/maestro-mcp","datePublished":"2026-11-06","dateModified":"2026-11-06","author":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"publisher":{"@type":"Organization","name":"NoMac","url":"https://nomac.app"},"about":[{"@type":"SoftwareApplication","name":"simulator-use","url":"https://simulator-use.dev/"},{"@type":"SoftwareApplication","name":"Maestro MCP"}]}]}</script>
 <style>
 :root {
   --bg: #0b0b0c;
@@ -124,28 +124,28 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
     <div class="answer">
       <p>Pick Maestro if you want tests as Maestro flows: YAML files kept in the repo and run locally or on Maestro Cloud, on Android, iOS and web. <span class="src">(<a href="https://github.com/mobile-dev-inc/Maestro">Maestro README</a>, <a href="https://docs.maestro.dev/get-started/maestro-mcp">Maestro docs: Maestro MCP</a>)</span></p>
       <p>Pick simulator-use to build the app and run its XCTest and XCUITest cases, and to read and act on the screen with single calls instead of flows. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://docs.maestro.dev/maestro-cloud/build-your-app-for-the-cloud">Maestro docs: build your app for the cloud</a>)</span></p>
-      <p class="measured">Measured on one Mac: simulator-use read 194 tokens per sign-in, Maestro MCP 2,987 (est.); simulator-use signed in in 3.50 s, Maestro MCP in 9.19 s.</p>
+      <p class="measured">Measured on one Mac: simulator-use read 194 tokens per sign-in, Maestro MCP 2,987 (est.); simulator-use signed in in 4.28 s, Maestro MCP in 10.21 s.</p>
       
     </div>
   </div>
 
   <section id="measured">
     <h2>Measured side by side</h2>
-    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of November 1, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
+    <p class="sub">From the <a href="/benchmarks">one-Mac benchmark</a> of November 6, 2026: the same app and iPhone 17 Pro Simulator, one tool at a time, each through its own MCP server. Times are medians; tokens are estimates (characters / 4).</p>
     <div class="scroll"><table class="cmp"><thead><tr><th></th><th class="n">Maestro MCP</th><th class="n">simulator-use</th></tr></thead><tbody>
-<tr><td>Signing in, step by step</td><td class="n">9.19 s</td><td class="n">3.50 s</td></tr>
+<tr><td>Signing in, step by step</td><td class="n">10.21 s</td><td class="n">4.28 s</td></tr>
 <tr><td>Tokens read per sign-in (est.)</td><td class="n">2,987</td><td class="n">194</td></tr>
 <tr><td>Sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Signing in, batched</td><td class="n">7.56 s</td><td class="n">2.87 s</td></tr>
+<tr><td>Signing in, batched</td><td class="n">8.67 s</td><td class="n">3.62 s</td></tr>
 <tr><td>Tokens read, batched (est.)</td><td class="n">2,885</td><td class="n">179</td></tr>
 <tr><td>Batched sign-ins completed</td><td class="n">10 of 10</td><td class="n">10 of 10</td></tr>
-<tr><td>Reading the screen (median)</td><td class="n">0.13 s</td><td class="n">0.19 s</td></tr>
-<tr><td>Tapping a button (median)</td><td class="n">1.58 s</td><td class="n">0.68 s</td></tr>
-<tr><td>Typing into a field (median)</td><td class="n">3.62 s</td><td class="n">1.14 s</td></tr>
+<tr><td>Reading the screen (median)</td><td class="n">0.16 s</td><td class="n">0.30 s</td></tr>
+<tr><td>Tapping a button (median)</td><td class="n">1.70 s</td><td class="n">0.72 s</td></tr>
+<tr><td>Typing into a field (median)</td><td class="n">4.00 s</td><td class="n">1.21 s</td></tr>
 <tr><td>Tool list in context (est.)</td><td class="n">3,063</td><td class="n">2,443</td></tr>
-<tr><td>Setup its docs ask for</td><td class="n">0.59 s</td><td class="n">0.12 s</td></tr>
+<tr><td>Setup its docs ask for</td><td class="n">0.63 s</td><td class="n">0.19 s</td></tr>
 </tbody></table></div>
-    <p class="fine">Maestro MCP 2.12.0, simulator-use 0.15.0. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">bench/results/2026-11-01</a>.</p>
+    <p class="fine">Maestro MCP 2.12.1, simulator-use 0.15.1. Every call is in <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-06">bench/results/2026-11-06</a>.</p>
   </section>
 
   <section id="what">
@@ -167,14 +167,14 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
     <ul class="notes">
       <li>Builds the Xcode project and runs its XCTest and XCUITest cases. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>)</span></li>
       <li>No Java needed; Maestro needs Java 17. <span class="src">(<a href="https://github.com/NoMac-app/simulator-use">simulator-use README</a>, <a href="https://github.com/mobile-dev-inc/Maestro">Maestro README</a>)</span></li>
-      <li>Signing in, step by step: 3.50 s against Maestro MCP's 9.19 s.</li>
+      <li>Signing in, step by step: 4.28 s against Maestro MCP's 10.21 s.</li>
       <li>Tokens read per sign-in (est.): 194 tokens against Maestro MCP's 2,987 tokens.</li>
-      <li>Signing in, batched: 2.87 s against Maestro MCP's 7.56 s.</li>
+      <li>Signing in, batched: 3.62 s against Maestro MCP's 8.67 s.</li>
       <li>Tokens per screen read (est.): 72 tokens against Maestro MCP's 1,116 tokens.</li>
-      <li>Tapping a button: 0.68 s against Maestro MCP's 1.58 s.</li>
-      <li>Typing into a field: 1.14 s against Maestro MCP's 3.62 s.</li>
+      <li>Tapping a button: 0.72 s against Maestro MCP's 1.70 s.</li>
+      <li>Typing into a field: 1.21 s against Maestro MCP's 4.00 s.</li>
       <li>Tool list in the agent's context (est.): 2,443 tokens against Maestro MCP's 3,063 tokens.</li>
-      <li>Setup its docs ask for: 0.12 s against Maestro MCP's 0.59 s.</li>
+      <li>Setup its docs ask for: 0.19 s against Maestro MCP's 0.63 s.</li>
       <li>A tap's answer held the new status text in 20 of 20 taps, Maestro MCP's in 0 of 20.</li>
     </ul>
     <p class="fine">A measured difference is listed when it is 5% or more.</p>
@@ -212,7 +212,7 @@ ul.vs span { display: block; color: var(--muted); font-size: 14.5px; margin-top:
 
   <section id="sources">
     <h2>Sources</h2>
-    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-01">the raw results</a>.</p>
+    <p class="sub">Read on October 31, 2026. The measured numbers: <a href="/benchmarks">benchmarks</a> and <a href="https://github.com/NoMac-app/simulator-use/tree/main/bench/results/2026-11-06">the raw results</a>.</p>
     <ul class="notes">
       <li><a href="https://github.com/mobile-dev-inc/Maestro/blob/main/LICENSE">Maestro LICENSE</a></li>
       <li><a href="https://github.com/NoMac-app/simulator-use/blob/main/LICENSE">simulator-use LICENSE</a></li>

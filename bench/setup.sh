@@ -1,28 +1,43 @@
 #!/bin/bash
 # Prepares a Mac for the benchmark: installs every tool at its pinned version in $BENCH_TOOLS (nothing global
-# but Homebrew's AXe and Java), builds the demo app, and creates and boots one iPhone 17 Pro Simulator on the newest
-# iOS runtime. Prints the lines to export for run.mjs. Run from the repository: bash bench/setup.sh
+# but Homebrew's AXe, Java and idb-companion, and uv's fb-idb), builds the demo app, and creates and boots one
+# iPhone 17 Pro Simulator on the newest iOS runtime. Prints the lines to export for run.mjs.
+# Run from the repository: bash bench/setup.sh
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 export BENCH_TOOLS=${BENCH_TOOLS:-$HOME/bench-tools}
 mkdir -p "$BENCH_TOOLS"
 
 # The versions tested (bench/results/<date>/*.json record what actually ran).
-SIMULATOR_USE=0.15.0
+SIMULATOR_USE=0.15.1
 MOBILEBUILDMCP=2.7.1
-MOBILE_MCP=1.0.15
-AGENT_DEVICE=0.21.35
-ARGENT=0.31.0
-MAESTRO=2.12.0
+MOBILE_MCP=1.0.16
+AGENT_DEVICE=0.21.36
+ARGENT=0.32.0
+MAESTRO=2.12.1
+IOS_SIMULATOR_MCP=2.2.0
+FB_IDB=1.7.7
 
 echo "== npm packages into $BENCH_TOOLS"
 npm install -g --no-fund --no-audit --prefix "$BENCH_TOOLS" \
   "simulator-use@$SIMULATOR_USE" "mobilebuildmcp@$MOBILEBUILDMCP" "@mobilenext/mobile-mcp@$MOBILE_MCP" \
-  "agent-device@$AGENT_DEVICE" "@swmansion/argent@$ARGENT"
+  "agent-device@$AGENT_DEVICE" "@swmansion/argent@$ARGENT" "ios-simulator-mcp@$IOS_SIMULATOR_MCP"
 
 echo "== AXe (Homebrew, as its README installs it)"
 command -v axe >/dev/null || brew install cameroncooke/axe/axe
 axe --version
+
+echo "== Facebook IDB for ios-simulator-mcp (its TROUBLESHOOTING.md: idb-companion from Homebrew, fb-idb with uv)"
+if ! brew list --versions idb-companion >/dev/null 2>&1; then
+  brew tap facebook/fb
+  brew trust --formula facebook/fb/idb-companion 2>/dev/null || true   # Homebrew 7 asks for it; older ones lack it
+  brew install idb-companion
+fi
+brew list --versions idb-companion
+command -v uv >/dev/null || brew install uv
+uv tool install --python 3.12 "fb-idb==$FB_IDB"
+IDB_BIN=$HOME/.local/bin/idb
+"$IDB_BIN" --help >/dev/null && uv tool list | grep '^fb-idb'
 
 echo "== Java 17 and Maestro $MAESTRO (its installer, MAESTRO_VERSION pinned)"
 if ! /usr/libexec/java_home -v 17+ >/dev/null 2>&1; then brew install openjdk@17; fi
@@ -58,7 +73,8 @@ export BENCH_TOOLS="$BENCH_TOOLS"
 export UDID="$UDID"
 export JAVA_HOME="$JAVA_HOME"
 export MAESTRO_BIN="$BENCH_TOOLS/maestro/bin/maestro"
-export PATH="$BENCH_TOOLS/bin:$JAVA_HOME/bin:$BENCH_TOOLS/maestro/bin:\$PATH"
+export IDB_BIN="$IDB_BIN"
+export PATH="$BENCH_TOOLS/bin:$JAVA_HOME/bin:$BENCH_TOOLS/maestro/bin:$HOME/.local/bin:\$PATH"
 ENV
 echo "== ready: source $BENCH_TOOLS/env.sh"
 cat "$BENCH_TOOLS/env.sh"

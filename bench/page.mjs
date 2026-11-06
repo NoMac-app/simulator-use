@@ -71,9 +71,11 @@ const cold = [...oncePerTool].sort((a, b) => (a.cold.setupMs ?? 0) - (b.cold.set
 
 // Not ranked: the plain counts of each such run, and its condition.
 const counts = (t) => [...(t.flow?.ok ? [`sign-in ${sec(t.flow.medianMs)}`] : []), `signed in ${ofN(t.flow)}`, `taps that reached the app ${ofN(t.tap)}`, `typings shown ${ofN(t.type)}`, `screen reads ${ofN(t.read)}${t.read?.ok ? ` (median ${sec(t.read.medianMs)})` : ""}`, ...(t.flowBatch ? [`batched sign-ins ${ofN(t.flowBatch)}`] : [])].join("; ");
-const why = (t) => (t.label === "last" ? "Second run, after the other seven tools; Simulator headless"
+const counted = (n) => ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"][n] ?? String(n);
+const why = (t) => (t.label === "last" ? `Second run, after the other ${counted(tools.length - 1).toLowerCase()} tools; Simulator headless`
   : t.label?.includes("devicehub") ? "Second run; Device Hub open"
   : t.label === "control" ? "Third run; Simulator headless again"
+  : t.label === "first" || t.label === "second" ? `${t.label === "first" ? "First" : "Second"} try; its setup stopped when its first read timed out starting its on-device agent`
   : "Simulator headless");
 const notRankedRows = notRanked.filter((t) => t.tool !== "simulator-use").map((t) => `<tr><td>${esc(t.name)} <span class="v">${esc(version(t))}</span></td><td>${esc(why(t))}</td><td>${esc(counts(t))}</td></tr>`);
 
@@ -107,7 +109,6 @@ put("board", board); put("read", read); put("tap", tap); put("type", type); put(
 put("env", envRows); put("notranked", notRankedRows); put("drift", []);
 
 // The headline: simulator-use's lead in tokens per sign-in, when it has one, from these results.
-const counted = (n) => ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"][n] ?? String(n);
 const byTok = [...ranked].sort((a, b) => a.flow.medianTokens - b.flow.medianTokens);
 const su = byTok[0]?.tool === "simulator-use" ? byTok[0] : null;
 const times = (t) => `${(t.flow.medianTokens / su.flow.medianTokens).toFixed(t.flow.medianTokens / su.flow.medianTokens < 10 ? 1 : 0)}x`;
@@ -123,10 +124,12 @@ const claim = su && next ? `simulator-use read ${num(su.flow.medianTokens)} toke
 put("hero", [su
   ? `    <h1>The most token-efficient iOS Simulator tool for agents.</h1>
     <p class="lead">${counted(byTok.length)} tools signed in to the same app on the same iPhone 17 Pro Simulator, on one Mac, each through its own MCP server (AXe, which has none, through its command line). ${esc(claim)} Every call was timed and saved, failures included.</p>`
-  : `    <h1>Eight Simulator tools, one sign-in screen.</h1>
-    <p class="lead">Eight tools drove the same app on the same iPhone 17 Pro Simulator, on one Mac, through their own MCP servers (AXe, which has none, through its command line), the way an agent uses them. Every call was timed and saved, failures included.</p>`]);
-const metaText = su ? `${claim} ${counted(byTok.length)} iOS Simulator tools for AI agents on one sign-in flow: time, tokens and reliability, every call published.` : "Eight iOS Simulator tools for coding agents on the same app and the same iPhone 17 Pro Simulator: time and tokens to read the screen, tap, type and sign in. Every call measured and published.";
+  : `    <h1>${counted(tools.length)} Simulator tools, one sign-in screen.</h1>
+    <p class="lead">${counted(tools.length)} tools drove the same app on the same iPhone 17 Pro Simulator, on one Mac, through their own MCP servers (AXe, which has none, through its command line), the way an agent uses them. Every call was timed and saved, failures included.</p>`]);
+const metaText = su ? `${claim} ${counted(byTok.length)} iOS Simulator tools for AI agents on one sign-in flow: time, tokens and reliability, every call published.` : `${counted(tools.length)} iOS Simulator tools for coding agents on the same app and the same iPhone 17 Pro Simulator: time and tokens to read the screen, tap, type and sign in. Every call measured and published.`;
 put("meta", [`<meta name="description" content="${esc(metaText)}">`]);
 put("ogdesc", [`<meta property="og:description" content="${esc(metaText)}">`]);
+// The title, og:title and structured data's headline name how many tools ran.
+page = page.replace(/(iOS Simulator MCP benchmark: )\w+( tools for AI agents)/g, `$1${counted(tools.length).toLowerCase()}$2`);
 writeFileSync(pagePath, page);
 console.log(`ranked: ${ranked.map((t) => t.tool + (t.label ? `@${t.label}` : "")).join(", ")}; not ranked: ${notRanked.map((t) => t.tool + (t.label ? `@${t.label}` : "")).join(", ") || "none"}`);

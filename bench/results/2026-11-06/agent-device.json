@@ -1,0 +1,5175 @@
+{
+ "tool": "agent-device",
+ "label": null,
+ "name": "agent-device",
+ "interface": "mcp",
+ "startedAt": "2026-11-06T13:23:57.517Z",
+ "counts": {
+  "reads": 20,
+  "taps": 20,
+  "types": 10,
+  "flows": 10
+ },
+ "notes": [],
+ "ops": [
+  {
+   "op": "setup",
+   "ok": true,
+   "error": null,
+   "wallMs": 59804.380833,
+   "ms": 59803.400166,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "open",
+     "args": {
+      "app": "dev.simtap.demo",
+      "platform": "ios",
+      "udid": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "foreground": true
+     },
+     "ms": 59803.400166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Opened: dev.simtap.demo\nSession state: /Users/agent/.agent-device/sessions/default\nPage: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\nThe surface was still changing after open when this tree was read, so it may not match where the surface comes to rest: an element missing from it is not proof of absence.\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 778,
+     "images": [],
+     "other": [],
+     "structuredChars": 6496
+    }
+   ],
+   "tokens": 195
+  },
+  {
+   "op": "warmup",
+   "ok": true,
+   "error": null,
+   "wallMs": 528.193042,
+   "ms": 528.008875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 528.008875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5140
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 85.685625,
+   "ms": 85.562833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 85.562833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5140
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 83.278833,
+   "ms": 83.059666,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 83.059666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5140
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 111.587208,
+   "ms": 111.468625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 111.468625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5140
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 74.460083,
+   "ms": 74.369333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 74.369333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5140
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 74.464708,
+   "ms": 74.377792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 74.377792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5139
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 72.819708,
+   "ms": 72.664083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 72.664083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5139
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 75.629333,
+   "ms": 75.524125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 75.524125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5141
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 71.065917,
+   "ms": 70.981,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 70.981,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5141
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 74.637667,
+   "ms": 74.487417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 74.487417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5141
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 81.080167,
+   "ms": 80.978542,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 80.978542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5141
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 85.011833,
+   "ms": 84.942292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 84.942292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 75.767458,
+   "ms": 75.656875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 75.656875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 80.111584,
+   "ms": 80.021666,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 80.021666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 76.35875,
+   "ms": 76.284792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 76.284792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 75.52575,
+   "ms": 75.456,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 75.456,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 76.207542,
+   "ms": 76.054375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 76.054375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5190
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 87.892375,
+   "ms": 87.796875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 87.796875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5188
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 74.047417,
+   "ms": 73.927084,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 73.927084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5188
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 73.953042,
+   "ms": 73.720417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 73.720417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5188
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "read",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 68.811458,
+   "ms": 68.679,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 68.679,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5188
+    }
+   ],
+   "tokens": 131,
+   "verify": {
+    "sawSignIn": true,
+    "sawEmail": true
+   }
+  },
+  {
+   "op": "tap",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 1579.334333,
+   "ms": 1579.149834,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1579.149834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 781ms: +2 -2 (~17 unchanged)\n- @e13 [cell] \"Not signed in\"\n- @e14 [other] \"Not signed in\"\n+ @e13~s445353 [cell] \"Invalid email or password\"\n+ @e14~s445353 [other] \"Invalid email or password\"",
+     "chars": 234,
+     "images": [],
+     "other": [],
+     "structuredChars": 825
+    }
+   ],
+   "tokens": 59,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1769.646542,
+    "ms": 1769.578083,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1769.578083,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 19 visible nodes\nSimulator AX snapshot unavailable (application-server-unavailable); used XCTest for this app generation.\n@e1 [application] \"Demo\"\n@e2 [other] \"Tab Bar\"\n@e3 [other] \"Toolbar\"\n@e4 [navigation-bar] \"Sign In\"\n@e5 [text] \"Sign In\"\n@e6 [collection]\n  [content below collection hidden]\n@e7 [cell]\n@e8 [text-field] \"email\" [editable]\n@e9 [cell]\n@e10 [securetextfield] \"password\"\n@e11 [switch] \"Remember me\" [unchecked]\n@e12 [cell] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [other] \"Not signed in\"\n@e15 [toolbar] \"Toolbar\"\n@e16 [tab-bar] \"Tab Bar\"\n@e17 [other] \"Login\"\n@e18 [button] \"Login\" [selected]\n@e19 [button] \"Items\"\n",
+      "chars": 686,
+      "images": [],
+      "other": [],
+      "structuredChars": 4708
+     }
+    ],
+    "tokens": 172,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 1308.788958,
+   "ms": 1308.727916,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1308.727916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 817ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445358 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1054.076458,
+    "ms": 1053.959167,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1053.959167,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 1307.882792,
+   "ms": 1307.821833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1307.821833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 803ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445363 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1025.055417,
+    "ms": 1024.982542,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1024.982542,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 1322.997666,
+   "ms": 1322.935625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1322.935625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 817ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445368 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1058.841041,
+    "ms": 1058.763208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1058.763208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 1299.8775,
+   "ms": 1299.818541,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1299.818541,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 795ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445373 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1069.410917,
+    "ms": 1069.320583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1069.320583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 1296.068792,
+   "ms": 1296.004667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1296.004667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 805ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445378 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1057.694292,
+    "ms": 1057.575167,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1057.575167,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 1306.705375,
+   "ms": 1306.629916,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1306.629916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 813ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445383 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1023.687542,
+    "ms": 1023.615708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1023.615708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 1324.358125,
+   "ms": 1324.286625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1324.286625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 818ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445388 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1047.607208,
+    "ms": 1047.53575,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1047.53575,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 1310.796583,
+   "ms": 1310.664375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1310.664375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 797ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445393 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1129.56525,
+    "ms": 1129.49425,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1129.49425,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 937.164667,
+   "ms": 937.103292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 937.103292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 436ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445397 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1092.648208,
+    "ms": 1092.57025,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1092.57025,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 911.954333,
+   "ms": 911.877542,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 911.877542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 430ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445401 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1052.065625,
+    "ms": 1051.995667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1051.995667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 1299.434125,
+   "ms": 1299.343583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1299.343583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 801ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445406 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1115.513334,
+    "ms": 1115.428,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1115.428,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 1308.688166,
+   "ms": 1308.617958,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1308.617958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 810ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445411 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1064.548625,
+    "ms": 1064.41575,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1064.41575,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 1339.154333,
+   "ms": 1339.096625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1339.096625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 822ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445416 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1046.202417,
+    "ms": 1046.122375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1046.122375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 898.979625,
+   "ms": 898.919625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 898.919625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 424ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445420 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1026.014625,
+    "ms": 1025.936,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1025.936,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 1301.982083,
+   "ms": 1301.922041,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1301.922041,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 808ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445425 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1029.270459,
+    "ms": 1029.1995,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1029.1995,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5140
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 1313.550583,
+   "ms": 1313.490875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1313.490875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 811ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445430 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1010.652625,
+    "ms": 1010.577792,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1010.577792,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 1321.625083,
+   "ms": 1321.564625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1321.564625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 812ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445435 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1003.550167,
+    "ms": 1003.471625,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1003.471625,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 901.421375,
+   "ms": 901.359667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 901.359667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 425ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445439 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1024.729875,
+    "ms": 1024.573042,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1024.573042,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 1317.825625,
+   "ms": 1317.765667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 1317.765667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 816ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445444 [cell] \"Invalid email or password\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    }
+   ],
+   "tokens": 38,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1080.647291,
+    "ms": 1080.5695,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1080.5695,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": true,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "type",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 3512.306708,
+   "ms": 3512.17825,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 3512.17825,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 465ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445448 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445448 [other] \"Demo\"\n= @e2~s445448 [navigation-bar] \"Sign In\"\n= @e3~s445448 [text] \"Sign In\"\n= @e4~s445448 [collection]\n= @e5~s445448 [cell]\n= @e7~s445448 [cell]\n= @e8~s445448 [securetextfield] \"Password\"\n= @e9~s445448 [switch] \"Remember me\"\n= @e10~s445448 [switch] \"0\"\n= @e11~s445448 [cell]\n= @e12~s445448 [button] \"Sign In\"\n= @e13~s445448 [cell] \"Not signed in\"\n= @e14~s445448 [toolbar] \"Toolbar\"\n= @e15~s445448 [tab-bar] \"Tab Bar\"\n= @e16~s445448 [button] \"Login\"\n= @e17~s445448 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1030.574875,
+    "ms": 1030.495958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1030.495958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 66.1735,
+    "ms": 66.110375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 66.110375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 2530.483958,
+   "ms": 2530.412416,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2530.412416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 434ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445453 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445453 [other] \"Demo\"\n= @e2~s445453 [navigation-bar] \"Sign In\"\n= @e3~s445453 [text] \"Sign In\"\n= @e4~s445453 [collection]\n= @e5~s445453 [cell]\n= @e7~s445453 [cell]\n= @e8~s445453 [securetextfield] \"Password\"\n= @e9~s445453 [switch] \"Remember me\"\n= @e10~s445453 [switch] \"0\"\n= @e11~s445453 [cell]\n= @e12~s445453 [button] \"Sign In\"\n= @e13~s445453 [cell] \"Not signed in\"\n= @e14~s445453 [toolbar] \"Toolbar\"\n= @e15~s445453 [tab-bar] \"Tab Bar\"\n= @e16~s445453 [button] \"Login\"\n= @e17~s445453 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1036.062542,
+    "ms": 1035.990042,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1035.990042,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 62.930916,
+    "ms": 62.853667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 62.853667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 2593.17175,
+   "ms": 2593.108333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2593.108333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 461ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445458 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445458 [other] \"Demo\"\n= @e2~s445458 [navigation-bar] \"Sign In\"\n= @e3~s445458 [text] \"Sign In\"\n= @e4~s445458 [collection]\n= @e5~s445458 [cell]\n= @e7~s445458 [cell]\n= @e8~s445458 [securetextfield] \"Password\"\n= @e9~s445458 [switch] \"Remember me\"\n= @e10~s445458 [switch] \"0\"\n= @e11~s445458 [cell]\n= @e12~s445458 [button] \"Sign In\"\n= @e13~s445458 [cell] \"Not signed in\"\n= @e14~s445458 [toolbar] \"Toolbar\"\n= @e15~s445458 [tab-bar] \"Tab Bar\"\n= @e16~s445458 [button] \"Login\"\n= @e17~s445458 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 993.727417,
+    "ms": 993.63825,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 993.63825,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 63.368084,
+    "ms": 63.3005,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 63.3005,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 2571.026833,
+   "ms": 2570.963667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2570.963667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 442ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445463 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445463 [other] \"Demo\"\n= @e2~s445463 [navigation-bar] \"Sign In\"\n= @e3~s445463 [text] \"Sign In\"\n= @e4~s445463 [collection]\n= @e5~s445463 [cell]\n= @e7~s445463 [cell]\n= @e8~s445463 [securetextfield] \"Password\"\n= @e9~s445463 [switch] \"Remember me\"\n= @e10~s445463 [switch] \"0\"\n= @e11~s445463 [cell]\n= @e12~s445463 [button] \"Sign In\"\n= @e13~s445463 [cell] \"Not signed in\"\n= @e14~s445463 [toolbar] \"Toolbar\"\n= @e15~s445463 [tab-bar] \"Tab Bar\"\n= @e16~s445463 [button] \"Login\"\n= @e17~s445463 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1061.912125,
+    "ms": 1061.841041,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1061.841041,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 62.631,
+    "ms": 62.5595,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 62.5595,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 2537.110583,
+   "ms": 2537.052042,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2537.052042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445468 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445468 [other] \"Demo\"\n= @e2~s445468 [navigation-bar] \"Sign In\"\n= @e3~s445468 [text] \"Sign In\"\n= @e4~s445468 [collection]\n= @e5~s445468 [cell]\n= @e7~s445468 [cell]\n= @e8~s445468 [securetextfield] \"Password\"\n= @e9~s445468 [switch] \"Remember me\"\n= @e10~s445468 [switch] \"0\"\n= @e11~s445468 [cell]\n= @e12~s445468 [button] \"Sign In\"\n= @e13~s445468 [cell] \"Not signed in\"\n= @e14~s445468 [toolbar] \"Toolbar\"\n= @e15~s445468 [tab-bar] \"Tab Bar\"\n= @e16~s445468 [button] \"Login\"\n= @e17~s445468 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1022.839333,
+    "ms": 1022.758875,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1022.758875,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 67.154292,
+    "ms": 67.064417,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 67.064417,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 2645.984875,
+   "ms": 2645.921792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2645.921792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 445ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445473 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445473 [other] \"Demo\"\n= @e2~s445473 [navigation-bar] \"Sign In\"\n= @e3~s445473 [text] \"Sign In\"\n= @e4~s445473 [collection]\n= @e5~s445473 [cell]\n= @e7~s445473 [cell]\n= @e8~s445473 [securetextfield] \"Password\"\n= @e9~s445473 [switch] \"Remember me\"\n= @e10~s445473 [switch] \"0\"\n= @e11~s445473 [cell]\n= @e12~s445473 [button] \"Sign In\"\n= @e13~s445473 [cell] \"Not signed in\"\n= @e14~s445473 [toolbar] \"Toolbar\"\n= @e15~s445473 [tab-bar] \"Tab Bar\"\n= @e16~s445473 [button] \"Login\"\n= @e17~s445473 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1023.311333,
+    "ms": 1023.235958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1023.235958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 67.649542,
+    "ms": 67.576458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 67.576458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 2574.831041,
+   "ms": 2574.763458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2574.763458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 443ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445478 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445478 [other] \"Demo\"\n= @e2~s445478 [navigation-bar] \"Sign In\"\n= @e3~s445478 [text] \"Sign In\"\n= @e4~s445478 [collection]\n= @e5~s445478 [cell]\n= @e7~s445478 [cell]\n= @e8~s445478 [securetextfield] \"Password\"\n= @e9~s445478 [switch] \"Remember me\"\n= @e10~s445478 [switch] \"0\"\n= @e11~s445478 [cell]\n= @e12~s445478 [button] \"Sign In\"\n= @e13~s445478 [cell] \"Not signed in\"\n= @e14~s445478 [toolbar] \"Toolbar\"\n= @e15~s445478 [tab-bar] \"Tab Bar\"\n= @e16~s445478 [button] \"Login\"\n= @e17~s445478 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1042.429459,
+    "ms": 1042.341208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1042.341208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 64.66725,
+    "ms": 64.600917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 64.600917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 2608.596083,
+   "ms": 2608.53175,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2608.53175,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445483 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445483 [other] \"Demo\"\n= @e2~s445483 [navigation-bar] \"Sign In\"\n= @e3~s445483 [text] \"Sign In\"\n= @e4~s445483 [collection]\n= @e5~s445483 [cell]\n= @e7~s445483 [cell]\n= @e8~s445483 [securetextfield] \"Password\"\n= @e9~s445483 [switch] \"Remember me\"\n= @e10~s445483 [switch] \"0\"\n= @e11~s445483 [cell]\n= @e12~s445483 [button] \"Sign In\"\n= @e13~s445483 [cell] \"Not signed in\"\n= @e14~s445483 [toolbar] \"Toolbar\"\n= @e15~s445483 [tab-bar] \"Tab Bar\"\n= @e16~s445483 [button] \"Login\"\n= @e17~s445483 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1049.954666,
+    "ms": 1049.881833,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1049.881833,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 63.158417,
+    "ms": 63.094583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 63.094583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 2588.196042,
+   "ms": 2588.122209,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2588.122209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445488 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445488 [other] \"Demo\"\n= @e2~s445488 [navigation-bar] \"Sign In\"\n= @e3~s445488 [text] \"Sign In\"\n= @e4~s445488 [collection]\n= @e5~s445488 [cell]\n= @e7~s445488 [cell]\n= @e8~s445488 [securetextfield] \"Password\"\n= @e9~s445488 [switch] \"Remember me\"\n= @e10~s445488 [switch] \"0\"\n= @e11~s445488 [cell]\n= @e12~s445488 [button] \"Sign In\"\n= @e13~s445488 [cell] \"Not signed in\"\n= @e14~s445488 [toolbar] \"Toolbar\"\n= @e15~s445488 [tab-bar] \"Tab Bar\"\n= @e16~s445488 [button] \"Login\"\n= @e17~s445488 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1021.470833,
+    "ms": 1021.395459,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1021.395459,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 68.392542,
+    "ms": 68.275667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 68.275667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 2600.396458,
+   "ms": 2600.33625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2600.33625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 447ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445493 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445493 [other] \"Demo\"\n= @e2~s445493 [navigation-bar] \"Sign In\"\n= @e3~s445493 [text] \"Sign In\"\n= @e4~s445493 [collection]\n= @e5~s445493 [cell]\n= @e7~s445493 [cell]\n= @e8~s445493 [securetextfield] \"Password\"\n= @e9~s445493 [switch] \"Remember me\"\n= @e10~s445493 [switch] \"0\"\n= @e11~s445493 [cell]\n= @e12~s445493 [button] \"Sign In\"\n= @e13~s445493 [cell] \"Not signed in\"\n= @e14~s445493 [toolbar] \"Toolbar\"\n= @e15~s445493 [tab-bar] \"Tab Bar\"\n= @e16~s445493 [button] \"Login\"\n= @e17~s445493 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    }
+   ],
+   "tokens": 167,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1016.206791,
+    "ms": 1016.130917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 1016.130917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+      "chars": 523,
+      "images": [],
+      "other": [],
+      "structuredChars": 5142
+     }
+    ],
+    "tokens": 131,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 69.087583,
+    "ms": 69.01375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "snapshot",
+      "args": {
+       "interactiveOnly": true
+      },
+      "ms": 69.01375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [focused] [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+      "chars": 627,
+      "images": [],
+      "other": [],
+      "structuredChars": 6799
+     }
+    ],
+    "tokens": 157,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": false
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "flow",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 7767.39275,
+   "ms": 7766.732167,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1094.624458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2615.745792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 434ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445498 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445498 [other] \"Demo\"\n= @e2~s445498 [navigation-bar] \"Sign In\"\n= @e3~s445498 [text] \"Sign In\"\n= @e4~s445498 [collection]\n= @e5~s445498 [cell]\n= @e7~s445498 [cell]\n= @e8~s445498 [securetextfield] \"Password\"\n= @e9~s445498 [switch] \"Remember me\"\n= @e10~s445498 [switch] \"0\"\n= @e11~s445498 [cell]\n= @e12~s445498 [button] \"Sign In\"\n= @e13~s445498 [cell] \"Not signed in\"\n= @e14~s445498 [toolbar] \"Toolbar\"\n= @e15~s445498 [tab-bar] \"Tab Bar\"\n= @e16~s445498 [button] \"Login\"\n= @e17~s445498 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3077.020375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 452ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445501 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445501 [other] \"Demo\"\n= @e2~s445501 [navigation-bar] \"Sign In\"\n= @e3~s445501 [text] \"Sign In\"\n= @e4~s445501 [collection]\n= @e5~s445501 [cell]\n= @e6~s445501 [text-field] \"gary@example.com\"\n= @e7~s445501 [cell]\n= @e9~s445501 [switch] \"Remember me\"\n= @e10~s445501 [switch] \"0\"\n= @e11~s445501 [cell]\n= @e12~s445501 [button] \"Sign In\"\n= @e13~s445501 [cell] \"Not signed in\"\n= @e14~s445501 [toolbar] \"Toolbar\"\n= @e15~s445501 [tab-bar] \"Tab Bar\"\n= @e16~s445501 [button] \"Login\"\n= @e17~s445501 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 909.3235,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 429ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445504 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 70.018042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 7617.898833,
+   "ms": 7617.527292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1003.56275,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2565.20775,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 443ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445509 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445509 [other] \"Demo\"\n= @e2~s445509 [navigation-bar] \"Sign In\"\n= @e3~s445509 [text] \"Sign In\"\n= @e4~s445509 [collection]\n= @e5~s445509 [cell]\n= @e7~s445509 [cell]\n= @e8~s445509 [securetextfield] \"Password\"\n= @e9~s445509 [switch] \"Remember me\"\n= @e10~s445509 [switch] \"0\"\n= @e11~s445509 [cell]\n= @e12~s445509 [button] \"Sign In\"\n= @e13~s445509 [cell] \"Not signed in\"\n= @e14~s445509 [toolbar] \"Toolbar\"\n= @e15~s445509 [tab-bar] \"Tab Bar\"\n= @e16~s445509 [button] \"Login\"\n= @e17~s445509 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3068.270292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 441ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445512 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445512 [other] \"Demo\"\n= @e2~s445512 [navigation-bar] \"Sign In\"\n= @e3~s445512 [text] \"Sign In\"\n= @e4~s445512 [collection]\n= @e5~s445512 [cell]\n= @e6~s445512 [text-field] \"gary@example.com\"\n= @e7~s445512 [cell]\n= @e9~s445512 [switch] \"Remember me\"\n= @e10~s445512 [switch] \"0\"\n= @e11~s445512 [cell]\n= @e12~s445512 [button] \"Sign In\"\n= @e13~s445512 [cell] \"Not signed in\"\n= @e14~s445512 [toolbar] \"Toolbar\"\n= @e15~s445512 [tab-bar] \"Tab Bar\"\n= @e16~s445512 [button] \"Login\"\n= @e17~s445512 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 916.305291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 441ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445515 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 64.181209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 7620.086958,
+   "ms": 7619.738043,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1005.465834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2618.800291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 450ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445520 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445520 [other] \"Demo\"\n= @e2~s445520 [navigation-bar] \"Sign In\"\n= @e3~s445520 [text] \"Sign In\"\n= @e4~s445520 [collection]\n= @e5~s445520 [cell]\n= @e7~s445520 [cell]\n= @e8~s445520 [securetextfield] \"Password\"\n= @e9~s445520 [switch] \"Remember me\"\n= @e10~s445520 [switch] \"0\"\n= @e11~s445520 [cell]\n= @e12~s445520 [button] \"Sign In\"\n= @e13~s445520 [cell] \"Not signed in\"\n= @e14~s445520 [toolbar] \"Toolbar\"\n= @e15~s445520 [tab-bar] \"Tab Bar\"\n= @e16~s445520 [button] \"Login\"\n= @e17~s445520 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3005.171209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 434ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445523 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445523 [other] \"Demo\"\n= @e2~s445523 [navigation-bar] \"Sign In\"\n= @e3~s445523 [text] \"Sign In\"\n= @e4~s445523 [collection]\n= @e5~s445523 [cell]\n= @e6~s445523 [text-field] \"gary@example.com\"\n= @e7~s445523 [cell]\n= @e9~s445523 [switch] \"Remember me\"\n= @e10~s445523 [switch] \"0\"\n= @e11~s445523 [cell]\n= @e12~s445523 [button] \"Sign In\"\n= @e13~s445523 [cell] \"Not signed in\"\n= @e14~s445523 [toolbar] \"Toolbar\"\n= @e15~s445523 [tab-bar] \"Tab Bar\"\n= @e16~s445523 [button] \"Login\"\n= @e17~s445523 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 920.662709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 449ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445526 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 69.638,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 7687.775583,
+   "ms": 7687.364501,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1059.571208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2578.303959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 444ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445531 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445531 [other] \"Demo\"\n= @e2~s445531 [navigation-bar] \"Sign In\"\n= @e3~s445531 [text] \"Sign In\"\n= @e4~s445531 [collection]\n= @e5~s445531 [cell]\n= @e7~s445531 [cell]\n= @e8~s445531 [securetextfield] \"Password\"\n= @e9~s445531 [switch] \"Remember me\"\n= @e10~s445531 [switch] \"0\"\n= @e11~s445531 [cell]\n= @e12~s445531 [button] \"Sign In\"\n= @e13~s445531 [cell] \"Not signed in\"\n= @e14~s445531 [toolbar] \"Toolbar\"\n= @e15~s445531 [tab-bar] \"Tab Bar\"\n= @e16~s445531 [button] \"Login\"\n= @e17~s445531 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3063.012875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 453ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445534 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445534 [other] \"Demo\"\n= @e2~s445534 [navigation-bar] \"Sign In\"\n= @e3~s445534 [text] \"Sign In\"\n= @e4~s445534 [collection]\n= @e5~s445534 [cell]\n= @e6~s445534 [text-field] \"gary@example.com\"\n= @e7~s445534 [cell]\n= @e9~s445534 [switch] \"Remember me\"\n= @e10~s445534 [switch] \"0\"\n= @e11~s445534 [cell]\n= @e12~s445534 [button] \"Sign In\"\n= @e13~s445534 [cell] \"Not signed in\"\n= @e14~s445534 [toolbar] \"Toolbar\"\n= @e15~s445534 [tab-bar] \"Tab Bar\"\n= @e16~s445534 [button] \"Login\"\n= @e17~s445534 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 919.6515,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 447ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445537 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 66.824959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 7655.831042,
+   "ms": 7655.477834000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1004.29675,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2621.142709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445542 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445542 [other] \"Demo\"\n= @e2~s445542 [navigation-bar] \"Sign In\"\n= @e3~s445542 [text] \"Sign In\"\n= @e4~s445542 [collection]\n= @e5~s445542 [cell]\n= @e7~s445542 [cell]\n= @e8~s445542 [securetextfield] \"Password\"\n= @e9~s445542 [switch] \"Remember me\"\n= @e10~s445542 [switch] \"0\"\n= @e11~s445542 [cell]\n= @e12~s445542 [button] \"Sign In\"\n= @e13~s445542 [cell] \"Not signed in\"\n= @e14~s445542 [toolbar] \"Toolbar\"\n= @e15~s445542 [tab-bar] \"Tab Bar\"\n= @e16~s445542 [button] \"Login\"\n= @e17~s445542 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3040.104833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 441ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445545 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445545 [other] \"Demo\"\n= @e2~s445545 [navigation-bar] \"Sign In\"\n= @e3~s445545 [text] \"Sign In\"\n= @e4~s445545 [collection]\n= @e5~s445545 [cell]\n= @e6~s445545 [text-field] \"gary@example.com\"\n= @e7~s445545 [cell]\n= @e9~s445545 [switch] \"Remember me\"\n= @e10~s445545 [switch] \"0\"\n= @e11~s445545 [cell]\n= @e12~s445545 [button] \"Sign In\"\n= @e13~s445545 [cell] \"Not signed in\"\n= @e14~s445545 [toolbar] \"Toolbar\"\n= @e15~s445545 [tab-bar] \"Tab Bar\"\n= @e16~s445545 [button] \"Login\"\n= @e17~s445545 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 924.963125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 449ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445548 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 64.970417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 7615.104458,
+   "ms": 7614.702625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 973.719958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2615.6315,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 453ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445553 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445553 [other] \"Demo\"\n= @e2~s445553 [navigation-bar] \"Sign In\"\n= @e3~s445553 [text] \"Sign In\"\n= @e4~s445553 [collection]\n= @e5~s445553 [cell]\n= @e7~s445553 [cell]\n= @e8~s445553 [securetextfield] \"Password\"\n= @e9~s445553 [switch] \"Remember me\"\n= @e10~s445553 [switch] \"0\"\n= @e11~s445553 [cell]\n= @e12~s445553 [button] \"Sign In\"\n= @e13~s445553 [cell] \"Not signed in\"\n= @e14~s445553 [toolbar] \"Toolbar\"\n= @e15~s445553 [tab-bar] \"Tab Bar\"\n= @e16~s445553 [button] \"Login\"\n= @e17~s445553 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3049.872542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 447ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445556 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445556 [other] \"Demo\"\n= @e2~s445556 [navigation-bar] \"Sign In\"\n= @e3~s445556 [text] \"Sign In\"\n= @e4~s445556 [collection]\n= @e5~s445556 [cell]\n= @e6~s445556 [text-field] \"gary@example.com\"\n= @e7~s445556 [cell]\n= @e9~s445556 [switch] \"Remember me\"\n= @e10~s445556 [switch] \"0\"\n= @e11~s445556 [cell]\n= @e12~s445556 [button] \"Sign In\"\n= @e13~s445556 [cell] \"Not signed in\"\n= @e14~s445556 [toolbar] \"Toolbar\"\n= @e15~s445556 [tab-bar] \"Tab Bar\"\n= @e16~s445556 [button] \"Login\"\n= @e17~s445556 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 913.150791,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 441ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445559 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 62.327834,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 7608.182875,
+   "ms": 7607.777833000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 970.520208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2563.783667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 433ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445564 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445564 [other] \"Demo\"\n= @e2~s445564 [navigation-bar] \"Sign In\"\n= @e3~s445564 [text] \"Sign In\"\n= @e4~s445564 [collection]\n= @e5~s445564 [cell]\n= @e7~s445564 [cell]\n= @e8~s445564 [securetextfield] \"Password\"\n= @e9~s445564 [switch] \"Remember me\"\n= @e10~s445564 [switch] \"0\"\n= @e11~s445564 [cell]\n= @e12~s445564 [button] \"Sign In\"\n= @e13~s445564 [cell] \"Not signed in\"\n= @e14~s445564 [toolbar] \"Toolbar\"\n= @e15~s445564 [tab-bar] \"Tab Bar\"\n= @e16~s445564 [button] \"Login\"\n= @e17~s445564 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3077.908166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445567 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445567 [other] \"Demo\"\n= @e2~s445567 [navigation-bar] \"Sign In\"\n= @e3~s445567 [text] \"Sign In\"\n= @e4~s445567 [collection]\n= @e5~s445567 [cell]\n= @e6~s445567 [text-field] \"gary@example.com\"\n= @e7~s445567 [cell]\n= @e9~s445567 [switch] \"Remember me\"\n= @e10~s445567 [switch] \"0\"\n= @e11~s445567 [cell]\n= @e12~s445567 [button] \"Sign In\"\n= @e13~s445567 [cell] \"Not signed in\"\n= @e14~s445567 [toolbar] \"Toolbar\"\n= @e15~s445567 [tab-bar] \"Tab Bar\"\n= @e16~s445567 [button] \"Login\"\n= @e17~s445567 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 925.979459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 446ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445570 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 69.586333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 7619.036667,
+   "ms": 7618.6985,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 982.155667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2607.335541,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 449ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445575 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445575 [other] \"Demo\"\n= @e2~s445575 [navigation-bar] \"Sign In\"\n= @e3~s445575 [text] \"Sign In\"\n= @e4~s445575 [collection]\n= @e5~s445575 [cell]\n= @e7~s445575 [cell]\n= @e8~s445575 [securetextfield] \"Password\"\n= @e9~s445575 [switch] \"Remember me\"\n= @e10~s445575 [switch] \"0\"\n= @e11~s445575 [cell]\n= @e12~s445575 [button] \"Sign In\"\n= @e13~s445575 [cell] \"Not signed in\"\n= @e14~s445575 [toolbar] \"Toolbar\"\n= @e15~s445575 [tab-bar] \"Tab Bar\"\n= @e16~s445575 [button] \"Login\"\n= @e17~s445575 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3061.993625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 445ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445578 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445578 [other] \"Demo\"\n= @e2~s445578 [navigation-bar] \"Sign In\"\n= @e3~s445578 [text] \"Sign In\"\n= @e4~s445578 [collection]\n= @e5~s445578 [cell]\n= @e6~s445578 [text-field] \"gary@example.com\"\n= @e7~s445578 [cell]\n= @e9~s445578 [switch] \"Remember me\"\n= @e10~s445578 [switch] \"0\"\n= @e11~s445578 [cell]\n= @e12~s445578 [button] \"Sign In\"\n= @e13~s445578 [cell] \"Not signed in\"\n= @e14~s445578 [toolbar] \"Toolbar\"\n= @e15~s445578 [tab-bar] \"Tab Bar\"\n= @e16~s445578 [button] \"Login\"\n= @e17~s445578 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 900.905709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 430ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445581 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 66.307958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 7569.981542,
+   "ms": 7569.618458000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 983.501417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2544.796792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 445ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445586 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445586 [other] \"Demo\"\n= @e2~s445586 [navigation-bar] \"Sign In\"\n= @e3~s445586 [text] \"Sign In\"\n= @e4~s445586 [collection]\n= @e5~s445586 [cell]\n= @e7~s445586 [cell]\n= @e8~s445586 [securetextfield] \"Password\"\n= @e9~s445586 [switch] \"Remember me\"\n= @e10~s445586 [switch] \"0\"\n= @e11~s445586 [cell]\n= @e12~s445586 [button] \"Sign In\"\n= @e13~s445586 [cell] \"Not signed in\"\n= @e14~s445586 [toolbar] \"Toolbar\"\n= @e15~s445586 [tab-bar] \"Tab Bar\"\n= @e16~s445586 [button] \"Login\"\n= @e17~s445586 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3063.702083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 457ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445589 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445589 [other] \"Demo\"\n= @e2~s445589 [navigation-bar] \"Sign In\"\n= @e3~s445589 [text] \"Sign In\"\n= @e4~s445589 [collection]\n= @e5~s445589 [cell]\n= @e6~s445589 [text-field] \"gary@example.com\"\n= @e7~s445589 [cell]\n= @e9~s445589 [switch] \"Remember me\"\n= @e10~s445589 [switch] \"0\"\n= @e11~s445589 [cell]\n= @e12~s445589 [button] \"Sign In\"\n= @e13~s445589 [cell] \"Not signed in\"\n= @e14~s445589 [toolbar] \"Toolbar\"\n= @e15~s445589 [tab-bar] \"Tab Bar\"\n= @e16~s445589 [button] \"Login\"\n= @e17~s445589 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 912.47825,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 441ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445592 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 65.139916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 7603.257458,
+   "ms": 7602.928209000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1001.4005,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"email\""
+      },
+      "text": "gary@example.com",
+      "settle": true
+     },
+     "ms": 2580.242125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 16 chars\nsettled after 439ms: +1 -1 (~16 unchanged)\n- @e6 [text-field] \"Email\"\n+ @e6~s445597 [text-field] \"gary@example.com\"\nunchanged interactive (16):\n= @e1~s445597 [other] \"Demo\"\n= @e2~s445597 [navigation-bar] \"Sign In\"\n= @e3~s445597 [text] \"Sign In\"\n= @e4~s445597 [collection]\n= @e5~s445597 [cell]\n= @e7~s445597 [cell]\n= @e8~s445597 [securetextfield] \"Password\"\n= @e9~s445597 [switch] \"Remember me\"\n= @e10~s445597 [switch] \"0\"\n= @e11~s445597 [cell]\n= @e12~s445597 [button] \"Sign In\"\n= @e13~s445597 [cell] \"Not signed in\"\n= @e14~s445597 [toolbar] \"Toolbar\"\n= @e15~s445597 [tab-bar] \"Tab Bar\"\n= @e16~s445597 [button] \"Login\"\n= @e17~s445597 [button] \"Items\"",
+     "chars": 665,
+     "images": [],
+     "other": [],
+     "structuredChars": 1351
+    },
+    {
+     "kind": "mcp",
+     "tool": "fill",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"password\""
+      },
+      "text": "secret1",
+      "settle": true
+     },
+     "ms": 3036.694542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Filled 7 chars\nsettled after 450ms: +1 -1 (~16 unchanged)\n- @e8 [securetextfield] \"Password\"\n+ @e8~s445600 [securetextfield] \"•••••••\"\nunchanged interactive (16):\n= @e1~s445600 [other] \"Demo\"\n= @e2~s445600 [navigation-bar] \"Sign In\"\n= @e3~s445600 [text] \"Sign In\"\n= @e4~s445600 [collection]\n= @e5~s445600 [cell]\n= @e6~s445600 [text-field] \"gary@example.com\"\n= @e7~s445600 [cell]\n= @e9~s445600 [switch] \"Remember me\"\n= @e10~s445600 [switch] \"0\"\n= @e11~s445600 [cell]\n= @e12~s445600 [button] \"Sign In\"\n= @e13~s445600 [cell] \"Not signed in\"\n= @e14~s445600 [toolbar] \"Toolbar\"\n= @e15~s445600 [tab-bar] \"Tab Bar\"\n= @e16~s445600 [button] \"Login\"\n= @e17~s445600 [button] \"Items\"",
+     "chars": 671,
+     "images": [],
+     "other": [],
+     "structuredChars": 1360
+    },
+    {
+     "kind": "mcp",
+     "tool": "press",
+     "args": {
+      "target": {
+       "kind": "selector",
+       "selector": "id=\"signIn\""
+      },
+      "settle": true
+     },
+     "ms": 917.840125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Tapped id=\"signIn\" (201, 350)\nsettled after 444ms: +1 -1 (~16 unchanged)\n- @e13 [cell] \"Not signed in\"\n+ @e13~s445603 [cell] \"Welcome, gary@example.com\"",
+     "chars": 152,
+     "images": [],
+     "other": [],
+     "structuredChars": 687
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 66.750917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 664,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 5
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 6737.795791,
+   "ms": 6737.464708,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 974.231958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5699.591542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5692ms\n1. OK Filled 16 chars (2161ms)\n2. OK Filled 7 chars (2617ms)\n3. OK Tapped id=\"signIn\" (201, 350) (914ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 63.641208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 6732.252916,
+   "ms": 6732.024042,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 991.482084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5673.3315,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5668ms\n1. OK Filled 16 chars (2170ms)\n2. OK Filled 7 chars (2577ms)\n3. OK Tapped id=\"signIn\" (201, 350) (921ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 67.210458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 6782.76225,
+   "ms": 6782.470958,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 990.207083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5722.975417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5710ms\n1. OK Filled 16 chars (2178ms)\n2. OK Filled 7 chars (2620ms)\n3. OK Tapped id=\"signIn\" (201, 350) (912ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 69.288458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 6785.466875,
+   "ms": 6785.240708,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1003.483542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5714.415333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5708ms\n1. OK Filled 16 chars (2205ms)\n2. OK Filled 7 chars (2603ms)\n3. OK Tapped id=\"signIn\" (201, 350) (899ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 67.341833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 6705.29025,
+   "ms": 6705.010833,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1002.773875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5635.345416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5629ms\n1. OK Filled 16 chars (2105ms)\n2. OK Filled 7 chars (2620ms)\n3. OK Tapped id=\"signIn\" (201, 350) (904ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 66.891542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 6667.172708,
+   "ms": 6666.921333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 975.758708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5621.649708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5616ms\n1. OK Filled 16 chars (2126ms)\n2. OK Filled 7 chars (2583ms)\n3. OK Tapped id=\"signIn\" (201, 350) (907ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 69.512917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 6686.703,
+   "ms": 6686.444751,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 969.209709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5652.760833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5646ms\n1. OK Filled 16 chars (2163ms)\n2. OK Filled 7 chars (2585ms)\n3. OK Tapped id=\"signIn\" (201, 350) (898ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 64.474209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 6677.219792,
+   "ms": 6677.008499999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1010.8605,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5598.778917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5592ms\n1. OK Filled 16 chars (2109ms)\n2. OK Filled 7 chars (2581ms)\n3. OK Tapped id=\"signIn\" (201, 350) (902ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 67.369083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 6710.339625,
+   "ms": 6710.118624000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 1010.592291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5631.645166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5626ms\n1. OK Filled 16 chars (2130ms)\n2. OK Filled 7 chars (2598ms)\n3. OK Tapped id=\"signIn\" (201, 350) (898ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 67.881167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 6723.063,
+   "ms": 6722.845418000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 999.732584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"Email\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"Password\"\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Not signed in\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n",
+     "chars": 523,
+     "images": [],
+     "other": [],
+     "structuredChars": 5142
+    },
+    {
+     "kind": "mcp",
+     "tool": "batch",
+     "args": {
+      "steps": [
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"email\""
+         },
+         "text": "gary@example.com"
+        }
+       },
+       {
+        "command": "fill",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"password\""
+         },
+         "text": "secret1"
+        }
+       },
+       {
+        "command": "press",
+        "input": {
+         "target": {
+          "kind": "selector",
+          "selector": "id=\"signIn\""
+         },
+         "settle": true
+        }
+       }
+      ]
+     },
+     "ms": 5654.606292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Batch completed: 3/3 steps in 5648ms\n1. OK Filled 16 chars (2118ms)\n2. OK Filled 7 chars (2615ms)\n3. OK Tapped id=\"signIn\" (201, 350) (915ms)",
+     "chars": 141,
+     "images": [],
+     "other": [],
+     "structuredChars": 1602
+    },
+    {
+     "kind": "mcp",
+     "tool": "snapshot",
+     "args": {
+      "interactiveOnly": true
+     },
+     "ms": 68.506542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Page: dev.simtap.demo\nApp: dev.simtap.demo\nSnapshot: 17 visible nodes (23 total)\n@e1 [other] \"Demo\"\n@e2 [navigation-bar] \"Sign In\"\n@e3 [text] \"Sign In\"\n@e4 [collection]\n  [content below collection hidden]\n@e5 [cell]\n@e6 [text-field] \"gary@example.com\" [editable]\n@e7 [cell]\n@e8 [securetextfield] \"•••••••\" [focused]\n@e9 [switch] \"Remember me\" [unchecked]\n@e10 [switch] \"0\" [unchecked]\n@e11 [cell]\n@e12 [button] \"Sign In\"\n@e13 [cell] \"Welcome, gary@example.com\"\n@e14 [toolbar] \"Toolbar\"\n@e15 [tab-bar] \"Tab Bar\"\n@e16 [button] \"Login\" [selected]\n@e17 [button] \"Items\"\n[off-screen below] 6 interactive items: \"Padding-Left\", \"Padding-Right\"\n",
+     "chars": 638,
+     "images": [],
+     "other": [],
+     "structuredChars": 6779
+    }
+   ],
+   "tokens": 327,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  }
+ ],
+ "condition": {
+  "deviceHubAsked": false,
+  "deviceHubRunning": false,
+  "simulator": "headless (simctl boot, no Device Hub)"
+ },
+ "environment": {
+  "date": "2026-11-06T13:24:33.462Z",
+  "macos": "26.6.2 (25G83)",
+  "hardware": {
+   "model": "VirtualMac2,1",
+   "cpu": "Apple M4 (Virtual)",
+   "cores": 6,
+   "memoryGB": 8
+  },
+  "xcode": "Xcode 27.0, Build version 27A266a",
+  "node": "v24.20.0",
+  "simulator": {
+   "udid": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+   "name": "Bench iPhone 17 Pro",
+   "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "runtime": "iOS 27.0 (24A434)"
+  }
+ },
+ "version": "0.21.36",
+ "server": {
+  "startToListMs": 153.183667,
+  "initMs": 144.616792,
+  "listMs": 5.445792,
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+   "name": "agent-device",
+   "version": "0.21.36"
+  },
+  "toolCount": 62,
+  "toolNames": [
+   "action-button",
+   "alert",
+   "app-switcher",
+   "apps",
+   "appstate",
+   "artifacts",
+   "audio",
+   "back",
+   "batch",
+   "boot",
+   "capabilities",
+   "click",
+   "clipboard",
+   "close",
+   "debug",
+   "devices",
+   "diff",
+   "doctor",
+   "events",
+   "fill",
+   "find",
+   "focus",
+   "fold",
+   "gesture",
+   "get",
+   "hardware-button",
+   "home",
+   "hover",
+   "install",
+   "install-from-source",
+   "is",
+   "keyboard",
+   "logs",
+   "longpress",
+   "metro",
+   "network",
+   "open",
+   "orientation",
+   "perf",
+   "press",
+   "push",
+   "react-native",
+   "record",
+   "reinstall",
+   "replay",
+   "screenshot",
+   "scroll",
+   "session",
+   "settings",
+   "shutdown",
+   "snapshot",
+   "swipe",
+   "telephony",
+   "test",
+   "trace",
+   "trigger-app-event",
+   "tv-remote",
+   "type",
+   "uninstall",
+   "viewport",
+   "wait",
+   "help"
+  ],
+  "definitionsChars": 188543,
+  "instructionsChars": 1630,
+  "outputSchemaChars": 74689,
+  "env": [],
+  "command": "agent-device mcp"
+ },
+ "leftoversKilled": [
+  "22630 /opt/homebrew/Cellar/node@24/24.20.0/bin/node /Users/agent/bench-tools/lib/node_modules/agent-device/dist/src/internal/d",
+  "23133 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -only-testing AgentDeviceRunnerUITes",
+  "23168 /Users/agent/Library/Developer/CoreSimulator/Devices/47F941AC-796F-469E-A2BA-8AAF81A1B7FE/data/Containers/Bundle/Applica"
+ ],
+ "finishedAt": "2026-11-06T13:31:02.566Z",
+ "mcpNotifications": 0,
+ "strayStdout": [],
+ "quick": {
+  "warmup": {
+   "n": 1,
+   "ok": 1,
+   "medianMs": 528.008875,
+   "p90Ms": 528.008875,
+   "medianTokens": 131
+  },
+  "read": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 75.59049999999999,
+   "p90Ms": 85.562833,
+   "medianTokens": 131
+  },
+  "tap": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 1308.2198955,
+   "p90Ms": 1324.286625,
+   "medianTokens": 38
+  },
+  "type": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 2590.615271,
+   "p90Ms": 2645.921792,
+   "medianTokens": 167
+  },
+  "flow": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 7618.112896000001,
+   "p90Ms": 7687.364501,
+   "medianTokens": 664
+  },
+  "flowBatch": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 6716.482021000001,
+   "p90Ms": 6782.470958,
+   "medianTokens": 327
+  }
+ },
+ "conditionAtEnd": {
+  "deviceHubRunning": false
+ },
+ "texts": []
+}

@@ -41,13 +41,13 @@ On the sign-in screen of `examples/swiftui-demo` (Email, Password, Remember me, 
 On a Mac with Xcode and an iOS Simulator runtime (the published run: a NoMac Mac, `nomac start`):
 
 ```sh
-bash bench/setup.sh                 # pinned tools into ~/bench-tools, AXe and Java from Homebrew, the demo app, one iPhone 17 Pro
+bash bench/setup.sh                 # pinned tools into ~/bench-tools; AXe, Java and idb-companion from Homebrew, fb-idb from uv; the demo app; one iPhone 17 Pro
 source ~/bench-tools/env.sh
 bash bench/run-all.sh bench/results/$(date -u +%F)            # every run, one after another (about two hours)
 node bench/run.mjs --tool agent-device --udid $UDID --probe   # one of each step for one tool, printed
-node bench/summarize.mjs bench/results/2026-11-01             # summary.json, summary.md
-node bench/page.mjs bench/results/2026-11-01 site/benchmarks.html   # the page's tables, from summary.json
-node bench/vs.mjs bench/results/2026-11-01 site/vs                  # the /vs pages and site/llms.txt, from summary.json and vs-facts.mjs
+node bench/summarize.mjs bench/results/2026-11-06             # summary.json, summary.md
+node bench/page.mjs bench/results/2026-11-06 site/benchmarks.html   # the page's tables, from summary.json
+node bench/vs.mjs bench/results/2026-11-06 site/vs                  # the /vs pages and site/llms.txt, from summary.json and vs-facts.mjs
 ```
 
 `setup.sh` pins every version it installs and needs `sudo` once, for `xcrun mcp-server enable` (Xcode's headless MCP
@@ -66,13 +66,29 @@ server). To count tokens with Anthropic's API, `npm install @anthropic-ai/sdk` i
   `vs-facts.mjs` with the sources it was read from. A measured difference is claimed only when it holds against both of
   simulator-use's runs by at least 5%.
 - `debug/`: the scripts used to find how a tool works (Xcode's command grammar, agent-device's snapshots) and to
-  check a failure (`axe-taps.mjs`); not part of a run.
+  check a failure (`axe-taps.mjs`, `ism-reads.mjs`: ios-simulator-mcp's reads after a boot and after a fresh app
+  start); not part of a run.
 - `lib/dedup.mjs`: stores each long answer text of a results file once (AXe's 220 KB screen read repeats). AXe's
   file is still about 20 MB, so it is kept as `axe.json.gz`; `summarize.mjs` reads both forms.
 
+## The November 6, 2026 run
+
+`results/2026-11-06/` holds the published run, the first with ios-simulator-mcp: every tool at its latest release on
+November 6 (simulator-use 0.15.1, ios-simulator-mcp 2.2.0 on idb-companion 1.7.8 and fb-idb 1.7.7, mobile-mcp 1.0.16,
+agent-device 0.21.36, Argent 0.32.0, Maestro 2.12.1, MobileBuildMCP 2.7.1, AXe 1.8.0, Xcode 27.0), on one NoMac Mac
+(M4 virtual Mac, 6 cores, 8 GB, macOS 26.6.2, Xcode 27.0, iOS 27.0), from 12:56 to 14:48 UTC, in the order of
+`run-all.sh`'s default list, then mobile-mcp twice more. In mobile-mcp's first two tries its setup's first read failed
+starting its on-device agent ("timed out waiting for WebDriverAgent to be ready", after 37 s and 23 s), so the app was
+never opened and its reads of the unchanged screen read the Home Screen; those files were renamed after the run to
+`mobile-mcp.first.*` and `mobile-mcp.second.*`, with the label set in each. Its setup now reads once more after that
+error, and the third try (`mobile-mcp.*`) is the ranked one. Some first reads timed out creating the Simulator's
+remote automation session: AXe's first four in its ranked run and first three with Device Hub open, MobileBuildMCP's
+first with Device Hub open and first three in its control run. With Device Hub open, no tap of AXe or MobileBuildMCP
+reached the app. The page says so under "Not ranked here".
+
 ## The November 1, 2026 run
 
-`results/2026-11-01/` holds the published run: simulator-use 0.15.0, every other tool at the version it had on
+`results/2026-11-01/` held the published run until November 6: simulator-use 0.15.0, every other tool at the version it had on
 October 31, on one NoMac Mac (M5 Pro virtual Mac, 6 cores, 8 GB, macOS 26.6.2, Xcode 27.0, iOS 27.0), in the order
 of `run-all.sh`'s default list but for two runs. Maestro MCP and AXe's Device Hub closed run (`axe.control.*`) first
 stopped before any call, with the Simulator found shut down after its reboot; each came after a run that left

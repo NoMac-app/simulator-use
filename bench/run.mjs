@@ -92,7 +92,7 @@ const push = (op) => { results.ops.push(op); return op; };
 const say = (op) => log(`${op.op}${op.i !== undefined ? ` #${op.i}` : ""}: ${op.ok ? "ok" : "FAIL"} ${op.ms.toFixed(0)} ms, ${op.tokens} tok${op.error ? ` (${op.error.slice(0, 200)})` : ""}${op.verify ? ` ${JSON.stringify(op.verify)}` : ""}`);
 
 // Nothing of another tool may still run: their servers, daemons and helpers (paths under $BENCH_TOOLS, or names).
-const LEFTOVERS = ["bench-tools/bin/", "bench-tools/lib/node_modules/", "bench-tools/maestro/", "maestro.cli", "mobilecli", "devicekit", "AgentDeviceRunner", "simulator-server", "ax-service", "simulator-use-engine", "mcpbridge", "axe describe-ui", "axe tap", "axe type", "axe batch", "hid-broker"];
+const LEFTOVERS = ["bench-tools/bin/", "bench-tools/lib/node_modules/", "bench-tools/maestro/", "maestro.cli", "mobilecli", "devicekit", "AgentDeviceRunner", "simulator-server", "ax-service", "simulator-use-engine", "mcpbridge", "axe describe-ui", "axe tap", "axe type", "axe batch", "hid-broker", "idb_companion", "uv/tools/fb-idb"];
 const stale = killMatching(LEFTOVERS);
 if (stale.length) log(`killed ${stale.length} leftover processes: ${stale.join(" | ").slice(0, 600)}`);
 if (adapter.prepare) adapter.prepare(ctx);

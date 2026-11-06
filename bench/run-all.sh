@@ -7,7 +7,7 @@ set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=${1:?usage: run-all.sh OUT_DIR [entry ...]}
 shift
-ENTRIES=${*:-simulator-use axe mobilebuildmcp mobile-mcp agent-device argent maestro xcode-mcp simulator-use@last axe@devicehub mobilebuildmcp@devicehub axe@control mobilebuildmcp@control}
+ENTRIES=${*:-simulator-use axe mobilebuildmcp mobile-mcp agent-device argent maestro xcode-mcp ios-simulator-mcp simulator-use@last axe@devicehub mobilebuildmcp@devicehub axe@control mobilebuildmcp@control}
 mkdir -p "$OUT"
 for e in $ENTRIES; do
   t=${e%%@*}; l=""; [ "$e" != "$t" ] && l=${e#*@}

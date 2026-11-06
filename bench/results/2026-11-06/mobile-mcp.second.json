@@ -1,0 +1,5541 @@
+{
+ "tool": "mobile-mcp",
+ "label": "second",
+ "name": "mobile-mcp",
+ "interface": "mcp",
+ "startedAt": "2026-11-06T14:34:17.535Z",
+ "counts": {
+  "reads": 20,
+  "taps": 20,
+  "types": 10,
+  "flows": 10
+ },
+ "notes": [],
+ "ops": [
+  {
+   "op": "setup",
+   "ok": false,
+   "error": "mobile_list_elements_on_screen failed: Error: Command failed: /Users/agent/bench-tools/lib/node_modules/@mobilenext/mobile-mcp/node_modules/@mobilenext/mobilecli-darwin-arm64/mobilecli-darwin-arm64 dump ui --device 47F941AC-796F-469E-A2BA-8AAF81A1B7FE\nfailed to start agent on device 47F941AC-796F-469E-A2BA-8AAF81A1B7FE: timed out waiting for WebDriverAgent to be ready; agent stderr:\nobjc[73942]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_24A434/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/Accessibilit",
+   "wallMs": 22972.465209,
+   "ms": 22971.238792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_available_devices",
+     "args": {},
+     "ms": 226.89575,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "{\"devices\":[{\"id\":\"47F941AC-796F-469E-A2BA-8AAF81A1B7FE\",\"name\":\"Bench iPhone 17 Pro\",\"platform\":\"ios\",\"type\":\"simulator\",\"version\":\"27.0\",\"state\":\"online\",\"model\":\"com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro\"}]}",
+     "chars": 220,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 22744.343042,
+     "isError": true,
+     "error": null,
+     "timedOut": false,
+     "chars": 1578,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 0
+    }
+   ],
+   "tokens": 450
+  },
+  {
+   "op": "warmup",
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 24212.927666,
+   "ms": 24212.755,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 24212.755,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 0,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 446.310416,
+   "ms": 446.205375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 446.205375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 1,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 676.707625,
+   "ms": 676.608625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 676.608625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 2,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 391.788292,
+   "ms": 391.702125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 391.702125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 3,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 407.105541,
+   "ms": 407.0095,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 407.0095,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 4,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 361.465833,
+   "ms": 361.360792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 361.360792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 5,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 374.814041,
+   "ms": 374.73775,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 374.73775,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 6,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 379.315875,
+   "ms": 379.215709,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 379.215709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 7,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 375.898,
+   "ms": 375.817709,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 375.817709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 8,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 393.432,
+   "ms": 393.312458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 393.312458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 9,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 388.300083,
+   "ms": 388.235125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 388.235125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 10,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 374.634667,
+   "ms": 374.583208,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 374.583208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 11,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 319.307667,
+   "ms": 319.261542,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 319.261542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 12,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 353.116667,
+   "ms": 353.07,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 353.07,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 13,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 364.077333,
+   "ms": 364.009083,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 364.009083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 14,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 368.156416,
+   "ms": 368.111125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 368.111125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 15,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 338.416959,
+   "ms": 338.363458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 338.363458,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 16,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 319.944125,
+   "ms": 319.886875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 319.886875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 17,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 316.398584,
+   "ms": 316.363416,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 316.363416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 18,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 315.281459,
+   "ms": 315.247,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 315.247,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "read",
+   "i": 19,
+   "ok": false,
+   "error": "the read did not show the Sign In screen",
+   "wallMs": 307.783833,
+   "ms": 307.739333,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 307.739333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 4025,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 1
+    }
+   ],
+   "tokens": 1007,
+   "verify": {
+    "sawSignIn": false,
+    "sawEmail": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 567.181583,
+   "ms": 566.338667,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 566.338667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1220.142834,
+    "ms": 1220.090542,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1220.090542,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 561.805833,
+   "ms": 561.630625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 561.630625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1196.390625,
+    "ms": 1196.334291,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1196.334291,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 2
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 540.346208,
+   "ms": 540.291042,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 540.291042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1239.056375,
+    "ms": 1239.015167,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1239.015167,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 551.544125,
+   "ms": 551.478584,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 551.478584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1176.54775,
+    "ms": 1176.464583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1176.464583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 550.557459,
+   "ms": 550.503625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 550.503625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1144.397833,
+    "ms": 1144.350333,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1144.350333,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 552.954167,
+   "ms": 552.872459,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 552.872459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1172.030125,
+    "ms": 1171.979916,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1171.979916,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 542.3975,
+   "ms": 542.339208,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 542.339208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1172.9715,
+    "ms": 1172.925667,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1172.925667,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 532.745208,
+   "ms": 532.674792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 532.674792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1190.40925,
+    "ms": 1190.365042,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1190.365042,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 539.258292,
+   "ms": 539.204292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 539.204292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1481.378,
+    "ms": 1481.314625,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1481.314625,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 556.99625,
+   "ms": 556.935792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 556.935792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1216.685625,
+    "ms": 1216.644375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1216.644375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 10,
+   "ok": true,
+   "error": null,
+   "wallMs": 546.137792,
+   "ms": 546.076875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 546.076875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1186.449208,
+    "ms": 1186.397959,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1186.397959,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 11,
+   "ok": true,
+   "error": null,
+   "wallMs": 546.534709,
+   "ms": 546.447666,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 546.447666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1176.608917,
+    "ms": 1176.565208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1176.565208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 12,
+   "ok": true,
+   "error": null,
+   "wallMs": 537.109708,
+   "ms": 537.057042,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 537.057042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1193.074875,
+    "ms": 1193.02975,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1193.02975,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 13,
+   "ok": true,
+   "error": null,
+   "wallMs": 544.318,
+   "ms": 544.260917,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 544.260917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1193.734875,
+    "ms": 1193.685666,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1193.685666,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 14,
+   "ok": true,
+   "error": null,
+   "wallMs": 547.333583,
+   "ms": 547.283875,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 547.283875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1213.231375,
+    "ms": 1213.187583,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1213.187583,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 15,
+   "ok": true,
+   "error": null,
+   "wallMs": 557.064917,
+   "ms": 557.013417,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 557.013417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1194.4405,
+    "ms": 1194.402334,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1194.402334,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 16,
+   "ok": true,
+   "error": null,
+   "wallMs": 548.041542,
+   "ms": 547.989375,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 547.989375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1188.857208,
+    "ms": 1188.81025,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1188.81025,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 17,
+   "ok": true,
+   "error": null,
+   "wallMs": 544.605125,
+   "ms": 544.554916,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 544.554916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1148.883292,
+    "ms": 1148.8415,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1148.8415,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 18,
+   "ok": true,
+   "error": null,
+   "wallMs": 542.6625,
+   "ms": 542.610792,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 542.610792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1141.891209,
+    "ms": 1141.843792,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1141.843792,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 3
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "tap",
+   "i": 19,
+   "ok": true,
+   "error": null,
+   "wallMs": 556.620917,
+   "ms": 556.576583,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 556.576583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 6,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1169.061209,
+    "ms": 1169.011791,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1169.011791,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "appSawTap": true,
+    "reportsChange": false,
+    "returnsImage": false
+   }
+  },
+  {
+   "op": "type",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 2949.29125,
+   "ms": 2949.054,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 549.182208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 2399.871792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1146.813125,
+    "ms": 1146.77225,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1146.77225,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 227.489041,
+    "ms": 227.452708,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 227.452708,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 2325.137959,
+   "ms": 2324.99,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 547.5305,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1777.4595,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1138.09625,
+    "ms": 1138.054209,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1138.054209,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 252.837792,
+    "ms": 252.797,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 252.797,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 2325.364334,
+   "ms": 2325.174376,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 562.193042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1762.981334,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1145.394417,
+    "ms": 1145.340917,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1145.340917,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 248.519083,
+    "ms": 248.471209,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 248.471209,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 2328.857458,
+   "ms": 2328.6444579999998,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 552.246333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1776.398125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1143.82875,
+    "ms": 1143.783375,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1143.783375,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 273.055625,
+    "ms": 272.989458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 272.989458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 2299.2385,
+   "ms": 2299.051458,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 544.2355,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1754.815958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1125.395583,
+    "ms": 1125.351208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1125.351208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 265.791292,
+    "ms": 265.724041,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 265.724041,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 2297.585875,
+   "ms": 2297.4114170000003,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 543.054875,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1754.356542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1126.326917,
+    "ms": 1126.276792,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1126.276792,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 255.260791,
+    "ms": 255.202833,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 255.202833,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 2305.847791,
+   "ms": 2305.747916,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 556.000958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1749.746958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1212.12725,
+    "ms": 1212.07325,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1212.07325,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 239.367625,
+    "ms": 239.325958,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 239.325958,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 2303.008917,
+   "ms": 2302.734292,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 558.325583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1744.408709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1135.316125,
+    "ms": 1135.270709,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1135.270709,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 258.587125,
+    "ms": 258.52675,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 258.52675,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 2327.434,
+   "ms": 2327.282668,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 555.783459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1771.499209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1168.763125,
+    "ms": 1168.684334,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1168.684334,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 254.866333,
+    "ms": 254.827458,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 254.827458,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "type",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 2300.853375,
+   "ms": 2300.689209,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 561.482584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1739.206625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    }
+   ],
+   "tokens": 13,
+   "prep": {
+    "op": "pre-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 1135.454,
+    "ms": 1135.40775,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 1135.40775,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 1462,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 4
+     }
+    ],
+    "tokens": 366,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "post": {
+    "op": "post-read",
+    "ok": true,
+    "error": null,
+    "wallMs": 256.656083,
+    "ms": 256.611208,
+    "calls": [
+     {
+      "kind": "mcp",
+      "tool": "mobile_list_elements_on_screen",
+      "args": {
+       "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+      },
+      "ms": 256.611208,
+      "isError": false,
+      "error": null,
+      "timedOut": false,
+      "chars": 2306,
+      "images": [],
+      "other": [],
+      "structuredChars": 0,
+      "textRef": 5
+     }
+    ],
+    "tokens": 577,
+    "verify": {
+     "sawSignIn": true,
+     "sawEmail": true
+    }
+   },
+   "verify": {
+    "fieldShowsText": true
+   }
+  },
+  {
+   "op": "flow",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 6353.206583,
+   "ms": 6352.479876,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1170.924084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 549.394958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1774.500542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 587.230709,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1450.973166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 591.766125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 227.690292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 6302.9385,
+   "ms": 6302.566874000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1158.927708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 545.12525,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1764.453791,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 598.388042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1437.919166,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 571.343125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 226.409792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 6295.327125,
+   "ms": 6294.772128,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1141.726917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 546.546917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1751.682042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 606.698084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1436.687792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 583.294792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 228.135584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 6346.62075,
+   "ms": 6346.013377,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1166.311,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 542.083042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1771.593584,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 606.779334,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1439.769917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 593.990291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 225.486209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 6348.091,
+   "ms": 6347.623084,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1142.228667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 545.733333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1804.613917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 604.249084,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1445.974708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 584.484542,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 220.338833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 6295.488792,
+   "ms": 6295.069501,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1136.222459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 543.154,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1779.37275,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 590.588291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1417.444167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 596.801167,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 231.486667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 6310.421917,
+   "ms": 6309.77154,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1168.537708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 544.857,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1760.776208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 610.379333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1429.886125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 569.622208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 225.712958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 7
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 6338.041583,
+   "ms": 6337.545166000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1154.832708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 6
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 542.604375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1767.71125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 615.945958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1433.598917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 595.97825,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 226.873708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 6263.557334,
+   "ms": 6263.056335,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1152.245,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 546.859,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1732.089459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 605.512917,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1411.940417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 586.064209,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 228.345333,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 6327.367333,
+   "ms": 6326.915457,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1129.420416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e3"
+     },
+     "ms": 543.670083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e3",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "gary@example.com",
+      "submit": false
+     },
+     "ms": 1781.969334,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: gary@example.com",
+     "chars": 28,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e4"
+     },
+     "ms": 599.450416,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e4",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_type_keys",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "text": "secret1",
+      "submit": false
+     },
+     "ms": 1445.294708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Typed text: secret1",
+     "chars": 19,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_click_on_screen_at_coordinates",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "ref": "@e8"
+     },
+     "ms": 595.065083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Clicked on element @e8",
+     "chars": 22,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 232.045417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 980,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 7
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 0,
+   "ok": true,
+   "error": null,
+   "wallMs": 6297.54125,
+   "ms": 6297.249459000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1130.481375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4937.713292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 229.054792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 1,
+   "ok": true,
+   "error": null,
+   "wallMs": 6285.485625,
+   "ms": 6285.316999000001,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1121.412083,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4938.034708,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 225.870208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 2,
+   "ok": true,
+   "error": null,
+   "wallMs": 6279.278084,
+   "ms": 6279.097626,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1153.012042,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4899.131125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 226.954459,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 3,
+   "ok": true,
+   "error": null,
+   "wallMs": 6366.34725,
+   "ms": 6366.147291,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1226.488958,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4916.849666,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 222.808667,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 8
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 4,
+   "ok": true,
+   "error": null,
+   "wallMs": 6245.966958,
+   "ms": 6245.795166,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1118.110583,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 9
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4893.445208,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 234.239375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 5,
+   "ok": true,
+   "error": null,
+   "wallMs": 6285.725709,
+   "ms": 6285.548457999999,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1160.45425,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4898.916292,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 226.177916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 6,
+   "ok": true,
+   "error": null,
+   "wallMs": 6259.063,
+   "ms": 6258.792917,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1113.300125,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4915.453417,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 230.039375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 7,
+   "ok": true,
+   "error": null,
+   "wallMs": 6280.4165,
+   "ms": 6280.207625,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1137.204291,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4920.810959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 222.192375,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 8,
+   "ok": true,
+   "error": null,
+   "wallMs": 6332.45325,
+   "ms": 6332.2845,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1172.227625,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4933.596916,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 226.459959,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  },
+  {
+   "op": "flow-batch",
+   "i": 9,
+   "ok": true,
+   "error": null,
+   "wallMs": 6301.119125,
+   "ms": 6300.948125,
+   "calls": [
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 1133.2635,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 1462,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 11
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_batch_commands",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+      "steps": [
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e3"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "gary@example.com",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e4"
+        }
+       },
+       {
+        "name": "mobile_type_keys",
+        "arguments": {
+         "text": "secret1",
+         "submit": false
+        }
+       },
+       {
+        "name": "mobile_click_on_screen_at_coordinates",
+        "arguments": {
+         "ref": "@e8"
+        }
+       }
+      ],
+      "stopOnError": true
+     },
+     "ms": 4946.482792,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "text": "Step 1 (mobile_click_on_screen_at_coordinates): Clicked on element @e3\nStep 2 (mobile_type_keys): Typed text: gary@example.com\nStep 3 (mobile_click_on_screen_at_coordinates): Clicked on element @e4\nStep 4 (mobile_type_keys): Typed text: secret1\nStep 5 (mobile_click_on_screen_at_coordinates): Clicked on element @e8",
+     "chars": 315,
+     "images": [],
+     "other": [],
+     "structuredChars": 0
+    },
+    {
+     "kind": "mcp",
+     "tool": "mobile_list_elements_on_screen",
+     "args": {
+      "device": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE"
+     },
+     "ms": 221.201833,
+     "isError": false,
+     "error": null,
+     "timedOut": false,
+     "chars": 2335,
+     "images": [],
+     "other": [],
+     "structuredChars": 0,
+     "textRef": 10
+    }
+   ],
+   "tokens": 1029,
+   "verify": {
+    "sawWelcome": true,
+    "appSignedIn": true,
+    "calls": 3
+   }
+  }
+ ],
+ "condition": {
+  "deviceHubAsked": false,
+  "deviceHubRunning": false,
+  "simulator": "headless (simctl boot, no Device Hub)"
+ },
+ "environment": {
+  "date": "2026-11-06T14:34:51.052Z",
+  "macos": "26.6.2 (25G83)",
+  "hardware": {
+   "model": "VirtualMac2,1",
+   "cpu": "Apple M4 (Virtual)",
+   "cores": 6,
+   "memoryGB": 8
+  },
+  "xcode": "Xcode 27.0, Build version 27A266a",
+  "node": "v24.20.0",
+  "simulator": {
+   "udid": "47F941AC-796F-469E-A2BA-8AAF81A1B7FE",
+   "name": "Bench iPhone 17 Pro",
+   "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+   "runtime": "iOS 27.0 (24A434)"
+  }
+ },
+ "version": "1.0.16",
+ "server": {
+  "startToListMs": 367.771291,
+  "initMs": 360.637959,
+  "listMs": 4.419292,
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+   "name": "mobile-mcp",
+   "version": "1.0.16"
+  },
+  "toolCount": 35,
+  "toolNames": [
+   "get_more_tools",
+   "mobile_list_available_devices",
+   "mobile_login_to_cloud_provider",
+   "mobile_list_remote_devices",
+   "mobile_allocate_remote_device",
+   "mobile_release_remote_device",
+   "mobile_list_apps",
+   "mobile_get_foreground_app",
+   "mobile_launch_app",
+   "mobile_terminate_app",
+   "mobile_clear_app_data",
+   "mobile_install_app",
+   "mobile_uninstall_app",
+   "mobile_get_screen_size",
+   "mobile_click_on_screen_at_coordinates",
+   "mobile_double_tap_on_screen",
+   "mobile_long_press_on_screen_at_coordinates",
+   "mobile_list_elements_on_screen",
+   "mobile_press_button",
+   "mobile_open_url",
+   "mobile_swipe_on_screen",
+   "mobile_type_keys",
+   "mobile_save_screenshot",
+   "mobile_take_screenshot",
+   "mobile_set_orientation",
+   "mobile_fold_device",
+   "mobile_set_location",
+   "mobile_clipboard",
+   "mobile_get_device_logs",
+   "mobile_get_orientation",
+   "mobile_start_screen_recording",
+   "mobile_stop_screen_recording",
+   "mobile_list_crashes",
+   "mobile_get_crash",
+   "mobile_batch_commands"
+  ],
+  "definitionsChars": 27566,
+  "instructionsChars": 1105,
+  "outputSchemaChars": 176,
+  "env": [],
+  "command": "node /Users/agent/bench-tools/lib/node_modules/@mobilenext/mobile-mcp/lib/index.js"
+ },
+ "leftoversKilled": [
+  "73899 /Users/agent/bench-tools/lib/node_modules/@mobilenext/mobile-mcp/node_modules/@mobilenext/mobilecli-darwin-arm64/mobilec",
+  "74087 /Users/agent/Library/Developer/CoreSimulator/Devices/47F941AC-796F-469E-A2BA-8AAF81A1B7FE/data/Containers/Bundle/Applica"
+ ],
+ "finishedAt": "2026-11-06T14:40:44.809Z",
+ "mcpNotifications": 0,
+ "strayStdout": [],
+ "quick": {
+  "warmup": {
+   "n": 1,
+   "ok": 0,
+   "medianMs": null,
+   "p90Ms": null,
+   "medianTokens": null
+  },
+  "read": {
+   "n": 20,
+   "ok": 0,
+   "medianMs": null,
+   "p90Ms": null,
+   "medianTokens": null
+  },
+  "tap": {
+   "n": 20,
+   "ok": 20,
+   "medianMs": 546.8657705,
+   "p90Ms": 557.013417,
+   "medianTokens": 6
+  },
+  "type": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 2315.368958,
+   "p90Ms": 2328.6444579999998,
+   "medianTokens": 13
+  },
+  "flow": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 6318.3434985,
+   "p90Ms": 6347.623084,
+   "medianTokens": 980
+  },
+  "flowBatch": {
+   "n": 10,
+   "ok": 10,
+   "medianMs": 6285.4327285,
+   "p90Ms": 6332.2845,
+   "medianTokens": 1029
+  }
+ },
+ "conditionAtEnd": {
+  "deviceHubRunning": false
+ },
+ "texts": [
+  "Error: Command failed: /Users/agent/bench-tools/lib/node_modules/@mobilenext/mobile-mcp/node_modules/@mobilenext/mobilecli-darwin-arm64/mobilecli-darwin-arm64 dump ui --device 47F941AC-796F-469E-A2BA-8AAF81A1B7FE\nfailed to start agent on device 47F941AC-796F-469E-A2BA-8AAF81A1B7FE: timed out waiting for WebDriverAgent to be ready; agent stderr:\nobjc[73942]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_24A434/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x101be0398) and /Library/Developer/CoreSimulator/Volumes/iOS_24A434/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.0.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x102cfc310). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.\n2026-11-06 14:34:59.183 devicekit-iosUITests-Runner[73942:426601] [DeviceKit] Suspending test runner so UI testing can initialize\n    t =      nans Interface orientation changed to Portrait\nTest Suite 'All tests' started at 2026-11-06 14:35:12.529.\nTest Suite 'devicekit-iosUITests.xctest' started at 2026-11-06 14:35:12.529.\nTest Suite 'DeviceKitUITests' started at 2026-11-06 14:35:12.529.\n    t =      nans Suite Set Up\nTest Case '-[devicekit_iosUITests.DeviceKitUITests testRunAutomation]' started.\n    t =     0.00s Start Test at 2026-11-06 14:35:13.023\n    t =     0.09s Set Up\n",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 Other name=\"Home screen icons\" id=\"Home screen icons\" at=0,0 size=402x874\n@e2 Icon label=\"Maps\" name=\"Maps\" value=\"Widget\" id=\"Maps\" at=24,88 size=168x191\n@e3 Image label=\"Map\" name=\"NearbyWidgetMapImage\" id=\"NearbyWidgetMapImage\" at=26,90 size=164x164\n@e4 Other name=\"label-view\" id=\"label-view\" at=84,257 size=47x19\n@e5 Icon label=\"Calendar\" name=\"Calendar\" value=\"Widget, Stack\" id=\"Calendar\" at=209,88 size=168x191\n@e6 Other name=\"widget-stack:<Calendar,News,Photos>\" id=\"widget-stack:<Calendar,News,Photos>\" at=211,90 size=164x164\n@e7 Other label=\"FRIDAY, NOVEMBER 06\" name=\"iconic-date-header-view\" id=\"iconic-date-header-view\" at=229,107 size=40x51\n@e8 StaticText label=\"FRIDAY\" name=\"FRIDAY\" at=229,107 size=40x13\n@e9 StaticText label=\"6\" name=\"6\" at=229,118 size=21x40\n@e10 StaticText label=\"No Events Today\" name=\"No Events Today\" at=229,188 size=114x18\n@e11 Other name=\"label-view\" id=\"label-view\" at=259,257 size=68x19\n@e12 Icon label=\"Calendar\" name=\"Calendar\" value=\"Friday, November 06\" id=\"Calendar\" at=26,288 size=72x90\n@e13 Other name=\"label-view\" id=\"label-view\" at=28,357 size=68x19\n@e14 Icon label=\"Photos\" name=\"Photos\" id=\"Photos\" at=120,288 size=68x90\n@e15 Other name=\"label-view\" id=\"label-view\" at=126,357 size=56x19\n@e16 Icon label=\"Maps\" name=\"Maps\" id=\"Maps\" at=213,288 size=68x90\n@e17 Other name=\"label-view\" id=\"label-view\" at=223,357 size=47x19\n@e18 Icon label=\"News\" name=\"News\" id=\"News\" at=306,288 size=68x90\n@e19 Other name=\"label-view\" id=\"label-view\" at=316,357 size=47x19\n@e20 Icon label=\"Health\" name=\"Health\" id=\"Health\" at=28,389 size=68x90\n@e21 Other name=\"label-view\" id=\"label-view\" at=35,458 size=53x19\n@e22 Icon label=\"Wallet\" name=\"Wallet\" id=\"Wallet\" at=120,389 size=68x90\n@e23 Other name=\"label-view\" id=\"label-view\" at=128,458 size=51x19\n@e24 Icon label=\"Siri\" name=\"Siri\" id=\"Siri\" at=213,389 size=68x90\n@e25 Other name=\"label-view\" id=\"label-view\" at=230,458 size=34x19\n@e26 Icon label=\"Settings\" name=\"Settings\" id=\"Settings\" at=305,389 size=68x90\n@e27 Other name=\"label-view\" id=\"label-view\" at=307,458 size=64x19\n@e28 Icon label=\"Fitness\" name=\"Fitness\" id=\"Fitness\" at=430,88 size=68x90\n@e29 Other name=\"label-view\" id=\"label-view\" at=435,157 size=57x19\n@e30 Icon label=\"Watch\" name=\"Watch\" id=\"Watch\" at=522,88 size=68x90\n@e31 Other name=\"label-view\" id=\"label-view\" at=530,157 size=52x19\n@e32 Icon label=\"Preview\" name=\"Preview\" id=\"Preview\" at=430,188 size=68x90\n@e33 Other name=\"label-view\" id=\"label-view\" at=433,257 size=61x19\n@e34 Icon label=\"Utilities folder\" name=\"Utilities\" value=\"2 apps\" id=\"Utilities\" at=522,188 size=68x90\n@e35 Other name=\"label-view\" id=\"label-view\" at=526,257 size=60x19\n@e36 Icon label=\"Device Kit\" name=\"Device Kit\" id=\"Device Kit\" at=425,288 size=78x90\n@e37 Other name=\"label-view\" id=\"label-view\" at=427,357 size=74x19\n@e38 Other label=\"Search\" name=\"spotlight-pill\" value=\"Page 1 of 2\" id=\"spotlight-pill\" at=162,703 size=78x30\n@e39 PageIndicator name=\"Page control\" value=\"Page 1 of 2\" id=\"Page control\" at=162,703 size=78x35\n@e40 Other name=\"spotlight-pill\" id=\"spotlight-pill\" at=162,703 size=78x30\n@e41 Image label=\"Search\" name=\"magnifyingglass\" id=\"magnifyingglass\" at=173,713 size=11x10\n@e42 StaticText label=\"Search\" name=\"Search\" at=188,711 size=40x14\n@e43 Icon label=\"Safari\" name=\"Safari\" id=\"Safari\" at=123,771 size=68x68\n@e44 Icon label=\"Messages\" name=\"Messages\" id=\"Messages\" at=211,771 size=68x68\n@e45 StaticText label=\"2:35 PM\" name=\"2:35 PM\" at=54,21 size=38x21\n@e46 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e47 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17\n@e48 StaticText label=\"2:35 PM\" name=\"2:35 PM\" at=54,21 size=38x21\n@e49 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e50 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:35 PM\" name=\"2:35 PM\" at=54,21 size=38x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:36 PM\" name=\"2:36 PM\" at=54,21 size=39x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:37 PM\" name=\"2:37 PM\" at=55,21 size=37x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" value=\"gary@example.com\" id=\"email\" at=32,183 size=338x22 focused\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"person\" id=\"person\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"list.bullet\" id=\"list.bullet\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 Other name=\"SystemInputAssistantView\" id=\"SystemInputAssistantView\" at=0,874 size=402x44\n@e17 Other name=\"CenterPageView\" id=\"CenterPageView\" at=0,874 size=402x20\n@e18 Button label=\"Passwords\" name=\"Passwords\" at=30,874 size=342x20\n@e19 Image name=\"kb-autofill-key\" id=\"kb-autofill-key\" at=150,876 size=13x23\n@e20 Other name=\"UIKeyboardLayoutStar Preview\" id=\"UIKeyboardLayoutStar Preview\" at=0,918 size=402x226\n@e21 Button label=\"shift\" name=\"shift\" id=\"shift\" at=4,1033 size=51x54\n@e22 Key label=\"delete\" name=\"delete\" id=\"delete\" at=348,1033 size=51x54\n@e23 Key label=\"numbers\" name=\"more\" id=\"more\" at=4,1087 size=98x54\n@e24 Key label=\"space\" name=\"space\" id=\"space\" at=103,1087 size=98x54\n@e25 Button label=\"return\" name=\"Return\" id=\"Return\" at=300,1087 size=99x54\n@e26 StaticText label=\"2:37 PM\" name=\"2:37 PM\" at=55,21 size=37x21\n@e27 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e28 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:38 PM\" name=\"2:38 PM\" at=54,21 size=39x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" value=\"gary@example.com\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" value=\"•••••••\" id=\"password\" at=32,235 size=338x22 focused\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Welcome, gary@example.com\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"person\" id=\"person\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"list.bullet\" id=\"list.bullet\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 Other name=\"SystemInputAssistantView\" id=\"SystemInputAssistantView\" at=0,874 size=402x44\n@e17 Other name=\"CenterPageView\" id=\"CenterPageView\" at=0,874 size=402x20\n@e18 Button label=\"Passwords\" name=\"Passwords\" at=30,874 size=342x20\n@e19 Image name=\"kb-autofill-key\" id=\"kb-autofill-key\" at=150,876 size=13x23\n@e20 Other name=\"UIKeyboardLayoutStar Preview\" id=\"UIKeyboardLayoutStar Preview\" at=0,918 size=402x226\n@e21 Button label=\"shift\" name=\"shift\" id=\"shift\" at=4,1033 size=51x54\n@e22 Key label=\"delete\" name=\"delete\" id=\"delete\" at=348,1033 size=51x54\n@e23 Key label=\"numbers\" name=\"more\" id=\"more\" at=4,1087 size=98x54\n@e24 Key label=\"space\" name=\"space\" id=\"space\" at=103,1087 size=197x54\n@e25 Button label=\"return\" name=\"Return\" id=\"Return\" at=300,1087 size=99x54\n@e26 StaticText label=\"2:38 PM\" name=\"2:38 PM\" at=54,21 size=39x21\n@e27 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e28 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" value=\"gary@example.com\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" value=\"•••••••\" id=\"password\" at=32,235 size=338x22 focused\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Welcome, gary@example.com\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"person\" id=\"person\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"list.bullet\" id=\"list.bullet\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 Other name=\"SystemInputAssistantView\" id=\"SystemInputAssistantView\" at=0,874 size=402x44\n@e17 Other name=\"CenterPageView\" id=\"CenterPageView\" at=0,874 size=402x20\n@e18 Button label=\"Passwords\" name=\"Passwords\" at=30,874 size=342x20\n@e19 Image name=\"kb-autofill-key\" id=\"kb-autofill-key\" at=150,876 size=13x23\n@e20 Other name=\"UIKeyboardLayoutStar Preview\" id=\"UIKeyboardLayoutStar Preview\" at=0,918 size=402x226\n@e21 Button label=\"shift\" name=\"shift\" id=\"shift\" at=4,1033 size=51x54\n@e22 Key label=\"delete\" name=\"delete\" id=\"delete\" at=348,1033 size=51x54\n@e23 Key label=\"numbers\" name=\"more\" id=\"more\" at=4,1087 size=98x54\n@e24 Key label=\"space\" name=\"space\" id=\"space\" at=103,1087 size=197x54\n@e25 Button label=\"return\" name=\"Return\" id=\"Return\" at=300,1087 size=99x54\n@e26 StaticText label=\"2:39 PM\" name=\"2:39 PM\" at=54,21 size=39x21\n@e27 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e28 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:39 PM\" name=\"2:39 PM\" at=54,21 size=39x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" value=\"gary@example.com\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" value=\"•••••••\" id=\"password\" at=32,235 size=338x22 focused\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Welcome, gary@example.com\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"person\" id=\"person\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"list.bullet\" id=\"list.bullet\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 Other name=\"SystemInputAssistantView\" id=\"SystemInputAssistantView\" at=0,874 size=402x44\n@e17 Other name=\"CenterPageView\" id=\"CenterPageView\" at=0,874 size=402x20\n@e18 Button label=\"Passwords\" name=\"Passwords\" at=30,874 size=342x20\n@e19 Image name=\"kb-autofill-key\" id=\"kb-autofill-key\" at=150,876 size=13x23\n@e20 Other name=\"UIKeyboardLayoutStar Preview\" id=\"UIKeyboardLayoutStar Preview\" at=0,918 size=402x226\n@e21 Button label=\"shift\" name=\"shift\" id=\"shift\" at=4,1033 size=51x54\n@e22 Key label=\"delete\" name=\"delete\" id=\"delete\" at=348,1033 size=51x54\n@e23 Key label=\"numbers\" name=\"more\" id=\"more\" at=4,1087 size=98x54\n@e24 Key label=\"space\" name=\"space\" id=\"space\" at=103,1087 size=197x54\n@e25 Button label=\"return\" name=\"Return\" id=\"Return\" at=300,1087 size=99x54\n@e26 StaticText label=\"2:40 PM\" name=\"2:40 PM\" at=54,21 size=39x21\n@e27 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e28 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17",
+  "One element per line: @ref Type text= label= name= value= id= at=x,y size=WxH [focused] [selected] [checked] [disabled]\n@e1 NavigationBar name=\"Sign In\" id=\"Sign In\" at=0,62 size=402x106\n@e2 StaticText label=\"Sign In\" name=\"Sign In\" at=15,119 size=107x40\n@e3 TextField name=\"email\" id=\"email\" at=32,183 size=338x22\n@e4 SecureTextField name=\"password\" id=\"password\" at=32,235 size=338x20\n@e5 Switch label=\"Remember me\" name=\"remember\" value=\"0\" id=\"remember\" at=16,272 size=370x52\n@e6 StaticText label=\"Remember me\" name=\"Remember me\" at=32,287 size=111x20\n@e7 Switch value=\"0\" at=309,284 size=63x28\n@e8 Button label=\"Sign In\" name=\"signIn\" id=\"signIn\" at=16,324 size=370x52\n@e9 StaticText label=\"Not signed in\" name=\"status\" id=\"status\" at=16,376 size=370x52\n@e10 Toolbar label=\"Toolbar\" name=\"Toolbar\" id=\"Toolbar\" at=0,0 size=402x874\n@e11 TabBar label=\"Tab Bar\" name=\"Tab Bar\" at=0,791 size=402x83\n@e12 Button label=\"Login\" name=\"Login\" at=111,795 size=94x54 selected\n@e13 Image label=\"Person silhouette, filled\" name=\"person.fill\" id=\"person.fill\" at=145,802 size=25x24\n@e14 Button label=\"Items\" name=\"Items\" at=197,795 size=94x54\n@e15 Image label=\"List\" name=\"list.bullet\" id=\"list.bullet\" at=229,804 size=29x21\n@e16 StaticText label=\"2:40 PM\" name=\"2:40 PM\" at=54,21 size=39x21\n@e17 Other name=\"3 of 3 Wi-Fi bars\" value=\"SSID, 3 of 3 Wi-Fi bars\" id=\"3 of 3 Wi-Fi bars\" at=314,26 size=17x12\n@e18 Image label=\"Wi-Fi\" name=\"wifi\" id=\"wifi\" at=311,23 size=23x17"
+ ]
+}

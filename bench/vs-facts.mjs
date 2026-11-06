@@ -1,11 +1,12 @@
-// Every claim the /vs pages make about a tool, with the sources it was read from (October 31, 2026). bench/vs.mjs
+// Every claim the /vs pages make about a tool, with the sources it was read from (October 31, 2026; a tool's
+// readOn says when it was read later). bench/vs.mjs
 // puts these beside the measured numbers from a benchmark run. A claim lists the keys of its sources; a page links
 // each one. Numbers never live here: they come from bench/results/<date>/summary.json and the raw results.
 export const READ_ON = "October 31, 2026";
 export const INSTALL = "claude mcp add simulator-use -- npx -y simulator-use mcp";
 
 const GH = (repo, path = "") => `https://github.com/${repo}${path ? `/blob/main/${path}` : ""}`;
-const RESULTS = (file) => `https://github.com/NoMac-app/simulator-use/blob/main/bench/results/2026-10-31/${file}`;
+const RESULTS = (file, date = "2026-10-31") => `https://github.com/NoMac-app/simulator-use/blob/main/bench/results/${date}/${file}`;
 
 export const SOURCES = {
   "su-readme": ["simulator-use README", GH("NoMac-app/simulator-use")],
@@ -44,6 +45,10 @@ export const SOURCES = {
   "mb-tap": ["MobileBuildMCP's tap tool", GH("getsentry/MobileBuildMCP", "manifests/tools/tap.yaml")],
   "mb-workflows": ["MobileBuildMCP workflows", "https://github.com/getsentry/MobileBuildMCP/tree/main/manifests/workflows"],
   "mb-tools": ["MobileBuildMCP's tool list, as the benchmark recorded it", RESULTS("mobilebuildmcp.tools.json")],
+  "ism-readme": ["ios-simulator-mcp README", GH("joshuayoes/ios-simulator-mcp")],
+  "ism-license": ["ios-simulator-mcp LICENSE", GH("joshuayoes/ios-simulator-mcp", "LICENSE")],
+  "ism-troubleshooting": ["ios-simulator-mcp TROUBLESHOOTING (installing IDB)", GH("joshuayoes/ios-simulator-mcp", "TROUBLESHOOTING.md")],
+  "ism-tools": ["ios-simulator-mcp's tool list, as the benchmark recorded it", RESULTS("ios-simulator-mcp.tools.json", "2026-11-06")],
 };
 
 const c = (t, ...s) => ({ t, s });
@@ -211,7 +216,7 @@ export const TOOLS = {
       { step: "Build, install and launch", them: c("build_run_sim", "mb-tools"), us: c("app_run", "su-readme") },
       { step: "Run the tests", them: c("test_sim", "mb-tools"), us: c("tests_run", "su-readme") },
     ],
-    slug: "mobilebuildmcp", name: "MobileBuildMCP", run: "mobilebuildmcp",
+    slug: "mobilebuildmcp", name: "MobileBuildMCP", long: "MobileBuildMCP (formerly XcodeBuildMCP)", run: "mobilebuildmcp",
     formerly: c("Before version 2.7.1, MobileBuildMCP was called XcodeBuildMCP; its changelog for 2.7.1: \"Renamed the project from XcodeBuildMCP to MobileBuildMCP.\"", "mb-changelog"),
     facts: {
       license: c("MIT", "mb-license"),
@@ -231,6 +236,35 @@ export const TOOLS = {
       c("Typing is one call per field that reads the text back. MobileBuildMCP's refs belong to its latest snapshot and its tools say to refresh after layout changes, so in the benchmark it read the screen again after each typing (counted in its sign-in).", "su-readme", "mb-tap"),
     ],
     deviceHub: true,
+  },
+
+  // Read on November 4, 2026, at its 2.2.0 release.
+  "ios-simulator-mcp": {
+    slug: "ios-simulator-mcp", name: "ios-simulator-mcp", run: "ios-simulator-mcp", readOn: "November 4, 2026",
+    calls: [
+      { step: "Build, install and launch", them: c("No build: install_app with a built .app or .ipa, then launch_app", "ism-readme"), us: c("app_run", "su-readme") },
+    ],
+    facts: {
+      license: c("MIT", "ism-license"),
+      builds: c("No; it installs a built .app or .ipa (install_app)", "ism-readme"),
+      tests: c("None in its README", "ism-readme"),
+      screen: c("The accessibility tree as JSON, from IDB (ui_describe_all), or a compressed screenshot (ui_view)", "ism-readme", "ism-tools"),
+      taps: c("At x,y coordinates (ui_tap)", "ism-readme"),
+      cloud: c("None in its README", "ism-readme"),
+      needs: c("Node 20 and Facebook's IDB: the idb_companion binary (Homebrew) and the fb-idb Python client", "ism-readme", "ism-troubleshooting"),
+    },
+    pickThem: c("Pick ios-simulator-mcp for a small set of Simulator tools on Facebook's IDB that also shows the agent a screenshot (ui_view), records video, opens deep links and pastes text on non-US keyboard layouts.", "ism-readme"),
+    pickUs: c("Pick simulator-use to build and test the Xcode project with the same tool, to get the screen as one line per element, and to tap by label or id instead of at coordinates, with nothing to install besides Node.", "su-readme", "ism-readme", "ism-troubleshooting"),
+    them: [
+      c("ui_view answers with a compressed screenshot the agent sees as an image, beside the accessibility tree.", "ism-readme"),
+      c("ui_type can paste text through the Simulator's pasteboard, for non-US keyboard layouts and non-ASCII text, and taps iOS's Allow Paste prompt itself.", "ism-readme"),
+      c("IOS_SIMULATOR_MCP_FILTERED_TOOLS leaves the tools an agent doesn't need out of its list.", "ism-readme"),
+    ],
+    us: [
+      c("Builds the Xcode project, installs and launches it, and runs its XCTest and XCUITest cases; ios-simulator-mcp installs an app built elsewhere.", "su-readme", "ism-readme"),
+      c("Taps go to an element by #id or label; ios-simulator-mcp taps at coordinates the agent works out from the frames in the tree.", "su-readme", "ism-readme"),
+      c("Nothing to install besides Node: its engine bundles AXe's frameworks, the IDB frameworks among them. ios-simulator-mcp needs idb_companion from Homebrew and the fb-idb Python client.", "su-readme", "ism-troubleshooting"),
+    ],
   },
 };
 

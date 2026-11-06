@@ -7,7 +7,7 @@
 - Any MCP client: run `npx -y simulator-use mcp` as a stdio server. Agents with a shell can use the CLI: `npx simulator-use look`.
 - Needs macOS with Xcode, a Simulator runtime and Node 20 or newer. From Linux, Windows or a cloud agent, `npx simulator-use cloud start` runs the same tools on a NoMac cloud iPhone, billed per minute.
 - Twelve tools: app_run, devices, device_use, app_control, ui_look, ui_act, app_logs, tests_run, screen_record, job_status, job_cancel, cloud.
-- Benchmark (one Mac, 8 tools, the same sign-in flow): simulator-use read 194 tokens per sign-in, 3.4x fewer than the next tool and 66x fewer than Xcode MCP, and signed in fastest (3.50 s step by step, 2.87 s batched); its tool list and instructions take 2,443 tokens.
+- Benchmark (one Mac, 9 tools, the same sign-in flow): simulator-use read 194 tokens per sign-in, 3.4x fewer than the next tool and 66x fewer than Xcode MCP; its tool list and instructions take 2,443 tokens.
 
 ## Docs
 
@@ -18,14 +18,15 @@
 
 ## Benchmarks and comparisons
 
-- [Benchmark](https://simulator-use.dev/benchmarks): eight iOS Simulator tools on one sign-in flow, every call timed and published
+- [Benchmark](https://simulator-use.dev/benchmarks): nine iOS Simulator tools on one sign-in flow, every call timed and published
 - [simulator-use vs Xcode MCP](https://simulator-use.dev/vs/xcode-mcp)
 - [simulator-use vs Argent](https://simulator-use.dev/vs/argent)
 - [simulator-use vs agent-device](https://simulator-use.dev/vs/agent-device)
 - [simulator-use vs mobile-mcp](https://simulator-use.dev/vs/mobile-mcp)
 - [simulator-use vs Maestro MCP](https://simulator-use.dev/vs/maestro-mcp)
 - [simulator-use vs AXe](https://simulator-use.dev/vs/axe)
-- [simulator-use vs MobileBuildMCP](https://simulator-use.dev/vs/mobilebuildmcp)
+- [simulator-use vs MobileBuildMCP (formerly XcodeBuildMCP)](https://simulator-use.dev/vs/mobilebuildmcp)
+- [simulator-use vs ios-simulator-mcp](https://simulator-use.dev/vs/ios-simulator-mcp)
 
 ## Optional
 
