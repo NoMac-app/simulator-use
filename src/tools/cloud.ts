@@ -197,6 +197,14 @@ const OPEN_LINK = /https?:\/\/[^\s/]+\/(?:simulator-use\/(?:view|replay)|api\/v1
 /** A CI job, whose log and pull request comment can be public. */
 const inCI = () => Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 
+/**
+ * Which of a phone's file links work after its stop (NoMac's side, apps/web/lib/phones.ts): a recording's
+ * (screen_record's clip link) is cut from the replay, so it opens only once the phone stopped and its replay is saved
+ * (409 while the phone runs, 503 while the replay saves) and works 7 days; any other file lives on the phone, copied
+ * on its link's first open, so only a link opened before the stop keeps working, for the 2 hours it was made for.
+ */
+const AFTER_STOP = "A screen recording's link opens after this stop, once the replay it is cut from is saved (about a minute; until then it answers 503), and works for 7 days. Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer.";
+
 async function stop(options: { linkless?: boolean } = {}): Promise<ToolResult> {
   tunnel?.stop();
   tunnel = undefined;
@@ -227,7 +235,7 @@ async function stop(options: { linkless?: boolean } = {}): Promise<ToolResult> {
   const replayLine = !replay ? "" : options.linkless
     ? `\nIts replay, the screen and every call, is kept 7 days. Its link opens without signing in, so it is left out here: GET https://nomac.app/api/v1/simulator/sessions/${state.session} with the account's key answers it (links.replay).`
     : `\nIts replay, the screen and every call, opens at ${replay} in a minute (kept 7 days).`;
-  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. A file link from its answers keeps working only if it was opened before this stop.${replayLine}` };
+  return { text: `Stopped the cloud phone ${cost}. The tools run on this machine again. ${AFTER_STOP}${replayLine}` };
 }
 
 /** A phone stopped at once, as the process ends (a signal): no waiting for its cleanup. */

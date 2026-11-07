@@ -263,12 +263,12 @@ permissions:
   pull-requests: write
 steps:
   - uses: actions/checkout@v5
-  - uses: NoMac-app/simulator-use@v0.12
+  - uses: NoMac-app/simulator-use@v0.15
     with:
       api-key: ${{ secrets.NOMAC_API_KEY }}
 ```
 
-It runs the simulator-use of its own tag (`@v0.12` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason. A job's log and its pull request comment can be public, so in CI (`CI` or `GITHUB_ACTIONS` set) `cloud run` prints no link that opens without signing in: files it links are kept in the run's artifacts, and the replay's link is read with the account's key (`GET https://nomac.app/api/v1/simulator/sessions/{id}`, `links.replay`).
+It runs the simulator-use of its own tag (`@v0.15` runs what that tag holds; `version` picks another). `path` is the project's folder, `scheme` the scheme when the project has several, and `tests: false` skips the tests (a project without a test target fails otherwise: zero tests is not a pass). A cancelled run stops its phone, and a pull request from a fork, which gets no secrets, fails with that reason. A job's log and its pull request comment can be public, so in CI (`CI` or `GITHUB_ACTIONS` set) `cloud run` prints no link that opens without signing in: files it links are kept in the run's artifacts, and the replay's link is read with the account's key (`GET https://nomac.app/api/v1/simulator/sessions/{id}`, `links.replay`).
 
 ## Privacy
 
@@ -293,7 +293,7 @@ The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0
 
 | Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
 |---|---|---|---|
-| 0.15.1 to 0.15.2 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
+| 0.15.1 to 0.15.3 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
