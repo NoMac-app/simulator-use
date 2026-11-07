@@ -241,12 +241,12 @@ simulator-use cloud start      # signs in through a link the first time (or NOMA
 simulator-use run              # every tool now runs there; run and test send the project first
 simulator-use cloud extend 30  # 30 minutes more (an hour by default), up to 8 hours in all
 simulator-use cloud stop       # ends it; the tools run on this machine again
-simulator-use cloud run . --tests   # CI in one line: start, build, run, test, a screenshot and a recording, stop
+simulator-use cloud run . --tests --out results   # CI in one line: start, build, run, test, stop; the screenshot and the run's video go in results
 ```
 
 Only the files the phone lacks are sent (a one-file change sends one file), into the account's own encrypted workspace, kept between sessions so builds stay incremental; build output and dependencies stay behind. Only files changed since the last send are read again (an index in simulator-use's state folder; `SIMULATOR_USE_SYNC_INDEX=0` reads every file). A CocoaPods project builds there too: `pod install` runs on the phone's host before the build when the pods are not the ones `Podfile` and `Podfile.lock` name, keeping the lock's versions, and the next build skips it. The `cloud` tool does the same over MCP.
 
-`cloud start` answers a link for a person to watch the phone in a browser and one to use it. `cloud stop` answers the session's replay: the screen as a video beside every call (typed text left out), kept for 7 days.
+`cloud start` answers a link for a person to watch the phone in a browser and one to use it. `cloud stop` answers the session's replay: the screen as a video beside every call (typed text left out), kept for 7 days. `cloud run` saves that video in its `--out` folder (made if missing) beside the screenshot.
 
 An app that talks to a backend on your machine reaches it through a tunnel (Node 22 or later):
 
@@ -293,7 +293,7 @@ The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0
 
 | Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
 |---|---|---|---|
-| 0.15.1 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
+| 0.15.1 to 0.15.2 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |

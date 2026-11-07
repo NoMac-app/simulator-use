@@ -1,6 +1,9 @@
-import { writeFile } from "node:fs/promises";
+import { createWriteStream, existsSync } from "node:fs";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 
 import { account, cloudState, setCloudState, signIn } from "../cloud/account.ts";
 import { type CloudApi, CloudError } from "../cloud/api.ts";
@@ -245,15 +248,61 @@ export async function stopServerPhone(): Promise<void> {
   if (session) await stopNow(session);
 }
 
+/** How long a run waits after its stop for the phone's replay, which the host uploads once the session ends. */
+const REPLAY_WAIT_MS = 3 * 60_000;
+
 /**
- * CI in one call: a phone, the project built and run, its tests with tests: true, a screenshot of its screen, and
- * the phone stopped (unless cloud was already on). Fails when the build or a test fails.
+ * The run's video, saved in out: the phone's replay, which a NoMac phone records from its hand-over to its stop. A
+ * Simulator's screen takes one recording at a time and the replay holds it, so screen_record cannot start beside
+ * it. NoMac has the replay a few seconds after the stop.
+ */
+async function keepReplay(session: string, out: string): Promise<string> {
+  const kept = "the phone's replay keeps it for 7 days";
+  try {
+    const api = await account();
+    if (!api) return `Recording: not saved, this machine is no longer signed in to NoMac; ${kept}.`;
+    for (const deadline = Date.now() + REPLAY_WAIT_MS; ; ) {
+      const replay = (await api.json("GET", `/api/v1/simulator/sessions/${session}/replay`)) as { state?: string; video_url?: string };
+      if (replay.state === "ready" && typeof replay.video_url === "string") {
+        const file = join(out, `simulator-use-cloud-${Date.now()}.mp4`);
+        const response = await fetch(replay.video_url, { signal: AbortSignal.timeout(10 * 60_000) });
+        if (!response.ok || !response.body) throw new Error(`its download answered ${response.status}`);
+        try {
+          await pipeline(Readable.fromWeb(response.body as never), createWriteStream(file));
+        } catch (error) {
+          await unlink(file).catch(() => undefined);
+          throw error;
+        }
+        return `Recording: ${file}`;
+      }
+      if (replay.state === "ready" || replay.state === "none") return "Recording: none, the phone saved no video of this run.";
+      if (Date.now() >= deadline) return `Recording: not saved, the video was not ready ${REPLAY_WAIT_MS / 60_000} minutes after the stop; ${kept}.`;
+      await new Promise((r) => setTimeout(r, 2_000));
+    }
+  } catch (error) {
+    return `Recording: not saved (${(error as Error).message.replace(/\.$/, "")}); ${kept}.`;
+  }
+}
+
+/**
+ * CI in one call: a phone, the project built and run, its tests with tests: true, a screenshot of its screen, the
+ * phone stopped (unless cloud was already on) and the run's video. Fails when the build or a test fails.
  */
 async function runOnce(args: Record<string, unknown>, context: CallContext): Promise<ToolResult> {
   // A run waits for a phone, the build and the tests, which takes minutes, past what an MCP call waits for; and its
   // steps are tools an agent already has.
   if (!context.waitForJobs) {
     throw new ToolError("cloud run is for the command line and CI: it takes minutes, longer than a tool call waits. Nothing ran.", "cloud start, then app_run (tests_run for the tests), then cloud stop.");
+  }
+  // The project and the output folder are checked before a phone starts: a mistyped path bills nothing, and the
+  // run's files always have a folder to go to (made, as any CLI makes its --out).
+  const path = typeof args.path === "string" ? args.path : ".";
+  if (!existsSync(resolve(path))) throw new ToolError(`No project at ${resolve(path)}. Nothing ran.`, "Pass path: the folder with the .xcodeproj, .xcworkspace or project.yml.");
+  const out = resolve(typeof args.out === "string" ? args.out : tmpdir());
+  try {
+    await mkdir(out, { recursive: true });
+  } catch (error) {
+    throw new ToolError(`Could not make the output folder ${out}: ${(error as Error).message}. Nothing ran.`, "Pass out: a folder this user can write to.");
   }
   const before = await cloudState();
   const lines: string[] = [];
@@ -263,6 +312,9 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
   // CI job), so a run never leaves a phone billing.
   let created: string | undefined;
   let signingIn = false;
+  // Once the phone is there, a step that breaks keeps what ran before it; the phone this run stopped, for its video.
+  let ready = false;
+  let stopped: string | undefined;
   const startedHere = async () => {
     const now = await cloudState().catch(() => undefined);
     if (now?.session && now.session !== before.session) created = now.session;
@@ -279,10 +331,8 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
       signingIn = true;
       return { text: ensure.text, isError: true };
     }
-    const path = typeof args.path === "string" ? args.path : ".";
+    ready = true;
     const scheme = typeof args.scheme === "string" && args.scheme ? { scheme: args.scheme } : {};
-    // A video of the whole run for the person reviewing it (the phone records up to its own limit).
-    const recording = await forward("screen_record", { action: "start" }, context);
     const ran = await forward("app_run", { path, ...scheme }, { waitForJobs: true });
     lines.push(ran.text);
     failed ||= Boolean(ran.isError);
@@ -291,7 +341,6 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
       lines.push(tested.text);
       failed ||= Boolean(tested.isError);
     }
-    const out = typeof args.out === "string" ? args.out : tmpdir();
     if (!ran.isError) {
       const look = await forward("ui_look", { screenshot: true }, context);
       image = look.image;
@@ -301,27 +350,26 @@ async function runOnce(args: Record<string, unknown>, context: CallContext): Pro
         lines.push(`Screenshot: ${file}`);
       }
     }
-    if (!recording.isError) {
-      const stopped = await forward("screen_record", { action: "stop" }, context);
-      const link = /https?:\/\/\S+\/api\/v1\/simulator\/files\/[A-Za-z0-9_.-]+/.exec(stopped.text)?.[0];
-      if (link && context.waitForJobs) {
-        const response = await fetch(link);
-        if (response.ok) {
-          const file = join(out, `simulator-use-cloud-${Date.now()}.mp4`);
-          await writeFile(file, Buffer.from(await response.arrayBuffer()));
-          lines.push(`Recording: ${file}`);
-        } else {
-          lines.push(`Recording: ${link}`);
-        }
-      } else if (link) {
-        lines.push(`Recording: ${link}`);
-      }
-    }
     await keepFiles(lines, out);
+  } catch (error) {
+    // Before the phone (no credit, no phone free): nothing ran, and the error says why. After it, the build's and
+    // the tests' answers stay, with what broke; the phone is stopped below either way.
+    if (!ready) throw error;
+    lines.push(error instanceof ToolError ? error.toText() : error instanceof CloudError ? `NoMac: ${error.message}` : `cloud run failed: ${(error as Error).message}`);
+    failed = true;
   } finally {
     release();
-    if (!signingIn && ((await startedHere()) || !before.on)) lines.push((await stop({ linkless: inCI() })).text);
+    if (!signingIn && ((await startedHere()) || !before.on)) {
+      const session = (await cloudState()).session;
+      const ended = await stop({ linkless: inCI() });
+      lines.push(ended.text);
+      if (session && !ended.isError) stopped = session;
+    }
   }
+  // The run's video is the phone's replay, which NoMac has once the phone stopped. A phone that keeps running (cloud
+  // was on before the run) saves it at its own stop.
+  if (stopped) lines.push(await keepReplay(stopped, out));
+  else if (!created && before.on) lines.push("Recording: the phone keeps running, so its video is saved with its replay when it stops (cloud stop answers the replay's link).");
   // In CI, a link that opens without signing in (one keepFiles could not save) stays out of the log and the comment.
   const text = inCI() ? lines.join("\n\n").replace(OPEN_LINK, "(a link left out: CI's log can be public)") : lines.join("\n\n");
   // The command line saved the screenshot above; an MCP client gets the picture itself.

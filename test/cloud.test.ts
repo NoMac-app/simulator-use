@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -219,6 +219,9 @@ test("a repository is one project whichever way it is cloned", async () => {
 let server: Server;
 const seen: { method: string; path: string; body: unknown; key: string | undefined }[] = [];
 let phoneState = "ready";
+// The replay's reads since the last start, and where its video is (nothing: a replay without a video).
+let replayReads = 0;
+let videoUrl: (() => string) | undefined = () => `${local()}/storage/replay/video.mp4`;
 // A build log's link, as NoMac makes them: its payload names the file. It works while the phone runs.
 const LOG_TOKEN = `${Buffer.from(JSON.stringify({ n: "build.log" })).toString("base64url")}.sig`;
 const local = () => `http://127.0.0.1:${(server.address() as { port: number }).port}`;
@@ -233,6 +236,8 @@ before(async () => {
     const send = (status: number, value: unknown) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(value)); };
     // A file link needs no key: the link is the permission.
     if (path === "/api/v1/simulator/files/rec.tok") { res.writeHead(200, { "content-type": "video/mp4" }); res.end("mp4"); return; }
+    // The replay's video, behind a storage link that needs no key; videoUrl is the link the replay answers.
+    if (path === "/storage/replay/video.mp4") { res.writeHead(200, { "content-type": "video/mp4" }); res.end("replay mp4"); return; }
     if (path === `/api/v1/simulator/files/${LOG_TOKEN}`) {
       if (phoneState === "stopped") return send(410, { error: { code: "file_gone", message: "That file is gone: the phone ended." } });
       res.writeHead(200, { "content-type": "text/plain" });
@@ -240,6 +245,7 @@ before(async () => {
       return;
     }
     if (req.headers.authorization !== "Bearer nmk_test") return send(401, { error: { code: "unauthorized", message: "no" } });
+    if (req.method === "POST" && path === "/api/v1/simulator/sessions") replayReads = 0;
     if (req.method === "POST" && path === "/api/v1/simulator/sessions") return send(202, { session: { id: "ses_phone", state: "queued" }, links: { view: "https://nomac.app/simulator-use/view/w.x", control: "https://nomac.app/simulator-use/view/c.x", expires_at: "2026-10-24T12:00:00.000Z", replay: "https://nomac.app/simulator-use/replay/r.x" } });
     if (req.method === "GET" && path === "/api/v1/simulator/sessions/ses_phone") {
       if (phoneState === "gone") return send(409, { error: { code: "session_not_ready", message: "not running" } });
@@ -258,7 +264,14 @@ before(async () => {
       return send(200, { id: "call_1", state: "running" });
     }
     if (path === "/api/v1/simulator/sessions/ses_phone/tools/tests_run") return send(200, { id: "call_2", state: "done", result: { content: [{ type: "text", text: "3 tests passed in 9.6 s." }] } });
-    if (path === "/api/v1/simulator/sessions/ses_phone/tools/screen_record") return send(200, { id: "call_4", state: "done", result: { content: [{ type: "text", text: (body as { action: string }).action === "start" ? "Recording iPhone 17 Pro." : `Recorded 12 s (1 MB): http://127.0.0.1:${(server.address() as { port: number }).port}/api/v1/simulator/files/rec.tok` }] } });
+    // As a NoMac phone answers: its replay holds the Simulator's one recording from the hand-over on.
+    if (path === "/api/v1/simulator/sessions/ses_phone/tools/screen_record") return send(200, { id: "call_4", state: "done", result: { content: [{ type: "text", text: "The recording did not start.\nNext: Check the Simulator is booted with devices." }], isError: true } });
+    // The replay: saving for a moment after the stop, then ready with its video.
+    if (req.method === "GET" && path === "/api/v1/simulator/sessions/ses_phone/replay") {
+      if (phoneState !== "stopped") return send(200, { state: "recording" });
+      replayReads++;
+      return send(200, replayReads < 2 ? { state: "saving" } : { state: "ready", ...(videoUrl ? { video_url: videoUrl() } : {}), log_url: `${local()}/storage/replay/log.json` });
+    }
     if (path === "/api/v1/simulator/sessions/ses_phone/tools/ui_look") return send(200, { id: "call_3", state: "done", result: { content: [{ type: "text", text: "Demo · Sign In" }, { type: "image", data: Buffer.from("jpeg").toString("base64"), mimeType: "image/jpeg" }] } });
     if (path === "/api/v1/simulator/sessions/ses_phone/calls/call_1") return send(200, { id: "call_1", state: "done", result: { content: [{ type: "text", text: `Built Demo in 1.2 s, installed dev.simtap.demo.\nFull log: ${local()}/api/v1/simulator/files/${LOG_TOKEN}` }] } });
     send(404, { error: { code: "not_found", message: path } });
@@ -322,6 +335,7 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   writeFileSync(join(project, "Sources/App.swift"), "import SwiftUI\n");
   const out = mkdtempSync(join(tmpdir(), "su-ci-out-"));
   phoneState = "ready";
+  const from = seen.length;
   const ci = { CI: process.env.CI, GITHUB_ACTIONS: process.env.GITHUB_ACTIONS };
   delete process.env.CI;
   delete process.env.GITHUB_ACTIONS;
@@ -331,8 +345,13 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   assert.match(ran.text, /3 tests passed in 9\.6 s\./);
   const shot = /Screenshot: (\S+)/.exec(ran.text)?.[1];
   assert.ok(shot && shot.startsWith(out) && existsSync(shot), ran.text);
+  // The run's video is the phone's replay, saved once the phone stopped: a NoMac phone's replay holds the
+  // Simulator's one recording, so the run never asks for a second one (it never starts beside the replay).
   const video = /Recording: (\S+)/.exec(ran.text)?.[1];
   assert.ok(video && video.startsWith(out) && video.endsWith(".mp4") && existsSync(video), ran.text);
+  assert.equal(readFileSync(video, "utf8"), "replay mp4");
+  assert.ok(ran.text.indexOf("Stopped the cloud phone") < ran.text.indexOf("Recording: "), ran.text);
+  assert.ok(!seen.slice(from).some((r) => r.path.endsWith("/tools/screen_record")), "no screen_record beside the replay");
   assert.match(ran.text, /Stopped the cloud phone/);
   assert.match(ran.text, /Its replay, the screen and every call, opens at https:\/\/nomac\.app\/simulator-use\/replay\/r\.x/);
   // The build log's link ends with the phone: the run kept the file, and names it instead.
@@ -341,6 +360,74 @@ test("cloud run is CI in one line: start, build and run, the tests, a screenshot
   assert.equal(readFileSync(join(out, "build.log"), "utf8"), "Demo.swift:3: error: cannot find 'x' in scope\n");
   assert.equal((await fetch(`${local()}/api/v1/simulator/files/${LOG_TOKEN}`)).status, 410);
   assert.match((await callTool("cloud", { action: "status" })).text, /^Cloud is off/);
+});
+
+test("cloud run makes its --out folder, nested and relative, before the phone starts, and names its files by their full path", async () => {
+  const project = mkdtempSync(join(tmpdir(), "su-ci-"));
+  mkdirSync(join(project, "Sources"));
+  writeFileSync(join(project, "Sources/App.swift"), "import SwiftUI\n");
+  const cwd = process.cwd();
+  const base = mkdtempSync(join(tmpdir(), "su-ci-cwd-"));
+  process.chdir(base);
+  phoneState = "ready";
+  const ci = { CI: process.env.CI, GITHUB_ACTIONS: process.env.GITHUB_ACTIONS };
+  delete process.env.CI;
+  delete process.env.GITHUB_ACTIONS;
+  try {
+    const ran = await callTool("cloud", { action: "run", path: project, out: "results/cloud-out" }, { waitForJobs: true });
+    assert.equal(ran.isError, undefined, ran.text);
+    const out = join(realpathSync(base), "results/cloud-out");
+    const shot = /Screenshot: (\S+)/.exec(ran.text)?.[1];
+    assert.ok(shot && shot.startsWith(`${out}/`) && existsSync(shot), ran.text);
+    const video = /Recording: (\S+)/.exec(ran.text)?.[1];
+    assert.ok(video && video.startsWith(`${out}/`) && existsSync(video), ran.text);
+    assert.ok(ran.text.includes(`Full log: ${join(out, "build.log")}`), ran.text);
+    assert.match(ran.text, /Stopped the cloud phone/);
+  } finally {
+    process.chdir(cwd);
+    Object.assign(process.env, Object.fromEntries(Object.entries(ci).filter(([, v]) => v !== undefined)));
+  }
+
+  // A folder that cannot be made, or a project that is not there, starts no phone.
+  const starts = seen.filter((r) => r.method === "POST" && r.path === "/api/v1/simulator/sessions").length;
+  const file = join(base, "a-file");
+  writeFileSync(file, "x");
+  const blocked = await callTool("cloud", { action: "run", path: project, out: join(file, "out") }, { waitForJobs: true });
+  assert.equal(blocked.isError, true);
+  assert.match(blocked.text, /^Could not make the output folder .*a-file\/out: .*Nothing ran\./, blocked.text);
+  const missing = await callTool("cloud", { action: "run", path: join(base, "Nope") }, { waitForJobs: true });
+  assert.equal(missing.isError, true);
+  assert.match(missing.text, /^No project at .*Nope\. Nothing ran\./, missing.text);
+  assert.equal(seen.filter((r) => r.method === "POST" && r.path === "/api/v1/simulator/sessions").length, starts);
+});
+
+test("a video that cannot be saved after the stop loses nothing else: the run passes with what it kept", async () => {
+  const project = mkdtempSync(join(tmpdir(), "su-ci-"));
+  mkdirSync(join(project, "Sources"));
+  writeFileSync(join(project, "Sources/App.swift"), "import SwiftUI\n");
+  const out = mkdtempSync(join(tmpdir(), "su-ci-out-"));
+  phoneState = "ready";
+  const saved = videoUrl;
+  // Storage that nothing answers on, as a dropped network would.
+  videoUrl = () => "http://127.0.0.1:9/replay/video.mp4";
+  try {
+    const ran = await callTool("cloud", { action: "run", path: project, tests: true, out }, { waitForJobs: true });
+    assert.equal(ran.isError, undefined, ran.text);
+    assert.match(ran.text, /Built Demo in 1\.2 s/);
+    assert.match(ran.text, /3 tests passed in 9\.6 s\./);
+    assert.ok(existsSync(/Screenshot: (\S+)/.exec(ran.text)?.[1] ?? ""), ran.text);
+    assert.match(ran.text, /Stopped the cloud phone/);
+    assert.match(ran.text, /Recording: not saved \(.+\); the phone's replay keeps it for 7 days\./);
+    assert.deepEqual(readdirSync(out).filter((f) => f.endsWith(".mp4")), [], "no half video left");
+    // A replay without a video says so.
+    videoUrl = undefined;
+    phoneState = "ready";
+    const none = await callTool("cloud", { action: "run", path: project, out }, { waitForJobs: true });
+    assert.equal(none.isError, undefined, none.text);
+    assert.match(none.text, /Recording: none, the phone saved no video of this run\./);
+  } finally {
+    videoUrl = saved;
+  }
 });
 
 test("in CI, cloud run's log holds no link that opens without signing in: the replay's is read with the account's key", async () => {
