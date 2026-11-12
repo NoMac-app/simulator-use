@@ -5,7 +5,8 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { ToolError } from "../src/errors.ts";
-import { ensurePackages, packageArgs, packagesCurrent, packagesDirFor, pickScheme, resolvedFile, resolvedPins, type Project } from "../src/engine/xcode.ts";
+import { build, ensurePackages, packageArgs, packagesCurrent, packagesDirFor, pickScheme, projectFor, resolvedFile, resolvedPins, type Project } from "../src/engine/xcode.ts";
+import { setApplicationsDir } from "../src/engine/xcodes.ts";
 
 const pin = (identity: string, revision: string) => ({ identity, kind: "remoteSourceControl", location: `https://github.com/x/${identity}`, state: { revision, version: "1.0.0" } });
 
@@ -57,9 +58,11 @@ test("packages are current only when every pin is checked out at its revision in
     assert.equal(packagesCurrent(project, dir), false, "Package.resolved moved one on");
     checkedOut(dir, [{ identity: "rxswift", revision: "aaa", subpath: "RxSwift" }, { identity: "snapkit", revision: "bbb", subpath: "SnapKit" }]);
     assert.equal(packagesCurrent(project, dir), true);
-    // Every read and the build use that folder; only then are the remotes not asked for updates.
-    assert.deepEqual(packageArgs(project), ["-clonedSourcePackagesDirPath", dir, "-scmProvider", "system", "-skipPackageUpdates"]);
-    // On NoMac's phone host: no SwiftPM cache in the home that is wiped after the phone, no keychain.
+    // Every read and the build use that folder; only then are the remotes not asked for updates (unless fresh). Xcode
+    // keeps its own git elsewhere: a private package may authenticate only through Xcode's Accounts.
+    assert.deepEqual(packageArgs(project), ["-clonedSourcePackagesDirPath", dir, "-skipPackageUpdates"]);
+    assert.deepEqual(packageArgs(project, undefined, true), ["-clonedSourcePackagesDirPath", dir]);
+    // On NoMac's phone host: the system's git, no SwiftPM cache in the home that is wiped after the phone, no keychain.
     await withSettings({ SIMULATOR_USE_HOSTED: "1" }, async () => {
       assert.deepEqual(packageArgs(project), ["-clonedSourcePackagesDirPath", dir, "-scmProvider", "system", "-disablePackageRepositoryCache", "-packageAuthorizationProvider", "netrc", "-skipPackageUpdates"]);
     });
@@ -106,13 +109,13 @@ mkdir -p "${dir}/checkouts/RxSwift" "${dir}/checkouts/SnapKit"; printf '%s' '${s
     assert.ok(lines.includes("Fetching from https://github.com/ReactiveX/RxSwift"));
     const fetch = readFileSync(fake.calls, "utf8").trim().split("\n");
     assert.equal(fetch.length, 1);
-    assert.equal(fetch[0], `-resolvePackageDependencies -project ${project.path} -clonedSourcePackagesDirPath ${dir} -scmProvider system`);
+    assert.equal(fetch[0], `-resolvePackageDependencies -project ${project.path} -clonedSourcePackagesDirPath ${dir}`);
     // Current now: no second fetch, and the scheme is read from the same folder without asking the remotes.
     assert.equal(await ensurePackages(project, progress), undefined);
     assert.equal(await pickScheme(project), "App");
     const calls = readFileSync(fake.calls, "utf8").trim().split("\n");
     assert.equal(calls.length, 2);
-    assert.equal(calls[1], `-list -json -project ${project.path} -clonedSourcePackagesDirPath ${dir} -scmProvider system -skipPackageUpdates`);
+    assert.equal(calls[1], `-list -json -project ${project.path} -clonedSourcePackagesDirPath ${dir} -skipPackageUpdates`);
   });
 });
 
@@ -138,4 +141,83 @@ test("a project without Swift packages fetches nothing", async () => {
     assert.equal(await ensurePackages({ kind: "project", path: join(dir, "App.xcodeproj"), name: "App", dir }), undefined);
   });
   assert.throws(() => readFileSync(fake.calls), "xcodebuild never ran");
+});
+
+/** A project whose two pins are checked out in its kept folder: packagesCurrent, so reads and builds skip the remotes. */
+function currentProject(cache: string): { project: Project; dir: string } {
+  const project = projectWith([{ identity: "rxswift", revision: "aaa" }]);
+  process.env.SIMULATOR_USE_CACHE_DIR = cache;
+  try {
+    const dir = packagesDirFor(project);
+    checkedOut(dir, [{ identity: "rxswift", revision: "aaa", subpath: "RxSwift" }]);
+    return { project, dir };
+  } finally {
+    delete process.env.SIMULATOR_USE_CACHE_DIR;
+  }
+}
+
+// As Xcode answers when the project asks for a package Package.resolved does not pin, and it may not ask the remotes.
+const unresolved = `if printf '%s' "$*" | grep -q -- -skipPackageUpdates; then echo "xcodebuild: error: Could not resolve package dependencies:" >&2; echo "  the package dependency graph changed" >&2; exit 74; fi`;
+
+test("a read that could not resolve the packages without asking their remotes asks them once", async () => {
+  const cache = mkdtempSync(join(tmpdir(), "su-cache-"));
+  const { project, dir } = currentProject(cache);
+  const fake = fakeXcodebuild(`${unresolved}\necho '{"project":{"schemes":["App"]}}'`);
+  await withSettings({ PATH: `${fake.bin}:${process.env.PATH}`, SIMULATOR_USE_CACHE_DIR: cache, SIMULATOR_USE_BUILD_CLAMP: undefined }, async () => {
+    assert.equal(await pickScheme(project), "App");
+  });
+  assert.deepEqual(readFileSync(fake.calls, "utf8").trim().split("\n"), [
+    `-list -json -project ${project.path} -clonedSourcePackagesDirPath ${dir} -skipPackageUpdates`,
+    `-list -json -project ${project.path} -clonedSourcePackagesDirPath ${dir}`,
+  ]);
+});
+
+test("a build that could not resolve the packages without asking their remotes builds once more, asking them", async () => {
+  const cache = mkdtempSync(join(tmpdir(), "su-cache-"));
+  const { project } = currentProject(cache);
+  const fake = fakeXcodebuild(`${unresolved}\necho "** BUILD SUCCEEDED **"`);
+  const lines: string[] = [];
+  const result = await withSettings({ PATH: `${fake.bin}:${process.env.PATH}`, SIMULATOR_USE_CACHE_DIR: cache, SIMULATOR_USE_BUILD_CLAMP: undefined }, () =>
+    build(project, "App", "5E55E550-0000-4000-8000-000000000001", { onLine: (l) => lines.push(l) }));
+  assert.equal(result.ok, true);
+  const calls = readFileSync(fake.calls, "utf8").trim().split("\n");
+  assert.equal(calls.length, 2);
+  assert.match(calls[0]!, / -skipPackageUpdates /);
+  assert.doesNotMatch(calls[1]!, /skipPackageUpdates/);
+  assert.ok(lines.some((l) => /building again, asking them/.test(l)));
+  // A build that fails for anything else is not built again.
+  const failing = fakeXcodebuild(`echo "/w/App.swift:1:1: error: cannot find 'x' in scope"; exit 65`);
+  const failed = await withSettings({ PATH: `${failing.bin}:${process.env.PATH}`, SIMULATOR_USE_CACHE_DIR: cache, SIMULATOR_USE_BUILD_CLAMP: undefined }, () =>
+    build(project, "App", "5E55E550-0000-4000-8000-000000000001", {}));
+  assert.equal(failed.ok, false);
+  assert.equal(readFileSync(failing.calls, "utf8").trim().split("\n").length, 1);
+});
+
+test("with another Xcode asked for, the packages are fetched and the scheme read with that Xcode, into its own folder", { skip: process.platform !== "darwin" }, async () => {
+  const apps = mkdtempSync(join(tmpdir(), "su-apps-"));
+  const plist = (k: string, v: string) => `<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>${k}</key><string>${v}</string></dict></plist>`;
+  for (const [name, version] of [["Xcode.app", "27.0"], ["Xcode-26.6.app", "26.6"]] as const) {
+    mkdirSync(join(apps, name, "Contents", "Developer"), { recursive: true });
+    writeFileSync(join(apps, name, "Contents", "Info.plist"), plist("CFBundleShortVersionString", version));
+    writeFileSync(join(apps, name, "Contents", "version.plist"), plist("ProductBuildVersion", "1A1"));
+  }
+  const project = projectWith([{ identity: "rxswift", revision: "aaa" }]);
+  const cache = mkdtempSync(join(tmpdir(), "su-cache-"));
+  const fake = fakeXcodebuild(`printf 'DEVELOPER_DIR=%s\\n' "$DEVELOPER_DIR" >> "$(dirname "$0")/env"; case "$1" in -list) echo '{"project":{"schemes":["App"]}}' ;; esac`);
+  setApplicationsDir(apps);
+  try {
+    await withSettings({ PATH: `${fake.bin}:${process.env.PATH}`, SIMULATOR_USE_CACHE_DIR: cache, SIMULATOR_USE_STATE_DIR: mkdtempSync(join(tmpdir(), "su-state-")),
+      SIMULATOR_USE_BUILD_CLAMP: undefined, DEVELOPER_DIR: join(apps, "Xcode.app", "Contents", "Developer") }, async () => {
+      const found = await projectFor(project.path, undefined, undefined, "26.6");
+      assert.equal(found.picked?.version, "26.6");
+      assert.equal(found.asked, "26.6");
+      const calls = readFileSync(fake.calls, "utf8").trim().split("\n");
+      assert.equal(calls.length, 2);
+      assert.match(calls[0]!, /^-resolvePackageDependencies .*-clonedSourcePackagesDirPath \S+-xcode26\.6\/SourcePackages$/);
+      assert.match(calls[1]!, /^-list .*-clonedSourcePackagesDirPath \S+-xcode26\.6\/SourcePackages/);
+      assert.deepEqual(readFileSync(join(fake.bin, "env"), "utf8").trim().split("\n"), Array(2).fill(`DEVELOPER_DIR=${join(apps, "Xcode-26.6.app", "Contents", "Developer")}`));
+    });
+  } finally {
+    setApplicationsDir("/Applications");
+  }
 });

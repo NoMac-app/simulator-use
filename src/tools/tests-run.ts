@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { answer, claimProject, currentJob, startJob } from "../engine/jobs.ts";
 import { holdDevice } from "../engine/state.ts";
 import { build, derivedDataFor, formatIssue, keepNewest, knownFix, noDestination, place, projectFor, remember, remembered, targetTooNew } from "../engine/xcode.ts";
-import { describeXcodes, listXcodes, pickXcode } from "../engine/xcodes.ts";
+import { describeXcodes, listXcodes } from "../engine/xcodes.ts";
 import { locate, readTestReport } from "../engine/xcresult.ts";
 import { CaseTally, finishedCase } from "../engine/testcases.ts";
 import { runDevice } from "./app-run.ts";
@@ -35,9 +35,7 @@ export const testsRun: Tool = {
   async run(args, context) {
     const job = startJob("Test", async (progress) => {
       progress.step("finding the project");
-      const { project, scheme, dir, note, xcode: kept } = await projectFor(args.path as string | undefined, args.scheme as string | undefined, progress);
-      const asked = (args.xcode as string | undefined) ?? kept;
-      const xcode = await pickXcode(asked);
+      const { project, scheme, dir, note, picked: xcode } = await projectFor(args.path as string | undefined, args.scheme as string | undefined, progress, args.xcode as string | undefined);
       const other = xcode && !xcode.default ? xcode : undefined;
       job.title = `Test ${scheme}`;
       const busy = await claimProject(project.path, currentJob(job.id)!);

@@ -8,7 +8,7 @@ import { ToolError } from "../errors.ts";
 import * as space from "../space.ts";
 import { run } from "./exec.ts";
 import { stateDir } from "./state.ts";
-import type { Xcode } from "./xcodes.ts";
+import { pickXcode, type Xcode } from "./xcodes.ts";
 import { setting } from "../settings.ts";
 
 export type Project = { kind: "workspace" | "project"; path: string; name: string; dir: string; generated?: boolean; note?: string };
@@ -232,11 +232,9 @@ async function xcodegen(dir: string, hasProject: boolean): Promise<string | unde
 }
 
 /** The scheme to build: the one asked for, the only one, or the one named like the project. */
-export async function pickScheme(project: Project, wanted?: string): Promise<string> {
-  const args = ["-list", "-json", project.kind === "workspace" ? "-workspace" : "-project", project.path, ...packageArgs(project)];
-  const { stdout } = await run(...clamped("xcodebuild", args), { timeoutMs: READ_TIMEOUT_MS }).catch((error: Error) => {
-    throw readFailed(error, "Reading the project's schemes (xcodebuild -list)");
-  });
+export async function pickScheme(project: Project, wanted?: string, xcode?: Xcode): Promise<string> {
+  const head = ["-list", "-json", project.kind === "workspace" ? "-workspace" : "-project", project.path];
+  const stdout = await readProject(head, project, xcode, "Reading the project's schemes (xcodebuild -list)");
   const list = JSON.parse(stdout) as { project?: { schemes?: string[] }; workspace?: { schemes?: string[] } };
   const schemes = list.workspace?.schemes ?? list.project?.schemes ?? [];
   if (wanted) {
@@ -348,10 +346,8 @@ export function laterVersion(a: string, b: string): boolean {
 
 /** The latest iOS deployment target among a scheme's targets, as the Xcode that builds it reads them. */
 export async function deploymentTarget(project: Project, scheme: string, xcode?: Xcode): Promise<string | undefined> {
-  const args = [project.kind === "workspace" ? "-workspace" : "-project", project.path, "-scheme", scheme, "-showBuildSettings", "-json", ...packageArgs(project, xcode)];
-  const { stdout } = await run(...clamped("xcodebuild", args), { timeoutMs: READ_TIMEOUT_MS, env: xcodeEnv(xcode) }).catch((error: Error) => {
-    throw readFailed(error, "Reading the project's build settings (xcodebuild -showBuildSettings)");
-  });
+  const head = [project.kind === "workspace" ? "-workspace" : "-project", project.path, "-scheme", scheme, "-showBuildSettings", "-json"];
+  const stdout = await readProject(head, project, xcode, "Reading the project's build settings (xcodebuild -showBuildSettings)");
   const targets = (JSON.parse(stdout) as { buildSettings?: { IPHONEOS_DEPLOYMENT_TARGET?: string } }[]).map((t) => t.buildSettings?.IPHONEOS_DEPLOYMENT_TARGET).filter((v): v is string => Boolean(v));
   return targets.reduce<string | undefined>((latest, v) => (!latest || laterVersion(v, latest) ? v : latest), undefined);
 }
@@ -453,10 +449,33 @@ export function packagesCurrent(project: Project, dir: string): boolean {
  * system's git; on NoMac's phone host without SwiftPM's shared cache, which lives in the pool user's home, wiped after
  * every phone (the packages themselves stay in the workspace), and without the keychain, which that user has none of.
  */
-export function packageArgs(project: Project, xcode?: Xcode): string[] {
+export function packageArgs(project: Project, xcode?: Xcode, fresh = false): string[] {
   const dir = packagesDirFor(project, xcode);
-  const host = setting("HOSTED") ? ["-disablePackageRepositoryCache", "-packageAuthorizationProvider", "netrc"] : [];
-  return ["-clonedSourcePackagesDirPath", dir, "-scmProvider", "system", ...host, ...(packagesCurrent(project, dir) ? ["-skipPackageUpdates"] : [])];
+  // Elsewhere Xcode's own choice stays: a private package may authenticate only through Xcode's Accounts.
+  const host = setting("HOSTED") ? ["-scmProvider", "system", "-disablePackageRepositoryCache", "-packageAuthorizationProvider", "netrc"] : [];
+  return ["-clonedSourcePackagesDirPath", dir, ...host, ...(!fresh && packagesCurrent(project, dir) ? ["-skipPackageUpdates"] : [])];
+}
+
+/**
+ * Xcode could not resolve the packages. packagesCurrent checks Package.resolved's pins, not what the project asks for,
+ * so after this a read or build that skipped the remotes (-skipPackageUpdates) runs once more without skipping.
+ */
+export const packagesFailed = (text: string) => /Could not resolve package dependencies|package resolution failed|Dependencies could not be resolved|Failed to resolve dependencies/i.test(text);
+
+/** A read of the project (xcodebuild -list, -showBuildSettings): once more without -skipPackageUpdates when it failed resolving. */
+async function readProject(head: string[], project: Project, xcode: Xcode | undefined, what: string): Promise<string> {
+  const read = async (fresh: boolean) => {
+    const args = [...head, ...packageArgs(project, xcode, fresh)];
+    try {
+      return { args, out: (await run(...clamped("xcodebuild", args), { timeoutMs: READ_TIMEOUT_MS, env: xcodeEnv(xcode) })).stdout };
+    } catch (error) {
+      return { args, error: error as Error };
+    }
+  };
+  let got = await read(false);
+  if (got.error && got.args.includes("-skipPackageUpdates") && packagesFailed(got.error.message)) got = await read(true);
+  if (got.error) throw readFailed(got.error, what);
+  return got.out!;
 }
 
 /**
@@ -558,7 +577,8 @@ function readFailed(error: Error, what: string): Error {
     "Run again; if it keeps timing out, the project or one of its packages may be unreachable or very large: build it once on a Mac with Xcode to check.");
 }
 
-export type BuildResult = { ok: boolean; errors: Issue[]; warnings: number; log: string; ms: number; tail: string[] };
+/** skippedUpdates: the build did not ask the packages' remotes (-skipPackageUpdates). */
+export type BuildResult = { ok: boolean; errors: Issue[]; warnings: number; log: string; ms: number; tail: string[]; skippedUpdates?: boolean };
 
 /**
  * xcodebuild, or xcodebuild under taskpolicy's clamp when SIMULATOR_USE_BUILD_CLAMP is utility or background:
@@ -581,7 +601,7 @@ export async function keepNewest(dir: string, pattern: RegExp, keep: number): Pr
   for (const name of names.slice(keep)) await rm(join(dir, name), { recursive: true, force: true }).catch(() => undefined);
 }
 
-type BuildOptions = { configuration?: string; clean?: boolean; action?: "build" | "test"; extra?: string[]; xcode?: Xcode; destination?: string; onLine?: (line: string) => void; onCancel?: (cancel: () => void) => void };
+type BuildOptions = { configuration?: string; clean?: boolean; action?: "build" | "test"; extra?: string[]; xcode?: Xcode; destination?: string; onLine?: (line: string) => void; onCancel?: (cancel: () => void) => void; freshPackages?: boolean };
 
 /**
  * One build. On NoMac's phone host the account's workspace has room first, this build's cache is never cleared under
@@ -589,16 +609,24 @@ type BuildOptions = { configuration?: string; clean?: boolean; action?: "build" 
  * (src/space.ts): incremental, so it goes on where it stopped.
  */
 export async function build(project: Project, scheme: string, udid: string, options: BuildOptions): Promise<BuildResult> {
-  if (!space.active()) return buildOnce(project, scheme, udid, options);
+  if (!space.active()) return buildResolving(project, scheme, udid, options);
   const release = space.hold("cache", derivedDataFor(project, options.xcode));
   try {
     await space.ensureRoom("build");
-    const result = await buildOnce(project, scheme, udid, options);
+    const result = await buildResolving(project, scheme, udid, options);
     if (result.ok || !space.noSpaceText([...result.errors.map((e) => e.message), ...result.tail].join("\n"))) return result;
-    return (await space.roomAfterNoSpace("build")) ? buildOnce(project, scheme, udid, options) : result;
+    return (await space.roomAfterNoSpace("build")) ? buildResolving(project, scheme, udid, options) : result;
   } finally {
     release();
   }
+}
+
+/** A build, once more without -skipPackageUpdates when it skipped the remotes and Xcode could not resolve the packages. */
+async function buildResolving(project: Project, scheme: string, udid: string, options: BuildOptions): Promise<BuildResult> {
+  const result = await buildOnce(project, scheme, udid, options);
+  if (result.ok || !result.skippedUpdates || !packagesFailed([...result.errors.map((e) => e.message), ...result.tail].join("\n"))) return result;
+  options.onLine?.("Xcode could not resolve the packages without asking their remotes: building again, asking them.");
+  return buildOnce(project, scheme, udid, { ...options, freshPackages: true });
 }
 
 async function buildOnce(project: Project, scheme: string, udid: string, options: BuildOptions): Promise<BuildResult> {
@@ -606,6 +634,7 @@ async function buildOnce(project: Project, scheme: string, udid: string, options
   await mkdir(derived, { recursive: true });
   await keepNewest(derived, /^(build|test)-\d+\.log$/, 9);
   const log = join(derived, `${options.action ?? "build"}-${Date.now()}.log`);
+  const packages = packageArgs(project, options.xcode, options.freshPackages);
   const args = [
     project.kind === "workspace" ? "-workspace" : "-project",
     project.path,
@@ -617,7 +646,7 @@ async function buildOnce(project: Project, scheme: string, udid: string, options
     options.destination ?? `id=${udid}`,
     "-derivedDataPath",
     derived,
-    ...packageArgs(project, options.xcode),
+    ...packages,
     // On NoMac's phone host nobody can trust a package's macros or plugins in Xcode first, and the project's own code
     // runs in its build there anyway, under the pool user's isolation.
     ...(setting("HOSTED") ? ["-skipMacroValidation", "-skipPackagePluginValidation"] : []),
@@ -667,7 +696,7 @@ async function buildOnce(project: Project, scheme: string, udid: string, options
   child.stderr.on("data", take);
   const code = await new Promise<number | null>((resolveCode) => child.on("close", resolveCode));
   out.end();
-  return { ok: code === 0, errors, warnings, log, ms: Date.now() - started, tail };
+  return { ok: code === 0, errors, warnings, log, ms: Date.now() - started, tail, skippedUpdates: packages.includes("-skipPackageUpdates") };
 }
 
 /** The .app a Simulator build made: the scheme's own, never a test runner. */
@@ -719,7 +748,7 @@ export async function setLastProject(project: string): Promise<void> {
  * Which project a call means: the path given; else the current folder's (or what app_run remembered for it);
  * else the one the last call used, so an agent that named a path once can drop it.
  */
-export async function projectFor(path: string | undefined, scheme: string | undefined, steps?: Steps): Promise<{ project: Project; scheme: string; dir: string; note: string; xcode?: string }> {
+export async function projectFor(path: string | undefined, scheme: string | undefined, steps?: Steps, xcode?: string): Promise<{ project: Project; scheme: string; dir: string; note: string; asked?: string; picked?: Xcode }> {
   const dir = path ?? process.cwd();
   const memory = await remembered(dir);
   let project: Project;
@@ -733,11 +762,15 @@ export async function projectFor(path: string | undefined, scheme: string | unde
     note = `No project in ${dir}; using ${project.name} from the last call (${project.dir}).\n`;
   }
   if (project.note) note += `${project.note}\n`;
-  // Its Swift packages first, once, where its builds keep them: xcodebuild -list reads the project with them.
-  const fetched = await ensurePackages(project, steps);
-  if (fetched) note += `${fetched}\n`;
   const known = memory?.project === project.path ? memory : await remembered(project.dir);
-  const chosen = await pickScheme(project, scheme ?? known?.scheme);
+  // The Xcode asked for, else the one this folder's calls used: packages, scheme and build all with that one.
+  const asked = xcode ?? known?.xcode;
+  const picked = await pickXcode(asked);
+  const other = picked && !picked.default ? picked : undefined;
+  // Its Swift packages first, once, where its builds keep them: xcodebuild -list reads the project with them.
+  const fetched = await ensurePackages(project, steps, other);
+  if (fetched) note += `${fetched}\n`;
+  const chosen = await pickScheme(project, scheme ?? known?.scheme, other);
   await setLastProject(project.path);
-  return { project, scheme: chosen, dir: path ? dir : project.dir, note, ...(known?.xcode ? { xcode: known.xcode } : {}) };
+  return { project, scheme: chosen, dir: path ? dir : project.dir, note, ...(asked ? { asked } : {}), ...(picked ? { picked } : {}) };
 }
