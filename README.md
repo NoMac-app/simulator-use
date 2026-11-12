@@ -99,6 +99,7 @@ textfield "Email" #email @201,194
 
 - A failed build answers with the errors only, as `Sources/App.swift:49:37: error: ...`, and the path to the full log.
 - Each folder (each git worktree) builds into its own DerivedData, so rebuilds are incremental and worktrees never share products. `SIMULATOR_USE_CACHE_DIR` puts it on a disk you keep, so the next machine's build is incremental too.
+- Swift packages are fetched once into that DerivedData, each one shown as it comes, and every later read of the project and every build use them without asking the packages' remotes again until `Package.resolved` changes. The first fetch can take minutes: Xcode clones each package's whole history.
 - An XcodeGen project is regenerated from `project.yml` before each build (skipped when nothing changed), so new files are always in it.
 - The next call in the same folder needs no arguments.
 - `env: "API_URL=http://127.0.0.1:8080 MODE=test"` gives the app those variables (it reads them from `ProcessInfo`), as an Xcode scheme does; they stay for its later launches, and `env: ""` clears them.
