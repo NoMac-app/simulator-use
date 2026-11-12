@@ -1,11 +1,11 @@
 import { spawn } from "node:child_process";
 import { closeSync, existsSync, openSync, statSync } from "node:fs";
-import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { basename, join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { isOurs } from "../engine/exec.ts";
-import { flattenFmp4 } from "../engine/fmp4.ts";
+import { flattenFmp4, NoFramesError } from "../engine/fmp4.ts";
 import { enginePath } from "../engine/native.ts";
 import { type Device, listDevices, pickDevice } from "../engine/simctl.ts";
 import { deviceDir, heldDevice } from "../engine/state.ts";
@@ -13,8 +13,11 @@ import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
 import type { Tool } from "./types.ts";
 
-/** A recording: simctl's, or on a NoMac phone the engine's stream (engine), written to part until its stop. */
-type Recording = { pid: number; file: string; started: number; watchdog?: number; engine?: true; part?: string };
+/**
+ * A recording: simctl's, or on a NoMac phone the engine's stream (engine), written to part until its stop, its
+ * recorder known by marker on its command line.
+ */
+type Recording = { pid: number; file: string; started: number; watchdog?: number; engine?: true; part?: string; marker?: string };
 
 const MAX_SECONDS = 600;
 
@@ -53,13 +56,15 @@ async function notStarted(device: Device, output: string): Promise<ToolError> {
  * The engine's stream of the screen, as NoMac's live view takes it (--no-bootstrap: no automation session, so the
  * session's own engine is never wedged), at the screen's own size: H.264 as fragmented MP4, a fragment a frame, so
  * the file is whole up to its last frame whenever the recorder ends. The engine stops it by itself after
- * MAX_SECONDS, then ends (its input is closed). What it answers goes to log. Tests replace it.
+ * MAX_SECONDS, then ends (its input is closed). What it answers goes to log. marker, an argument the engine ignores,
+ * tells this recorder from the live view's engines, which run as the same user with the same command line otherwise.
+ * Tests replace it.
  */
-let streamScreen = async (udid: string, file: string, log: string): Promise<number | undefined> => {
+let streamScreen = async (udid: string, file: string, log: string, marker: string): Promise<number | undefined> => {
   const engine = enginePath();
   if (!engine) return undefined;
   const out = openSync(log, "w");
-  const child = spawn(engine, ["--udid", udid, "--no-bootstrap"], { detached: true, stdio: ["pipe", out, "ignore"] });
+  const child = spawn(engine, ["--udid", udid, "--no-bootstrap", "--recording", marker], { detached: true, stdio: ["pipe", out, "ignore"] });
   closeSync(out);
   child.on("error", () => undefined);
   child.stdin!.end(`${JSON.stringify({ id: 1, op: "stream", codec: "h264", transport: "fmp4", fps: 30, scale: 1, bitrate: 2_000_000, keyframe_s: 2, seconds: MAX_SECONDS, path: file })}\n`);
@@ -71,20 +76,34 @@ export function setScreenStreamer(stream: typeof streamScreen) {
 }
 
 const STREAM_START_MS = 8_000;
-const ENGINE = /simulator-use-engine --udid \S+ --no-bootstrap/;
+/** The recorder's own command line, by its marker (the recording's file name): never another engine's. */
+const recorderLine = (marker: string) => new RegExp(`simulator-use-engine --udid \\S+ --no-bootstrap --recording ${marker.replace(/[^A-Za-z0-9-]/g, "\\$&")}(?:\\s|$)`);
+/** A signal to a process that may have ended meanwhile. */
+const signal = (pid: number, name: NodeJS.Signals) => {
+  try {
+    process.kill(pid, name);
+  } catch {
+    // Gone already.
+  }
+};
+/** The recordings a phone keeps on its own disk, the newest: an older one's link works only if NoMac kept it. */
+const KEEP_RECORDINGS = 5;
 
 /**
  * Starts the engine's recording, answering once the engine is ready and still streaming a moment later, or why it
  * is not: its first line says ready (or why not), and a stream that cannot start answers ok: false, and the engine ends.
  */
 async function startStream(device: Device, dir: string, file: string): Promise<Recording> {
-  const part = file.replace(/\.mp4$/, ".fmp4"), log = join(dir, "recording.log");
-  const pid = await streamScreen(device.udid, part, log);
+  const part = file.replace(/\.mp4$/, ".fmp4"), log = join(dir, "recording.log"), marker = basename(file, ".mp4");
+  // A phone runs for hours: older recordings go, so their videos never fill its disk.
+  const older = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^recording-[\dT-]+Z\.mp4$/.test(f)).sort().slice(0, -(KEEP_RECORDINGS - 1));
+  await Promise.all(older.map((f) => rm(join(dir, f), { force: true })));
+  const pid = await streamScreen(device.udid, part, log, marker);
   if (!pid) throw new ToolError("The recording did not start: this phone's screen recorder is missing.");
   const said = () => readFile(log, "utf8").catch(() => "");
   const failed = (text: string) => /"(?:ok|ready)"\s*:\s*false/.test(text);
   const fail = async (text: string, fallback: string, next?: string) => {
-    if (alive(pid)) process.kill(pid, "SIGTERM");
+    if (alive(pid)) signal(pid, "SIGTERM");
     await rm(part, { force: true });
     const reason = /"error"\s*:\s*("(?:[^"\\]|\\.)*")/.exec(text)?.[1];
     return new ToolError(reason ? `The recording did not start: ${(JSON.parse(reason) as string).replace(/\.$/, "")}.` : fallback, next);
@@ -97,7 +116,7 @@ async function startStream(device: Device, dir: string, file: string): Promise<R
       await sleep(300);
       const later = await said();
       if (!alive(pid) || failed(later)) throw await fail(later, "The recording did not start: its recorder ended without saying why.");
-      return { pid, file, part, started: Date.now(), engine: true };
+      return { pid, file, part, marker, started: Date.now(), engine: true };
     }
     if (Date.now() > deadline) throw await fail("", "The recording did not start: its recorder was not ready in time.", "Try again in a few seconds.");
   }
@@ -106,20 +125,23 @@ async function startStream(device: Device, dir: string, file: string): Promise<R
 /** Ends the engine's recording (a signal ends the engine at once, every frame written kept) and makes its MP4. */
 async function stopStream(recording: Recording, running: boolean): Promise<{ text: string }> {
   if (running) {
-    process.kill(recording.pid, "SIGTERM");
+    signal(recording.pid, "SIGTERM");
     for (let i = 0; i < 40 && alive(recording.pid); i++) await sleep(125);
-    if (alive(recording.pid)) process.kill(recording.pid, "SIGKILL");
+    if (alive(recording.pid)) signal(recording.pid, "SIGKILL");
   }
   const part = recording.part!;
-  if (!existsSync(part) || statSync(part).size === 0) {
+  const nothing = async () => {
     await rm(part, { force: true });
-    throw new ToolError("The recording stopped but left no video: its recorder wrote nothing.", 'Start again with screen_record {action: "start"}.');
-  }
+    return new ToolError("The recording stopped but left no video: its recorder wrote nothing.", 'Start again with screen_record {action: "start"}.');
+  };
+  if (!existsSync(part) || statSync(part).size === 0) throw await nothing();
   let seconds = Math.round((Date.now() - recording.started) / 1000);
   try {
     seconds = Math.round((await flattenFmp4(part, recording.file)).seconds);
     await rm(part, { force: true });
-  } catch {
+  } catch (error) {
+    // Stopped before its first whole frame (the engine says ready before it streams): no video at all.
+    if (error instanceof NoFramesError) throw await nothing();
     // Kept as it is: ffmpeg's players and Chrome play it, though QuickTime does not.
     await rename(part, recording.file);
   }
@@ -152,7 +174,7 @@ export const screenRecord: Tool = {
     const dir = await deviceDir(device.udid);
     const state = join(dir, "recording.json");
     const current = await readFile(state, "utf8").then((t) => JSON.parse(t) as Recording, () => undefined);
-    const running = current && (await isOurs(current.pid, current.engine ? ENGINE : /recordVideo/)) ? current : undefined;
+    const running = current && (await isOurs(current.pid, current.engine ? recorderLine(current.marker ?? "") : /recordVideo/)) ? current : undefined;
 
     if (args.action === "start") {
       if (running) throw new ToolError(`Already recording since ${new Date(running.started).toLocaleTimeString()} to ${running.file}.`, 'Call screen_record {action: "stop"} first.');

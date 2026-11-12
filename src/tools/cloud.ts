@@ -204,7 +204,7 @@ const inCI = () => Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
  * replay is saved (503 until then). Any other file (a build log) lives on the phone, copied on its link's first open,
  * so only a link opened before the stop keeps working, for the 2 hours it was made for.
  */
-const AFTER_STOP = "Its screenshots' and screen recordings' links keep working for 7 days after their answers (a recording this stop ended opens in about a minute, once the replay it is cut from is saved). Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer.";
+const AFTER_STOP = "Its screenshots' and screen recordings' links (up to 200 a phone) keep working for 7 days after their answers (a recording this stop ended opens in about a minute, once the replay it is cut from is saved). Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer.";
 
 async function stop(options: { linkless?: boolean } = {}): Promise<ToolResult> {
   tunnel?.stop();

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -6,7 +7,7 @@ import { test } from "node:test";
 
 import { ToolError } from "../src/errors.ts";
 import { screenRecord } from "../src/tools/screen-record.ts";
-import { fmp4, numbers, path as boxPath, readBoxes } from "./fixtures/fmp4.ts";
+import { fmp4, initSegment, numbers, path as boxPath, readBoxes } from "./fixtures/fmp4.ts";
 
 // What simctl 27 wrote, word for word, when NoMac's replay held a phone's screen (November 7, 2026).
 const BUSY = [
@@ -146,6 +147,32 @@ test("on a NoMac phone, a recording is the engine's stream, made a plain MP4 at 
     process.env.FAKE_STREAM = "fail";
     assert.equal((await call("start")).error, "The recording did not start: The stream could not start.");
     assert.equal(readdirSync(folder).filter((f) => f.endsWith(".fmp4") || f === "recording.json").length, 0);
+
+    // Stopped before its first whole frame (only the movie box written): no video, never an empty MP4.
+    process.env.FAKE_STREAM = "ok";
+    writeFileSync(join(bin, "init.fmp4"), initSegment());
+    process.env.FAKE_STREAM_FILE = join(bin, "init.fmp4");
+    assert.ok((await call("start")).text);
+    assert.equal((await call("stop")).error, 'The recording stopped but left no video: its recorder wrote nothing.\nNext: Start again with screen_record {action: "start"}.');
+    assert.equal(readdirSync(folder).filter((f) => f.endsWith(".fmp4")).length, 0);
+    process.env.FAKE_STREAM_FILE = join(bin, "recording.fmp4");
+
+    // The live view's engines run as the same user with the recorder's command line but its marker: a recording
+    // whose pid such an engine took over is over, and the view's engine is never signalled.
+    const view = spawn(process.env.SIMULATOR_USE_ENGINE!, ["--udid", udid, "--no-bootstrap"], { stdio: ["pipe", "ignore", "ignore"] });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const part = join(folder, "recording-2026-11-12T19-00-00-000Z.fmp4");
+    writeFileSync(part, fmp4(frames.slice(0, 30)));
+    writeFileSync(join(folder, "recording.json"), JSON.stringify({ pid: view.pid, file: part.replace(/\.fmp4$/, ".mp4"), part, marker: "recording-2026-11-12T19-00-00-000Z", started: Date.now() - 20_000, engine: true }));
+    assert.match((await call("stop")).text ?? "", /^The recording had stopped after 1 s, when its recorder ended/);
+    assert.equal(view.exitCode, null);
+    view.kill("SIGKILL");
+
+    // A phone keeps its newest recordings on its disk: a start leaves four and its own.
+    for (let i = 0; i < 6; i++) writeFileSync(join(folder, `recording-2026-11-12T20-0${i}-00-000Z.mp4`), "old");
+    assert.ok((await call("start")).text);
+    assert.deepEqual(readdirSync(folder).filter((f) => /^recording-2026-11-12T20-.*\.mp4$/.test(f)).sort(), [2, 3, 4, 5].map((i) => `recording-2026-11-12T20-0${i}-00-000Z.mp4`));
+    assert.ok((await call("stop")).text);
   } finally {
     for (const k of keys) {
       if (saved[k] === undefined) delete process.env[k];

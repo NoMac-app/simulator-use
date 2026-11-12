@@ -12,6 +12,8 @@
 import { open } from "node:fs/promises";
 
 export class FragmentError extends Error {}
+/** A recording with no whole frame (ended before its first fragment, or never began): there is no video to keep. */
+export class NoFramesError extends FragmentError {}
 
 type Box = { type: string; payload: Buffer };
 type Sample = { offset: number; size: number; duration: number; sync: boolean; cto: number };
@@ -183,6 +185,7 @@ export async function flattenFmp4(source: string, target: string): Promise<{ sec
           timescale = mdhd.readUInt32BE(mdhd[0] === 1 ? 20 : 12);
           if (need(mdia, "hdlr").payload.toString("latin1", 8, 12) !== "vide") throw new FragmentError("not a video track");
           const ex = find(children(need(top, "mvex").payload), "trex");
+          if (ex && ex.payload.readUInt32BE(4) !== trackId) throw new FragmentError("fragment defaults of another track");
           if (ex) trex = { duration: ex.payload.readUInt32BE(12), size: ex.payload.readUInt32BE(16), flags: ex.payload.readUInt32BE(20) };
         } else {
           if (!moov) throw new FragmentError("a fragment before the movie box");
@@ -191,9 +194,9 @@ export async function flattenFmp4(source: string, target: string): Promise<{ sec
       }
       off += boxSize;
     }
-    if (!moov || !trak || !tkhd || !mdhd || !timescale) throw new FragmentError("no movie box");
+    if (!moov || !trak || !tkhd || !mdhd || !timescale) throw (size < 4096 ? new NoFramesError("no movie box") : new FragmentError("no movie box"));
     const whole = samples.filter((s) => s.size > 0 && s.offset >= 0 && s.offset + s.size <= size);
-    if (!whole.length) throw new FragmentError("no frames");
+    if (!whole.length) throw new NoFramesError("no frames");
 
     const durations = whole.map((s) => s.duration);
     const duration = durations.reduce((a, b) => a + b, 0);
@@ -203,11 +206,12 @@ export async function flattenFmp4(source: string, target: string): Promise<{ sec
     const minf = children(need(mdia, "minf").payload);
     const stsd = need(children(need(minf, "stbl").payload), "stsd");
     const dataBytes = whole.reduce((a, s) => a + s.size, 0);
-    const large = dataBytes + whole.length * 8 + 64 * 1024 > 0xffffffff;
-    const table = (chunkOffsets: number[]) => box("stbl",
+    // Composition offsets: signed (a version 1 ctts) only when one is negative.
+    const signedCtos = ctos.some((c) => c < 0);
+    const table = (chunkOffsets: number[], large: boolean) => box("stbl",
       box("stsd", stsd.payload),
       full("stts", 0, 0, u32s([runs(durations).length / 2, ...runs(durations)])),
-      ...(ctos.some((c) => c !== 0) ? [full("ctts", ctos.some((c) => c < 0) ? 1 : 0, 0, u32s([runs(ctos).length / 2]), i32s(runs(ctos)))] : []),
+      ...(ctos.some((c) => c !== 0) ? [full("ctts", signedCtos ? 1 : 0, 0, u32s([runs(ctos).length / 2]), (signedCtos ? i32s : u32s)(runs(ctos)))] : []),
       // Every frame a sync frame: no stss, as the format says.
       ...(syncs.length < whole.length ? [full("stss", 0, 0, u32s([syncs.length, ...syncs]))] : []),
       // One frame a chunk.
@@ -225,17 +229,20 @@ export async function flattenFmp4(source: string, target: string): Promise<{ sec
     mvhd.writeUInt16BE(0x0100, 20);
     [0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000].forEach((v, i) => mvhd.writeUInt32BE(v, 32 + i * 4));
     mvhd.writeUInt32BE(trackId + 1, 92);
-    const moovOf = (chunkOffsets: number[]) => box("moov",
+    const moovOf = (chunkOffsets: number[], large: boolean) => box("moov",
       full("mvhd", 0, 0, mvhd),
       box("trak",
         box("tkhd", withDuration(tkhd, 20, 28, duration)),
         box("mdia",
           box("mdhd", withDuration(mdhd, 16, 24, duration)),
           box("hdlr", need(mdia, "hdlr").payload),
-          box("minf", ...minf.filter((b) => b.type !== "stbl").map((b) => box(b.type, b.payload)), table(chunkOffsets)))));
+          box("minf", ...minf.filter((b) => b.type !== "stbl").map((b) => box(b.type, b.payload)), table(chunkOffsets, large)))));
     const ftyp = box("ftyp", Buffer.from("isom", "latin1"), u32s([0x200]), Buffer.from("isomiso2avc1mp41", "latin1"));
-    // The movie box's size does not depend on the offsets' values, only on their count: measured once, then written.
-    const headerBytes = ftyp.length + moovOf(whole.map(() => 0)).length;
+    // The movie box's size does not depend on the offsets' values, only on their count and width: measured with
+    // 32-bit offsets, and with 64-bit ones (and a 64-bit mdat) only if the last frame would end past 4 GiB.
+    const zeros = whole.map(() => 0);
+    const large = ftyp.length + moovOf(zeros, false).length + 8 + dataBytes > 0xffffffff;
+    const headerBytes = ftyp.length + moovOf(zeros, large).length;
     const mdatHeader = large ? 16 : 8;
     const offsets: number[] = [];
     let at = headerBytes + mdatHeader;
@@ -246,7 +253,7 @@ export async function flattenFmp4(source: string, target: string): Promise<{ sec
 
     const output = await open(target, "w");
     try {
-      await output.write(Buffer.concat([ftyp, moovOf(offsets), mdatHead]));
+      await output.write(Buffer.concat([ftyp, moovOf(offsets, large), mdatHead]));
       // Frames next to each other in the source are copied together, a megabyte at most at a time.
       for (let i = 0; i < whole.length;) {
         let j = i + 1, end = whole[i]!.offset + whole[i]!.size;

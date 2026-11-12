@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { flattenFmp4, FragmentError } from "../src/engine/fmp4.ts";
+import { flattenFmp4, FragmentError, NoFramesError } from "../src/engine/fmp4.ts";
 import { fmp4, type Frame, initSegment, numbers, path, readBoxes } from "./fixtures/fmp4.ts";
 
 // A NoMac phone's recording is the engine's stream, a fragment a frame (ffmpeg and Chrome play it, QuickTime and
@@ -68,7 +68,14 @@ test("a recorder ended mid-write leaves its last fragment cut off: the frames be
 });
 
 test("anything but a recording of one video track is refused, never copied wrongly", async () => {
-  await assert.rejects(flatten(initSegment()), FragmentError);
+  // A recording stopped before its first frame has no video at all (an empty file, or the movie box alone).
+  await assert.rejects(flatten(initSegment()), NoFramesError);
+  await assert.rejects(flatten(Buffer.alloc(0)), NoFramesError);
+  // Fragment defaults of another track.
+  const bare = initSegment(), trexAt = bare.indexOf(Buffer.from("trex", "latin1"));
+  const otherTrex = Buffer.from(bare);
+  otherTrex.writeUInt32BE(2, trexAt + 8);
+  await assert.rejects(flatten(Buffer.concat([otherTrex, fmp4(frames.slice(0, 2)).subarray(bare.length)])), /fragment defaults of another track/);
   await assert.rejects(flatten(Buffer.from("not a movie at all, just some words")), FragmentError);
   // Two tracks in the movie box.
   const init = readBoxes(initSegment());
