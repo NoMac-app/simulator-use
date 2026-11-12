@@ -198,12 +198,13 @@ const OPEN_LINK = /https?:\/\/[^\s/]+\/(?:simulator-use\/(?:view|replay)|api\/v1
 const inCI = () => Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 
 /**
- * Which of a phone's file links work after its stop (NoMac's side, apps/web/lib/phones.ts): a recording's
- * (screen_record's clip link) is cut from the replay, so it opens only once the phone stopped and its replay is saved
- * (409 while the phone runs, 503 while the replay saves) and works 7 days; any other file lives on the phone, copied
- * on its link's first open, so only a link opened before the stop keeps working, for the 2 hours it was made for.
+ * Which of a phone's file links work after its stop (NoMac's side, apps/web/lib/phones.ts, since November 2026): a
+ * screenshot's and a screen recording's are copied to NoMac's storage as their answer is given, so they work 7 days
+ * whether the phone runs or not; a recording the stop itself ended is cut from the replay, so its link opens once the
+ * replay is saved (503 until then). Any other file (a build log) lives on the phone, copied on its link's first open,
+ * so only a link opened before the stop keeps working, for the 2 hours it was made for.
  */
-const AFTER_STOP = "A screen recording's link opens after this stop, once the replay it is cut from is saved (about a minute; until then it answers 503), and works for 7 days. Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer.";
+const AFTER_STOP = "Its screenshots' and screen recordings' links keep working for 7 days after their answers (a recording this stop ended opens in about a minute, once the replay it is cut from is saved). Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer.";
 
 async function stop(options: { linkless?: boolean } = {}): Promise<ToolResult> {
   tunnel?.stop();
@@ -260,9 +261,8 @@ export async function stopServerPhone(): Promise<void> {
 const REPLAY_WAIT_MS = 3 * 60_000;
 
 /**
- * The run's video, saved in out: the phone's replay, which a NoMac phone records from its hand-over to its stop. A
- * Simulator's screen takes one recording at a time and the replay holds it, so screen_record cannot start beside
- * it. NoMac has the replay a few seconds after the stop.
+ * The run's video, saved in out: the phone's replay, which a NoMac phone records from its hand-over to its stop, so
+ * it shows the whole run, the build's wait included. NoMac has the replay a few seconds after the stop.
  */
 async function keepReplay(session: string, out: string): Promise<string> {
   const kept = "the phone's replay keeps it for 7 days";

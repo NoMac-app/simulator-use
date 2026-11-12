@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { ToolError } from "../src/errors.ts";
 import { screenRecord } from "../src/tools/screen-record.ts";
+import { fmp4, numbers, path as boxPath, readBoxes } from "./fixtures/fmp4.ts";
 
 // What simctl 27 wrote, word for word, when NoMac's replay held a phone's screen (November 7, 2026).
 const BUSY = [
@@ -73,5 +74,84 @@ test("a recording that did not start says simctl's reason; the boot hint only fo
     if (saved.STATE === undefined) delete process.env.SIMULATOR_USE_STATE_DIR;
     else process.env.SIMULATOR_USE_STATE_DIR = saved.STATE;
     rmSync(bin, { recursive: true, force: true });
+  }
+});
+
+// On a NoMac phone the session's replay holds simctl's one recorder from the hand-over (November 7, 2026), so the
+// recording is the engine's stream of the screen (fragmented MP4), made a plain MP4 at its stop: a file the phone's
+// answer names while the phone keeps running. The engine and simctl's device list are stood in for.
+test("on a NoMac phone, a recording is the engine's stream, made a plain MP4 at its stop", { skip: process.platform !== "darwin" }, async () => {
+  const bin = mkdtempSync(join(tmpdir(), "su-record-hosted-"));
+  const udid = "5E55E550-0000-4000-8000-00000000AEC1";
+  writeFileSync(join(bin, "xcrun"), [
+    "#!/bin/sh",
+    `if [ "$2" = list ]; then echo '${JSON.stringify({ devices: { "com.apple.CoreSimulator.SimRuntime.iOS-27-2": [{ udid, name: "iPhone 17 Pro", state: "Booted", isAvailable: true }] } })}'; exit 0; fi`,
+    // simctl's recorder must never run here: the replay holds it.
+    'if [ "$2" = io ]; then touch "$(dirname "$0")/simctl-recorded"; exit 1; fi',
+    "exit 0",
+    "",
+  ].join("\n"), { mode: 0o755 });
+  const frames = Array.from({ length: 90 }, (_, i) => ({ size: 200 + i, duration: 3000, sync: i % 60 === 0 }));
+  writeFileSync(join(bin, "recording.fmp4"), fmp4(frames));
+  const keys = ["PATH", "SIMULATOR_USE_STATE_DIR", "SIMULATOR_USE_HOSTED", "SIMULATOR_USE_ENGINE", "FAKE_STREAM", "FAKE_STREAM_FILE"] as const;
+  const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+  const state = mkdtempSync(join(tmpdir(), "su-record-hosted-state-"));
+  Object.assign(process.env, { PATH: `${bin}:${saved.PATH}`, SIMULATOR_USE_STATE_DIR: state, SIMULATOR_USE_HOSTED: "1",
+    SIMULATOR_USE_ENGINE: new URL("fixtures/stream-engine/simulator-use-engine", import.meta.url).pathname, FAKE_STREAM: "ok", FAKE_STREAM_FILE: join(bin, "recording.fmp4") });
+  const call = async (action: string) => {
+    try {
+      return { text: (await screenRecord.run({ action }, { waitForJobs: true })).text };
+    } catch (error) {
+      assert.ok(error instanceof ToolError, String(error));
+      return { error: error.toText() };
+    }
+  };
+  const folder = join(state, udid);
+  try {
+    // The device list is cached: read afresh from the stand-in.
+    await (await import("../src/engine/simctl.ts")).listDevices(true);
+    const started = await call("start");
+    assert.deepEqual(started, { text: 'Recording iPhone 17 Pro (it stops by itself after 10 minutes). Do the work, then screen_record {action: "stop"} for the file.' });
+    const recording = JSON.parse(readFileSync(join(folder, "recording.json"), "utf8"));
+    assert.equal(recording.engine, true);
+    assert.match(recording.part, /\/recording-[\dT-]+Z\.fmp4$/);
+    assert.match((await call("start")).error ?? "", /^Already recording since .+\nNext: Call screen_record \{action: "stop"\} first\.$/);
+
+    const stopped = await call("stop");
+    const file = /: (\/\S+\.mp4)$/.exec(stopped.text ?? "")?.[1];
+    assert.match(stopped.text ?? "", /^Recorded 3 s \(0\.\d MB\): \/\S+\/recording-[\dT-]+Z\.mp4$/);
+    // The plain MP4 is there, every frame indexed; the stream's part, the state and the engine's log are gone.
+    const boxes = readBoxes(readFileSync(file!));
+    assert.deepEqual(boxes.map((b) => b.type), ["ftyp", "moov", "mdat"]);
+    assert.deepEqual(numbers(boxPath(boxes, "moov", "trak", "mdia", "minf", "stbl", "stss")), [2, 1, 61]);
+    assert.deepEqual(readdirSync(folder).sort(), [file!.split("/").at(-1)]);
+    assert.equal((await call("stop")).error, 'Nothing is recording on this Simulator.\nNext: Start with screen_record {action: "start"}.');
+    assert.equal(existsSync(join(bin, "simctl-recorded")), false);
+
+    // A recorder that ended by itself (the phone's screen went away) still leaves its video.
+    process.env.FAKE_STREAM = "end:1200";
+    assert.ok((await call("start")).text);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    assert.match((await call("stop")).text ?? "", /^The recording had stopped after 3 s, when its recorder ended \(0\.\d MB\): \/\S+\.mp4$/);
+    // One that ran out its 10 minutes says so.
+    assert.ok((await call("start")).text);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const ran = JSON.parse(readFileSync(join(folder, "recording.json"), "utf8"));
+    writeFileSync(join(folder, "recording.json"), JSON.stringify({ ...ran, started: Date.now() - 601_000 }));
+    assert.match((await call("stop")).text ?? "", /^The recording had already stopped after 10 minutes: \/\S+\.mp4$/);
+
+    // A recorder that cannot start says why, and leaves nothing behind.
+    process.env.FAKE_STREAM = "refuse";
+    assert.equal((await call("start")).error, "The recording did not start: no framebuffer for this device.");
+    process.env.FAKE_STREAM = "fail";
+    assert.equal((await call("start")).error, "The recording did not start: The stream could not start.");
+    assert.equal(readdirSync(folder).filter((f) => f.endsWith(".fmp4") || f === "recording.json").length, 0);
+  } finally {
+    for (const k of keys) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+    rmSync(bin, { recursive: true, force: true });
+    rmSync(state, { recursive: true, force: true });
   }
 });

@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+// A stand-in for native/engine's stream in tests, named as the engine is so a recording finds it by its command line.
+// FAKE_STREAM: ok (ready, then the recording in FAKE_STREAM_FILE written to the request's path, until a signal),
+// refuse (not ready, with a reason), fail (ready, then the stream refused), end:<ms> (ok, then ends by itself).
+import { copyFileSync } from "node:fs";
+import { createInterface } from "node:readline";
+
+const mode = process.env.FAKE_STREAM ?? "ok";
+if (mode === "refuse") {
+  process.stdout.write(JSON.stringify({ ready: false, error: "no framebuffer for this device" }) + "\n");
+  process.exit(1);
+}
+process.on("SIGTERM", () => process.exit(0));
+process.stdout.write(JSON.stringify({ ready: true, framebuffer: true }) + "\n");
+for await (const line of createInterface({ input: process.stdin })) {
+  const request = JSON.parse(line);
+  if (mode === "fail") {
+    process.stdout.write(JSON.stringify({ id: request.id, ok: false, error: "The stream could not start." }) + "\n");
+    continue;
+  }
+  if (request.op !== "stream" || request.transport !== "fmp4" || !request.path || request.seconds !== 600) {
+    process.stdout.write(JSON.stringify({ id: request.id, ok: false, error: `unexpected request ${line}` }) + "\n");
+    continue;
+  }
+  copyFileSync(process.env.FAKE_STREAM_FILE, request.path);
+  const end = /^end:(\d+)$/.exec(mode);
+  await new Promise((resolve) => setTimeout(resolve, end ? Number(end[1]) : 3_600_000));
+}
+process.exit(0);

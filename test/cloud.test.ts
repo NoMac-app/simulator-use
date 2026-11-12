@@ -323,9 +323,10 @@ test("cloud start, then every tool on the phone: app_run sends the project first
   phoneState = "ready";
   const stopped = await callTool("cloud", { action: "stop" });
   assert.match(stopped.text, /The tools run on this machine again/);
-  // A recording's link is cut from the replay, so it opens only after the stop (NoMac answers 409 before it, 503
-  // while the replay saves); any other file link lives on the phone, so only one opened before the stop lasts.
-  assert.match(stopped.text, /\. A screen recording's link opens after this stop, once the replay it is cut from is saved \(about a minute; until then it answers 503\), and works for 7 days\. Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer\.\n/);
+  // A screenshot's and a recording's link are kept in NoMac's storage as they are answered, so they outlast the
+  // phone (a recording the stop ended is cut from the replay, once it is saved); any other file link lives on the
+  // phone, so only one opened before the stop lasts.
+  assert.match(stopped.text, /\. Its screenshots' and screen recordings' links keep working for 7 days after their answers \(a recording this stop ended opens in about a minute, once the replay it is cut from is saved\)\. Any other file link from its answers keeps working only if it was opened before this stop, up to 2 hours after its answer\.\n/);
   assert.match(stopped.text, /Its replay, the screen and every call, opens at https:\/\/nomac\.app\/simulator-use\/replay\/r\.x in a minute \(kept 7 days\)\./);
   assert.match((await callTool("cloud", { action: "status" })).text, /^Cloud is off/);
 });
