@@ -7,6 +7,7 @@
 import { createInterface } from "node:readline";
 
 import { cancelAllJobs } from "./engine/jobs.ts";
+import { hostAnswer, setHostOffers, setHostOutput } from "./host.ts";
 import { hosted, hostedAnswer, noteCall } from "./hosted.ts";
 import { callTool, INSTRUCTIONS, toContent, TOOLS, VERSION } from "./registry.ts";
 import { setting } from "./settings.ts";
@@ -27,6 +28,8 @@ const toolList = () =>
 async function result(method: string, params: Record<string, unknown>, stateless: boolean): Promise<unknown> {
   switch (method) {
     case "initialize": {
+      // NoMac Simulator's host says what it answers when this server asks (src/host.ts).
+      if (setting("HOSTED")) setHostOffers(params.capabilities);
       const asked = params.protocolVersion;
       const protocolVersion = typeof asked === "string" && HANDSHAKE_VERSIONS.includes(asked) ? asked : HANDSHAKE_VERSIONS[0];
       return { protocolVersion, capabilities: CAPABILITIES, serverInfo: SERVER_INFO, instructions: INSTRUCTIONS };
@@ -83,6 +86,8 @@ export function serve(input: NodeJS.ReadableStream = process.stdin, output: Node
   const write = (response: Response) => output.write(`${JSON.stringify(response)}\n`);
   // NoMac Simulator's host logs what a phone's workspace had cleared to make room: sizes and counts only (src/space.ts).
   if (setting("HOSTED")) setNotifier((report) => output.write(`${JSON.stringify({ jsonrpc: "2.0", method: "notifications/simulator-use/space", params: report })}\n`));
+  // ...and answers what this server asks of it (src/host.ts).
+  if (setting("HOSTED")) setHostOutput((line) => output.write(line));
   const lines = createInterface({ input, crlfDelay: Infinity });
   const pending = new Set<Promise<void>>();
   lines.on("line", (raw) => {
@@ -94,6 +99,8 @@ export function serve(input: NodeJS.ReadableStream = process.stdin, output: Node
       write({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } });
       return;
     }
+    // The host's answer to a request of this server's own is no request to answer.
+    if (hostAnswer(message)) return;
     // Calls run side by side; each answer carries its id. A batch (MCP 2025-03-26) is answered as a batch.
     const answer = async (): Promise<void> => {
       if (Array.isArray(message)) {
@@ -115,6 +122,7 @@ export function serve(input: NodeJS.ReadableStream = process.stdin, output: Node
   return new Promise((resolve) =>
     lines.on("close", () => {
       cancelAllJobs();
+      setHostOutput(undefined);
       void Promise.allSettled([...pending]).then(() => resolve());
     }),
   );

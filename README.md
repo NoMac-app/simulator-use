@@ -172,7 +172,7 @@ App Review runs iPhone apps on an iPad, where iPadOS draws them in a window, mov
 - Its own system log lines (its subsystem, or logged by its own code), streamed from launch. macOS keeps info lines only in memory and drops them within seconds when the Simulator is busy, so reading the log store afterwards misses them.
 - `grep` also searches Apple's lines, for things like a missing image or a layout warning.
 - `wait_for` waits up to 25 seconds for a line, for example after a tap that starts a network call.
-- `crashes` lists crash reports with the crashing thread down to your code (`ItemsView.body.getter (App.swift:64)`), next to the app's last output, which holds Swift's own message (`App.swift:64: Fatal error: ...`). macOS can take up to a minute to write a report.
+- `crashes` lists crash reports with the crashing thread down to your code (`ItemsView.body.getter (App.swift:64)`), next to the app's last output, which holds Swift's own message (`App.swift:64: Fatal error: ...`). macOS can take up to a minute to write a report, and later moves it into the `Retired` folder beside it, which is read too.
 
 ## Several agents, one Mac
 

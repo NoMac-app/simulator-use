@@ -1,9 +1,11 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
+import { askHost, hostOffers } from "../host.ts";
 import { ownLines } from "./apps.ts";
 import { run } from "./exec.ts";
+import { stateDir } from "./state.ts";
 
 /** A line from the system log, shortened: `01:52:54.047 error login: sign-in rejected`. */
 export type LogLine = { time: string; level: string; text: string };
@@ -67,22 +69,35 @@ export function cleanConsole(text: string): string[] {
 
 export type Crash = { file: string; time: string; summary: string[] };
 
+/** Where macOS writes a user's crash reports. */
+export const homeReports = () => join(homedir(), "Library", "Logs", "DiagnosticReports");
+
 /**
  * Crash reports of a Simulator app land on the Mac itself, in ~/Library/Logs/DiagnosticReports, named after
- * the app's executable. An .ips file is one JSON header line, then the report as JSON. Another app with the same
+ * the app's executable, and macOS moves each, whole and with its time, into its Retired folder (within seconds on some
+ * Macs), so both are read. An .ips file is one JSON header line, then the report as JSON. Another app with the same
  * executable name, or the same app on another Simulator, writes reports there too: a report is this app's when its
- * header's bundleID is the app's, and this device's when its process path (or coalition) names the device.
+ * header's bundleID is the app's, and this device's when its process path (or coalition) names the device. dir: the
+ * folders to read instead, each with its Retired (hostCrashReports' and the home's on NoMac's phone host).
  */
-export async function crashReports(executable: string, since: number, of: { bundleId?: string; udid?: string; dir?: string } = {}, limit = 3): Promise<Crash[]> {
-  const dir = of.dir ?? join(homedir(), "Library", "Logs", "DiagnosticReports");
-  let names: string[];
-  try {
-    names = (await readdir(dir)).filter((n) => n.startsWith(`${executable}-`) && n.endsWith(".ips"));
-  } catch {
-    return [];
+export async function crashReports(executable: string, since: number, of: { bundleId?: string; udid?: string; dir?: string | string[] } = {}, limit = 3): Promise<Crash[]> {
+  const dirs = (of.dir === undefined ? [homeReports()] : [of.dir].flat()).flatMap((dir) => [dir, join(dir, "Retired")]);
+  const files: { file: string; at: number }[] = [];
+  for (const dir of dirs) {
+    let names: string[];
+    try {
+      names = (await readdir(dir)).filter((n) => n.startsWith(`${executable}-`) && n.endsWith(".ips"));
+    } catch {
+      continue;
+    }
+    files.push(...(await Promise.all(names.map(async (n) => ({ file: join(dir, n), at: await stat(join(dir, n)).then((s) => s.mtimeMs, () => 0) })))));
   }
-  const files = await Promise.all(names.map(async (n) => ({ file: join(dir, n), at: (await stat(join(dir, n))).mtimeMs })));
-  const recent = files.filter((f) => f.at >= since).sort((a, b) => b.at - a.at);
+  // A report macOS was moving while this read could be in both folders: once.
+  const seen = new Set<string>();
+  const recent = files
+    .filter((f) => f.at >= since)
+    .sort((a, b) => b.at - a.at)
+    .filter((f) => (seen.has(basename(f.file)) ? false : (seen.add(basename(f.file)), true)));
   const out: Crash[] = [];
   for (const f of recent) {
     if (out.length >= limit) break;
@@ -93,6 +108,34 @@ export async function crashReports(executable: string, since: number, of: { bund
     out.push({ file: f.file, time, summary: summarizeIps(text, executable) });
   }
   return out;
+}
+
+/** What NoMac Simulator's host answers for the phone's crash reports (src/host.ts). */
+export const HOST_CRASH_REPORTS = "nomac/crash_reports";
+
+/**
+ * On NoMac Simulator's host a phone's crash reports are not in its user's home: that user has no login session, so
+ * macOS writes them to the system's folder, which it cannot read. The host hands over the reports of the user's own
+ * phone apps since the user's last wipe (nomac-sim crash-reports): they go to a folder of simulator-use's own, read as
+ * the home's is. Undefined where the host offers none (a developer's Mac).
+ */
+export async function hostCrashReports(): Promise<string | undefined> {
+  if (!hostOffers(HOST_CRASH_REPORTS)) return undefined;
+  const answer = (await askHost(HOST_CRASH_REPORTS, {}, 25_000)) as { reports?: unknown } | null;
+  const dir = join(stateDir(), "crash-reports");
+  await rm(dir, { recursive: true, force: true });
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  const reports = Array.isArray(answer?.reports) ? answer.reports.slice(0, 20) : [];
+  for (const report of reports as { name?: unknown; text?: unknown; modified_ms?: unknown }[]) {
+    const { name, text, modified_ms: at } = report ?? {};
+    // macOS's own names (<process>-<date>.ips): never a path, never hidden.
+    if (typeof name !== "string" || !/^[^./\\\0][^/\\\0]{0,250}\.ips$/.test(name) || typeof text !== "string") continue;
+    const file = join(dir, name);
+    await writeFile(file, text, { mode: 0o600 });
+    // When macOS wrote it, which the since of app_logs compares.
+    if (typeof at === "number" && Number.isFinite(at) && at > 0) await utimes(file, at / 1000, at / 1000).catch(() => undefined);
+  }
+  return dir;
 }
 
 /** Whether a report is this app's on this device; a report without the field to tell is kept. */
