@@ -168,10 +168,11 @@ test("on a NoMac phone, a recording is the engine's stream, made a plain MP4 at 
     assert.equal(view.exitCode, null);
     view.kill("SIGKILL");
 
-    // A phone keeps its newest recordings on its disk: a start leaves four and its own.
-    for (let i = 0; i < 6; i++) writeFileSync(join(folder, `recording-2026-11-12T20-0${i}-00-000Z.mp4`), "old");
+    // A phone keeps its newest recordings on its disk: a start leaves four and its own. Named in 2099, so they are the
+    // newest whenever the test runs, above the recordings it made a moment ago (named for the real time).
+    for (let i = 0; i < 6; i++) writeFileSync(join(folder, `recording-2099-01-01T00-0${i}-00-000Z.mp4`), "old");
     assert.ok((await call("start")).text);
-    assert.deepEqual(readdirSync(folder).filter((f) => /^recording-2026-11-12T20-.*\.mp4$/.test(f)).sort(), [2, 3, 4, 5].map((i) => `recording-2026-11-12T20-0${i}-00-000Z.mp4`));
+    assert.deepEqual(readdirSync(folder).filter((f) => /^recording-2099-.*\.mp4$/.test(f)).sort(), [2, 3, 4, 5].map((i) => `recording-2099-01-01T00-0${i}-00-000Z.mp4`));
     assert.ok((await call("stop")).text);
   } finally {
     for (const k of keys) {
