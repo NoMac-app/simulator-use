@@ -38,8 +38,10 @@ check "full-screen cover" '#closeCover' act 'tap "Show full screen"'
 check "close the cover" 'Show alert' act 'tap #closeCover'
 check "iOS permission prompt, named after the app" 'EdgeLab · system alert' act 'tap "Ask for location"'
 check "allow it" 'Dialogs' act 'tap "Allow While Using App"'
-# iOS asks for notifications once per install (simctl can't reset it): answer the prompt if it comes.
-allow_if_asked() { local out; out=$("$@" 2>&1); if grep -q "system alert\|Open in" <<<"$out"; then act "tap ${ANSWER}"; else echo "$out"; fi; }
+# iOS asks for notifications once per install (simctl can't reset it): answer the prompt if it is still in front.
+# Only a screen read names one ("· system alert"): open_url answers "Open in" itself and says so, and a tap on its
+# Open button afterwards finds none (every first run on a phone failed so, with any engine, until November 16, 2026).
+allow_if_asked() { local out; out=$("$@" 2>&1); if grep -q "· system alert" <<<"$out"; then act "tap ${ANSWER}"; else echo "$out"; fi; }
 ANSWER=Allow check "notifications, prompt waited for and allowed" 'notifications true' allow_if_asked act 'tap "Ask for notifications"' 'wait "notifications true"'
 check "text in any language" 'Typed: Café 日本 🚀' act 'tap Text' 'fill #unicode Café 日本 🚀' 'wait "Typed: Café"'
 check "autocorrect undone by paste" 'pasted instead|O.Brien' act "fill #unicode O'Brien --id x"

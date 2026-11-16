@@ -36,7 +36,8 @@ check "launch answers with the first screen" '#signIn @' $DL app launch dev.simt
 check "sign in" 'Welcome, gary@example\.com' $DL act --device "$U" "fill #email gary@example.com" "fill #password secret1" "tap #signIn" 'wait "Welcome"'
 check "toggle a switch" '#remember "Remember me" on' $DL act --device "$U" 'tap #remember'
 check "open an item" 'Details for Item 3' $DL act --device "$U" 'tap Items' 'tap "Item 3"'
-check "back and scroll" 'scroll: 4 pages, at [0-9]+%' $DL act --device "$U" back 'scroll down'
+# The list is 4 pages on an iPhone 17 Pro, 3 on a Pro Max: scrolled is "at" a percent, not "at top".
+check "back and scroll" 'scroll: [0-9]+ pages, at [0-9]+%' $DL act --device "$U" back 'scroll down'
 logs=$($DL logs --device "$U" 2>&1)
 check "the app's print output" 'Sign In tapped, ok: true' echo "$logs"
 check "the app's own system log line" 'info login: signed in' echo "$logs"
