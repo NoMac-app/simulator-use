@@ -6,15 +6,22 @@
 // steady reads, and read fast. Run by scripts/lab.sh; the engine's own flag shows it failing:
 //   node scripts/engine-check.mjs UDID                               # passes on a working engine
 //   node scripts/engine-check.mjs UDID -- --bootstrap-every-call     # fails: the slow path
-// SIMULATOR_USE_ENGINE picks another engine build; SIMULATOR_USE_ENGINE_READS picks its read path (session, axe).
+//   node scripts/engine-check.mjs UDID --set PATH                    # a phone in another device set
+// SIMULATOR_USE_ENGINE picks another engine build; SIMULATOR_USE_ENGINE_READS picks its read path (axe; any other
+// value, or none, is the engine's default, session).
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
-const [udid, dashes, ...extra] = process.argv.slice(2);
-if (!udid || (dashes !== undefined && dashes !== "--")) {
-  console.error("usage: node scripts/engine-check.mjs UDID [-- engine arguments]");
+const args = process.argv.slice(2);
+const udid = args.shift();
+// --set PATH: the phone's device set (a folder), passed to the engine as its own --set.
+const hasSet = args[0] === "--set";
+const set = hasSet ? (args.shift(), args.shift()) : undefined;
+const [dashes, ...extra] = args;
+if (!udid || udid.startsWith("-") || (args.length && dashes !== "--") || (hasSet && !set)) {
+  console.error("usage: node scripts/engine-check.mjs UDID [--set PATH] [-- engine arguments]");
   process.exit(2);
 }
 const engine = process.env.SIMULATOR_USE_ENGINE || fileURLToPath(new URL("../vendor/axe/simulator-use-engine", import.meta.url));
@@ -31,7 +38,7 @@ const READ_MEDIAN_MS = 900;
 /** A point read is a few milliseconds on the fast path. */
 const POINT_MEDIAN_MS = 250;
 
-const child = spawn(engine, ["--udid", udid, ...extra], { stdio: ["pipe", "pipe", "ignore"] });
+const child = spawn(engine, ["--udid", udid, ...(set ? ["--set", set] : []), ...extra], { stdio: ["pipe", "pipe", "ignore"] });
 const lines = createInterface({ input: child.stdout })[Symbol.asyncIterator]();
 const next = async (ms) => {
   let timer;
@@ -56,7 +63,8 @@ const problems = [];
 try {
   const ready = await next(30_000);
   if (!ready.ready) throw new Error(`the engine did not start: ${ready.error}`);
-  const expected = process.env.SIMULATOR_USE_ENGINE_READS || "session";
+  // The engine reads on the axe path only when asked for it by name; any other value is its default, session.
+  const expected = process.env.SIMULATOR_USE_ENGINE_READS === "axe" ? "axe" : "session";
   if (ready.reads !== expected) problems.push(`the engine reads on the "${ready.reads}" path, not "${expected}"`);
   const warm = await call({ op: "describe", lean: true });
   const reads = [];
