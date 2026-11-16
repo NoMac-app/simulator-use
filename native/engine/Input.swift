@@ -35,10 +35,19 @@ final class PhoneInput: @unchecked Sendable {
   /** How the request's input went ("indigo", "dtuhid", or both), and how long a dtuhidd connection it opened took. */
   private var route = Set<String>()
   private var dtuhidConnectMs: Int?
-  /** What the request's inputs went by, for its answer; cleared for the next request. */
-  func takeRoute() -> (via: String?, dtuhidConnectMs: Int?) {
-    defer { route = []; dtuhidConnectMs = nil }
-    return (route.isEmpty ? nil : route.sorted().joined(separator: "+"), dtuhidConnectMs)
+  /**
+   * Whether any of the request's input may have reached the phone: a piece was handed to a connection. A request that
+   * fails after that answers input_sent, so simulator-use never sends the input again another way.
+   */
+  private(set) var sent = false
+  /** A request starts: nothing of it sent yet. */
+  func beginRequest() { route = []; dtuhidConnectMs = nil; sent = false }
+  /** What the request's inputs went by, for its answer (failed or not). */
+  func report() -> [String: Any] {
+    var out: [String: Any] = [:]
+    if !route.isEmpty { out["via"] = route.sorted().joined(separator: "+") }
+    if let dtuhidConnectMs { out["dtuhid_connect_ms"] = dtuhidConnectMs }
+    return out
   }
 
   init(_ simulator: FBSimulator, choice: HIDChoice, logger: FBControlCoreLogger) {
@@ -143,22 +152,38 @@ final class PhoneInput: @unchecked Sendable {
     }
     route.insert("indigo")
     let typing = Self.pieces(event).contains { if case .keyboard = $0 { return true }; return false }
-    try await indigoConnection(forKeys: typing).send(event: event, logger: logger)
+    try await sendPieces(event, on: try indigoConnection(forKeys: typing))
   }
 
   /**
-   * On dtuhidd's kept connection, each piece confirmed by the phone in turn (sendAsync), without AXe's 380 ms wait
-   * after the gesture. A failed input is never sent again (part of it may have arrived): the connection is dropped,
-   * and the next input opens a new one.
+   * On dtuhidd's kept connection, each piece confirmed by the phone in turn, without AXe's 380 ms wait after the
+   * gesture. A failed input is never sent again (part of it may have arrived): the connection is dropped, and the
+   * next input opens a new one.
    */
   private func sendDtuhid(_ event: FBSimulatorHIDEvent) async throws {
     let connection = try await dtuhidConnection()
     route.insert("dtuhid")
     do {
-      try await Self.pacedForDtuhid(event).sendAsync(on: connection)
+      try await sendPieces(Self.pacedForDtuhid(event), on: connection)
     } catch {
       connection.disconnect(); if dtuhid === connection { dtuhid = nil }
       throw error
+    }
+  }
+
+  /**
+   * The event's pieces in order, each sent and acknowledged before the next (sendAsync, as AXe's own send does them
+   * for Indigo; AXe's flush after them is nothing on Indigo and the 380 ms wait on dtuhidd), the pauses slept. `sent`
+   * turns true as the first piece is handed over.
+   */
+  private func sendPieces(_ event: FBSimulatorHIDEvent, on connection: FBSimulatorHID) async throws {
+    for piece in Self.pieces(event) {
+      if case let .delay(seconds) = piece {
+        try await Task.sleep(nanoseconds: UInt64(max(0, seconds) * 1_000_000_000))
+        continue
+      }
+      sent = true
+      try await piece.sendAsync(on: connection)
     }
   }
 }

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { ToolError } from "../errors.ts";
 import type { AxNode, Frame } from "../look/snapshot.ts";
 import { run } from "./exec.ts";
-import { engineCall, noteSessionClosed, engineGesture, engineSteps } from "./native.ts";
+import { type Answer, engineCall, noteSessionClosed, engineGesture, engineSteps } from "./native.ts";
 import { setting } from "../settings.ts";
 
 /**
@@ -113,13 +113,24 @@ export async function screenshotFile(udid: string, file: string): Promise<void> 
 const axe = (udid: string, args: string[], timeoutMs = 30_000) =>
   run(axePath(), [...args, "--udid", udid], { timeoutMs }).finally(() => noteSessionClosed(udid));
 
+/**
+ * An engine's input that failed after some of it may have reached the phone (input_sent), or whose engine stopped
+ * after the request went out (lost): it is never sent again another way, which could do it twice.
+ */
+function sentInPart(answer: Answer | undefined, what: string): void {
+  if (answer && (answer.lost || answer.input_sent === true)) {
+    throw new ToolError(`The ${what} may have reached the Simulator only in part: ${String(answer.error ?? "the engine stopped")}.`, "Call ui_look to see the screen before doing it again.");
+  }
+}
+
 /** One AXe process for several input steps (tap, type, key, key-combo, swipe, sleep): about 0.2 s cheaper per step. */
 export async function batch(udid: string, steps: string[]): Promise<void> {
   const native = engineSteps(steps);
   if (native) {
-    const answer = await engineCall(udid, { op: "steps", steps: native }, 60_000);
+    const answer = await engineCall(udid, { op: "steps", steps: native }, 60_000, { reportLost: true });
     if (answer?.ok) return;
     if (answer?.busy) throw new ToolError("The Simulator did not take the input within a minute.");
+    sentInPart(answer, "input");
   }
   try {
     await axe(udid, ["batch", "--ax-cache", "none", "--type-submission", "composite", ...steps.flatMap((s) => ["--step", s])], 60_000);
@@ -132,9 +143,10 @@ export async function batch(udid: string, steps: string[]): Promise<void> {
 export async function gesture(udid: string, args: string[]): Promise<void> {
   const native = engineGesture(args);
   if (native) {
-    const answer = await engineCall(udid, native, 30_000);
+    const answer = await engineCall(udid, native, 30_000, { reportLost: true });
     if (answer?.ok) return;
     if (answer?.busy) throw new ToolError("The Simulator did not take the gesture within 30 s.");
+    sentInPart(answer, "gesture");
   }
   try {
     await axe(udid, args, 30_000);
@@ -170,9 +182,10 @@ export function typeStep(text: string): string {
 }
 
 export async function pressButton(udid: string, button: "home" | "lock"): Promise<void> {
-  const answer = await engineCall(udid, { op: button, wait: false });
+  const answer = await engineCall(udid, { op: button, wait: false }, 30_000, { reportLost: true });
   if (answer?.ok) return;
   if (answer?.busy) throw new ToolError(`The ${button} button press was not answered within 30 s.`);
+  sentInPart(answer, `${button} button press`);
   await axe(udid, ["button", button]);
 }
 

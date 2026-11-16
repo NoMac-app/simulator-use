@@ -261,8 +261,27 @@ func restartTestDaemons() {
   }
   Thread.sleep(forTimeInterval: 2)
 }
-func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
-  sessionTurnMs = takeSessionTurn()
+/**
+ * Opens an automation session: the request, then up to `timeout` for the answer, never past `deadline`. The first
+ * request after a boot (or after the phone's test daemons were restarted) starts the phone's testmanagerd, which loads
+ * accessibility in the phone before it answers and allows itself 120 s for that ("Waiting 120.0s for AX to finish
+ * loading", its log). Right after a boot that took 23 to 26 s (November 16, 2026, a busy 6-core virtual Mac:
+ * testmanagerd took 8 s to start, then 16.6 s to load accessibility); given up at 12 s, with the daemons restarted
+ * mid-load, the first read came no sooner. So when the testmanagerd running now is not the one that ran as the
+ * request went out (this request started it), its answer is waited for, up to its own 120 s or the deadline. A
+ * testmanagerd that was already there loads nothing long (0.3 s, measured): one that does not answer in `timeout`
+ * is a phone that refuses sessions, and the hook restarts its daemons, as before.
+ */
+func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, restartingDaemons: Bool = false) -> (AnyObject?, String?) {
+  guard let turnMs = takeSessionTurn(deadline: deadline) else {
+    sessionLog("open not tried: another engine held the turn until the deadline")
+    return (nil, "another engine was opening a session on this phone")
+  }
+  sessionTurnMs = turnMs
+  // The restart of the phone's test daemons is done under the turn too: done outside it, it ended another engine's
+  // request in flight (its testmanagerd stopped under it), and that engine, never answered, restarted them in turn for
+  // the next one.
+  if restartingDaemons { sessionLog("refused: the phone's test daemons restarted"); restartTestDaemons(); sessionRecoveries += 1 }
   sessionLog("open after waiting \(sessionTurnMs) ms")
   let opened = Date()
   var outcome = "failed"
@@ -275,19 +294,21 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   let done = DispatchSemaphore(value: 0); var session: AnyObject?; var failure: String?
   let completion: @convention(block) (AnyObject?, NSError?) -> Void = { s, e in session = s; failure = e?.localizedDescription; done.signal() }
   typealias RequestFn = @convention(c) (AnyClass, Selector, AnyObject, AnyObject) -> Void
+  let daemonBefore = phoneProcesses.pid(named: "testmanagerd")
+  let requested = DispatchTime.now()
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
-  var answered = done.wait(timeout: .now() + timeout) == .success
-  // Not answered in time, but the phone's testmanagerd may be working on it: the first request after a boot (or after
-  // its daemons were restarted) starts testmanagerd and has it load accessibility in the phone before it answers,
-  // which it allows itself 120 s for ("Waiting 120.0s for AX to finish loading", its log). Right after a boot the
-  // answer came 23 to 26 s after the request (November 16, 2026, a busy 6-core virtual Mac; testmanagerd took 8 s to
-  // start, then 16.6 s to load accessibility). Given up at 12 s, with the daemons restarted mid-load, the first read
-  // came no sooner (24 to 28 s). So while a testmanagerd started within those 120 s runs, its answer is waited for; a
-  // phone whose testmanagerd is older and does not answer refuses sessions (the hook restarts its daemons for that).
-  if !answered, let started = testmanagerdStart(), Date().timeIntervalSince(started) < 120 {
-    sessionLog("no answer in \(Int(timeout)) s from a testmanagerd started \(Int(Date().timeIntervalSince(started))) s ago: waiting for it")
-    while !answered, Date().timeIntervalSince(started) < 125, testmanagerdStart() == started {
-      answered = done.wait(timeout: .now() + 1) == .success
+  var answered = done.wait(timeout: min(requested + timeout, deadline)) == .success
+  if !answered {
+    let daemon = phoneProcesses.pid(named: "testmanagerd")
+    switch unansweredSession(daemonBefore: daemonBefore, daemonNow: daemon) {
+    case let .loading(pid):
+      sessionLog("no answer in \(Int(timeout)) s from the testmanagerd this request started (pid \(pid), \(daemonBefore > 0 ? "after pid \(daemonBefore)" : "none before")): waiting for its accessibility load")
+      let limit = DispatchTime(uptimeNanoseconds: loadingWaitUntil(requestedAt: requested.uptimeNanoseconds, deadline: deadline.uptimeNanoseconds))
+      while !answered, DispatchTime.now() < limit, phoneProcesses.pid(named: "testmanagerd") == pid {
+        answered = done.wait(timeout: min(.now() + 1, limit)) == .success
+      }
+    case .refused:
+      sessionLog("no answer in \(Int(timeout)) s from \(daemon > 0 ? "testmanagerd pid \(daemon), there before the request" : "no testmanagerd")")
     }
   }
   if !answered { outcome = "timed out"; return (nil, "timed out creating the remote automation session") }
@@ -301,15 +322,19 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   outcome = "ok"; sessionsOpened += 1
   return (session, nil)
 }
-/** This phone's own processes: children of its launchd_sim, found by the UDID in its arguments. */
+/**
+ * This phone's own processes: children of its launchd_sim, which is found by the UDID in its arguments and checked
+ * again by them before each use (a pid can be reused). One fetcher, under a lock: the hook's thread and the main actor
+ * both ask.
+ */
 final class PhoneProcesses: @unchecked Sendable {
   private let lock = NSLock()
+  private let fetcher = FBProcessFetcher()
   private var launchd: pid_t = 0
   /** The pid of the phone's process of that name, or 0. */
   func pid(named name: String) -> pid_t {
     lock.lock(); defer { lock.unlock() }
-    let fetcher = FBProcessFetcher()
-    if launchd <= 0 || fetcher.processInfo(for: launchd) == nil {
+    if launchd <= 0 || !(fetcher.processInfo(for: launchd)?.arguments.contains { $0.contains(udid) } ?? false) {
       launchd = fetcher.processes(withProcessName: "launchd_sim").first { $0.arguments.contains { $0.contains(udid) } }?.processIdentifier ?? 0
     }
     guard launchd > 0 else { return 0 }
@@ -317,17 +342,6 @@ final class PhoneProcesses: @unchecked Sendable {
   }
 }
 let phoneProcesses = PhoneProcesses()
-/** When a process started, from the kernel. */
-func processStart(_ pid: pid_t) -> Date? {
-  guard pid > 0 else { return nil }
-  var info = kinfo_proc(), size = MemoryLayout<kinfo_proc>.stride
-  var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
-  guard sysctl(&mib, 4, &info, &size, nil, 0) == 0, size > 0 else { return nil }
-  let t = info.kp_proc.p_starttime
-  return Date(timeIntervalSince1970: Double(t.tv_sec) + Double(t.tv_usec) / 1_000_000)
-}
-/** When the phone's testmanagerd (the XCTest daemon that answers session requests) started, if it runs. */
-func testmanagerdStart() -> Date? { processStart(phoneProcesses.pid(named: "testmanagerd")) }
 /** Ends the automation session so the phone accepts the next client's session (a session left open blocks them). */
 /**
  * A phone takes a new automation session only a while after the last one closed: a second engine started as the
@@ -356,18 +370,29 @@ func lastSessionClose() -> Double {
   guard let text = try? String(contentsOfFile: sessionLockPath(), encoding: .utf8) else { return 0 }
   return Double(text.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
 }
-/** The lock for one open or close (another engine's open can take up to half a minute). */
-func lockSessionTurn(maxWait: TimeInterval) {
-  let start = Date()
+/**
+ * How long the engine's first read may spend on its session, from the request that needed it: the lock, the open,
+ * a restart of the phone's test daemons and a second open, and loading accessibility. Below the 120 s after which
+ * simulator-use ends an engine that answers nothing (src/engine/native.ts, HUNG_MS). It is also the longest any engine
+ * holds the lock below, so it is how long one waits for it.
+ */
+let sessionBudget: TimeInterval = 100
+/** The lock for one open or close, waited for until the deadline; whether it was taken. */
+@discardableResult
+func lockSessionTurn(until deadline: DispatchTime) -> Bool {
   if sessionLockFD < 0 { sessionLockFD = open(sessionLockPath(), O_CREAT | O_RDWR, 0o600) }
-  guard sessionLockFD >= 0 else { return }
-  while flock(sessionLockFD, LOCK_EX | LOCK_NB) != 0 && Date().timeIntervalSince(start) < maxWait { usleep(50_000) }
+  guard sessionLockFD >= 0 else { return true }
+  while flock(sessionLockFD, LOCK_EX | LOCK_NB) != 0 {
+    if DispatchTime.now() >= deadline { return false }
+    usleep(50_000)
+  }
+  return true
 }
 func unlockSessionTurn() { if sessionLockFD >= 0 { flock(sessionLockFD, LOCK_UN) } }
-/** Before a session is opened: the lock, then the gap since the last close. Returns the ms waited. */
-func takeSessionTurn() -> Int {
+/** Before a session is opened: the lock, then the gap since the last close. The ms waited, or nil without the lock. */
+func takeSessionTurn(deadline: DispatchTime) -> Int? {
   let start = Date()
-  lockSessionTurn(maxWait: 60)
+  guard lockSessionTurn(until: deadline) else { return nil }
   let wait = lastSessionClose() + sessionGapSeconds - Date().timeIntervalSince1970
   if wait > 0 { usleep(UInt32(min(wait, sessionGapSeconds) * 1_000_000)) }
   return ms(start)
@@ -375,7 +400,8 @@ func takeSessionTurn() -> Int {
 func closeSession() {
   guard let session = automationSession else { return }
   automationSession = nil
-  lockSessionTurn(maxWait: 10)
+  // Another engine may hold the turn for a whole open (sessionBudget); the close goes ahead only after it.
+  lockSessionTurn(until: .now() + sessionBudget)
   sessionLog("close")
   if session.responds(to: NSSelectorFromString("invalidate")) { _ = session.perform(NSSelectorFromString("invalidate")) }
   // The invalidation is a message to the phone's testmanagerd: give it time to arrive before the process ends.
@@ -402,7 +428,7 @@ var lastBootstrapError: String?
 func shortLivedBootstrap(_ original: BootstrapIMP, _ klass: AnyClass, _ sel: Selector, _ device: AnyObject, _ timeout: Double, _ logger: AnyObject?,
                          _ errorOut: AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool {
   bootstrapCount += 1
-  sessionTurnMs = takeSessionTurn()
+  sessionTurnMs = takeSessionTurn(deadline: .now() + sessionBudget) ?? Int(sessionBudget * 1000)
   let opened = Date()
   var error: NSError?
   let ok = original(klass, sel, device, timeout, logger, &error)
@@ -426,7 +452,10 @@ func installPersistentBootstrap() {
       if let failure = loadAccessibility(session, timeout: 10) { lastBootstrapError = failure; return true }
       return true
     }
-    // The first time: the framework's own bootstrap loads the XCTest frameworks; then our session stays open.
+    // The first time: the framework's own bootstrap loads the XCTest frameworks; then our session stays open. All of
+    // it within sessionBudget of now.
+    let deadline = DispatchTime.now() + sessionBudget
+    func left() -> Double { Double(Int64(deadline.uptimeNanoseconds) - Int64(DispatchTime.now().uptimeNanoseconds)) / 1e9 }
     bootstrapCount += 1
     // The XCTest frameworks the session needs, loaded the framework's way, without its throwaway session.
     var loaded = false
@@ -434,15 +463,15 @@ func installPersistentBootstrap() {
       loaded = (try? loader.loadPrivateFrameworks(logger as? FBControlCoreLogger)) != nil
     }
     if !loaded { _ = original(klass, sel, device, max(timeout, 20), logger, errorOut) }
-    var (session, failure) = openSession(device: device, timeout: 12)
-    if session == nil {
-      // A phone that refuses sessions (after one opened too soon after another closed it refuses them for good)
-      // takes them again once its test daemon is restarted: no reboot, the apps stay as they are (measured).
-      sessionLog("refused: the phone's test daemons restarted"); restartTestDaemons(); sessionRecoveries += 1
-      (session, failure) = openSession(device: device, timeout: 20)
+    var (session, failure) = openSession(device: device, timeout: 12, deadline: deadline)
+    // A phone that refuses sessions (after one opened too soon after another closed it refuses them for good) takes
+    // them again once its test daemons are restarted: no reboot, the apps stay as they are (measured). Only with
+    // time left for the restart and a second request.
+    if session == nil && timeForRestart(secondsLeft: left()) {
+      (session, failure) = openSession(device: device, timeout: 20, deadline: deadline, restartingDaemons: true)
     }
     guard let session else { lastBootstrapError = failure; return false }
-    if let failure = loadAccessibility(session, timeout: 10) { lastBootstrapError = failure }
+    if let failure = loadAccessibility(session, timeout: max(1, min(10, left()))) { lastBootstrapError = failure }
     automationSession = session; forceBootstrap = false
     return true
   }
@@ -942,6 +971,7 @@ func main() async {
       guard let data = line.data(using: .utf8), let req = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let op = req["op"] as? String else { emit(["ok": false, "error": "bad request"]); continue }
       let id = req["id"] ?? NSNull()
       if inputOps.contains(op) || (op == "watch" && req["tap"] != nil) { keptRead = nil }
+      input.beginRequest()
       // settle_read's input went out: a failure after it (the read) must not be answered by sending it again.
       var inputSent = false
       do {
@@ -1150,14 +1180,15 @@ func main() async {
         default:
           throw EngineError(message: "unknown op \(op)")
         }
-        let (via, dtuhidConnectMs) = input.takeRoute()
-        if let via { answer["via"] = via }
-        if let dtuhidConnectMs { answer["dtuhid_connect_ms"] = dtuhidConnectMs }
+        for (key, value) in input.report() { answer[key] = value }
         answer["ms"] = ms(t0); answer["bootstraps"] = bootstrapCount; answer["sessions"] = sessionsOpened
         if let failure = lastBootstrapError { answer["bootstrap_error"] = failure; lastBootstrapError = nil }
         emit(answer)
       } catch {
-        emit(["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? String(describing: error), "input_sent": inputSent])
+        // input_sent: any of the request's input may have reached the phone; it must not be sent again another way.
+        var failed: [String: Any] = ["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? String(describing: error), "input_sent": inputSent || input.sent]
+        for (key, value) in input.report() { failed[key] = value }
+        emit(failed)
       }
     }
     closeSession()

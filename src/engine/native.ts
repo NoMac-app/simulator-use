@@ -29,7 +29,8 @@ const START_MS = 15_000;
  * An engine that answers nothing for this long is hung, and is ended. A request merely slower than its caller's
  * wait never ends it: a new engine's first read costs 1 to 5 s and its cached web page is lost, and on a phone
  * copied from another user's golden a new engine could not open an automation session at all (a web field's first
- * read took 4.2 s against a 3 s wait, and ending the engine then left that phone unreadable).
+ * read took 4.2 s against a 3 s wait, and ending the engine then left that phone unreadable). The engine keeps its
+ * first read's session work within 100 s (native/engine/main.swift, sessionBudget), under this.
  */
 const HUNG_MS = 120_000;
 
