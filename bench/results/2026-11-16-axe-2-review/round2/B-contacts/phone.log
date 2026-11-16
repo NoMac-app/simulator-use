@@ -1,0 +1,218 @@
+getpwuid_r did not find a match for uid 502
+Timestamp               Ty Process[PID:TID]
+2026-11-16 22:51:06.310 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-16 22:51:06.312 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-16 22:51:06.312 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Beginning AX loading sequence.
+2026-11-16 22:51:06.316 Df testmanagerd[2117:4351] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 1, cached: 0
+2026-11-16 22:51:06.328 Df testmanagerd[2117:4351] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 1, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f83e20 -[XCTDAccessibilitySystem _queue_loadAccessibilityIfNeeded:andWaitForNotificationWithTimeout:error:] + 344
+	3   testmanagerd                        0x0000000104f83b8c -[XCTDAccessibilitySystem _queue_loadAccessibilityWithTimeout:error:] + 404
+	4   testmanagerd                        0x0000000104f839a8 __62-[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:]_block_invoke + 44
+	5   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	6   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	7   testmanagerd                        0x0000000104f838d0 -[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:] + 180
+	8   testmanagerd
+2026-11-16 22:51:06.329 Df testmanagerd[2117:4351] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 1
+2026-11-16 22:51:06.330 Df testmanagerd[2117:4351] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:06.330 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Waiting 120.0s for AX to finish loading...
+2026-11-16 22:51:06.635 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Received kAXAccessibilityLoaded notification
+2026-11-16 22:51:06.635 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-16 22:51:06.646 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] AXDisableAccessibilityOnTermination() returned kAXErrorSuccess
+2026-11-16 22:51:06.646 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Finished loading AX.
+2026-11-16 22:51:06.724 Df testmanagerd[2117:4acf] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:06.724 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:06.724 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Enabling Automation Mode...
+2026-11-16 22:51:06.729 Df testmanagerd[2117:4acf] [com.apple.dt.xctest:Default] Received request to exchange capabilities, remote interface capabilities are: <XCTCapabilities: 0x10623e480>: {
+    "application state change handling capability" = 2;
+    "handle AX notification capability" = 1;
+    "override implicit event confirmation interval" = 1;
+    "process launch returns a PID value" = 1;
+    "request screenshot attachment capability" = 1;
+    "request screenshot capability" = 3;
+    "reset authorization status of protected resources" = 1;
+    "supports Multi-Device native code execution" = 1;
+    "supports Multi-Device screen recordings" = 1;
+    "supports dedicated launching for Multi-Device remote runners" = 1;
+}
+2026-11-16 22:51:06.734 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Remote driver requested automation mode be enabled
+2026-11-16 22:51:06.738 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Finished enabling Automation Mode
+2026-11-16 22:51:06.738 Df testmanagerd[2117:4351] [com.apple.dt.xctest:Default] Adding <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=1> to the set of remote automation sessions
+2026-11-16 22:51:06.738 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:06.740 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:06.740 Df testmanagerd[2117:4acf] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 1
+2026-11-16 22:51:14.285 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Remote automation session disconnected.
+2026-11-16 22:51:14.285 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Tearing down <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=1>.
+2026-11-16 22:51:14.294 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Removed Automation Mode client <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=0>. Total clients: 0
+2026-11-16 22:51:14.294 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Disabling Automation Mode...
+2026-11-16 22:51:14.296 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Finished disabling Automation Mode
+2026-11-16 22:51:14.298 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 1
+2026-11-16 22:51:14.298 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:14.299 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Invalidating <XCAXManager_iOS: 0x106a0c640>
+2026-11-16 22:51:14.299 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Invalidated <XCTDAccessibilitySessionToken: 0x10624bdb0>. Remaining XCTDAccessibilitySessionToken instances: {(
+)}
+2026-11-16 22:51:14.299 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Unloading accessibility
+2026-11-16 22:51:14.301 Df testmanagerd[2117:4a8c] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:14.303 Df testmanagerd[2117:4a8c] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:14.307 Df testmanagerd[2117:4a8c] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 0, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f84264 -[XCTDAccessibilitySystem _queue_unloadAccessibility] + 248
+	3   testmanagerd                        0x0000000104f84778 __43-[XCTDAccessibilitySystem invalidateToken:]_block_invoke + 204
+	4   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	5   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	6   testmanagerd                        0x0000000104f84688 -[XCTDAccessibilitySystem invalidateToken:] + 116
+	7   testmanagerd                        0x0000000104f849a4 -[XCTDAccessibilitySessionToken invalidate] + 40
+	8   testmanagerd                        0x0000000104f80694 __29-[XCAXManager_iOS invalidate]_block_invoke + 140
+	9   libdispatch.dylib
+2026-11-16 22:51:14.307 Df testmanagerd[2117:4a8c] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 0
+2026-11-16 22:51:14.308 Df testmanagerd[2117:4a8c] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 0, cached: 1
+2026-11-16 22:51:14.309 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Remote automation session <XCTDRemoteAutomationSession: 0x10696d200; dtxConnection=0x106960300, broker=0x1062450b0, valid=0> invalidated
+2026-11-16 22:51:14.309 Df testmanagerd[2117:3d31] [com.apple.dt.xctest:Default] Releasing accessibility observer 0x10690e340 after main queue drain
+2026-11-16 22:51:16.293 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-16 22:51:16.293 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-16 22:51:16.293 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Beginning AX loading sequence.
+2026-11-16 22:51:16.295 Df testmanagerd[2117:4cf5] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 1, cached: 0
+2026-11-16 22:51:16.296 Df testmanagerd[2117:4cf5] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 1, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f83e20 -[XCTDAccessibilitySystem _queue_loadAccessibilityIfNeeded:andWaitForNotificationWithTimeout:error:] + 344
+	3   testmanagerd                        0x0000000104f83b8c -[XCTDAccessibilitySystem _queue_loadAccessibilityWithTimeout:error:] + 404
+	4   testmanagerd                        0x0000000104f839a8 __62-[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:]_block_invoke + 44
+	5   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	6   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	7   testmanagerd                        0x0000000104f838d0 -[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:] + 180
+	8   testmanagerd
+2026-11-16 22:51:16.298 Df testmanagerd[2117:4cf5] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 1
+2026-11-16 22:51:16.299 Df testmanagerd[2117:4cf5] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:16.299 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Waiting 120.0s for AX to finish loading...
+2026-11-16 22:51:16.600 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Received kAXAccessibilityLoaded notification
+2026-11-16 22:51:16.601 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-16 22:51:16.601 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] AXDisableAccessibilityOnTermination() returned kAXErrorSuccess
+2026-11-16 22:51:16.601 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Finished loading AX.
+2026-11-16 22:51:16.604 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:16.604 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:16.604 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Enabling Automation Mode...
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Received request to exchange capabilities, remote interface capabilities are: <XCTCapabilities: 0x106b68050>: {
+    "application state change handling capability" = 2;
+    "handle AX notification capability" = 1;
+    "override implicit event confirmation interval" = 1;
+    "process launch returns a PID value" = 1;
+    "request screenshot attachment capability" = 1;
+    "request screenshot capability" = 3;
+    "reset authorization status of protected resources" = 1;
+    "supports Multi-Device native code execution" = 1;
+    "supports Multi-Device screen recordings" = 1;
+    "supports dedicated launching for Multi-Device remote runners" = 1;
+}
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Finished enabling Automation Mode
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Adding <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=1> to the set of remote automation sessions
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Remote driver requested automation mode be enabled
+2026-11-16 22:51:16.605 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:17.011 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Remote automation session disconnected.
+2026-11-16 22:51:17.011 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Tearing down <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=1>.
+2026-11-16 22:51:17.011 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Removed Automation Mode client <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=0>. Total clients: 0
+2026-11-16 22:51:17.011 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Disabling Automation Mode...
+2026-11-16 22:51:17.012 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Finished disabling Automation Mode
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4cf5] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 1
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Invalidating <XCAXManager_iOS: 0x106a0c820>
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Invalidated <XCTDAccessibilitySessionToken: 0x10623ca40>. Remaining XCTDAccessibilitySessionToken instances: {(
+)}
+2026-11-16 22:51:17.013 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Unloading accessibility
+2026-11-16 22:51:17.014 Df testmanagerd[2117:4cee] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:17.015 Df testmanagerd[2117:4cee] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:17.016 Df testmanagerd[2117:4cee] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 0, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f84264 -[XCTDAccessibilitySystem _queue_unloadAccessibility] + 248
+	3   testmanagerd                        0x0000000104f84778 __43-[XCTDAccessibilitySystem invalidateToken:]_block_invoke + 204
+	4   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	5   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	6   testmanagerd                        0x0000000104f84688 -[XCTDAccessibilitySystem invalidateToken:] + 116
+	7   testmanagerd                        0x0000000104f849a4 -[XCTDAccessibilitySessionToken invalidate] + 40
+	8   testmanagerd                        0x0000000104f80694 __29-[XCAXManager_iOS invalidate]_block_invoke + 140
+	9   libdispatch.dylib
+2026-11-16 22:51:17.016 Df testmanagerd[2117:4cee] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 0
+2026-11-16 22:51:17.017 Df testmanagerd[2117:4cee] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 0, cached: 1
+2026-11-16 22:51:17.018 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Remote automation session <XCTDRemoteAutomationSession: 0x10696d800; dtxConnection=0x106960400, broker=0x1062450b0, valid=0> invalidated
+2026-11-16 22:51:17.018 Df testmanagerd[2117:3d31] [com.apple.dt.xctest:Default] Releasing accessibility observer 0x10690f880 after main queue drain
+2026-11-16 22:51:19.015 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-16 22:51:19.015 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-16 22:51:19.015 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Beginning AX loading sequence.
+2026-11-16 22:51:19.020 Df testmanagerd[2117:4e1d] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 1, cached: 0
+2026-11-16 22:51:19.022 Df testmanagerd[2117:4e1d] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 1, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f83e20 -[XCTDAccessibilitySystem _queue_loadAccessibilityIfNeeded:andWaitForNotificationWithTimeout:error:] + 344
+	3   testmanagerd                        0x0000000104f83b8c -[XCTDAccessibilitySystem _queue_loadAccessibilityWithTimeout:error:] + 404
+	4   testmanagerd                        0x0000000104f839a8 __62-[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:]_block_invoke + 44
+	5   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	6   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	7   testmanagerd                        0x0000000104f838d0 -[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:] + 180
+	8   testmanagerd
+2026-11-16 22:51:19.025 Df testmanagerd[2117:4e1d] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 1
+2026-11-16 22:51:19.026 Df testmanagerd[2117:4e1d] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:19.026 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Waiting 120.0s for AX to finish loading...
+2026-11-16 22:51:19.329 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Received kAXAccessibilityLoaded notification
+2026-11-16 22:51:19.329 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-16 22:51:19.329 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] AXDisableAccessibilityOnTermination() returned kAXErrorSuccess
+2026-11-16 22:51:19.329 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Finished loading AX.
+2026-11-16 22:51:19.331 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.331 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:19.331 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Enabling Automation Mode...
+2026-11-16 22:51:19.332 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Received request to exchange capabilities, remote interface capabilities are: <XCTCapabilities: 0x106b680a0>: {
+    "application state change handling capability" = 2;
+    "handle AX notification capability" = 1;
+    "override implicit event confirmation interval" = 1;
+    "process launch returns a PID value" = 1;
+    "request screenshot attachment capability" = 1;
+    "request screenshot capability" = 3;
+    "reset authorization status of protected resources" = 1;
+    "supports Multi-Device native code execution" = 1;
+    "supports Multi-Device screen recordings" = 1;
+    "supports dedicated launching for Multi-Device remote runners" = 1;
+}
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Remote driver requested automation mode be enabled
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Finished enabling Automation Mode
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4e1d] [com.apple.dt.xctest:Default] Adding <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=1> to the set of remote automation sessions
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=1>. Total clients: 1
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4cee] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 1
+2026-11-16 22:51:19.333 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.828 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Remote automation session disconnected.
+2026-11-16 22:51:19.828 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Tearing down <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=1>.
+2026-11-16 22:51:19.833 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Removed Automation Mode client <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=0>. Total clients: 0
+2026-11-16 22:51:19.833 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Disabling Automation Mode...
+2026-11-16 22:51:19.846 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Finished disabling Automation Mode
+2026-11-16 22:51:19.877 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Invalidating <XCAXManager_iOS: 0x106a0c820>
+2026-11-16 22:51:19.877 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Invalidated <XCTDAccessibilitySessionToken: 0x106b68030>. Remaining XCTDAccessibilitySessionToken instances: {(
+)}
+2026-11-16 22:51:19.877 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Unloading accessibility
+2026-11-16 22:51:19.879 Df testmanagerd[2117:4cef] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:19.880 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.880 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.880 Df testmanagerd[2117:4a8b] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 22:51:19.880 Df testmanagerd[2117:4a8c] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 1
+2026-11-16 22:51:19.904 Df testmanagerd[2117:4cef] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 22:51:19.904 Df testmanagerd[2117:4cef] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 0, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000104f84264 -[XCTDAccessibilitySystem _queue_unloadAccessibility] + 248
+	3   testmanagerd                        0x0000000104f84778 __43-[XCTDAccessibilitySystem invalidateToken:]_block_invoke + 204
+	4   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	5   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	6   testmanagerd                        0x0000000104f84688 -[XCTDAccessibilitySystem invalidateToken:] + 116
+	7   testmanagerd                        0x0000000104f849a4 -[XCTDAccessibilitySessionToken invalidate] + 40
+	8   testmanagerd                        0x0000000104f80694 __29-[XCAXManager_iOS invalidate]_block_invoke + 140
+	9   libdispatch.dylib
+2026-11-16 22:51:19.929 Df testmanagerd[2117:4cef] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 0
+2026-11-16 22:51:19.949 Df testmanagerd[2117:4cef] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 0, cached: 1
+2026-11-16 22:51:19.954 Df testmanagerd[2117:4cef] [com.apple.dt.xctest:Default] Remote automation session <XCTDRemoteAutomationSession: 0x10696d780; dtxConnection=0x106960500, broker=0x1062450b0, valid=0> invalidated
+2026-11-16 22:51:19.958 Df testmanagerd[2117:3d31] [com.apple.dt.xctest:Default] Releasing accessibility observer 0x10690f700 after main queue drain

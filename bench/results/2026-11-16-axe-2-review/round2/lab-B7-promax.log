@@ -1,0 +1,202 @@
+Using iPhone 17 Pro Max (iOS 27.2, 54AA6ED1-2491-4A50-9B10-F87C3B942EC9); the other tools use it from now on.
+PASS build, install and launch (31 s)
+PASS the engine reads on its fast path (6 s)
+PASS segments are not tabs (3 s)
+PASS stepper buttons (3 s)
+FAIL set a slider
+  Step 1 (set #volume 75) failed: The slider shows "0.71", not 75%.
+  Next: Check it with simulator-use look; a slider with steps only takes some values.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · iPhone 17 Pro Max (iOS 27.2)
+  heading "Values" @220,188
+  slider "Volume" #volume ="0.71" @220,239
+  button "Count: 3, Decrement" #count-Decrement ="3" @330,295
+  button "Count: 3, Increment" #count-Increment ="3" @377,295
+  popup "Flavor, Vanilla" #flavor @220,348
+  segment "S" @100,404
+  segment "M" selected @220,404
+  segment "L" @340,404
+  button "Date Picker" ="Jan 15, 2027" @340,467
+  heading "Text" @220,537
+  textfield "prefilled" #nickname @220,583
+  textview #notes @220,664
+  heading "Buttons" @220,757
+  button "Disabled" #disabled disabled @220,803
+  button "Favorite" #star @51,855
+  button "Gear Shape" #gearshape @80,855
+  popup "Sort" #sort @115,855
+  button @115,855
+  tabs: Controls (selected) @67,904, Dialogs @144,904, Lists @220,904, Text @296,904, More @373,904
+  scroll: 2 pages, at top; 1 below
+PASS menu pick (8 s)
+PASS alert in front, alone (6 s)
+PASS answer the alert (3 s)
+PASS sheet in front, its Done reachable (5 s)
+PASS close the sheet (5 s)
+PASS full-screen cover (4 s)
+PASS close the cover (4 s)
+FAIL iOS permission prompt, named after the app
+  1 step done in 6.1 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · iPhone 17 Pro Max (iOS 27.2)
+  button "Show alert" @220,194
+  button "Show choices" @220,246
+  button "Show sheet" @220,298
+  button "Show full screen" @220,350
+  button "Ask for location" @220,402
+  button "Ask for photos" @220,454
+  button "Ask for notifications" @220,506
+  button "Ask for contacts" @220,558
+  text "Result: cancelled" #dialogResult @220,610
+  tabs: Controls @67,904, Dialogs (selected) @144,904, Lists @220,904, Text @296,904, More @373,904
+PASS notifications, prompt waited for and allowed (12 s)
+FAIL text in any language
+  Step 2 (fill #unicode …) failed: #unicode shows "", not "Café 日本 🚀".
+  Next: Check it with simulator-use look: the field may limit or reformat input, the target may not be a text field, or the keyboard may need a moment.
+  1 of 3 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL autocorrect undone by paste
+  Step 1 (fill #unicode …) failed: No #unicode on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL delayed content
+  Step 1 (tap Lists) failed: No "Lists" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL toast comes and goes
+  Step 1 (tap "Show toast") failed: No "Show toast" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 3 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL swipe a row to delete
+  Step 1 (swipe left "Row 3") failed: No "Row 3" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL delete it
+  Step 1 (tap Delete) failed: No "Delete" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL long press menu
+  Step 1 (hold "Row 5") failed: No "Row 5" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL pin from the menu
+  Step 1 (tap "Pin Row 5") failed: No "Pin Row 5" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL web view called unreadable, or read
+  Step 1 (tap More) failed: No "More" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL UIKit table, real title
+  Step 1 (back) failed: No back button, and swiping from the left edge changed nothing.
+  Next: Call simulator-use look to find another way back, such as a Close or Cancel button.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL deep link opened
+  Step 1 (tap Open) failed: No "Open" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below
+FAIL deep link arrives
+  Step 1 (tap Text) failed: No "Text" on screen: an alert is in front of the screen.
+  Next: Answer it first: tap "Don’t Allow" or "Allow".
+  0 of 3 steps done before it.
+  Screen now:
+  EdgeLab · system alert · iPhone 17 Pro Max (iOS 27.2)
+  An alert is in front: answer it with one of its buttons.
+  alert "“EdgeLab” Would Like to Send You Notifications" @220,492
+  text "Notifications may include alerts, sounds, and icon badges. These can be configu…" @220,486
+  button "Don’t Allow" @146,559
+  button "Allow" @294,559
+  keyboard: shown, covering y 609 and below

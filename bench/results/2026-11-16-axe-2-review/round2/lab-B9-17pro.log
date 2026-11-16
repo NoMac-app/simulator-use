@@ -1,0 +1,210 @@
+Using AL iPhone 17 Pro (iOS 27.2, 1A92C9F6-2CBE-4619-B62F-0553C65BE96C); the other tools use it from now on.
+PASS build, install and launch (23 s)
+PASS the engine reads on its fast path (9 s)
+PASS segments are not tabs (4 s)
+PASS stepper buttons (4 s)
+FAIL set a slider
+  Step 1 (set #volume 75) failed: The slider shows "0.72", not 75%.
+  Next: Check it with simulator-use look; a slider with steps only takes some values.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · AL iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.72" @201,239
+  button "Count: 3, Decrement" #count-Decrement ="3" @296,295
+  button "Count: 3, Increment" #count-Increment ="3" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+PASS menu pick (8 s)
+PASS alert in front, alone (6 s)
+PASS answer the alert (4 s)
+PASS sheet in front, its Done reachable (4 s)
+PASS close the sheet (4 s)
+PASS full-screen cover (3 s)
+PASS close the cover (3 s)
+FAIL iOS permission prompt, named after the app
+  Step 2 (wait "Allow While Using App" 20) failed: "Allow While Using App" did not appear after 20 s.
+  Next: The screen is below. Wait longer with wait "Allow While Using App" 15, or act on what is there.
+  1 of 2 steps done before it.
+  step 1 (tap "Ask for location"): no visible change
+  Screen now:
+  EdgeLab · Dialogs · AL iPhone 17 Pro (iOS 27.2)
+  button "Show alert" @201,194
+  button "Show choices" @201,246
+  button "Show sheet" @201,298
+  button "Show full screen" @201,350
+  button "Ask for location" @201,402
+  button "Ask for photos" @201,454
+  button "Ask for notifications" @201,506
+  button "Ask for contacts" @201,558
+  text "Result: cancelled" #dialogResult @201,610
+  tabs: Controls @64,822, Dialogs (selected) @132,822, Lists @201,822, Text @270,822, More @339,822
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · AL iPhone 17 Pro (iOS 27.2)
+  button "Show alert" @201,194
+  button "Show choices" @201,246
+  button "Show sheet" @201,298
+  button "Show full screen" @201,350
+  button "Ask for location" @201,402
+  button "Ask for photos" @201,454
+  button "Ask for notifications" @201,506
+  button "Ask for contacts" @201,558
+  text "Result: cancelled" #dialogResult @201,610
+  tabs: Controls @64,822, Dialogs (selected) @132,822, Lists @201,822, Text @270,822, More @339,822
+PASS notifications, prompt waited for and allowed (3 s)
+FAIL text in any language
+  Step 2 (fill #unicode …) failed: #unicode shows "Unicode here", not "Café 日本 🚀".
+  Next: Check it with simulator-use look: the field may limit or reformat input, the target may not be a text field, or the keyboard may need a moment.
+  1 of 3 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+PASS autocorrect undone by paste (10 s)
+FAIL delayed content
+  Step 1 (tap Lists) failed: No "Lists" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL toast comes and goes
+  Step 1 (tap "Show toast") failed: No "Show toast" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 3 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL swipe a row to delete
+  Step 1 (swipe left "Row 3") failed: No "Row 3" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL delete it
+  Step 1 (tap Delete) failed: 2 elements match "Delete": button "Delete" @201,431 · button "Delete" @201,483
+  Next: Use a #id, a quoted exact label, kind plus label (button "Save"), or @x,y.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL long press menu
+  Step 1 (hold "Row 5") failed: No "Row 5" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL pin from the menu
+  Step 1 (tap "Pin Row 5") failed: No "Pin Row 5" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL web view called unreadable, or read
+  Step 1 (tap More) failed: No "More" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+FAIL UIKit table, real title
+  Step 1 (back) failed: No back button, and swiping from the left edge changed nothing.
+  Next: Call simulator-use look to find another way back, such as a Close or Cancel button.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
+PASS deep link opened (2 s)
+FAIL deep link arrives
+  Step 1 (tap Text) failed: No "Text" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 3 steps done before it.
+  Screen now:
+  EdgeLab · Text · AL iPhone 17 Pro (iOS 27.2)
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @201,181
+  text "He said \"hi\"\nthen left" @201,231
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @201,336
+  button "Delete" @201,431
+  button "Delete" @201,483
+  textfield "Unicode here" #unicode @201,535
+  scroll: 2 pages, at 8%
+  keyboard: shown, covering y 546 and below
