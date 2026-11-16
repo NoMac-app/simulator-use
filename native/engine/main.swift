@@ -216,8 +216,8 @@ let readPath: ReadPath = {
 }()
 /** Whether the bootstrap hook is in place: without it every read would open a session of its own. */
 var hookInstalled = false
-/** Calls into the hook (every read on the session path, only reloads on the axe path) and automation sessions opened. */
-var hookCalls = 0, sessionsOpened = 0
+/** Automation sessions opened, kept or short-lived (every answer carries the count). */
+var sessionsOpened = 0
 /** The way reads actually go, for the ready line and every read's answer. */
 var readPathName: String { hookInstalled ? readPath.rawValue : "per-call" }
 
@@ -376,7 +376,6 @@ func installPersistentBootstrap() {
   guard let method = class_getClassMethod(cls, sel) else { return }
   let original = unsafeBitCast(method_getImplementation(method), to: BootstrapIMP.self)
   let block: @convention(block) (AnyClass, AnyObject, Double, AnyObject?, UnsafeMutablePointer<NSError?>?) -> Bool = { klass, device, timeout, logger, errorOut in
-    hookCalls += 1
     if skipBootstrap { return true }
     if readPath == .axe { return shortLivedBootstrap(original, klass, sel, device, timeout, logger, errorOut) }
     if let session = automationSession {
