@@ -276,7 +276,21 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   let completion: @convention(block) (AnyObject?, NSError?) -> Void = { s, e in session = s; failure = e?.localizedDescription; done.signal() }
   typealias RequestFn = @convention(c) (AnyClass, Selector, AnyObject, AnyObject) -> Void
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
-  if done.wait(timeout: .now() + timeout) == .timedOut { outcome = "timed out"; return (nil, "timed out creating the remote automation session") }
+  var answered = done.wait(timeout: .now() + timeout) == .success
+  // Not answered in time, but the phone's testmanagerd may be working on it: the first request after a boot (or after
+  // its daemons were restarted) starts testmanagerd and has it load accessibility in the phone before it answers,
+  // which it allows itself 120 s for ("Waiting 120.0s for AX to finish loading", its log). Right after a boot the
+  // answer came 23 to 26 s after the request (November 16, 2026, a busy 6-core virtual Mac; testmanagerd took 8 s to
+  // start, then 16.6 s to load accessibility). Given up at 12 s, with the daemons restarted mid-load, the first read
+  // came no sooner (24 to 28 s). So while a testmanagerd started within those 120 s runs, its answer is waited for; a
+  // phone whose testmanagerd is older and does not answer refuses sessions (the hook restarts its daemons for that).
+  if !answered, let started = testmanagerdStart(), Date().timeIntervalSince(started) < 120 {
+    sessionLog("no answer in \(Int(timeout)) s from a testmanagerd started \(Int(Date().timeIntervalSince(started))) s ago: waiting for it")
+    while !answered, Date().timeIntervalSince(started) < 125, testmanagerdStart() == started {
+      answered = done.wait(timeout: .now() + 1) == .success
+    }
+  }
+  if !answered { outcome = "timed out"; return (nil, "timed out creating the remote automation session") }
   guard let session else { return (nil, failure ?? "no session") }
   // An Objective-C NSError ** is autoreleasing: the callee hands back an object it does not own.
   typealias EnableFn = @convention(c) (AnyObject, Selector, AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool
@@ -287,6 +301,33 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   outcome = "ok"; sessionsOpened += 1
   return (session, nil)
 }
+/** This phone's own processes: children of its launchd_sim, found by the UDID in its arguments. */
+final class PhoneProcesses: @unchecked Sendable {
+  private let lock = NSLock()
+  private var launchd: pid_t = 0
+  /** The pid of the phone's process of that name, or 0. */
+  func pid(named name: String) -> pid_t {
+    lock.lock(); defer { lock.unlock() }
+    let fetcher = FBProcessFetcher()
+    if launchd <= 0 || fetcher.processInfo(for: launchd) == nil {
+      launchd = fetcher.processes(withProcessName: "launchd_sim").first { $0.arguments.contains { $0.contains(udid) } }?.processIdentifier ?? 0
+    }
+    guard launchd > 0 else { return 0 }
+    return max(0, fetcher.subprocess(of: launchd, withName: name))
+  }
+}
+let phoneProcesses = PhoneProcesses()
+/** When a process started, from the kernel. */
+func processStart(_ pid: pid_t) -> Date? {
+  guard pid > 0 else { return nil }
+  var info = kinfo_proc(), size = MemoryLayout<kinfo_proc>.stride
+  var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
+  guard sysctl(&mib, 4, &info, &size, nil, 0) == 0, size > 0 else { return nil }
+  let t = info.kp_proc.p_starttime
+  return Date(timeIntervalSince1970: Double(t.tv_sec) + Double(t.tv_usec) / 1_000_000)
+}
+/** When the phone's testmanagerd (the XCTest daemon that answers session requests) started, if it runs. */
+func testmanagerdStart() -> Date? { processStart(phoneProcesses.pid(named: "testmanagerd")) }
 /** Ends the automation session so the phone accepts the next client's session (a session left open blocks them). */
 /**
  * A phone takes a new automation session only a while after the last one closed: a second engine started as the

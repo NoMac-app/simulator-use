@@ -34,6 +34,11 @@ What makes that possible:
   on it when the frontmost app reads empty (`forceBootstrap`). It closes the session when its input ends and waits
   0.8 s for that to reach the phone: without the wait, the next process could not open a session at all. A new
   engine's first read takes 0.5 to 1.25 s; after that a point read takes 3 to 15 ms and a whole screen 80 to 300 ms.
+  The first session request after a boot starts the phone's testmanagerd, which loads accessibility in the phone
+  before it answers (it allows itself 120 s): 23 to 26 s on a busy 6-core virtual Mac right after the boot. The
+  engine waits for a testmanagerd that young instead of giving up at 12 s and restarting the phone's test daemons,
+  which cut the load short and answered later (`bench/results/2026-11-16-axe-2-review`); the restart is kept for a
+  phone whose older testmanagerd does not answer, one that refuses sessions.
   `scripts/engine-check.mjs` (run by `scripts/lab.sh`) fails when reads pay a session each.
 - **Kept over AXe 2.0's own way, on numbers** (`bench/results/2026-11-16-axe-2`). AXe 2.0 reads with no session
   (`bootstrap: false`) and loads accessibility through a short-lived session (0.42 s) only when a read comes back
