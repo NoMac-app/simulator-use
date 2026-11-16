@@ -12,7 +12,11 @@ APP=dev.simtap.edgelab
 $DL use "$WANT"
 U=$($DL devices | awk -v want="$WANT" -F ' · ' '$1 == "booted " want || $1 == want { print $3; exit }')
 [ -n "$U" ] || { echo "No Simulator named $WANT"; exit 1; }
+# A fresh install: iOS asks for location and notifications once per install (an answer outlives simctl privacy
+# reset), and asks for location only on a phone that has one (a Mac without Location Services gives it none).
+xcrun simctl uninstall "$U" "$APP" 2>/dev/null || true
 xcrun simctl privacy "$U" reset all "$APP" 2>/dev/null || true
+xcrun simctl location "$U" set 37.3349,-122.0090 2>/dev/null || true
 
 fail=0
 check() { # name, expected pattern, command...
@@ -36,7 +40,8 @@ check "sheet in front, its Done reachable" '^button "Done"' act 'tap "Show sheet
 check "close the sheet" 'Show alert' act 'tap Done'
 check "full-screen cover" '#closeCover' act 'tap "Show full screen"'
 check "close the cover" 'Show alert' act 'tap #closeCover'
-check "iOS permission prompt, named after the app" 'EdgeLab · system alert' act 'tap "Ask for location"'
+# The prompt can come several seconds after the tap (9 s on a Session Mac): until it is in front, later steps meet it.
+check "iOS permission prompt, named after the app" 'EdgeLab · system alert' act 'tap "Ask for location"' 'wait "Allow While Using App" 20'
 check "allow it" 'Dialogs' act 'tap "Allow While Using App"'
 # iOS asks for notifications once per install (simctl can't reset it): answer the prompt if it is still in front.
 # Only a screen read names one ("· system alert"): open_url answers "Open in" itself and says so, and a tap on its
