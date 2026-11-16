@@ -3,7 +3,12 @@
 One long-lived process per booted Simulator. It loads CoreSimulator's private frameworks, the HID connection,
 the accessibility translator and the framebuffer once, then answers JSON requests, one per line on stdin, with
 one JSON answer per line on stdout. Built on the FBSimulatorControl frameworks AXe ships (MIT; AXe by Cameron
-Cooke, FBSimulatorControl from Meta's idb). `TextToHIDEvents.swift` and `KeyCode.swift` are AXe's, unchanged.
+Cooke, FBSimulatorControl from Meta's idb), AXe 2.0.4's since November 16, 2026 (1.8.0's before).
+`TextToHIDEvents.swift` and `KeyCode.swift` are AXe's, unchanged (identical in 1.8.0 and 2.0.4). Requests are read
+from stdin on a thread of their own and run one at a time on the main actor, which never blocks between them:
+FBSimulatorControl 2's actors and the signal handlers need it free. The ready line names the read path (`reads`:
+`session`, `axe`, or `per-call` when the bootstrap hook could not be installed) and the HID transport (`hid`); every
+answer counts the accessibility loads (`bootstraps`) and automation sessions opened (`sessions`).
 
 Ops: `describe` (whole screen, AXe's JSON), `point` {x,y}, `tap` {x,y}, `swipe`, `type` {text}, `home`,
 `screenshot` {width,height,quality,path|inline; png_path: the full-size PNG, alpha removed}, `settle` {quiet_ms,first_change_ms}, `tap_settle_describe`,
@@ -23,13 +28,23 @@ Measured October 21, 2026 on an Apple M6 Mac mini (iOS 27.0 runtime), against AX
 
 What makes that possible:
 - **One automation session per phone, kept open.** iOS 27 Simulators read accessibility only after an XCTest
-  "remote automation session" has loaded it, and an app launched afterwards reads empty until it is loaded again.
-  FBSimulatorControl opens a session, loads accessibility and closes the session before every request (AXe pays
-  about 1 to 2 s for that per call); in a long-lived process new sessions soon time out. The engine opens one
-  session, keeps it, and reloads accessibility on it when the frontmost app reads empty (`forceBootstrap`). It
-  closes the session when its input ends and waits 0.8 s for that to reach the phone: without the wait, the next
-  process could not open a session at all. A new engine's first read takes 1.0 to 1.25 s; after that a point read
-  takes 3 to 15 ms and a whole screen about 300 ms.
+  "remote automation session" has loaded it. FBSimulatorControl, unless told otherwise, opens a session, loads
+  accessibility and closes the session before every request (AXe 1.8 paid about 1 to 2 s for that per call); in a
+  long-lived process new sessions soon time out. The engine opens one session, keeps it, and reloads accessibility
+  on it when the frontmost app reads empty (`forceBootstrap`). It closes the session when its input ends and waits
+  0.8 s for that to reach the phone: without the wait, the next process could not open a session at all. A new
+  engine's first read takes 0.5 to 1.25 s; after that a point read takes 3 to 15 ms and a whole screen 80 to 300 ms.
+  `scripts/engine-check.mjs` (run by `scripts/lab.sh`) fails when reads pay a session each.
+- **Kept over AXe 2.0's own way, on numbers** (`bench/results/2026-11-16-axe-2`). AXe 2.0 reads with no session
+  (`bootstrap: false`) and loads accessibility through a short-lived session (0.42 s) only when a read comes back
+  empty. That is faster on a screen already read (through simulator-use, 0.13 against 0.18 s a read and 0.54 against
+  0.63 s a tap; at the engine, about 70 against 90 ms), but without a kept session every app launched since the last
+  load reads empty: its first read took about 2 s against 0.6 s, and the sign-in flows 19 and 46% longer (4.26 and
+  4.46 s against 3.58 and 3.06 s). `SIMULATOR_USE_ENGINE_READS=axe` (or `--reads axe`) still reads AXe 2.0's
+  way, its short-lived sessions under the same lock and gap as the kept one.
+- **Input through `connectToHID`** (FBSimulatorControl's Indigo transport, the same as before): a tap's call returns
+  at once and the screen first changes about 13 ms later. AXe 2.0's `FBSimulatorHIDSession` (one screen bound, the
+  target checked before input: what a foldable needs) took 430 to 460 ms a tap on an iPhone 17 Pro.
 - **Never restart CoreSimulatorService under booted phones:** their automation sessions then time out until each
   phone is rebooted. A host also needs `automationmodetool enable-automationmode-without-authentication` once.
 - **"Settled" is read from the screen buffer**, not from repeated tree reads: the IOSurface seed changes on every

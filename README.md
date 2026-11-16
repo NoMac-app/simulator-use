@@ -284,16 +284,17 @@ simulator-use reads the Simulator through a small native engine (`native/engine`
 ```sh
 npm install
 npm run axe        # fetch the pinned AXe into vendor/axe
-npm run native     # build the engine, the clipboard and StoreKit helpers into vendor/axe (IDB_HEADERS: idb's PrivateHeaders)
+npm run native     # build the engine, the clipboard and StoreKit helpers into vendor/axe (IDB_HEADERS: idb's PrivateHeaders, from AXe's repository)
 npm test           # node --test, no build needed
 npm run build      # dist/ for the npm package
 node bin/simulator-use.js look
 ```
 
-The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0, Swift 6.3.2, which is Xcode 26.5 (build 17F42), the Xcode releases are built with. `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 26.5's `Contents/Developer`. The build is reproducible: from a fresh clone of a release tag, in any folder, with Xcode 26.5, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026:
+The engine builds only with the Swift that built AXe's frameworks: for AXe 2.0.4, Swift 6.4.2 (swiftlang-6.4.2.1.9), which is Xcode 27.2 (build 27B52), the Xcode releases are built with (up to 0.16.0, on AXe 1.8.0: Swift 6.3.2, Xcode 26.5, build 17F42). `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 27.2's `Contents/Developer`. It compiles against idb's private headers, which since AXe 2.0 live in AXe's own repository (`Packages/IDBKit/PrivateHeaders`); `npm run native` fetches them once, from the commit of the pinned release's tag. The build is reproducible: from a fresh clone of a release tag, in any folder, with that release's Xcode, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026 (November 16 for AXe 2.0.4):
 
 | Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
 |---|---|---|---|
+| next, on AXe 2.0.4 (Xcode 27.2) | `15c3989a934a2f2056d0dace59b6fb4f10ecad8b6544c866c1d8e76db84a732e` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` |
 | 0.15.1 to 0.16.0 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
 | 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
@@ -302,7 +303,7 @@ The engine builds only with the Swift that built AXe's frameworks: for AXe 1.8.0
 
 `examples/swiftui-demo` is the sample app the tests' screens come from. `scripts/golden.sh` builds it, runs it on a Simulator and checks 19 golden tasks: build and launch in one call, sign in, toggle, open an item, back and scroll, the app's logs, a crash, a build error and a failing test as `file:line`, a video, and a wrong password that must fail loudly.
 
-`examples/edge-lab` is an app with every awkward screen: segments, steppers, sliders, menus, alerts, sheets, full-screen covers, permission prompts, text in any language, autocorrect, late content, toasts, swipe-to-delete, long press, a web view, UIKit and a deep link. `scripts/lab.sh` builds it and runs 26 checks on it.
+`examples/edge-lab` is an app with every awkward screen: segments, steppers, sliders, menus, alerts, sheets, full-screen covers, permission prompts, text in any language, autocorrect, late content, toasts, swipe-to-delete, long press, a web view, UIKit and a deep link. `scripts/lab.sh` builds it and runs 27 checks on it, one of them `scripts/engine-check.mjs`, which fails when the engine reads on the slow path (an automation session for every read).
 
 `SIMULATOR_USE_DEBUG=1` prints every step and every program run with its time.
 
@@ -314,4 +315,4 @@ When simulator-use can't run where it is (no Mac, no Xcode, no Simulator runtime
 
 ## License
 
-MIT. AXe and the IDB frameworks it includes are MIT too; see `THIRD_PARTY_LICENSES`.
+MIT. AXe and the IDB frameworks it includes are MIT too, and AXe's `axe` binary carries code adapted from LY Corporation's sim-use (Apache-2.0); see `THIRD_PARTY_LICENSES`.
