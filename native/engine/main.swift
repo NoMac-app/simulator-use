@@ -896,7 +896,10 @@ func main() async {
     guard simulator.state == .booted else { throw EngineError(message: "simulator \(udid) is not booted") }
     let loaded = ms(started)
     let hidStart = Date()
-    let hid = try await simulator.connectToHID()
+    // How input goes is chosen before each input, not once by AXe's connectToHID (Input.swift).
+    let input = PhoneInput(simulator, choice: PhoneInput.choiceFromArguments(), logger: logger)
+    try await input.start()
+    let hidMs = ms(hidStart)
     let watcher = DamageWatcher()
     screenWatcher = watcher
     let fbStart = Date()
@@ -923,8 +926,10 @@ func main() async {
     seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.currentSurface()) }
     seedClock.resume()
     seedClocks.append(seedClock)
-    emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen,
-          "reads": readPathName, "hid": hid.transportType == .dtuhid ? "dtuhid" : "indigo"])
+    var ready: [String: Any] = ["ready": true, "load_ms": loaded, "hid_ms": hidMs, "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil,
+                                "name": simulator.name, "screen": screen, "reads": readPathName]
+    for (key, value) in input.describe() { ready[key] = value }
+    emit(ready)
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
       signal(sig, SIG_IGN)
@@ -999,15 +1004,15 @@ func main() async {
             }
           }
         case "tap", "swipe":
-          var input = req; input["op"] = op
-          try await hid.send(event: try inputEvent(input), logger: logger)
+          var request = req; request["op"] = op
+          try await input.send(try inputEvent(request))
         case "type":
           let text = req["text"] as? String ?? ""
-          try await hid.send(event: .composite(try TextToHIDEvents.convertTextToHIDEvents(text)), logger: logger)
+          try await input.send(.composite(try TextToHIDEvents.convertTextToHIDEvents(text)))
         case "steps", "drag":
-          try await hid.send(event: try inputEvent(req), logger: logger)
+          try await input.send(try inputEvent(req))
         case "lock":
-          try await hid.send(event: .shortButtonPress(.lock), logger: logger)
+          try await input.send(.shortButtonPress(.lock))
         case "open_url":
           // The link comes on the engine's input, never in an argument (simctl openurl's), which every user of a Mac can read.
           guard let text = req["url"] as? String, let url = URL(string: text), url.scheme != nil else { throw EngineError(message: "url: a link with a scheme") }
@@ -1021,7 +1026,7 @@ func main() async {
           let event = try (req["input"] as? [String: Any]).map(inputEvent)
           lastReadReport = [:]
           lastSerializeMs = []
-          let result = try await settleRead(simulator, input: event.map { e in { try await hid.send(event: e, logger: logger); inputSent = true } },
+          let result = try await settleRead(simulator, input: event.map { e in { try await input.send(e); inputSent = true } },
             firstChangeMs: req["first_change_ms"] as? Double ?? 800, quietMs: req["quiet_ms"] as? Double ?? 150, startMs: req["start_ms"] as? Double ?? 50,
             guardMs: req["guard_ms"] as? Double ?? 35, timeoutMs: req["timeout_ms"] as? Double ?? 4000, keys: (req["lean"] as? Bool) == true ? leanKeys : outputKeys,
             fromKept: (req["baseline"] as? String) == "kept")
@@ -1031,7 +1036,7 @@ func main() async {
           // One call for an act: the tap, the wait until the screen stops changing, then the new tree.
           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
           lastReadReport = [:]
-          try await hid.send(event: .tapAt(x: x, y: y), logger: logger)
+          try await input.send(.tapAt(x: x, y: y))
           let (waited, updates, settled) = await settle(watcher, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 800)
           let readStart = Date()
           // An app still launching reads as an application with nothing in it: wait for content, up to 3 s.
@@ -1055,7 +1060,7 @@ func main() async {
           let reference = PixelReference()
           guard reference.capture(surface) else { throw EngineError(message: "the screen buffer can't be read") }
           var lastSeed = reference.seed
-          if let p = req["tap"] as? [Double], p.count == 2 { try await hid.send(event: .tapAt(x: p[0], y: p[1]), logger: logger) }
+          if let p = req["tap"] as? [Double], p.count == 2 { try await input.send(.tapAt(x: p[0], y: p[1])) }
           let start = Date(); var changes: [[Double]] = []; var diffMs = 0.0, diffs = 0
           while Date().timeIntervalSince(start) * 1000 < windowMs {
             try? await Task.sleep(nanoseconds: 4_000_000)
@@ -1072,7 +1077,7 @@ func main() async {
         case "tap_trace":
           // When the screen changes after a tap: one timestamp (ms after the tap) per surface change.
           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0, windowMs = req["window_ms"] as? Double ?? 3000
-          try await hid.send(event: .tapAt(x: x, y: y), logger: logger)
+          try await input.send(.tapAt(x: x, y: y))
           let start = Date(); var changes: [Int] = []; var last = watcher.snapshot().1
           while Date().timeIntervalSince(start) * 1000 < windowMs {
             try? await Task.sleep(nanoseconds: 5_000_000); watcher.pollSeed()
@@ -1084,10 +1089,10 @@ func main() async {
           // With "wait": false only the press (the caller waits for the screen itself).
           for attempt in 0..<((req["wait"] as? Bool) == false ? 1 : 2) {
             if (req["wait"] as? Bool) == false {
-              try await hid.send(event: .composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]), logger: logger)
+              try await input.send(.composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]))
               break
             }
-            try await hid.send(event: .composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]), logger: logger)
+            try await input.send(.composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]))
             let (_, updates, _) = await settle(watcher, quietMs: 150, timeoutMs: 3000, firstChangeMs: 600)
             answer["attempts"] = attempt + 1; answer["updates"] = updates
             if updates > 0 { break }
@@ -1145,6 +1150,9 @@ func main() async {
         default:
           throw EngineError(message: "unknown op \(op)")
         }
+        let (via, dtuhidConnectMs) = input.takeRoute()
+        if let via { answer["via"] = via }
+        if let dtuhidConnectMs { answer["dtuhid_connect_ms"] = dtuhidConnectMs }
         answer["ms"] = ms(t0); answer["bootstraps"] = bootstrapCount; answer["sessions"] = sessionsOpened
         if let failure = lastBootstrapError { answer["bootstrap_error"] = failure; lastBootstrapError = nil }
         emit(answer)

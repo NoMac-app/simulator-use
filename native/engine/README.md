@@ -7,8 +7,9 @@ Cooke, FBSimulatorControl from Meta's idb), AXe 2.0.4's since November 16, 2026 
 `TextToHIDEvents.swift` and `KeyCode.swift` are AXe's, unchanged (identical in 1.8.0 and 2.0.4). Requests are read
 from stdin on a thread of their own and run one at a time on the main actor, which never blocks between them:
 FBSimulatorControl 2's actors and the signal handlers need it free. The ready line names the read path (`reads`:
-`session`, `axe`, or `per-call` when the bootstrap hook could not be installed) and the HID transport (`hid`); every
-answer counts the accessibility loads (`bootstraps`) and automation sessions opened (`sessions`).
+`session`, `axe`, or `per-call` when the bootstrap hook could not be installed) and how input goes (`hid`, with
+`hid_choice` and whether `dtuhidd` runs: Input.swift); every answer counts the accessibility loads (`bootstraps`) and
+automation sessions opened (`sessions`), and an input's answer says what carried it (`via`).
 
 Ops: `describe` (whole screen, AXe's JSON), `point` {x,y}, `tap` {x,y}, `swipe`, `type` {text}, `home`,
 `screenshot` {width,height,quality,path|inline; png_path: the full-size PNG, alpha removed}, `settle` {quiet_ms,first_change_ms}, `tap_settle_describe`,
@@ -47,9 +48,16 @@ What makes that possible:
   load reads empty: its first read took about 2 s against 0.6 s, and the sign-in flows 19 and 46% longer (4.26 and
   4.46 s against 3.58 and 3.06 s). `SIMULATOR_USE_ENGINE_READS=axe` (or `--reads axe`) still reads AXe 2.0's
   way, its short-lived sessions under the same lock and gap as the kept one.
-- **Input through `connectToHID`** (FBSimulatorControl's Indigo transport, the same as before): a tap's call returns
-  at once and the screen first changes about 13 ms later. AXe 2.0's `FBSimulatorHIDSession` (one screen bound, the
-  target checked before input: what a foldable needs) took 430 to 460 ms a tap on an iPhone 17 Pro.
+- **Input by dtuhidd while it runs, else by Indigo, chosen before every input** (Input.swift; `--hid` or
+  `SIMULATOR_USE_ENGINE_HID`: `auto`, the default, `indigo` or `dtuhid`). Indigo, CoreSimulator's legacy HID client,
+  sends a tap in under a millisecond, and the screen first changes about 13 ms later. dtuhidd, Xcode 27's daemon in the
+  phone, runs while Device Hub shows the phone, and AXe 2.0's Indigo transport is not to be relied on then: with Device
+  Hub showing the phone its taps were sent and none landed (November 16, 2026), and AXe refuses its keys. So, as AXe's
+  own `connectToHID` does at the moment it connects, the engine sends by dtuhidd while it runs, but it looks before
+  every input (Device Hub opens and closes while an engine runs) and keeps the connection: AXe's send waits 380 ms after
+  each gesture so a short-lived process does not close the connection too soon (382 to 395 ms a tap), which the engine
+  skips, keeping AXe's pacing of keys. AXe 2.0's `FBSimulatorHIDSession` (one screen bound, the target checked before
+  input: what a foldable needs) took 430 to 460 ms a tap on an iPhone 17 Pro.
 - **Never restart CoreSimulatorService under booted phones:** their automation sessions then time out until each
   phone is rebooted. A host also needs `automationmodetool enable-automationmode-without-authentication` once.
 - **"Settled" is read from the screen buffer**, not from repeated tree reads: the IOSurface seed changes on every

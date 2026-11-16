@@ -22,5 +22,5 @@ if [ "$want" != "$have" ]; then
   exit 1
 fi
 for d in AccessibilityPlatformTranslation AXRuntime CoreSimDeviceIO CoreSimulator CoreSimulatorUtilities SimulatorKit; do args+=(-I "$P/$d"); done
-swiftc -O -swift-version 5 main.swift Frames.swift Settle.swift TextToHIDEvents.swift KeyCode.swift Support.swift -F "$F" -I "$P" "${args[@]}" \
+swiftc -O -swift-version 5 main.swift Frames.swift Settle.swift Input.swift TextToHIDEvents.swift KeyCode.swift Support.swift -F "$F" -I "$P" "${args[@]}" \
   -framework FBControlCore -framework FBSimulatorControl -Xlinker -rpath -Xlinker @executable_path/Frameworks -target arm64-apple-macos14 -o simulator-use-engine

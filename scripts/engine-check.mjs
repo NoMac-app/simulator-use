@@ -85,7 +85,8 @@ try {
   if (sessions > 0) problems.push(`${sessions} automation session(s) opened for 21 steady reads`);
   if (median(reads) > READ_MEDIAN_MS) problems.push(`whole-screen reads took ${median(reads)} ms (median), over ${READ_MEDIAN_MS}`);
   if (median(points) > POINT_MEDIAN_MS) problems.push(`point reads took ${median(points)} ms (median), over ${POINT_MEDIAN_MS}`);
-  const summary = `reads: ${ready.reads}, hid: ${ready.hid}, first read ${warm.ms} ms, whole screen ${median(reads)} ms, point ${median(points)} ms (medians of 10), sessions opened ${warm.sessions} then ${sessions}`;
+  const input = ready.hid_choice ? `${ready.hid} (${ready.hid_choice}${ready.dtuhidd ? ", dtuhidd runs" : ""})` : ready.hid;
+  const summary = `reads: ${ready.reads}, hid: ${input}, first read ${warm.ms} ms, whole screen ${median(reads)} ms, point ${median(points)} ms (medians of 10), sessions opened ${warm.sessions} then ${sessions}`;
   if (problems.length) {
     console.log(`SLOW PATH: ${problems.join("; ")}\n${summary}`);
     process.exitCode = 1;
