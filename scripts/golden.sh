@@ -36,8 +36,16 @@ check "launch answers with the first screen" '#signIn @' $DL app launch dev.simt
 check "sign in" 'Welcome, gary@example\.com' $DL act --device "$U" "fill #email gary@example.com" "fill #password secret1" "tap #signIn" 'wait "Welcome"'
 check "toggle a switch" '#remember "Remember me" on' $DL act --device "$U" 'tap #remember'
 check "open an item" 'Details for Item 3' $DL act --device "$U" 'tap Items' 'tap "Item 3"'
-# The list is 4 pages on an iPhone 17 Pro, 3 on a Pro Max: scrolled is "at" a percent, not "at top".
-check "back and scroll" 'scroll: [0-9]+ pages, at [0-9]+%' $DL act --device "$U" back 'scroll down'
+# The list's length in pages is iOS's own count (its scroll bar's), so it depends on the phone: 4 on an iPhone 17 Pro, 3
+# on a Pro Max, and on any other phone the count the list shows back at its top. The scroll must leave it at a percent
+# of that many pages, not "at top".
+top=$($DL act --device "$U" back 2>&1 || true)
+case "$WANT" in
+  "iPhone 17 Pro") PAGES=4 ;;
+  "iPhone 17 Pro Max") PAGES=3 ;;
+  *) PAGES=$(grep -oE 'scroll: [0-9]+ pages, at top' <<<"$top" | grep -oE '[0-9]+' | head -1 || true) ;;
+esac
+check "back and scroll" "scroll: ${PAGES:-no count at the top,} pages, at [0-9]+%" $DL act --device "$U" 'scroll down'
 logs=$($DL logs --device "$U" 2>&1)
 check "the app's print output" 'Sign In tapped, ok: true' echo "$logs"
 check "the app's own system log line" 'info login: signed in' echo "$logs"
