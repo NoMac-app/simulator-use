@@ -18,6 +18,10 @@ if (!udid || (dashes !== undefined && dashes !== "--")) {
   process.exit(2);
 }
 const engine = process.env.SIMULATOR_USE_ENGINE || fileURLToPath(new URL("../vendor/axe/simulator-use-engine", import.meta.url));
+if (engine === "off" || engine === "0") {
+  console.log("no engine: SIMULATOR_USE_ENGINE turns it off, so every read is AXe's, one process each");
+  process.exit(1);
+}
 if (!existsSync(engine)) {
   console.error(`no engine at ${engine}: npm run native`);
   process.exit(2);
