@@ -128,7 +128,16 @@ lab.sh's two misses are the location prompt, which never shows on this Mac's iOS
 the list's page count per phone again (4 on the iPhone 17 Pro, 3 on the Pro Max; on any other phone, the count the
 list shows at its top), and both passed it. `npm test`: 219 of 219.
 
-XCODE265
+## 4. Xcode 26.5 (the laptop)
+
+The packed 0.17.0 (the tarball of section 5, its own bin, dist and vendor/axe, with the repository's scripts and
+examples beside them; `laptop-test.sh`) on a MacBook with Xcode 26.5 (17F42) and an iOS 26.5 iPhone 17 Pro, the one
+Simulator running: golden.sh 19 of 19 (`laptop-xcode265-golden.log`), lab.sh 24 of 27 (`laptop-xcode265-lab.log`),
+the engine on its fast path there too. The misses: the location prompt (as on the Session Mac) and "web view called
+unreadable": iOS 26.5 gives the SwiftUI web view's page, and simulator-use read its field, button and text, where the
+check expected iOS 27's unreadable view. lab.sh now accepts either (`80f060b`). So AXe 2.0.4's frameworks and the
+engine built with Xcode 27.2's Swift run with Xcode 26.5: reads, taps, typing, builds, tests, logs, crashes and video.
+The test apps were removed and the phone shut down after.
 
 ## 5. The release tarball
 
@@ -163,3 +172,4 @@ over 100 reboots.
   `golden-iPhone17Pro.log`, `golden-iPhone17ProMax.log`, `lab-iPhone17Pro.log` (B5) and `golden-final.log`,
   `lab-final.log` (the release clone): headless. `regress.sh`, `pack.sh`: how they and the tarball were made.
 - `runtime-lost-1.log`: simdiskimaged and cryptexd when the runtime was lost.
+- `laptop-test.sh`, `laptop-xcode265-golden.log`, `laptop-xcode265-lab.log`: section 4.
