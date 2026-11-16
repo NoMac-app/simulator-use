@@ -1,0 +1,69 @@
+Booted iPad Pro 11-inch (M5) (iOS 27.2) in 26.8 s.
+Using iPad Pro 11-inch (M5) (iOS 27.2, 0F7117E9-D6CE-4649-A9C0-9201F1B6A783); the other tools use it from now on.
+PASS build, install and launch (38 s)
+PASS the engine reads on its fast path (7 s)
+PASS segments are not tabs (3 s)
+PASS stepper buttons (3 s)
+PASS set a slider (22 s)
+PASS menu pick (8 s)
+PASS alert in front, alone (6 s)
+PASS answer the alert (4 s)
+PASS sheet in front, its Done reachable (4 s)
+PASS close the sheet (3 s)
+PASS full-screen cover (4 s)
+PASS close the cover (4 s)
+FAIL iOS permission prompt, named after the app
+  1 step done in 6.6 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · iPad Pro 11-inch (M5) (iOS 27.2)
+  button "Show alert" @417,164
+  button "Show choices" @417,216
+  button "Show sheet" @417,268
+  button "Show full screen" @417,320
+  button "Ask for location" @417,372
+  button "Ask for photos" @417,424
+  button "Ask for notifications" @417,476
+  button "Ask for contacts" @417,528
+  text "Result: cancelled" #dialogResult @417,580
+  tabs: Controls @269,54, Dialogs (selected) @363,54, Lists @443,54, Text @510,54, More @579,54
+PASS notifications, prompt waited for and allowed (13 s)
+FAIL text in any language
+  Step 2 (fill #unicode …) failed: #unicode shows "Unicode here", not "Café 日本 🚀".
+  Next: Check it with simulator-use look: the field may limit or reformat input, the target may not be a text field, or the keyboard may need a moment.
+  1 of 3 steps done before it.
+  Screen now:
+  EdgeLab · Text · iPad Pro 11-inch (M5) (iOS 27.2)
+  button "Search" @802,54
+  text "Café crème · 日本語 · 🚀 rocket · مرحبا" @417,164
+  text "He said \"hi\"\nthen left" @417,226
+  text "Long label Long label Long label Long label Long label Long label Long label Lo…" @417,310
+  button "Delete" @417,383
+  button "Delete" @417,435
+  textfield "Unicode here" #unicode @417,487
+  text "Typed:" #typed @417,539
+  text "Deep link: none" #deepLink @417,591
+  text "Apple" @417,643
+  text "Banana" @417,695
+  text "Cherry" @417,747
+  element "Paste" @59,439
+  element "AutoFill" @136,439
+  button "Previous Page" @13,439
+  button "Next Page" @196,439
+  tabs: Controls @269,54, Dialogs @363,54, Lists @443,54, Text (selected) @510,54, More @579,54
+  keyboard: shown, covering y 870 and below
+PASS autocorrect undone by paste (10 s)
+PASS delayed content (7 s)
+PASS toast comes and goes (5 s)
+PASS swipe a row to delete (4 s)
+PASS delete it (4 s)
+PASS long press menu (5 s)
+PASS pin from the menu (4 s)
+PASS web view called unreadable (5 s)
+PASS UIKit table, real title (7 s)
+PASS deep link opened (5 s)
+PASS deep link arrives (5 s)

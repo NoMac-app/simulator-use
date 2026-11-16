@@ -1,0 +1,40 @@
+--- a/native/engine/main.swift	2026-11-16 17:18:20
++++ b/native/engine/main.swift	2026-11-16 17:34:02
+@@ -1028,6 +1028,37 @@
+             else { changes.append([at]) }
+           }
+           answer["changes"] = changes; answer["diff_ms_avg"] = diffs > 0 ? diffMs / Double(diffs) : 0
++        case "hid_probe":
++          // Measurement only, never shipped (bench/results/2026-11-16-axe-2): taps alternating between two points,
++          // each sent once through connectToHID's transport and once through FBSimulatorHIDSession (AXe 2's selected
++          // input), each timed to the call's return and to the screen's first change.
++          let pts = (req["points"] as? [[Double]]) ?? [[0, 0]], n = req["n"] as? Int ?? 10
++          let t1 = Date()
++          let discovery = try await ActivePanelReader.discoverWithMetadata(for: simulator)
++          let panel = discovery.readback.snapshot.activePanel.identity
++          let reader = FBSimulatorNativeContextReader(simulator: simulator, screenID: panel.displayID, screenUniqueID: panel.uniqueID)
++          let observation = try await reader.observation()
++          let session = try await FBSimulatorHIDSession.open(for: simulator, observation: observation, freshnessProvider: reader)
++          answer["session_open_ms"] = ms(t1); answer["display"] = [Int(panel.displayID)]
++          func firstChange(_ send: () async throws -> Void) async throws -> [Int] {
++            watcher.pollSeed(); let before = watcher.snapshot().1; let s = Date()
++            try await send(); let sent = ms(s)
++            while Date().timeIntervalSince(s) < 3 { watcher.pollSeed(); if watcher.snapshot().1 != before { return [sent, ms(s)] }; try? await Task.sleep(nanoseconds: 1_000_000) }
++            return [sent, -1]
++          }
++          var legacy: [[Int]] = [], selected: [[Int]] = []
++          // Each tap goes to the other point (another tab: the screen changes every time); the path alternates in pairs.
++          for i in 0..<n {
++            let p = pts[i % pts.count]
++            if (i / 2) % 2 == 0 {
++              legacy.append(try await firstChange { try await hid.send(event: .tapAt(x: p[0], y: p[1]), logger: logger) })
++            } else {
++              selected.append(try await firstChange { _ = try await session.execute(.tapAt(x: p[0], y: p[1])) })
++            }
++            _ = await settle(watcher, quietMs: 400, timeoutMs: 4000)
++          }
++          _ = try? await session.close()
++          answer["connect_to_hid"] = legacy; answer["hid_session"] = selected
+         case "tap_trace":
+           // When the screen changes after a tap: one timestamp (ms after the tap) per surface change.
+           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0, windowMs = req["window_ms"] as? Double ?? 3000

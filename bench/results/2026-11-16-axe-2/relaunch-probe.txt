@@ -1,0 +1,33 @@
+== A
+ready reads=undefined hid=undefined
+warm 843 ms serialize=[838] bootstraps=1 sessions=undefined
+relaunch 0: first 825 ms serialize=[820] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 172 ms serialize=[171]
+relaunch 1: first 782 ms serialize=[779] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 175 ms serialize=[174]
+relaunch 2: first 828 ms serialize=[826] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 171 ms serialize=[171]
+relaunch 3: first 784 ms serialize=[783] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 173 ms serialize=[172]
+relaunch 4: first 785 ms serialize=[784] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 229 ms serialize=[228]
+relaunch 5: first 791 ms serialize=[789] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 172 ms serialize=[171]
+relaunch 6: first 772 ms serialize=[771] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 169 ms serialize=[168]
+relaunch 7: first 1211 ms serialize=[1210] nodes=102 kept=moving during bootstraps=1 sessions=undefined | second 182 ms serialize=[182]
+== B
+ready reads=session hid=indigo
+warm 470 ms serialize=[469] bootstraps=1 sessions=1
+relaunch 0: first 663 ms serialize=[661] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 94 ms serialize=[94]
+relaunch 1: first 651 ms serialize=[649] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 83 ms serialize=[83]
+relaunch 2: first 615 ms serialize=[614] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 86 ms serialize=[85]
+relaunch 3: first 609 ms serialize=[607] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 114 ms serialize=[113]
+relaunch 4: first 551 ms serialize=[549] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 116 ms serialize=[116]
+relaunch 5: first 633 ms serialize=[632] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 83 ms serialize=[83]
+relaunch 6: first 630 ms serialize=[629] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 80 ms serialize=[80]
+relaunch 7: first 586 ms serialize=[585] nodes=102 kept=moving during bootstraps=1 sessions=1 | second 109 ms serialize=[109]
+== B --reads axe
+ready reads=axe hid=indigo
+warm 88 ms serialize=[88] bootstraps=0 sessions=0
+relaunch 0: first 1994 ms serialize=[160,592,136,262,79] nodes=87 kept=moving during bootstraps=1 sessions=1 | second 66 ms serialize=[65]
+relaunch 1: first 1959 ms serialize=[159,573,137,236,76] nodes=87 kept=moving during bootstraps=2 sessions=2 | second 69 ms serialize=[69]
+relaunch 2: first 2437 ms serialize=[176,562,140,673,121] nodes=87 kept=moving during bootstraps=3 sessions=3 | second 67 ms serialize=[66]
+relaunch 3: first 1965 ms serialize=[174,569,133,242,80] nodes=87 kept=moving during bootstraps=4 sessions=4 | second 69 ms serialize=[68]
+relaunch 4: first 1962 ms serialize=[159,557,138,258,84] nodes=87 kept=moving during bootstraps=5 sessions=5 | second 67 ms serialize=[66]
+relaunch 5: first 1951 ms serialize=[141,557,136,258,101] nodes=87 kept=moving during bootstraps=6 sessions=6 | second 72 ms serialize=[71]
+relaunch 6: first 1970 ms serialize=[173,562,136,255,80] nodes=87 kept=moving during bootstraps=7 sessions=7 | second 67 ms serialize=[66]
+relaunch 7: first 1941 ms serialize=[150,562,139,241,81] nodes=87 kept=moving during bootstraps=8 sessions=8 | second 71 ms serialize=[70]

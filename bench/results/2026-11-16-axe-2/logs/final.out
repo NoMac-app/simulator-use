@@ -1,0 +1,37 @@
+== 0.16.0 lab, erased iPad 18:13:51
+exit 1
+23
+FAIL iOS permission prompt, named after the app
+  1 step done in 7.0 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+--
+FAIL deep link opened
+  Step 1 (tap Open) failed: No "Open" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+== sync 18:17:52
+
+138706dc989784bef566249884e42551056d2da4f5a3449cad911aa2fa256b2c  vendor/axe/simulator-use-engine
+fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5  vendor/axe/simulator-use-pbset
+7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0  vendor/axe/simulator-use-skconfig
+== repro 18:18:02
+fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5  simulator-use-pbset
+7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0  simulator-use-skconfig
+/tmp/repro-second-clone-at-another-path at f79a702
+138706dc989784bef566249884e42551056d2da4f5a3449cad911aa2fa256b2c  simulator-use-engine
+fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5  simulator-use-pbset
+7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0  simulator-use-skconfig
+IDENTICAL
+Identifier=simulator-use-engine
+Signature=adhoc
+TeamIdentifier=not set
+== golden + engine-check, iPhone 17 Pro 18:19:24
+exit 0
+19
+fast path: reads: session, hid: indigo, first read 633 ms, whole screen 145 ms, point 1 ms (medians of 10), sessions opened 1 then 0
+SLOW PATH: the engine reads on the "per-call" path, not "session"; point reads took 422 ms (median), over 250
+reads: per-call, hid: indigo, first read 619 ms, whole screen 559 ms, point 422 ms (medians of 10), sessions opened 0 then 0
+slow path exit 1
+== done 18:22:06

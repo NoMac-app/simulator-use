@@ -1,0 +1,98 @@
+Using iPhone 17 Pro (iOS 27.2, 4B59B305-AD2C-49AA-929F-B2C491DDFA9A); the other tools use it from now on.
+PASS build, install and launch (14 s)
+PASS the engine reads on its fast path (4 s)
+PASS segments are not tabs (3 s)
+PASS stepper buttons (3 s)
+PASS set a slider (17 s)
+PASS menu pick (6 s)
+PASS alert in front, alone (5 s)
+PASS answer the alert (4 s)
+PASS sheet in front, its Done reachable (3 s)
+PASS close the sheet (3 s)
+PASS full-screen cover (4 s)
+PASS close the cover (3 s)
+FAIL iOS permission prompt, named after the app
+  1 step done in 6.4 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · iPhone 17 Pro (iOS 27.2)
+  button "Show alert" @201,194
+  button "Show choices" @201,246
+  button "Show sheet" @201,298
+  button "Show full screen" @201,350
+  button "Ask for location" @201,402
+  button "Ask for photos" @201,454
+  button "Ask for notifications" @201,506
+  button "Ask for contacts" @201,558
+  text "Result: cancelled" #dialogResult @201,610
+  tabs: Controls @64,822, Dialogs (selected) @132,822, Lists @201,822, Text @270,822, More @339,822
+PASS notifications, prompt waited for and allowed (12 s)
+PASS text in any language (6 s)
+PASS autocorrect undone by paste (7 s)
+PASS delayed content (6 s)
+PASS toast comes and goes (5 s)
+PASS swipe a row to delete (5 s)
+PASS delete it (3 s)
+PASS long press menu (5 s)
+PASS pin from the menu (3 s)
+PASS web view called unreadable (6 s)
+PASS UIKit table, real title (7 s)
+FAIL deep link opened
+  Step 1 (tap Open) failed: No "Open" on screen.
+  Next: 7 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · UIKit table · iPhone 17 Pro (iOS 27.2)
+  back "More" #BackButton @38,84
+  text "UIKit row 1" @56,196
+  text "detail 1" @40,219
+  text "UIKit row 2" @58,269
+  text "detail 2" @41,292
+  text "UIKit row 3" @58,343
+  text "detail 3" @42,366
+  text "UIKit row 4" @58,416
+  text "detail 4" @42,439
+  text "UIKit row 5" @58,489
+  text "detail 5" @41,512
+  text "UIKit row 6" @58,563
+  text "detail 6" @42,586
+  text "UIKit row 7" @57,636
+  text "detail 7" @41,659
+  text "UIKit row 8" @58,709
+  text "detail 8" @42,732
+  text "UIKit row 9" @58,782
+  text "UIKit row 12" @45,180
+  text "detail 12" @29,179
+  text "UIKit row 13" @46,180
+  text "detail 13" @29,179
+  text "UIKit row 14" @46,180
+  text "detail 14" @29,179
+  text "UIKit row 15" @45,180
+  text "detail 15" @29,179
+  text "UIKit row 16" @46,180
+  text "detail 16" @29,179
+  text "UIKit row 17" @45,180
+  text "detail 17" @28,179
+  text "UIKit row 18" @46,180
+  text "detail 18" @29,179
+  text "UIKit row 19" @46,180
+  text "detail 19" @29,179
+  text "UIKit row 20" @47,180
+  text "detail 20" @30,179
+  text "UIKit row 21" @45,180
+  text "detail 21" @29,179
+  text "UIKit row 22" @46,180
+  text "detail 22" @30,179
+  text "UIKit row 23" @47,180
+  text "detail 23" @30,179
+  text "UIKit row 24" @47,180
+  text "detail 24" @30,179
+  text "UIKit row 25" @47,180
+  text "detail 25" @30,179
+  tabs: Controls @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More (selected) @339,822
+  scroll: 3 pages, at top; 7 below
+PASS deep link arrives (6 s)

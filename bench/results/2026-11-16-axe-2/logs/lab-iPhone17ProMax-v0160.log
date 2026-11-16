@@ -1,0 +1,92 @@
+Using iPhone 17 Pro Max (iOS 27.2, 6FB07A8E-12BE-41D1-8C81-F436EBE46ED4); the other tools use it from now on.
+PASS build, install and launch (11 s)
+PASS segments are not tabs (3 s)
+PASS stepper buttons (3 s)
+PASS set a slider (11 s)
+PASS menu pick (8 s)
+PASS alert in front, alone (7 s)
+PASS answer the alert (4 s)
+PASS sheet in front, its Done reachable (4 s)
+PASS close the sheet (3 s)
+PASS full-screen cover (4 s)
+PASS close the cover (4 s)
+FAIL iOS permission prompt, named after the app
+  1 step done in 6.6 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · iPhone 17 Pro Max (iOS 27.2)
+  button "Show alert" @220,194
+  button "Show choices" @220,246
+  button "Show sheet" @220,298
+  button "Show full screen" @220,350
+  button "Ask for location" @220,402
+  button "Ask for photos" @220,454
+  button "Ask for notifications" @220,506
+  button "Ask for contacts" @220,558
+  text "Result: cancelled" #dialogResult @220,610
+  tabs: Controls @67,904, Dialogs (selected) @144,904, Lists @220,904, Text @296,904, More @373,904
+PASS notifications, prompt waited for and allowed (4 s)
+PASS text in any language (6 s)
+PASS autocorrect undone by paste (7 s)
+PASS delayed content (7 s)
+PASS toast comes and goes (5 s)
+FAIL swipe a row to delete
+  1 step done in 4.2 s
+  screen:
+  EdgeLab · Lists · iPhone 17 Pro Max (iOS 27.2)
+  heading "Async" @220,188
+  text "Loaded 20 results" #loaded @220,234
+  button "Show toast" @220,286
+  heading "Carousel" @220,350
+  button "Card 1" @76,403
+  button "Card 2" @158,403
+  button "Card 3" @241,403
+  button "Card 4" @325,403
+  button "Card 5" @405,403
+  text "Picked: none" #picked @220,461
+  heading "Rows" @220,524
+  text "Row 1" @220,570
+  text "Row 2" @220,622
+  text "Row 4" @220,674
+  text "Row 5" @220,726
+  text "Row 6" @220,778
+  text "Row 7" @220,830
+  text "Row 8" @220,865
+  tabs: Controls @67,904, Dialogs @144,904, Lists (selected) @220,904, Text @296,904, More @373,904
+  scroll: 3 pages, at top; 1 below; 7 to the right
+FAIL delete it
+  Step 1 (tap Delete) failed: No "Delete" on screen.
+  Next: 1 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Lists · iPhone 17 Pro Max (iOS 27.2)
+  heading "Async" @220,188
+  text "Loaded 20 results" #loaded @220,234
+  button "Show toast" @220,286
+  heading "Carousel" @220,350
+  button "Card 1" @76,403
+  button "Card 2" @158,403
+  button "Card 3" @241,403
+  button "Card 4" @325,403
+  button "Card 5" @405,403
+  text "Picked: none" #picked @220,461
+  heading "Rows" @220,524
+  text "Row 1" @220,570
+  text "Row 2" @220,622
+  text "Row 4" @220,674
+  text "Row 5" @220,726
+  text "Row 6" @220,778
+  text "Row 7" @220,830
+  text "Row 8" @220,865
+  tabs: Controls @67,904, Dialogs @144,904, Lists (selected) @220,904, Text @296,904, More @373,904
+  scroll: 3 pages, at top; 1 below; 7 to the right
+PASS long press menu (6 s)
+PASS pin from the menu (4 s)
+PASS web view called unreadable (7 s)
+PASS UIKit table, real title (7 s)
+PASS deep link opened (3 s)
+PASS deep link arrives (5 s)

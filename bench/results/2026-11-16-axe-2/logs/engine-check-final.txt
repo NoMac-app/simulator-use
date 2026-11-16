@@ -1,0 +1,3 @@
+fast path: reads: session, hid: indigo, first read 633 ms, whole screen 145 ms, point 1 ms (medians of 10), sessions opened 1 then 0
+SLOW PATH: the engine reads on the "per-call" path, not "session"; point reads took 422 ms (median), over 250
+reads: per-call, hid: indigo, first read 619 ms, whole screen 559 ms, point 422 ms (medians of 10), sessions opened 0 then 0
