@@ -6,8 +6,9 @@ import Foundation
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
-import FBControlCore
-import FBSimulatorControl
+// FBSimulatorControl 2 is annotated for Swift concurrency only in part: its classes cross queues here as they did in 1.x.
+@preconcurrency import FBControlCore
+@preconcurrency import FBSimulatorControl
 
 let started = Date()
 func ms(_ since: Date) -> Int { Int(Date().timeIntervalSince(since) * 1000) }
@@ -181,18 +182,13 @@ func blocking(_ work: @escaping @Sendable () throws -> Void) async throws {
   }
 }
 /**
- FBSimulatorControl bootstraps accessibility (a short-lived XCTest remote automation session) before every
- accessibility request on iOS 27 runtimes. A per-call CLI needs that; a long-lived engine needs it once per
- phone: repeated sessions pile up in the phone's testmanagerd, slow every read and finally time out.
- This replaces the class method with one that runs the original once and then reports success.
- */
-/**
- iOS 27 Simulators read accessibility only while an XCTest "remote automation session" has loaded it, and an
- app launched afterwards is unreadable until it is loaded again. FBSimulatorControl opens a session, loads
- accessibility and closes the session before every request; in a long-lived process new sessions soon time out.
- The engine instead opens one session per phone, keeps it for its whole life, and reloads accessibility on that
- same session when the frontmost app reads empty (forceBootstrap). The framework's per-request bootstrap is
- replaced by this.
+ iOS 27 Simulators read accessibility only once an XCTest "remote automation session" has loaded it, and an app
+ launched afterwards can read empty until it is loaded again. FBSimulatorControl's reads, unless told otherwise
+ (AXe 2.0 reads with bootstrap: false first), open a session, load accessibility and close the session before every
+ request: about a second a read, and in a long-lived process new sessions soon time out. The engine replaces that
+ class method (installPersistentBootstrap): on the session path it opens one session per phone, keeps it for its
+ whole life, and reloads accessibility on that same session when the frontmost app reads empty (forceBootstrap); on
+ the axe path it runs the framework's own short-lived session, only for such a reload, under the engine's lock.
  */
 var bootstrapCount = 0
 var signalSources: [DispatchSourceSignal] = []
@@ -200,6 +196,54 @@ var seedClocks: [DispatchSourceTimer] = []
 var forceBootstrap = false
 var automationSession: AnyObject?
 var skipBootstrap = CommandLine.arguments.contains("--no-bootstrap")
+
+/**
+ * How accessibility is kept loaded, for every read (--reads, else SIMULATOR_USE_ENGINE_READS; session when neither says).
+ * - session: one automation session per phone, opened by the first read and kept for the engine's life; a read that
+ *   comes back empty reloads accessibility on it (installPersistentBootstrap).
+ * - axe: AXe 2.0's own way: reads go straight to the phone, and only one that comes back empty, or fails for want
+ *   of a translation object, loads accessibility again through a short-lived session (opened, loaded and closed,
+ *   under the same lock and gap as ours).
+ * Either way no read pays a session of its own: that is the slow per-call path (FBSimulatorControl's default, about
+ * a second a read), which the ready line names "per-call" when the hook that prevents it could not be installed, and
+ * which scripts/engine-check.mjs fails on.
+ */
+enum ReadPath: String { case session, axe }
+let readPath: ReadPath = {
+  let given = args.firstIndex(of: "--reads").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+    ?? ProcessInfo.processInfo.environment["SIMULATOR_USE_ENGINE_READS"]
+  return given.flatMap(ReadPath.init(rawValue:)) ?? .session
+}()
+/** Whether the bootstrap hook is in place: without it every read would open a session of its own. */
+var hookInstalled = false
+/** Calls into the hook (every read on the session path, only reloads on the axe path) and automation sessions opened. */
+var hookCalls = 0, sessionsOpened = 0
+/** The way reads actually go, for the ready line and every read's answer. */
+var readPathName: String { hookInstalled ? readPath.rawValue : "per-call" }
+
+/** The frontmost app's element. reload: load accessibility first (a read that came back empty, or failed). */
+@MainActor
+func frontmostElement(_ simulator: FBSimulator, reload: Bool) async throws -> FBAccessibilityElement {
+  switch readPath {
+  case .session:
+    // The framework calls its bootstrap before the read; the hook answers it from the kept session.
+    if reload { forceBootstrap = true }
+    return try await simulator.accessibilityElementForFrontmostApplication()
+  case .axe:
+    return try await simulator.accessibilityElementForFrontmostApplication(bootstrap: reload)
+  }
+}
+/** The element at a screen point, as frontmostElement. */
+@MainActor
+func pointElement(_ simulator: FBSimulator, _ point: CGPoint, reload: Bool = false) async throws -> FBAccessibilityElement {
+  switch readPath {
+  case .session:
+    if reload { forceBootstrap = true }
+    return try await simulator.accessibilityElement(at: point)
+  case .axe:
+    return try await simulator.accessibilityElement(at: point, bootstrap: reload)
+  }
+}
 func objcCall(_ target: AnyObject, _ name: String) -> IMP? {
   let sel = NSSelectorFromString(name)
   if let cls = target as? AnyClass { return class_getMethodImplementation(object_getClass(cls), sel) }
@@ -222,6 +266,7 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   sessionLog("open after waiting \(sessionTurnMs) ms")
   let opened = Date()
   var outcome = "failed"
+  sessionsOpened += 1
   defer { sessionLog("open \(outcome) in \(ms(opened)) ms"); unlockSessionTurn() }
   guard let providerClass: AnyClass = NSClassFromString("XCUIDeviceRemoteDaemonConnectionProvider"),
         let sessionClass: AnyClass = NSClassFromString("XCUIDeviceRemoteAutomationSession") else { return (nil, "XCTest automation classes unavailable") }
@@ -307,13 +352,33 @@ func loadAccessibility(_ session: AnyObject, timeout: Double) -> String? {
 }
 typealias BootstrapIMP = @convention(c) (AnyClass, Selector, AnyObject, Double, AnyObject?, UnsafeMutablePointer<NSError?>?) -> Bool
 var lastBootstrapError: String?
+/**
+ * The axe path's reload: FBSimulatorControl's own short-lived session (open, load accessibility, close), taken under
+ * the lock and after the gap our sessions keep (a session opened too soon after another closed is refused, and so is
+ * every later one), with its close time written for the next.
+ */
+func shortLivedBootstrap(_ original: BootstrapIMP, _ klass: AnyClass, _ sel: Selector, _ device: AnyObject, _ timeout: Double, _ logger: AnyObject?,
+                         _ errorOut: UnsafeMutablePointer<NSError?>?) -> Bool {
+  bootstrapCount += 1; sessionsOpened += 1
+  sessionTurnMs = takeSessionTurn()
+  let opened = Date()
+  var error: NSError?
+  let ok = original(klass, sel, device, timeout, logger, &error)
+  sessionLog("short-lived session \(ok ? "ok" : "failed") in \(ms(opened)) ms after waiting \(sessionTurnMs) ms")
+  try? String(Date().timeIntervalSince1970).write(toFile: sessionLockPath(), atomically: false, encoding: .utf8)
+  unlockSessionTurn()
+  if !ok { lastBootstrapError = error?.localizedDescription ?? "accessibility load refused"; errorOut?.pointee = error }
+  return ok
+}
 func installPersistentBootstrap() {
   let cls: AnyClass = FBSimulatorControlFrameworkLoader.self
   let sel = NSSelectorFromString("bootstrapAccessibilityForSimulatorDevice:timeout:logger:error:")
   guard let method = class_getClassMethod(cls, sel) else { return }
   let original = unsafeBitCast(method_getImplementation(method), to: BootstrapIMP.self)
   let block: @convention(block) (AnyClass, AnyObject, Double, AnyObject?, UnsafeMutablePointer<NSError?>?) -> Bool = { klass, device, timeout, logger, errorOut in
+    hookCalls += 1
     if skipBootstrap { return true }
+    if readPath == .axe { return shortLivedBootstrap(original, klass, sel, device, timeout, logger, errorOut) }
     if let session = automationSession {
       if !forceBootstrap { return true }
       bootstrapCount += 1; forceBootstrap = false
@@ -340,7 +405,9 @@ func installPersistentBootstrap() {
     automationSession = session; forceBootstrap = false
     return true
   }
-  method_setImplementation(method, imp_implementationWithBlock(block))
+  let hook = imp_implementationWithBlock(block)
+  method_setImplementation(method, hook)
+  hookInstalled = class_getClassMethod(cls, sel).map(method_getImplementation) == hook
 }
 func nodeCount(_ tree: Any) -> Int {
   if let list = tree as? [Any] { return list.reduce(0) { $0 + nodeCount($1) } }
@@ -413,7 +480,7 @@ func placed(_ node: [String: Any], _ p: Placement) -> [String: Any] {
 /** The element at a screen point as its app reports it (in the app's own points), or nil where there is none. */
 @MainActor
 func rawHit(_ simulator: FBSimulator, _ x: Double, _ y: Double) async -> [String: Any]? {
-  guard let element = try? await simulator.accessibilityElement(at: CGPoint(x: x, y: y)) else { return nil }
+  guard let element = try? await pointElement(simulator, CGPoint(x: x, y: y)) else { return nil }
   defer { element.close() }
   return (try? element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: false, keys: outputKeys)).elements).map(withDefaults) as? [String: Any]
 }
@@ -657,9 +724,9 @@ func withWebContent(_ simulator: FBSimulator, _ tree: Any) async -> Any {
 }
 /** One accessibility read of the frontmost app, with the options above; its time goes to lastSerializeMs. */
 @MainActor
-func serializeFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool) async throws -> Any {
+func serializeFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, reload: Bool = false) async throws -> Any {
   let start = Date()
-  let element = try await simulator.accessibilityElementForFrontmostApplication()
+  let element = try await frontmostElement(simulator, reload: reload)
   defer { element.close() }
   let response = try element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: nested, keys: keys, enableProfiling: readProfile,
     collectFrameCoverage: readRemote != nil, remoteContentOptions: readRemote))
@@ -683,8 +750,9 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
   lastSerializeMs = []
   for attempt in 0..<2 {
     do {
-      var tree = try await serializeFrontmost(simulator, keys: keys, nested: nested)
-      if attempt == 0 && isEmptyApp(tree) { forceBootstrap = true; reloaded = true; continue }
+      // The second attempt loads accessibility first (an app launched since the last load reads empty).
+      var tree = try await serializeFrontmost(simulator, keys: keys, nested: nested, reload: attempt > 0)
+      if attempt == 0 && isEmptyApp(tree) { reloaded = true; continue }
       // After accessibility was reloaded (an app that read empty), its elements fill in over a moment: read again
       // until two reads agree, up to 2 s. A newly opened app is read again by simulator-use (opening() in
       // src/look/read.ts); the pid comparison that once did it here never fired (pids came back nil), and every
@@ -707,7 +775,7 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
       lastTreeSignature = signature(tree)
       return tree
     } catch {
-      if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; reloadedAfterError = true; continue }
+      if attempt == 0 && String(describing: error).contains("No translation object") { reloadedAfterError = true; continue }
       throw error
     }
   }
@@ -757,6 +825,22 @@ func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
     throw EngineError(message: "input: an op of tap, swipe, drag or steps")
   }
 }
+/**
+ * The requests, one per line on stdin, read on a thread of their own. The main actor, where requests run one at a
+ * time, only awaits the next line and never blocks in a read of stdin: FBSimulatorControl 2's actors, its HID
+ * connection's readiness and the signal handlers below all need it free between requests. The stream ends with stdin.
+ */
+func requestLines() -> AsyncStream<String> {
+  AsyncStream { continuation in
+    let reader = Thread {
+      while let line = readLine() { continuation.yield(line) }
+      continuation.finish()
+    }
+    reader.name = "simulator-use-engine stdin"
+    reader.start()
+  }
+}
+
 /** Requests that send input to the phone: after one, the kept read (Settle.swift) is the past. */
 let inputOps: Set<String> = ["tap", "swipe", "type", "steps", "drag", "lock", "home", "open_url", "tap_settle_describe", "tap_trace"]
 
@@ -798,7 +882,8 @@ func main() async {
     seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.currentSurface()) }
     seedClock.resume()
     seedClocks.append(seedClock)
-    emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen])
+    emit(["ready": true, "load_ms": loaded, "hid_ms": ms(hidStart), "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil, "name": simulator.name, "screen": screen,
+          "reads": readPathName, "hid": hid.transportType == .dtuhid ? "dtuhid" : "indigo"])
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
       signal(sig, SIG_IGN)
@@ -806,7 +891,7 @@ func main() async {
       source.setEventHandler { closeSession(); exit(0) }
       source.resume(); signalSources.append(source)
     }
-    while let line = readLine() {
+    for await line in requestLines() {
       let t0 = Date()
       guard let data = line.data(using: .utf8), let req = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let op = req["op"] as? String else { emit(["ok": false, "error": "bad request"]); continue }
       let id = req["id"] ?? NSNull()
@@ -862,13 +947,13 @@ func main() async {
           let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
           for attempt in 0..<2 {
             do {
-              let element = try await simulator.accessibilityElement(at: CGPoint(x: x, y: y))
+              let element = try await pointElement(simulator, CGPoint(x: x, y: y), reload: attempt > 0)
               defer { element.close() }
               // nested: the element with everything under it (a hit on a web page's background is the page).
               answer["element"] = onScreen(withDefaults(try element.serialize(with: FBAccessibilityRequestOptions(nestedFormat: (req["nested"] as? Bool) ?? false, keys: outputKeys)).elements), at: CGPoint(x: x, y: y))
               break
             } catch {
-              if attempt == 0 && String(describing: error).contains("No translation object") { forceBootstrap = true; continue }
+              if attempt == 0 && String(describing: error).contains("No translation object") { continue }
               throw error
             }
           }
@@ -1019,7 +1104,7 @@ func main() async {
         default:
           throw EngineError(message: "unknown op \(op)")
         }
-        answer["ms"] = ms(t0); answer["bootstraps"] = bootstrapCount
+        answer["ms"] = ms(t0); answer["bootstraps"] = bootstrapCount; answer["sessions"] = sessionsOpened
         if let failure = lastBootstrapError { answer["bootstrap_error"] = failure; lastBootstrapError = nil }
         emit(answer)
       } catch {

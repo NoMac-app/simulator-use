@@ -9,8 +9,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "1.8.0";
-const SHA256 = "7b76340b72e90d0f211bc7c4636f15009076eff07acef2f2b632b175debd8834";
+const VERSION = "2.0.4";
+const SHA256 = "3178ec66d9ff46455fec737debad719c41cab16edb1435b2c721e07760a208c3";
 const RELEASE = `https://github.com/cameroncooke/AXe/releases/download/v${VERSION}/AXe-macOS-v${VERSION}-universal.tar.gz`;
 
 const root = fileURLToPath(new URL("..", import.meta.url));

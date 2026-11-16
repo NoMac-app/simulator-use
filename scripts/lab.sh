@@ -24,6 +24,8 @@ check() { # name, expected pattern, command...
 act() { $DL act --device "$U" "$@"; }
 
 check "build, install and launch" 'EdgeLab · Controls' $DL run examples/edge-lab --device "$U"
+# The engine reads without opening an automation session per read (scripts/engine-check.mjs).
+check "the engine reads on its fast path" '^fast path' node scripts/engine-check.mjs "$U"
 check "segments are not tabs" '^segment "M" selected' $DL look --device "$U"
 check "stepper buttons" 'Count: 3' act 'tap #count-Increment'
 check "set a slider" '#volume "Volume" ="0\.75"|#volume' act 'set #volume 75'

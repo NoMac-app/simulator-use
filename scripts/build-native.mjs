@@ -16,17 +16,23 @@ if (process.env.SIMULATOR_USE_SKIP_NATIVE === "1") {
   process.exit(0);
 }
 if (!existsSync(join(vendor, "Frameworks", "FBSimulatorControl.framework"))) throw new Error("AXe's frameworks are missing from vendor/axe: run scripts/fetch-axe.mjs first");
-// The engine compiles against idb's private headers (never shipped): those of the idb commit AXe 1.8.0 builds its
-// frameworks from (AXe's scripts/build.sh), fetched once into node_modules/.cache when IDB_HEADERS is not given.
-const IDB_REF = "604c51013438f0c3603b720a05a44b7c5b8f286d";
+// The engine compiles against idb's private headers (never shipped). Since AXe 2.0 they live in AXe's own repository
+// (Packages/IDBKit/PrivateHeaders), beside the frameworks' sources: those of the commit the pinned release (AXe
+// v2.0.4, scripts/fetch-axe.mjs) was built from, fetched once into node_modules/.cache when IDB_HEADERS is not given.
+const AXE_COMMIT = "3e4100f6805b78a2b457935afa086e95d1c8cf7d"; // tag v2.0.4
+const HEADERS = "Packages/IDBKit/PrivateHeaders";
 if (!process.env.IDB_HEADERS) {
-  const cache = join(root, "node_modules", ".cache", `idb-${IDB_REF.slice(0, 12)}`);
-  if (!existsSync(join(cache, "PrivateHeaders"))) {
+  const cache = join(root, "node_modules", ".cache", `axe-${AXE_COMMIT.slice(0, 12)}`);
+  if (!existsSync(join(cache, HEADERS))) {
     rmSync(cache, { recursive: true, force: true });
-    execFileSync("git", ["clone", "--quiet", "--filter=blob:none", "--no-checkout", "https://github.com/cameroncooke/idb.git", cache], { stdio: "inherit" });
-    execFileSync("git", ["-C", cache, "checkout", "--quiet", IDB_REF, "--", "PrivateHeaders"], { stdio: "inherit" });
+    // That one commit's tree, and only the headers' files (a few hundred KB, not the repository's history).
+    const git = (...args) => execFileSync("git", ["-C", cache, ...args], { stdio: "inherit" });
+    execFileSync("git", ["init", "--quiet", cache], { stdio: "inherit" });
+    git("remote", "add", "origin", "https://github.com/cameroncooke/AXe.git");
+    git("fetch", "--quiet", "--depth", "1", "--filter=blob:none", "origin", AXE_COMMIT);
+    git("checkout", "--quiet", AXE_COMMIT, "--", HEADERS);
   }
-  process.env.IDB_HEADERS = join(cache, "PrivateHeaders");
+  process.env.IDB_HEADERS = join(cache, HEADERS);
 }
 if (!existsSync(process.env.IDB_HEADERS)) throw new Error(`IDB_HEADERS (${process.env.IDB_HEADERS}) does not exist; SIMULATOR_USE_SKIP_NATIVE=1 packs without the native parts`);
 const sh = (script) => execFileSync("bash", [script], { cwd: root, stdio: "inherit", env: process.env });

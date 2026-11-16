@@ -7,8 +7,8 @@
 import Foundation
 import CoreGraphics
 import IOSurface
-import FBControlCore
-import FBSimulatorControl
+@preconcurrency import FBControlCore
+@preconcurrency import FBSimulatorControl
 
 /** A caret is about 2 points wide; with its antialiasing a blink changes at most this wide a band. */
 let caretMaxWidth: CGFloat = 4.5
