@@ -216,7 +216,7 @@ let readPath: ReadPath = {
 }()
 /** Whether the bootstrap hook is in place: without it every read would open a session of its own. */
 var hookInstalled = false
-/** Automation sessions opened, kept or short-lived (every answer carries the count). */
+/** Automation sessions opened, kept or short-lived (every answer carries the count); a request that failed is not one. */
 var sessionsOpened = 0
 /** The way reads actually go, for the ready line and every read's answer. */
 var readPathName: String { hookInstalled ? readPath.rawValue : "per-call" }
@@ -266,7 +266,6 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   sessionLog("open after waiting \(sessionTurnMs) ms")
   let opened = Date()
   var outcome = "failed"
-  sessionsOpened += 1
   defer { sessionLog("open \(outcome) in \(ms(opened)) ms"); unlockSessionTurn() }
   guard let providerClass: AnyClass = NSClassFromString("XCUIDeviceRemoteDaemonConnectionProvider"),
         let sessionClass: AnyClass = NSClassFromString("XCUIDeviceRemoteAutomationSession") else { return (nil, "XCTest automation classes unavailable") }
@@ -279,12 +278,13 @@ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
   if done.wait(timeout: .now() + timeout) == .timedOut { outcome = "timed out"; return (nil, "timed out creating the remote automation session") }
   guard let session else { return (nil, failure ?? "no session") }
-  typealias EnableFn = @convention(c) (AnyObject, Selector, UnsafeMutablePointer<NSError?>?) -> Bool
+  // An Objective-C NSError ** is autoreleasing: the callee hands back an object it does not own.
+  typealias EnableFn = @convention(c) (AnyObject, Selector, AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool
   if session.responds(to: NSSelectorFromString("enableAutomationModeWithError:")) {
     var error: NSError?
     if !unsafeBitCast(objcCall(session, "enableAutomationModeWithError:"), to: EnableFn.self)(session, NSSelectorFromString("enableAutomationModeWithError:"), &error) { return (nil, "automation mode: \(error?.localizedDescription ?? "refused")") }
   }
-  outcome = "ok"
+  outcome = "ok"; sessionsOpened += 1
   return (session, nil)
 }
 /** Ends the automation session so the phone accepts the next client's session (a session left open blocks them). */
@@ -350,7 +350,8 @@ func loadAccessibility(_ session: AnyObject, timeout: Double) -> String? {
   if done.wait(timeout: .now() + timeout + 1) == .timedOut { return "timed out loading accessibility" }
   return ok ? nil : (failure ?? "accessibility load refused")
 }
-typealias BootstrapIMP = @convention(c) (AnyClass, Selector, AnyObject, Double, AnyObject?, UnsafeMutablePointer<NSError?>?) -> Bool
+/** +[FBSimulatorControlFrameworkLoader bootstrapAccessibilityForSimulatorDevice:timeout:logger:error:]; its NSError ** is autoreleasing. */
+typealias BootstrapIMP = @convention(c) (AnyClass, Selector, AnyObject, Double, AnyObject?, AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool
 var lastBootstrapError: String?
 /**
  * The axe path's reload: FBSimulatorControl's own short-lived session (open, load accessibility, close), taken under
@@ -358,8 +359,8 @@ var lastBootstrapError: String?
  * every later one), with its close time written for the next.
  */
 func shortLivedBootstrap(_ original: BootstrapIMP, _ klass: AnyClass, _ sel: Selector, _ device: AnyObject, _ timeout: Double, _ logger: AnyObject?,
-                         _ errorOut: UnsafeMutablePointer<NSError?>?) -> Bool {
-  bootstrapCount += 1; sessionsOpened += 1
+                         _ errorOut: AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool {
+  bootstrapCount += 1
   sessionTurnMs = takeSessionTurn()
   let opened = Date()
   var error: NSError?
@@ -367,7 +368,7 @@ func shortLivedBootstrap(_ original: BootstrapIMP, _ klass: AnyClass, _ sel: Sel
   sessionLog("short-lived session \(ok ? "ok" : "failed") in \(ms(opened)) ms after waiting \(sessionTurnMs) ms")
   try? String(Date().timeIntervalSince1970).write(toFile: sessionLockPath(), atomically: false, encoding: .utf8)
   unlockSessionTurn()
-  if !ok { lastBootstrapError = error?.localizedDescription ?? "accessibility load refused"; errorOut?.pointee = error }
+  if ok { sessionsOpened += 1 } else { lastBootstrapError = error?.localizedDescription ?? "accessibility load refused"; errorOut?.pointee = error }
   return ok
 }
 func installPersistentBootstrap() {
@@ -375,7 +376,7 @@ func installPersistentBootstrap() {
   let sel = NSSelectorFromString("bootstrapAccessibilityForSimulatorDevice:timeout:logger:error:")
   guard let method = class_getClassMethod(cls, sel) else { return }
   let original = unsafeBitCast(method_getImplementation(method), to: BootstrapIMP.self)
-  let block: @convention(block) (AnyClass, AnyObject, Double, AnyObject?, UnsafeMutablePointer<NSError?>?) -> Bool = { klass, device, timeout, logger, errorOut in
+  let block: @convention(block) (AnyClass, AnyObject, Double, AnyObject?, AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool = { klass, device, timeout, logger, errorOut in
     if skipBootstrap { return true }
     if readPath == .axe { return shortLivedBootstrap(original, klass, sel, device, timeout, logger, errorOut) }
     if let session = automationSession {
