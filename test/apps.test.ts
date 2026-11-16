@@ -161,6 +161,34 @@ test("pasted text reaches the Simulator on standard input, never in an argument,
   }
 });
 
+test("pasted text set by simctl is read back, and set from inside the phone when it did not arrive (Device Hub open)", async () => {
+  for (const hubOpen of [false, true]) {
+    const bin = mkdtempSync(join(tmpdir(), "su-pb-"));
+    const record = join(bin, "calls");
+    const board = join(bin, "board");
+    // A stand-in xcrun with a clipboard: pbcopy keeps its input, pbpaste prints it; with Device Hub open, pbcopy's
+    // input is lost (the Mac's empty clipboard wins) and only the helper inside the phone sets it.
+    const pbcopy = hubOpen ? "cat > /dev/null; : > \"$B\"" : "cat > \"$B\"";
+    writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nB="${board}"\nprintf 'args:%s\\n' "$*" >> "${record}"\ncase "$2" in\n  pbcopy) ${pbcopy} ;;\n  pbpaste) cat "$B" 2>/dev/null ;;\n  spawn) cat > "$B" ;;\nesac\nexit 0\n`, { mode: 0o755 });
+    const path = process.env.PATH;
+    process.env.PATH = `${bin}:${path}`;
+    try {
+      if (hubOpen && !pasteHelper()) {
+        // A build without the helper (SIMULATOR_USE_SKIP_NATIVE) says why instead of pasting the wrong text.
+        await assert.rejects(setPasteboard("UDID", "hunter2 é 日本 🚀"), /clipboard: simctl pbcopy's text did not reach the phone/);
+        continue;
+      }
+      await setPasteboard("UDID", "hunter2 é 日本 🚀");
+      assert.equal(readFileSync(board, "utf8"), "hunter2 é 日本 🚀");
+      const calls = readFileSync(record, "utf8").trim().split("\n");
+      assert.deepEqual(calls.map((l) => l.split(" ").slice(0, 2).join(" ")), hubOpen ? ["args:simctl pbcopy", "args:simctl pbpaste", "args:simctl spawn"] : ["args:simctl pbcopy", "args:simctl pbpaste"]);
+      assert.doesNotMatch(calls.join("\n"), /hunter2/);
+    } finally {
+      process.env.PATH = path;
+    }
+  }
+});
+
 test("a link opens through the engine's input; a shared host never puts it in simctl's arguments", async () => {
   const bin = mkdtempSync(join(tmpdir(), "su-open-"));
   const record = join(bin, "calls");

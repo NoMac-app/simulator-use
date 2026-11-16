@@ -242,18 +242,26 @@ export function withInput(args: string[], input: string, timeoutMs: number): Pro
 
 /** Puts text on the Simulator's clipboard, for pasting what the keyboard can't type (é, 日本, emoji). */
 export async function setPasteboard(udid: string, text: string): Promise<void> {
+  let failure: string;
   try {
     await withInput(["simctl", "pbcopy", udid], text, 15_000);
+    // While Device Hub shows the phone, it keeps the phone's clipboard in step with the Mac's, and what simctl pbcopy
+    // puts there never arrives: the phone's clipboard read back empty and the paste left the field as it was, with any
+    // build of simulator-use (November 16, 2026). So it is read back, and set from inside the phone when it differs.
+    const back = await simctl(["pbpaste", udid], 15_000).then((r) => r.stdout, () => undefined);
+    if (back === text) return;
+    failure = back === undefined ? "simctl pbpaste failed" : "simctl pbcopy's text did not reach the phone (Device Hub keeps its clipboard in step with the Mac's)";
   } catch (error) {
     // A macOS user with no screen session (a shared Simulator host's users) has no pasteboard server, and simctl
     // pbcopy crashes: the helper sets the phone's own pasteboard from inside the phone instead, from its input.
-    const helper = pasteHelper();
-    if (!helper) throw new ToolError(`Could not set the Simulator's clipboard: ${(error as Error).message}`);
-    try {
-      await withInput(["simctl", "spawn", udid, helper, "-"], text, 15_000);
-    } catch (fallback) {
-      throw new ToolError(`Could not set the Simulator's clipboard: ${(error as Error).message}; from inside the phone: ${(fallback as Error).message}`);
-    }
+    failure = (error as Error).message;
+  }
+  const helper = pasteHelper();
+  if (!helper) throw new ToolError(`Could not set the Simulator's clipboard: ${failure}`);
+  try {
+    await withInput(["simctl", "spawn", udid, helper, "-"], text, 15_000);
+  } catch (fallback) {
+    throw new ToolError(`Could not set the Simulator's clipboard: ${failure}; from inside the phone: ${(fallback as Error).message}`);
   }
 }
 
