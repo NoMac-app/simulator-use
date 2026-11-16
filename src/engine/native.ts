@@ -9,10 +9,10 @@ import { setting } from "../settings.ts";
 
 /**
  * The native engine (native/engine): one long-lived process per booted Simulator that keeps CoreSimulator's
- * HID connection, accessibility and screen buffer open, so a tap is about a millisecond and a full read a few
- * hundred, where AXe pays one to three seconds per call to set up. When it is missing or fails, every caller
- * falls back to AXe. It sits beside AXe's frameworks (vendor/axe), which it loads; SIMULATOR_USE_ENGINE points
- * at another build, or "off" turns it off.
+ * HID connection, accessibility and screen buffer open, so a tap is sent in about a millisecond and a full read takes
+ * a few hundred, where AXe's command line starts a process for every call (AXe 2.0.4: about 0.4 s a read or a tap,
+ * November 2026). When it is missing or fails, every caller falls back to AXe. It sits beside AXe's frameworks
+ * (vendor/axe), which it loads; SIMULATOR_USE_ENGINE points at another build, or "off" turns it off.
  */
 export function enginePath(): string | undefined {
   const override = setting("ENGINE");
