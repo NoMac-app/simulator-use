@@ -1,0 +1,45 @@
+Using iPhone 17 Pro (iOS 27.2, A8130860-E241-4325-986A-F2BE177DC0A6); the other tools use it from now on.
+PASS build, install and launch (14 s)
+PASS the engine reads on its fast path (4 s)
+PASS segments are not tabs (3 s)
+PASS stepper buttons (3 s)
+PASS set a slider (17 s)
+PASS menu pick (6 s)
+PASS alert in front, alone (6 s)
+PASS answer the alert (3 s)
+PASS sheet in front, its Done reachable (4 s)
+PASS close the sheet (3 s)
+PASS full-screen cover (4 s)
+PASS close the cover (3 s)
+FAIL iOS permission prompt, named after the app
+  1 step done in 6.1 s
+  step 1 (tap "Ask for location"): no visible change
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: Call simulator-use look to see what is on screen.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Dialogs · iPhone 17 Pro (iOS 27.2)
+  button "Show alert" @201,194
+  button "Show choices" @201,246
+  button "Show sheet" @201,298
+  button "Show full screen" @201,350
+  button "Ask for location" @201,402
+  button "Ask for photos" @201,454
+  button "Ask for notifications" @201,506
+  button "Ask for contacts" @201,558
+  text "Result: cancelled" #dialogResult @201,610
+  tabs: Controls @64,822, Dialogs (selected) @132,822, Lists @201,822, Text @270,822, More @339,822
+PASS notifications, prompt waited for and allowed (3 s)
+PASS text in any language (6 s)
+PASS autocorrect undone by paste (7 s)
+PASS delayed content (6 s)
+PASS toast comes and goes (5 s)
+PASS swipe a row to delete (4 s)
+PASS delete it (4 s)
+PASS long press menu (5 s)
+PASS pin from the menu (3 s)
+PASS web view called unreadable (7 s)
+PASS UIKit table, real title (6 s)
+PASS deep link opened (3 s)
+PASS deep link arrives (5 s)

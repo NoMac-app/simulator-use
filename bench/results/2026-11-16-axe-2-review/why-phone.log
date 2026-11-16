@@ -1,0 +1,243 @@
+getpwuid_r did not find a match for uid 502
+Timestamp               Ty Process[PID:TID]
+2026-11-16 20:52:18.343 Df launchd_sim[32639:4d40c] [user/502/com.apple.testmanagerd [32761]:] Successfully spawned testmanagerd[32761] because ipc (socket)
+2026-11-16 20:52:26.231 A  testmanagerd[32761:4d5ee] (libsystem_containermanager.dylib) container_query_t
+2026-11-16 20:52:26.231 Df testmanagerd[32761:0] [com.apple.libsystem.libdispatch:] BUG in libdispatch: 25G83 24B8117 - 653 - 0x4
+2026-11-16 20:52:26.233 Df testmanagerd[32761:4d5ee] [com.apple.containermanager:query] Query; personaid = 4294967295, type = NOPERSONA, name = <unknown>, origin [pid = 0, personaid = 0], proximate [pid = 0, personaid = 0], euid = 502, uid = 502, class = 10, identifier = [(null)](0), gidentifier = [(null)](0), persona = 🔒com.apple.containermanager.primary-persona, instance = 🔒*, uuid = 🔒*, flags = 900000003
+2026-11-16 20:52:26.235 A  testmanagerd[32761:4d5ee] (libsystem_containermanager.dylib) container_copy_sandbox_token
+2026-11-16 20:52:26.235 Df testmanagerd[32761:4d5ee] Successfully created data container at file:///Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data/Containers/Data/InternalDaemon/A72AE669-ADE9-4D17-9F5F-3BDA32418FD6/
+2026-11-16 20:52:26.235 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Data container URL: file:///Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data/Containers/Data/InternalDaemon/A72AE669-ADE9-4D17-9F5F-3BDA32418FD6/
+2026-11-16 20:52:26.236 Df testmanagerd[32761:4d5ee] [com.apple.FileURL:default] kExcludedFromBackupXattrName set on path: /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data/Containers/Data/InternalDaemon/A72AE669-ADE9-4D17-9F5F-3BDA32418FD6/tmp/Attachments
+2026-11-16 20:52:26.236 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming remote runner connections from <NSXPCListener: 0x101ce88c0> service: com.apple.dt.xctestd.remote.runner
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162ac50] activating connection: mach=true listener=true peer=false name=com.apple.dt.xctestd.remote.runner
+2026-11-16 20:52:26.237 Df launchd_sim[32639:4d6e7] [user/502:] failed activation: name = com.apple.dt.xctestd.remote.runner, flags = 0x0, requestor = testmanagerd[32761], error = 1: Operation not permitted
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162ac50] listener failed to activate: xpc_error=[1: Operation not permitted]
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162ac50] invalidated after a failed init
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming IDE connections from <NSXPCListener: 0x101ce8980> service: com.apple.testmanagerd.control
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162d4f0] activating connection: mach=true listener=true peer=false name=com.apple.testmanagerd.control
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming IDE connections from named socket com.apple.testmanagerd.unix-domain.socket
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming IDE connections from named socket com.apple.testmanagerd.remote-automation.uds
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming test runner connections from <NSXPCListener: 0x101ce89c0> service: com.apple.testmanagerd
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162d730] activating connection: mach=true listener=true peer=false name=com.apple.testmanagerd
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Listening for incoming test target connections from <NSXPCListener: 0x101ce8a00> service: com.apple.dt.xctestd.target
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x10162d8f0] activating connection: mach=true listener=true peer=false name=com.apple.dt.xctestd.target
+2026-11-16 20:52:26.237 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Creating XCTDAutomationModeInterface.sharedInterface
+2026-11-16 20:52:26.238 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Init XCTDAutomationModeInterface, automationModeFunctions.registerAutomationModeChangeHandler is 0x1005af784, from stack (
+	0   testmanagerd                        0x0000000100424d04 -[XCTDAutomationModeInterface initWithAutomationModeFunctions:] + 148
+	1   testmanagerd                        0x0000000100424c48 __46+[XCTDAutomationModeInterface sharedInterface]_block_invoke + 140
+	2   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	3   libdispatch.dylib                   0x00000001e6727fa0 _dispatch_once_callout + 28
+	4   testmanagerd                        0x0000000100424bb4 +[XCTDAutomationModeInterface sharedInterface] + 40
+	5   testmanagerd                        0x0000000100432bb8 -[XCTDRemoteAutomationSession initWithConnectedSocket:diagnosticsProvider:targetBootstrapSessionProvider:remoteRunnerConnectionBroker:] + 84
+	6   testmanagerd                        0x0000000100447cc8 -[XCTDDaemon serverReceivedConnectionForServiceType:overSocket:effectiveUserIdentifier:clientPrivilege:disconnectionHandler:] + 372
+	7   testmanagerd                        0x000000010044c430
+2026-11-16 20:52:26.238 Df testmanagerd[32761:4d839] [com.apple.dt.automationmode:Default] XAM shared observer connecting to com.apple.dt.automationmode.reader
+2026-11-16 20:52:26.238 Df testmanagerd[32761:4d839] [com.apple.xpc:connection] [0x101d90000] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:26.243 Df testmanagerd[32761:4d5ee] [com.apple.xpc:connection] [0x101d90140] activating connection: mach=true listener=false peer=false name=com.apple.cfprefsd.daemon
+2026-11-16 20:52:26.248 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Launched testmanagerd from /var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.2.8117.0.cU3aUZ/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.2.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/testmanagerd, modified on Tuesday, October 20, 2026 at 6:22:35 PM Greenwich Mean Time
+2026-11-16 20:52:27.602 Df automationmode-writer[32803:0] [com.apple.libsystem.libdispatch:] BUG in libdispatch: 25G83 24B8117 - 653 - 0x4
+2026-11-16 20:52:27.604 Df automationmode-writer[32803:4d83c] [com.apple.dt.automationmode-writer:Default] AutomationMode writer daemon launched with state file /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled, mach service name com.apple.dt.automationmode.writer.
+2026-11-16 20:52:27.606 Df automationmode-writer[32803:4d83c] [com.apple.xpc:connection] [0x10317e6c0] activating connection: mach=true listener=false peer=false name=com.apple.cfprefsd.daemon
+2026-11-16 20:52:27.607 Df automationmode-writer[32803:4d83c] [com.apple.dt.automationmode-writer:Default] Boot session UUID is CC26A6CC-EC7E-467D-9DAB-DBD1407C2422
+2026-11-16 20:52:27.608 Df automationmode-writer[32803:4d83c] [com.apple.xpc:connection] [0x103182530] activating connection: mach=true listener=true peer=false name=com.apple.dt.automationmode.writer
+2026-11-16 20:52:27.608 Df automationmode-writer[32803:4d83c] [com.apple.dt.automationmode-writer:Default] AutomationMode reader listening to mach service name com.apple.dt.automationmode.reader
+2026-11-16 20:52:27.608 Df automationmode-writer[32803:4d83c] [com.apple.xpc:connection] [0x103182670] activating connection: mach=true listener=true peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:27.692 Df automationmode-writer[32803:4d83c] [com.apple.dt.automationmode-writer:Default] Waiting for connections
+2026-11-16 20:52:27.692 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Received reader connection request
+2026-11-16 20:52:27.692 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103183290] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.reader.peer[32761].0x103183290
+2026-11-16 20:52:27.692 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Reader client asked if automation mode is enabled, checking for state file at /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled
+2026-11-16 20:52:27.692 Df testmanagerd[32761:4d839] [com.apple.xpc:connection] [0x101d90000] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:27.693 Df testmanagerd[32761:4d839] [com.apple.runningboard:connection] Initializing connection
+2026-11-16 20:52:27.693 Df testmanagerd[32761:4d839] [com.apple.runningboard:process] Removing all cached process handles
+2026-11-16 20:52:27.693 Df testmanagerd[32761:4d83a] [com.apple.runningboard:connection] Sending handshake request attempt #1 to server
+2026-11-16 20:52:27.693 Df testmanagerd[32761:4d83a] [com.apple.runningboard:connection] Creating connection to com.apple.runningboard
+2026-11-16 20:52:27.693 Df testmanagerd[32761:4d83a] [com.apple.xpc:connection] [0x101d90000] activating connection: mach=true listener=false peer=false name=com.apple.runningboard
+2026-11-16 20:52:27.695 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-16 20:52:27.696 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Beginning AX loading sequence.
+2026-11-16 20:52:27.696 Df testmanagerd[32761:4d839] [com.apple.Accessibility:AXSupportCommon] Setting automation enabled: 1
+2026-11-16 20:52:27.697 Df testmanagerd[32761:4d83a] [com.apple.runningboard:connection] Handshake succeeded
+2026-11-16 20:52:27.697 Df testmanagerd[32761:4d83a] [com.apple.runningboard:connection] Identity resolved as osservice<com.apple.testmanagerd>
+2026-11-16 20:52:27.698 Df testmanagerd[32761:4d839] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 1, cached: 0
+2026-11-16 20:52:27.706 Df testmanagerd[32761:4d839] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 1, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000100423e20 -[XCTDAccessibilitySystem _queue_loadAccessibilityIfNeeded:andWaitForNotificationWithTimeout:error:] + 344
+	3   testmanagerd                        0x0000000100423b8c -[XCTDAccessibilitySystem _queue_loadAccessibilityWithTimeout:error:] + 404
+	4   testmanagerd                        0x00000001004239a8 __62-[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:]_block_invoke + 44
+	5   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	6   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	7   testmanagerd                        0x00000001004238d0 -[XCTDAccessibilitySystem loadAccessibilityWithTimeout:error:] + 180
+	8   testmanagerd
+2026-11-16 20:52:27.707 Df testmanagerd[32761:4d839] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 1
+2026-11-16 20:52:27.708 Df testmanagerd[32761:4d839] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 20:52:27.708 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Waiting 120.0s for AX to finish loading...
+2026-11-16 20:52:28.226 Df testmanagerd[32761:4d5ee] [com.apple.Accessibility:AXCommon] Read Per-App on Init: Smart invert = (null)
+2026-11-16 20:52:43.959 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103183290] invalidated because the client process (pid 32761) either cancelled the connection or exited
+2026-11-16 20:52:44.347 Df testmanagerd[32761:4d87b] [com.apple.dt.xctest:Default] Received kAXAccessibilityLoaded notification
+2026-11-16 20:52:44.348 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-16 20:52:44.351 Df testmanagerd[32761:4d839] (libMobileGestalt.dylib) No persisted cache on this platform.
+2026-11-16 20:52:44.352 Df testmanagerd[32761:4d839] (libMobileGestalt.dylib) MGIsDeviceOneOfType is not supported on this platform.
+2026-11-16 20:52:44.354 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] AXDisableAccessibilityOnTermination() returned kAXErrorSuccess
+2026-11-16 20:52:44.354 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Finished loading AX.
+2026-11-16 20:52:44.355 Df testmanagerd[32761:4d839] [com.apple.xpc:connection] [0x101d903c0] activating connection: mach=false listener=false peer=false name=(anonymous)
+2026-11-16 20:52:44.356 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Initial device orientation 0
+2026-11-16 20:52:44.356 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Enabled BKSAccelerometer orientation events
+2026-11-16 20:52:44.356 Df testmanagerd[32761:4d839] [com.apple.FrontBoard:InterfaceOrientationObserver] Creating orientation service connection with <BSServiceConnectionEndpoint: 0x101e18460; target: com.apple.frontboard.systemappservices; service: com.apple.frontboard.orientation-observer>
+2026-11-16 20:52:44.367 Df testmanagerd[32761:4d87b] [com.apple.dt.xctest:Default] Handling a remote automation proxy request
+2026-11-16 20:52:44.368 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=1>. Total clients: 1
+2026-11-16 20:52:44.368 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Enabling Automation Mode...
+2026-11-16 20:52:44.368 Df testmanagerd[32761:4d839] [com.apple.xpc:connection] [0x101d90500] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.writer
+2026-11-16 20:52:44.368 Df testmanagerd[32761:4d839] [com.apple.dt.automationmode:Default] Created new connection <NSXPCConnection: 0x101d1d900> connection to service named com.apple.dt.automationmode.writer.
+2026-11-16 20:52:44.368 Df testmanagerd[32761:4dc6f] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 0
+2026-11-16 20:52:44.369 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Received connection request
+2026-11-16 20:52:44.369 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x1031827b0] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.writer.peer[32761].0x1031827b0
+2026-11-16 20:52:44.369 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Authentication not required in the simulator
+2026-11-16 20:52:44.369 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Executing request to ENABLE automation mode
+2026-11-16 20:52:44.370 Df testmanagerd[32761:4dc6f] [com.apple.dt.xctest:Default] Received request to exchange capabilities, remote interface capabilities are: <XCTCapabilities: 0x1016332b0>: {
+    "application state change handling capability" = 2;
+    "handle AX notification capability" = 1;
+    "override implicit event confirmation interval" = 1;
+    "process launch returns a PID value" = 1;
+    "request screenshot attachment capability" = 1;
+    "request screenshot capability" = 3;
+    "reset authorization status of protected resources" = 1;
+    "supports Multi-Device native code execution" = 1;
+    "supports Multi-Device screen recordings" = 1;
+    "supports dedicated launching for Multi-Device remote runners" = 1;
+}
+2026-11-16 20:52:44.371 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Created state file for automation mode at file:///Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled with boot session id CC26A6CC-EC7E-467D-9DAB-DBD1407C2422
+2026-11-16 20:52:44.371 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Successfully set automation mode to ENABLED
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4d839] [com.apple.dt.automationmode:Default] Invalidating connection <NSXPCConnection: 0x101d1d900> connection to service with pid 32803 named com.apple.dt.automationmode.writer.
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4d839] [com.apple.xpc:connection] [0x101d90500] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4dc70] [com.apple.dt.automationmode:Default] Handling posted change notification (com.apple.dt.automationmode.state-changed)
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Finished enabling Automation Mode
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4dc70] [com.apple.dt.automationmode:Default] XAM shared observer connecting to com.apple.dt.automationmode.reader
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Adding <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=1> to the set of remote automation sessions
+2026-11-16 20:52:44.371 Df testmanagerd[32761:4dc70] [com.apple.xpc:connection] [0x101d90780] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:44.372 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x1031827b0] invalidated because the client process (pid 32761) either cancelled the connection or exited
+2026-11-16 20:52:44.372 Df automationmode-writer[32803:4dc65] [com.apple.dt.automationmode-writer:Default] Received reader connection request
+2026-11-16 20:52:44.372 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x103d20000] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.reader.peer[32761].0x103d20000
+2026-11-16 20:52:44.372 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Reader client asked if automation mode is enabled, checking for state file at /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled
+2026-11-16 20:52:44.372 Df testmanagerd[32761:4dc70] [com.apple.xpc:connection] [0x101d90780] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:44.372 Df testmanagerd[32761:4dc70] [com.apple.dt.automationmode:Default] Comparing previous enabled state (0) to current enabled state (1)
+2026-11-16 20:52:44.405 Df testmanagerd[32761:4dc71] [com.apple.FrontBoard:InterfaceOrientationObserver] <0x101ce9280> connection activated: <BSXPC(com.apple.frontboard.systemappservices[C:1-2])-as(com.apple.frontboard.orientation-observer):0x101e400f0>
+2026-11-16 20:52:44.405 Df testmanagerd[32761:4dc71] [com.apple.FrontBoard:InterfaceOrientationObserver] <0x101ca1020> Received orientation reset.
+2026-11-16 20:52:44.405 Df testmanagerd[32761:4dc70] [com.apple.FrontBoard:InterfaceOrientationObserver] <0x101ca1020> Received orientation update: state: displayIdentity: Main; interfaceOrientation: portrait (1); animationDuration: 0.30; clockwise: 1; sequenceNumber: 1.
+2026-11-16 20:52:44.406 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Interface orientation updated to Portrait
+2026-11-16 20:52:44.419 Df testmanagerd[32761:4d87b] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 1. Remote automation session had previously enabled? 0
+2026-11-16 20:52:44.422 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Remote driver requested automation mode be enabled
+2026-11-16 20:52:44.422 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Added Automation Mode client <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=1>. Total clients: 1
+2026-11-16 20:52:44.423 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Automation already enabled, nothing to do.
+2026-11-16 20:52:44.835 Df AutomationModeUI[32861:0] [com.apple.libsystem.libdispatch:] BUG in libdispatch: 25G83 24B8117 - 653 - 0x4
+2026-11-16 20:52:44.835 Df AutomationModeUI[32861:4dc7b] [com.apple.dt.automationmode:Default] XAM shared observer connecting to com.apple.dt.automationmode.reader
+2026-11-16 20:52:44.836 Df AutomationModeUI[32861:4dc7b] [com.apple.xpc:connection] [0x100f83350] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:44.836 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x103d20000] invalidated because the client process (pid 32761) either cancelled the connection or exited
+2026-11-16 20:52:44.836 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Received reader connection request
+2026-11-16 20:52:44.837 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103d20140] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.reader.peer[32861].0x103d20140
+2026-11-16 20:52:44.837 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Reader client asked if automation mode is enabled, checking for state file at /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled
+2026-11-16 20:52:44.837 Df AutomationModeUI[32861:4dc7b] [com.apple.xpc:connection] [0x100f83350] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:44.837 Df AutomationModeUI[32861:4dc7b] Handling transition to automation mode ENABLED
+2026-11-16 20:52:44.839 Df AutomationModeUI[32861:4dc7b] [com.apple.dt.AutomationModeUI:Default] Starting to monitor HID events
+2026-11-16 20:52:44.843 Df AutomationModeUI[32861:4dc7b] [com.apple.xpc:connection] [0x100f86c20] activating connection: mach=true listener=false peer=false name=com.apple.cfprefsd.daemon
+2026-11-16 20:52:44.846 Df AutomationModeUI[32861:4dc7b] [com.apple.dt.AutomationModeUI:Default] Overlay not displayed in the Simulator
+2026-11-16 20:52:45.173 Df testmanagerd[32761:4d839] [com.apple.dt.xctest:Default] Closing remote automation socket 6
+2026-11-16 20:52:45.173 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Remote automation session disconnected.
+2026-11-16 20:52:45.173 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Tearing down <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=1>.
+2026-11-16 20:52:45.176 Df testmanagerd[32761:4dc70] [com.apple.locationd.Core:Simulation] {"msg":"getDaemonProxy called"}
+2026-11-16 20:52:45.178 Df testmanagerd[32761:4dc70] [com.apple.locationd.Core:Simulation] {"msg":"no existing connection, trying to get one"}
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.xpc:connection] [0x101d90640] activating connection: mach=true listener=false peer=false name=com.apple.locationd.simulation
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.locationd.Core:Simulation] {"msg":"Do we have a proxy?", "proxy":<__NSXPCInterfaceProxy_CLSimulationXPCServerInterface: 0x101e403c0>, "connection":<NSXPCConnection: 0x101d1d7c0> connection to service named com.apple.locationd.simulation}
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.locationd.Core:Simulation] {"msg":"getDaemonProxy called"}
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.locationd.Core:Simulation] {"msg":"Do we have a proxy?", "proxy":<__NSXPCInterfaceProxy_CLSimulationXPCServerInterface: 0x101e40550>, "connection":<NSXPCConnection: 0x101d1d7c0> connection to service named com.apple.locationd.simulation}
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] disableAutomationModeForClient
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Removed Automation Mode client <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=0>. Total clients: 0
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Disabling Automation Mode...
+2026-11-16 20:52:45.179 Df testmanagerd[32761:4dc70] [com.apple.xpc:connection] [0x101d90780] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.writer
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc70] [com.apple.dt.automationmode:Default] Created new connection <NSXPCConnection: 0x101d1d9a0> connection to service named com.apple.dt.automationmode.writer.
+2026-11-16 20:52:45.180 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Received connection request
+2026-11-16 20:52:45.180 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103d20000] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.writer.peer[32761].0x103d20000
+2026-11-16 20:52:45.180 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Executing request to disable automation mode
+2026-11-16 20:52:45.180 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x103d20140] invalidated because the client process (pid 32861) either cancelled the connection or exited
+2026-11-16 20:52:45.180 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Successfully set automation mode to disabled
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc71] [com.apple.dt.automationmode:Default] Handling posted change notification (com.apple.dt.automationmode.state-changed)
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc71] [com.apple.dt.automationmode:Default] XAM shared observer connecting to com.apple.dt.automationmode.reader
+2026-11-16 20:52:45.180 Df AutomationModeUI[32861:4dcb9] [com.apple.dt.automationmode:Default] Handling posted change notification (com.apple.dt.automationmode.state-changed)
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc71] [com.apple.xpc:connection] [0x101d90280] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:45.180 Df AutomationModeUI[32861:4dcb9] [com.apple.dt.automationmode:Default] XAM shared observer connecting to com.apple.dt.automationmode.reader
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc70] [com.apple.dt.automationmode:Default] Invalidating connection <NSXPCConnection: 0x101d1d9a0> connection to service with pid 32803 named com.apple.dt.automationmode.writer.
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc70] [com.apple.xpc:connection] [0x101d90780] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:45.180 Df AutomationModeUI[32861:4dcb9] [com.apple.xpc:connection] [0x100f8a140] activating connection: mach=true listener=false peer=false name=com.apple.dt.automationmode.reader
+2026-11-16 20:52:45.180 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Finished disabling Automation Mode
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Invalidating <XCTDProcessManagementServicesProvider: 0x101ca02a0>
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Invalidating <XCTDProcessMonitor: 0x101ca01b0>
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.runningboard:monitor] unsubscribing configuration of monitor M32761-1
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Tearing down <XCTDProcessAssertionManager: 0x101ca1260>
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Invalidating <XCTDAutomationServicesProvider: 0x101c9cf60>.
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Tearing down <XCTDApplicationLauncher: 0x101ca0570>.
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.FrontBoard:InterfaceOrientationObserver] <0x101ca1020> Invalidating client.
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Received reader connection request
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103d20140] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.reader.peer[32761].0x103d20140
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Received reader connection request
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103d20280] activating connection: mach=false listener=false peer=true name=com.apple.dt.automationmode.reader.peer[32861].0x103d20280
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Reader client asked if automation mode is enabled, checking for state file at /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled
+2026-11-16 20:52:45.181 Df automationmode-writer[32803:4d877] [com.apple.dt.automationmode-writer:Default] Reader client asked if automation mode is enabled, checking for state file at /Users/agent/Library/Developer/CoreSimulator/Devices/836BBC9A-2B0C-47D7-9315-63DF9F68589C/data//var/db/com.apple.dt.automationmode/automation-enabled
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Tearing down <XCTDSiriInterface: 0x101ca0bd0>.
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Deallocating <XCTouchGesturePerformer: 0x101ce8fc0>.
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc71] [com.apple.xpc:connection] [0x101d90280] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:45.181 Df testmanagerd[32761:4dc71] [com.apple.dt.automationmode:Default] Comparing previous enabled state (1) to current enabled state (0)
+2026-11-16 20:52:45.182 Df testmanagerd[32761:4dc71] [com.apple.dt.xctest:Default] Automation mode state changed, enabled = 0. Remote automation session had previously enabled? 1
+2026-11-16 20:52:45.182 Df AutomationModeUI[32861:4dcb9] [com.apple.xpc:connection] [0x100f8a140] invalidated because the current process cancelled the connection by calling xpc_connection_cancel()
+2026-11-16 20:52:45.182 Df AutomationModeUI[32861:4dcb9] [com.apple.dt.automationmode:Default] Comparing previous enabled state (1) to current enabled state (0)
+2026-11-16 20:52:45.182 Df AutomationModeUI[32861:4dc7b] Handling transition to automation mode disabled
+2026-11-16 20:52:45.182 Df AutomationModeUI[32861:4dc7b] [com.apple.dt.AutomationModeUI:Default] Turning off HID event monitor
+2026-11-16 20:52:45.183 Df testmanagerd[32761:4dc70] [com.apple.iohid:oversized] Released connection: 9E127547-0BF5-4573-8590-74C389D0DEB7
+{
+    UUID = "9E127547-0BF5-4573-8590-74C389D0DEB7";
+    caller = "testmanagerd: -[XCTouchGesturePerformer initWithUserTestingNotificationProvider:] + 60";
+    dispatchQueue = 0;
+    eventCount = 0;
+    eventMask = 0;
+    port = 12547;
+    resetCount = 0;
+    runloop = 0;
+    services =     (
+        778835616971358211,
+        778835616971358210,
+        778835616971358212,
+        778835616971358213,
+        778835616971358214,
+        778835616971358209,
+        778835616971358208,
+        778835616971358215,
+        778835616971358216
+    );
+    virtualServices =     (
+    );
+}
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Invalidating <XCAXManager_iOS: 0x1016348a0>
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Invalidated <XCTDAccessibilitySessionToken: 0x101624c80>. Remaining XCTDAccessibilitySessionToken instances: {(
+)}
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Unloading accessibility
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Turning off automation
+2026-11-16 20:52:45.184 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] Setting automation enabled: 0
+2026-11-16 20:52:45.187 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 1), ax settings: 1, cached: 1
+2026-11-16 20:52:45.189 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] Application accessibility enabled: 0, (
+	0   libAccessibility.dylib              0x00000001d16c2f44 _AXSApplicationAccessibilitySetEnabled + 84
+	1   libAccessibility.dylib              0x00000001d16cfddc _AXSSetAutomationEnabled + 208
+	2   testmanagerd                        0x0000000100424264 -[XCTDAccessibilitySystem _queue_unloadAccessibility] + 248
+	3   testmanagerd                        0x0000000100424778 __43-[XCTDAccessibilitySystem invalidateToken:]_block_invoke + 204
+	4   libdispatch.dylib                   0x00000001e673ffb8 _dispatch_client_callout + 12
+	5   libdispatch.dylib                   0x00000001e6735b28 _dispatch_lane_barrier_sync_invoke_and_complete + 92
+	6   testmanagerd                        0x0000000100424688 -[XCTDAccessibilitySystem invalidateToken:] + 116
+	7   testmanagerd                        0x00000001004249a4 -[XCTDAccessibilitySessionToken invalidate] + 40
+	8   testmanagerd                        0x0000000100420694 __29-[XCAXManager_iOS invalidate]_block_invoke + 140
+	9   libdispatch.dylib
+2026-11-16 20:52:45.191 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] Stored App AX setting: 0
+2026-11-16 20:52:45.193 Df testmanagerd[32761:4dc70] [com.apple.Accessibility:AXSupportCommon] AXS AccessibilityEnabled: (app ax: 0), ax settings: 0, cached: 1
+2026-11-16 20:52:45.195 Df testmanagerd[32761:4dc70] [com.apple.dt.xctest:Default] Remote automation session <XCTDRemoteAutomationSession: 0x101d6c100; dtxConnection=0x101d58100, broker=0x10162ab10, valid=0> invalidated
+2026-11-16 20:52:45.195 Df testmanagerd[32761:4d5ee] [com.apple.dt.xctest:Default] Releasing accessibility observer 0x101d12c80 after main queue drain
+2026-11-16 20:52:46.935 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x103d20140] invalidated because the client process (pid 32761) either cancelled the connection or exited
+2026-11-16 20:52:46.936 Df automationmode-writer[32803:4dc65] [com.apple.xpc:connection] [0x103d20280] invalidated because the client process (pid 32861) either cancelled the connection or exited
+2026-11-16 20:52:46.936 Df automationmode-writer[32803:4d877] [com.apple.xpc:connection] [0x103d20000] invalidated because the client process (pid 32761) either cancelled the connection or exited

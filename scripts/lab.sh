@@ -52,9 +52,10 @@ check "delete it" 'gone: text "Row 3"|Row 4' act 'tap Delete'
 check "long press menu" 'Pin Row 5' act 'hold "Row 5"'
 check "pin from the menu" 'steps? done' act 'tap "Pin Row 5"'
 # This web view is hosted by SwiftUI, where iOS 27 gives no reader the page (point reads and XCTest's own requests
-# fail): it is called unreadable, with the way to work it. A WKWebView in UIKit (Capacitor, React Native, most apps)
-# is read in full by the engine (native/engine/bench/host/webtest).
-check "web view called unreadable" '^unreadable @' act 'tap More' 'tap "Web page"'
+# fail): it is called unreadable, with the way to work it. iOS 26 gives the page, and it is read (its field, button and
+# text; November 16, 2026, iOS 26.5). A WKWebView in UIKit (Capacitor, React Native, most apps) is read in full by the
+# engine (native/engine/bench/host/webtest).
+check "web view called unreadable, or read" '^unreadable @|^button "Web button"' act 'tap More' 'tap "Web page"'
 check "UIKit table, real title" 'EdgeLab · UIKit table' act back 'tap "UIKit table"'
 # iOS asks "Open in EdgeLab?" the first time only.
 ANSWER=Open check "deep link opened" 'Opened|EdgeLab' allow_if_asked $DL app open_url "edgelab://item/7" --device "$U"

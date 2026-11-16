@@ -1,0 +1,37 @@
+--- a/native/engine/main.swift	2026-11-16 20:39:00
++++ b/native/engine/main.swift	2026-11-16 20:39:00
+@@ -251,15 +251,19 @@
+ }
+ var sessionTurnMs = 0, sessionRecoveries = 0
+ /** The phone's XCTest daemons stopped inside it (launchd starts them again on the next request). */
+-func restartTestDaemons() {
+-  for label in ["com.apple.testmanagerd", "com.apple.dt.automationmode-writer", "com.apple.dt.AutomationModeUI"] {
++let diagEnv = ProcessInfo.processInfo.environment
++func restartTestDaemons(_ only: [String]? = nil) {
++  let labels = only ?? (diagEnv["SUE_STOP_LABELS"].map { $0.split(separator: ",").map(String.init) } ?? ["com.apple.testmanagerd", "com.apple.dt.automationmode-writer", "com.apple.dt.AutomationModeUI"])
++  let t = Date()
++  defer { sessionLog("diag: stopped \(labels.joined(separator: ",")) in \(ms(t)) ms") }
++  for label in labels {
+     let process = Process()
+     process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+     process.arguments = ["simctl"] + (deviceSetPath.map { ["--set", $0] } ?? []) + ["spawn", udid, "launchctl", "stop", label]
+     process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
+     try? process.run(); process.waitUntilExit()
+   }
+-  Thread.sleep(forTimeInterval: 2)
++  Thread.sleep(forTimeInterval: Double(diagEnv["SUE_STOP_SLEEP"] ?? "2") ?? 2)
+ }
+ func openSession(device: AnyObject, timeout: Double) -> (AnyObject?, String?) {
+   sessionTurnMs = takeSessionTurn()
+@@ -393,7 +397,10 @@
+       loaded = (try? loader.loadPrivateFrameworks(logger as? FBControlCoreLogger)) != nil
+     }
+     if !loaded { _ = original(klass, sel, device, max(timeout, 20), logger, errorOut) }
+-    var (session, failure) = openSession(device: device, timeout: 12)
++    sessionLog("diag: first open \(ms(started)) ms after engine start, main thread \(Thread.isMainThread)")
++    if let pre = diagEnv["SUE_PRESTOP"] { restartTestDaemons(pre.split(separator: ",").map(String.init)) }
++    var (session, failure) = openSession(device: device, timeout: Double(diagEnv["SUE_OPEN_TIMEOUT"] ?? "12") ?? 12)
++    if session == nil { sessionLog("diag: first open failed: \(failure ?? "?")") }
+     if session == nil {
+       // A phone that refuses sessions (after one opened too soon after another closed it refuses them for good)
+       // takes them again once its test daemon is restarted: no reboot, the apps stay as they are (measured).

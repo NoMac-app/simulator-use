@@ -1,0 +1,36 @@
+input-probe.mjs and tab-probe.mjs with Device Hub showing FR iPhone 17 Pro (iOS 27.2), November 16, 2026, as printed.
+
+Headless (no Device Hub), B2 auto:
+{"ready":{"ms":203,"hid":"indigo","hid_choice":"auto","hid_keys":"indigo","dtuhidd":false,"hid_ms":13},"steps":[{"name":"tap #email","ok":true,"ms":1,"via":"indigo"},{"name":"type into #email","ok":true,"ms":13,"via":"indigo","value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":0,"via":"indigo"},{"name":"type into #password","ok":true,"ms":1,"via":"indigo","value":"•••••••","arrived":true}],"taps":{"ms":[0,0,0,0,0,0,0,0,0,0],"via":"indigo"}}
+
+Device Hub open (first time, 19:52 UTC):
+== B2 auto (touch by Indigo, keys by dtuhidd: the first fix)
+{"ready":{"ms":205,"hid":"indigo","hid_choice":"auto","hid_keys":"dtuhid","dtuhidd":true,"hid_ms":11},"steps":[{"name":"tap #email","ok":true,"ms":1,"via":"indigo"},{"name":"type into #email","ok":true,"ms":1122,"via":"dtuhid","dtuhid_connect_ms":218,"value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":0,"via":"indigo"},{"name":"type into #password","ok":true,"ms":631,"via":"dtuhid","value":"•••••••","arrived":true}],"taps":{"ms":[0,0,0,0,0,0,0,0,0,0],"via":"indigo"}}
+== B2 --hid indigo
+{"ready":{"ms":140,"hid":"indigo","hid_choice":"indigo","hid_keys":"indigo","dtuhidd":true,"hid_ms":7},"steps":[{"name":"tap #email","ok":true,"ms":3,"via":"indigo"},{"name":"type into #email","ok":false,"ms":0,"error":"keyboardSuppressedByActiveDTUHIDD","value":"Email","arrived":false},{"name":"tap #password","ok":true,"ms":0,"via":"indigo"},{"name":"type into #password","ok":false,"ms":0,"error":"keyboardSuppressedByActiveDTUHIDD","value":"Password","arrived":false}],"taps":{"ms":[0,0,0,0,0,0,0,2,1,7],"via":"indigo"}}
+== B2 --hid dtuhid (AXe's own send, 380 ms after each gesture)
+{"ready":{"ms":628,"hid":"dtuhid","hid_choice":"dtuhid","hid_keys":"dtuhid","dtuhidd":true,"hid_ms":250},"steps":[{"name":"tap #email","ok":true,"ms":407,"via":"dtuhid"},{"name":"type into #email","ok":true,"ms":1036,"via":"dtuhid","value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":407,"via":"dtuhid"},{"name":"type into #password","ok":true,"ms":670,"via":"dtuhid","value":"•••••••","arrived":true}],"taps":{"ms":[381,388,394,398,387,383,383,383,385,396],"via":"dtuhid"}}
+== B0, as reviewed (connectToHID)
+{"ready":{"ms":451,"hid":"dtuhid","hid_ms":249},"steps":[{"name":"tap #email","ok":true,"ms":395},{"name":"type into #email","ok":true,"ms":906,"value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":382},{"name":"type into #password","ok":true,"ms":622,"value":"•••••••","arrived":true}],"taps":{"ms":[388,382,383,382,384,383,384,383,390,384]}}
+== A, 0.16.0
+{"ready":{"ms":187,"hid_ms":8},"steps":[{"name":"tap #email","ok":true,"ms":86},{"name":"type into #email","ok":true,"ms":595,"value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":90},{"name":"type into #password","ok":true,"ms":318,"value":"•••••••","arrived":true}],"taps":{"ms":[83,87,86,88,80,81,82,85,81,81]}}
+
+keys-after-hub.mjs, B2 --hid indigo started before Device Hub opened:
+ready {"hid":"indigo","hid_choice":"indigo","hid_keys":"indigo","dtuhidd":false} dtuhidd processes 0
+email tap true indigo type true 9 ms indigo  value "before@hub.io" dtuhidd processes 0
+password tap true indigo type true 3 ms indigo  value "••••••" dtuhidd processes 2
+email tap true indigo type true 0 ms indigo  value "before@hub.ioX" dtuhidd processes 2
+
+Device Hub opened again (21:53 UTC, showing FR), after the phones were rebooted:
+== B5 auto (touch by Indigo, keys by dtuhidd)
+{"ready":{"ms":179,"hid":"indigo","hid_choice":"auto","hid_keys":"dtuhid","dtuhidd":true,"hid_ms":8},"steps":[{"name":"tap #email","ok":true,"ms":2,"via":"indigo"},{"name":"type into #email","ok":true,"ms":1119,"via":"dtuhid","dtuhid_connect_ms":216,"value":"Email","arrived":false},{"name":"tap #password","ok":true,"ms":0,"via":"indigo"},{"name":"type into #password","ok":true,"ms":648,"via":"dtuhid","value":"Password","arrived":false}],"taps":{"ms":[0,0,0,0,0,0,0,0,0,0],"via":"indigo"}}
+tab-probe.mjs (Items tab, then Login tab, 3 times; a Login tap after an Items tap that did not land "lands" trivially):
+== B5 auto (Indigo touch)
+{"ready":{"hid":"indigo","hid_choice":"auto","hid_keys":"dtuhid","dtuhidd":true},"taps":[{"ms":0,"via":"indigo","ok":true,"landed":false},{"ms":0,"via":"indigo","ok":true,"landed":true},{"ms":0,"via":"indigo","ok":true,"landed":false},{"ms":0,"via":"indigo","ok":true,"landed":true},{"ms":0,"via":"indigo","ok":true,"landed":false},{"ms":0,"via":"indigo","ok":true,"landed":true}],"landed":"3 of 6"}
+== B5 --hid dtuhid (AXe's own send)
+{"ready":{"hid":"dtuhid","hid_choice":"dtuhid","hid_keys":"dtuhid","dtuhidd":true},"taps":[{"ms":386,"via":"dtuhid","ok":true,"landed":true},{"ms":381,"via":"dtuhid","ok":true,"landed":true},{"ms":390,"via":"dtuhid","ok":true,"landed":true},{"ms":388,"via":"dtuhid","ok":true,"landed":true},{"ms":383,"via":"dtuhid","ok":true,"landed":true},{"ms":389,"via":"dtuhid","ok":true,"landed":true}],"landed":"6 of 6"}
+== A, 0.16.0 (AXe 1.8's Indigo)
+{"ready":{},"taps":[{"ms":89,"ok":true,"landed":true},{"ms":83,"ok":true,"landed":true},{"ms":82,"ok":true,"landed":true},{"ms":80,"ok":true,"landed":true},{"ms":81,"ok":true,"landed":true},{"ms":87,"ok":true,"landed":true}],"landed":"6 of 6"}
+== B6 auto, the release (dtuhidd while it runs, on the kept connection)
+{"ready":{"hid":"dtuhid","hid_choice":"auto","dtuhidd":true},"taps":[{"ms":237,"via":"dtuhid","ok":true,"landed":true},{"ms":0,"via":"dtuhid","ok":true,"landed":true},{"ms":0,"via":"dtuhid","ok":true,"landed":true},{"ms":0,"via":"dtuhid","ok":true,"landed":true},{"ms":0,"via":"dtuhid","ok":true,"landed":true},{"ms":0,"via":"dtuhid","ok":true,"landed":true}],"landed":"6 of 6"}
+{"ready":{"ms":75,"hid":"dtuhid","hid_choice":"auto","dtuhidd":true,"hid_ms":0},"steps":[{"name":"tap #email","ok":true,"ms":220,"via":"dtuhid","dtuhid_connect_ms":219},{"name":"type into #email","ok":true,"ms":506,"via":"dtuhid","value":"gary@example.com","arrived":true},{"name":"tap #password","ok":true,"ms":0,"via":"dtuhid"},{"name":"type into #password","ok":true,"ms":248,"via":"dtuhid","value":"•••••••","arrived":true}],"taps":{"ms":[0,1,2,1,3,1,3,1,2,0],"via":"dtuhid"}}

@@ -1,0 +1,477 @@
+Using FR iPhone 17 Pro (iOS 27.2, 836BBC9A-2B0C-47D7-9315-63DF9F68589C); the other tools use it from now on.
+PASS build, install and launch (29 s)
+PASS the engine reads on its fast path (5 s)
+PASS segments are not tabs (3 s)
+FAIL stepper buttons
+  1 step done in 6.3 s
+  step 1 (tap #count-Increment): no visible change
+PASS set a slider (18 s)
+FAIL menu pick
+  Step 2 (tap Chocolate) failed: No "Chocolate" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  1 of 2 steps done before it.
+  step 1 (tap #flavor): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL alert in front, alone
+  Step 2 (tap "Show alert") failed: No "Show alert" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  1 of 2 steps done before it.
+  step 1 (tap "Dialogs"): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL answer the alert
+  Step 1 (tap Cancel) failed: No "Cancel" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL sheet in front, its Done reachable
+  Step 1 (tap "Show sheet") failed: No "Show sheet" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL close the sheet
+  Step 1 (tap Done) failed: No "Done" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL full-screen cover
+  Step 1 (tap "Show full screen") failed: No "Show full screen" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL close the cover
+  Step 1 (tap #closeCover) failed: No #closeCover on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL iOS permission prompt, named after the app
+  Step 1 (tap "Ask for location") failed: No "Ask for location" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL allow it
+  Step 1 (tap "Allow While Using App") failed: No "Allow While Using App" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL notifications, prompt waited for and allowed
+  Step 1 (tap "Ask for notifications") failed: No "Ask for notifications" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL text in any language
+  Step 2 (fill #unicode …) failed: No #unicode on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  1 of 3 steps done before it.
+  step 1 (tap "Text"): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL autocorrect undone by paste
+  Step 1 (fill #unicode …) failed: No #unicode on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL delayed content
+  Step 2 (wait "Loaded 20 results") failed: "Loaded 20 results" did not appear after 5 s.
+  Next: The screen is below. Wait longer with wait "Loaded 20 results" 15, or act on what is there.
+  1 of 2 steps done before it.
+  step 1 (tap "Lists"): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL toast comes and goes
+  Step 1 (tap "Show toast") failed: No "Show toast" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 3 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL swipe a row to delete
+  Step 1 (swipe left "Row 3") failed: No "Row 3" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL delete it
+  Step 1 (tap Delete) failed: No "Delete" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL long press menu
+  Step 1 (hold "Row 5") failed: No "Row 5" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL pin from the menu
+  Step 1 (tap "Pin Row 5") failed: No "Pin Row 5" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL web view called unreadable
+  Step 2 (tap "Web page") failed: No "Web page" on screen.
+  Next: 3 elements are below: scroll down, or call simulator-use look.
+  1 of 2 steps done before it.
+  step 1 (tap "More"): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+FAIL UIKit table, real title
+  Step 1 (back) failed: No back button, and swiping from the left edge changed nothing.
+  Next: Call simulator-use look to find another way back, such as a Close or Cancel button.
+  0 of 2 steps done before it.
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
+PASS deep link opened (3 s)
+FAIL deep link arrives
+  Step 3 (wait "Deep link: edgelab") failed: "Deep link: edgelab" did not appear after 5 s.
+  Next: The screen is below. Wait longer with wait "Deep link: edgelab" 15, or act on what is there.
+  2 of 3 steps done before it.
+  step 1 (tap "Text"): no visible change
+  Screen now:
+  EdgeLab · Controls · FR iPhone 17 Pro (iOS 27.2)
+  heading "Values" @201,188
+  slider "Volume" #volume ="0.75" @201,239
+  button "Count: 2, Decrement" #count-Decrement ="2" @296,295
+  button "Count: 2, Increment" #count-Increment ="2" @343,295
+  popup "Flavor, Vanilla" #flavor disabled @201,348
+  segment "S" @91,404
+  segment "M" selected @201,404
+  segment "L" @311,404
+  button "Date Picker" ="Jan 15, 2027" @306,467
+  heading "Text" @201,537
+  textfield "prefilled" #nickname @201,583
+  textview #notes @201,664
+  heading "Buttons" @201,757
+  button "Disabled" #disabled disabled @201,784
+  tabs: Controls (selected) @64,822, Dialogs @132,822, Lists @201,822, Text @270,822, More @339,822
+  scroll: 2 pages, at top; 3 below
