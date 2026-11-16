@@ -189,6 +189,32 @@ test("pasted text set by simctl is read back, and set from inside the phone when
   }
 });
 
+test("the clipboard read back must be exact, and a pbpaste that fails trusts pbcopy when the phone has no helper", async () => {
+  for (const kind of ["newline", "fails"] as const) {
+    const bin = mkdtempSync(join(tmpdir(), "su-pb2-"));
+    const record = join(bin, "calls");
+    const board = join(bin, "board");
+    // pbcopy keeps its input; pbpaste adds a newline (not the text, exactly) or fails.
+    const pbpaste = kind === "newline" ? 'cat "$B"; printf "\\n"' : "exit 1";
+    writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nB="${board}"\nprintf 'args:%s\\n' "$*" >> "${record}"\ncase "$2" in\n  pbcopy) cat > "$B" ;;\n  pbpaste) ${pbpaste} ;;\n  spawn) cat > "$B.helper" ;;\nesac\n`, { mode: 0o755 });
+    const path = process.env.PATH;
+    process.env.PATH = `${bin}:${path}`;
+    try {
+      const helper = Boolean(pasteHelper());
+      if (kind === "newline" && !helper) {
+        await assert.rejects(setPasteboard("UDID", "abc"), /did not reach the phone/);
+        continue;
+      }
+      await setPasteboard("UDID", "abc");
+      const verbs = readFileSync(record, "utf8").trim().split("\n").map((l) => l.split(" ")[1]);
+      // An inexact read back, or none with a helper there, sets it from inside the phone; none without one trusts pbcopy.
+      assert.deepEqual(verbs, helper ? ["pbcopy", "pbpaste", "spawn"] : ["pbcopy", "pbpaste"]);
+    } finally {
+      process.env.PATH = path;
+    }
+  }
+});
+
 test("a link opens through the engine's input; a shared host never puts it in simctl's arguments", async () => {
   const bin = mkdtempSync(join(tmpdir(), "su-open-"));
   const record = join(bin, "calls");

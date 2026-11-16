@@ -248,8 +248,11 @@ export async function setPasteboard(udid: string, text: string): Promise<void> {
     // While Device Hub shows the phone, it keeps the phone's clipboard in step with the Mac's, and what simctl pbcopy
     // puts there never arrives: the phone's clipboard read back empty and the paste left the field as it was, with any
     // build of simulator-use (November 16, 2026). So it is read back, and set from inside the phone when it differs.
+    // simctl pbpaste prints the clipboard's bytes as they are (no newline added), so the text must come back exactly.
     const back = await simctl(["pbpaste", udid], 15_000).then((r) => r.stdout, () => undefined);
     if (back === text) return;
+    // Not read back at all: pbcopy is trusted, as before, unless the phone's own helper can make sure.
+    if (back === undefined && !pasteHelper()) return;
     failure = back === undefined ? "simctl pbpaste failed" : "simctl pbcopy's text did not reach the phone (Device Hub keeps its clipboard in step with the Mac's)";
   } catch (error) {
     // A macOS user with no screen session (a shared Simulator host's users) has no pasteboard server, and simctl
