@@ -13,6 +13,30 @@ import { setting } from "../settings.ts";
 
 const MAX_FAILURES = 20;
 
+/**
+ * xcodebuild's test arguments beside the build's own: the result bundle, no diagnostics bundle, the tests on the phone
+ * itself, and only the tests asked for.
+ */
+export function testArgs(bundle: string, only: string[]): string[] {
+  return [
+    "-resultBundlePath",
+    bundle,
+    // On the phone the other tools use, never on clones of it. A test target the project runs in parallel (its scheme's
+    // or test plan's parallelizable; Xcode's app template has its UI tests so, and an XcodeGen spec's, which every
+    // build regenerates the scheme from) makes xcodebuild shut the destination down, clone it and test on "Clone 1 of
+    // ...", and the phone stays off after the run. On NoMac that phone's live view went with it, and the agent's next
+    // call found "no longer booted" (November 14, 2026); the clones are whole extra Simulators too. This overrides the
+    // project's per-target setting.
+    "-parallel-testing-enabled",
+    "NO",
+    // After a failure Xcode collects a sysdiagnose-like bundle from the Simulator; on Xcode 27 in a VM that waited out
+    // its own 600 s timeout, turning a 19 s run into 11 minutes. Agents need the failure, not that.
+    "-collect-test-diagnostics",
+    "never",
+    ...only.map((t) => `-only-testing:${t}`),
+  ];
+}
+
 export const testsRun: Tool = {
   name: "tests_run",
   title: "Run the tests",
@@ -57,9 +81,7 @@ export const testsRun: Tool = {
       const result = await build(project, scheme, device.udid, {
         action: "test",
         xcode: other,
-        // After a failure Xcode collects a sysdiagnose-like bundle from the Simulator; on Xcode 27 in a VM that
-        // waited out its own 600 s timeout, turning a 19 s run into 11 minutes. Agents need the failure, not that.
-        extra: ["-resultBundlePath", bundle, "-collect-test-diagnostics", "never", ...only.map((t) => `-only-testing:${t}`)],
+        extra: testArgs(bundle, only),
         onLine: (line) => {
           const finished = finishedCase(line);
           if (finished) {
