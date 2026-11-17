@@ -78,6 +78,11 @@ final class LoadLog: @unchecked Sendable {
     case .finished: finished = finished ?? now
     }
   }
+  private var listened: UInt64?
+  /** The stream says it listens (its first line), at `now`. */
+  func listening(at now: UInt64 = DispatchTime.now().uptimeNanoseconds) { lock.lock(); defer { lock.unlock() }; listened = listened ?? now }
+  /** When the stream began listening (nil: not yet). */
+  var listeningAt: UInt64? { lock.lock(); defer { lock.unlock() }; return listened }
   /** When the log said a testmanagerd launched (nil: not heard). */
   var launchedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return launched }
   /** When the load finished (nil: not yet). */
@@ -110,6 +115,40 @@ enum SessionWait: Equatable {
   case outOfTime
 }
 
+/**
+ * How long the phone has had the CPU, as a request waits: its host may hold all its processes at background priority
+ * (NoMac's phone hosts do, for a phone prepared beside a live one), and a starved phone's silence says nothing about
+ * whether it refuses. On a phone so held (November 17, 2026), a testmanagerd started for the request logged no load in
+ * the 12 s after its start, and another answered 12 to 17 s after its load finished: both were restarted as refusing,
+ * which switched accessibility off and on again in the phone and cost its reads 25 s more. So the silence the first
+ * timeout measures is time the phone ran unclamped; the request's budgets (the deadline, testmanagerd's 120 s, the
+ * restart's reserve) stay wall-clock time. Ticked by the request's wait loop with whether the phone was clamped.
+ */
+final class RunClock {
+  private var marks: [(at: UInt64, ran: UInt64)]
+  private var total: UInt64 = 0
+  private var last: UInt64
+  /** Time the phone was clamped, for the request's log. */
+  private(set) var clampedNanos: UInt64 = 0
+  init(at now: UInt64) { last = now; marks = [(now, 0)] }
+  /** The time since the last tick, counted as run unless the phone was clamped. */
+  func tick(at now: UInt64, clamped: Bool) {
+    guard now > last else { return }
+    if clamped { clampedNanos += now - last } else { total += now - last }
+    last = now
+    marks.append((now, total))
+  }
+  /** The phone's unclamped time from `t` to the last tick (from the first tick for a `t` before it). */
+  func ran(since t: UInt64) -> UInt64 { total - ran(upTo: t) }
+  /** The phone's unclamped time from the first tick to `t`. */
+  private func ran(upTo t: UInt64) -> UInt64 {
+    guard let i = marks.lastIndex(where: { $0.at <= t }) else { return 0 }
+    // `t` within a tick that ran counts that tick's part before it; within a clamped one, or past the last tick, none.
+    guard i + 1 < marks.count, marks[i + 1].ran > marks[i].ran else { return marks[i].ran }
+    return marks[i].ran + (t - marks[i].at)
+  }
+}
+
 /** The phone's testmanagerd as a request waits. */
 enum Daemon: Equatable {
   /** None runs yet: the phone's launchd starts one for the request (15 s after it on a phone at background priority). */
@@ -124,11 +163,13 @@ enum Daemon: Equatable {
  * The state of a request at `now` (uptime ns): sent at `requestedAt`; `loadedAt` when testmanagerd's log said the load
  * finished (nil: not yet); `loading`, whether it says one is under way; the phone's testmanagerd (`daemon`); `timeout`,
  * how long a testmanagerd may stay silent with nothing to load (from the request, or from its own start when it
- * started for the request); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd).
+ * started for the request), in time the phone ran (`ran`: its unclamped time from a moment to now, RunClock; all of it
+ * when nil); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd).
  */
-func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil) -> SessionWait {
+func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil, ran: ((UInt64) -> UInt64)? = nil) -> SessionWait {
+  let ranSince = ran ?? { now > $0 ? now - $0 : 0 }
   if now >= min(deadline, requestedAt + testmanagerdLoadLimitNanos) { return .outOfTime }
-  if let loadedAt { return now < max(loadedAt, requestedAt) + timeout ? .waiting : .refused }
+  if let loadedAt { return ranSince(max(loadedAt, requestedAt)) < timeout ? .waiting : .refused }
   // Since when testmanagerd has had the request: from the request, or from the start of one started for it; none yet,
   // it has not had it at all.
   var heardSince: UInt64? = requestedAt
@@ -141,7 +182,7 @@ func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: B
   if loading || starting, let loadUntil, now >= loadUntil { return .loadTooLong }
   if loading { return .waiting }
   guard let heardSince else { return .waiting }
-  return now < heardSince + timeout ? .waiting : .nothingLoading
+  return ranSince(heardSince) < timeout ? .waiting : .nothingLoading
 }
 
 /** When a request stops waiting for the load: a first one (a restart may follow) leaves restartReserveNanos. */

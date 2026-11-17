@@ -263,13 +263,16 @@ func restartTestDaemons() {
 }
 /**
  * testmanagerd's log, streamed from the phone while a session request waits (`simctl spawn … log stream`, its own
- * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started before the request and waited for
- * until it says it is listening (about 0.4 s; at most 3 s), so a load that begins with the request is seen. Never a
- * read of the phone, which before its accessibility is loaded poisons its CoreSimulatorBridge (SessionWait.swift).
- * nil when the stream cannot start: no load is then seen, and a silent testmanagerd is restarted at the first timeout.
+ * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started just before the request, which never
+ * waits for it: a process spawned into a phone just booted takes 3 to 4 s to start on a busy Mac, and a request held
+ * back that long until the stream listened made the first read 3 s slower (November 17, 2026: sessions in 12.2 to 15.0
+ * s against 8.6 to 11.4 s). testmanagerd starts for the request seconds later, so its lines come once the stream
+ * listens; a load that began before (a testmanagerd already there) and is not seen leaves its request to the first
+ * timeout, as before there was a log. Never a read of the phone, which before its accessibility is loaded poisons its
+ * CoreSimulatorBridge (SessionWait.swift). nil when the stream cannot start: no load is then seen.
  */
 func startLoadLog() -> (log: LoadLog, process: Process)? {
-  let log = LoadLog(), process = Process(), pipe = Pipe(), listening = DispatchSemaphore(value: 0)
+  let log = LoadLog(), process = Process(), pipe = Pipe()
   process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
   process.arguments = ["simctl"] + (deviceSetPath.map { ["--set", $0] } ?? []) + ["spawn", udid, "log", "stream", "--style", "compact",
     "--level", "info", "--predicate", "process == \"testmanagerd\" AND subsystem == \"com.apple.dt.xctest\""]
@@ -282,12 +285,11 @@ func startLoadLog() -> (log: LoadLog, process: Process)? {
     while let end = pending.firstIndex(of: 0x0A) {
       let line = String(decoding: pending[pending.startIndex..<end], as: UTF8.self)
       pending.removeSubrange(pending.startIndex...end)
-      if !heard && line.hasPrefix("Filtering the log data") { heard = true; listening.signal() }
+      if !heard && line.hasPrefix("Filtering the log data") { heard = true; log.listening() }
       log.note(line)
     }
   }
   do { try process.run() } catch { pipe.fileHandleForReading.readabilityHandler = nil; return nil }
-  _ = listening.wait(timeout: .now() + 3)
   return (log, process)
 }
 /**
@@ -383,9 +385,11 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   // A first request (no restart yet) leaves the time for one.
   let loadUntil = loadWaitEnd(deadline: deadline.uptimeNanoseconds, restartMayFollow: !restartingDaemons)
   var answered = false, state = SessionWait.waiting, noted = "", daemon: pid_t = 0, daemonState = Daemon.running
+  let clock = RunClock(at: requested.uptimeNanoseconds)
   func since(_ t: UInt64) -> Int { Int((DispatchTime.now().uptimeNanoseconds - t) / 1_000_000) }
   while true {
     let now = DispatchTime.now().uptimeNanoseconds, loadedAt = load?.log.loadedAt, loading = load?.log.loading ?? false
+    clock.tick(at: now, clamped: phoneProcesses.clamped())
     // Which testmanagerd runs matters only once the first timeout has passed with accessibility not loaded; before,
     // the request is waited for whatever runs.
     if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
@@ -394,7 +398,7 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
         ?? load?.log.launchedAt).map { Daemon.started(at: $0) } ?? .running
     } else { daemon = 0; daemonState = .running }
     state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, loading: loading, daemon: daemonState,
-                        timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil)
+                        timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil, ran: clock.ran(since:))
     guard state == .waiting else { break }
     if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
       var why = ""
@@ -407,6 +411,8 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   }
   let loadedAt = load?.log.loadedAt
   let loadedNote = loadedAt.map { "accessibility loaded \(Int((Int64($0) - Int64(requested.uptimeNanoseconds)) / 1_000_000)) ms after the request" } ?? "accessibility not loaded"
+  if clock.clampedNanos > 0 { sessionLog("the phone was held at background priority for \(clock.clampedNanos / 1_000_000) ms of the wait: not counted as silence") }
+  if let listening = load?.log.listeningAt { sessionLog("testmanagerd's log listening \(Int((Int64(listening) - Int64(requested.uptimeNanoseconds)) / 1_000_000)) ms after the request") }
   if !noted.isEmpty && answered { sessionLog("answered after the wait (\(loadedNote))") }
   if !answered {
     switch state {
@@ -443,13 +449,31 @@ final class PhoneProcesses: @unchecked Sendable {
   /** The pid of the phone's process of that name, or 0. */
   func pid(named name: String) -> pid_t {
     lock.lock(); defer { lock.unlock() }
+    guard findLaunchd() > 0 else { return 0 }
+    return max(0, fetcher.subprocess(of: launchd, withName: name))
+  }
+  /**
+   * Whether the phone is held at background priority (`taskpolicy -b`, what NoMac's phone hosts do to a phone prepared
+   * beside a live one): its launchd_sim's scheduling priority is then the kernel's throttled one, 4 (31 otherwise).
+   * Unknown is not held.
+   */
+  func clamped() -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    guard findLaunchd() > 0 else { return false }
+    var info = proc_taskinfo()
+    let size = Int32(MemoryLayout<proc_taskinfo>.size)
+    return proc_pidinfo(launchd, PROC_PIDTASKINFO, 0, &info, size) == size && info.pti_priority <= throttledPriority
+  }
+  /** The phone's launchd_sim, found again when the pid known no longer is it. Under the lock. */
+  private func findLaunchd() -> pid_t {
     if launchd <= 0 || !(fetcher.processInfo(for: launchd)?.arguments.contains { $0.contains(udid) } ?? false) {
       launchd = fetcher.processes(withProcessName: "launchd_sim").first { $0.arguments.contains { $0.contains(udid) } }?.processIdentifier ?? 0
     }
-    guard launchd > 0 else { return 0 }
-    return max(0, fetcher.subprocess(of: launchd, withName: name))
+    return launchd
   }
 }
+/** The kernel's scheduling priority for a process held at background (MAXPRI_THROTTLE). */
+let throttledPriority: Int32 = 4
 let phoneProcesses = PhoneProcesses()
 /**
  * When a process started, on the uptime clock the session wait uses (DispatchTime): the kernel's record of its start

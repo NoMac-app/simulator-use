@@ -127,4 +127,36 @@ func throttledStart(_ t: UInt64) -> SessionWait {
 check((0...51).allSatisfy { throttledStart(UInt64($0)) == .waiting }, "a testmanagerd started late for the request is waited for from the request to 12 s after its load")
 check(throttledStart(52) == .refused, "no answer 12 s after the load: refused")
 
+// The phone held at background priority (RunClock): its silence is not counted, its budgets are.
+let held = RunClock(at: request)
+for t in 1...60 { held.tick(at: request + UInt64(t) * s, clamped: t <= 50) }
+check(held.ran(since: request) == 10 * s, "60 s of which 50 held: 10 s run")
+check(held.ran(since: request + 55 * s) == 5 * s, "from 55 s: 5 s run")
+check(held.ran(since: request + 55 * s + s / 2) == 4 * s + s / 2, "from within a tick that ran: its part after")
+check(held.ran(since: request + 20 * s) == 10 * s, "from within the hold: the run after it")
+check(held.ran(since: request - 5 * s) == 10 * s, "from before the first tick: all the run")
+check(held.ran(since: request + 70 * s) == 0, "from after the last tick: none")
+check(held.clampedNanos == 50 * s, "the time held, for the log")
+/** A request's clock ticked every poll from the request to `now`, the phone held until `until`. */
+func clock(heldUntil until: UInt64, to now: UInt64) -> RunClock {
+  let c = RunClock(at: request); var t = request
+  while t < request + now * s { t += poll; c.tick(at: t, clamped: t <= request + until * s) }
+  return c
+}
+func heldWait(_ now: UInt64, loadedAt: UInt64? = nil, loading: Bool = false, daemon: Daemon, heldUntil: UInt64 = 50) -> SessionWait {
+  sessionWait(now: request + now * s, requestedAt: request, loadedAt: loadedAt.map { request + $0 * s }, loading: loading, daemon: daemon,
+              timeout: timeout, deadline: deadline, loadUntil: firstUntil, ran: clock(heldUntil: heldUntil, to: now).ran(since:))
+}
+// November 17, 2026, m9, a phone held until about 50 s: a testmanagerd started 5 s after the request logged no load by
+// 17 s (restarted then), and another answered more than 12 s after its load finished at 36 s (restarted at 53 s).
+check(heldWait(17, daemon: .started(at: request + 5 * s)) == .waiting, "held: a silent testmanagerd started for the request is not refused at 17 s")
+check(heldWait(61, daemon: .started(at: request + 5 * s)) == .waiting, "11 s after the hold: still within the first timeout of run")
+check(heldWait(63, daemon: .started(at: request + 5 * s)) == .nothingLoading, "13 s of run after the hold, still silent: nothing loading")
+check(heldWait(53, loadedAt: 36, daemon: .running) == .waiting, "held: no answer 17 s after the load, 3 s of them run: waited for")
+check(heldWait(63, loadedAt: 36, daemon: .running) == .refused, "13 s of run after the load and no answer: refused")
+check(heldWait(74, loading: true, daemon: .started(at: request + 5 * s)) == .loadTooLong, "the restart's reserve is wall-clock: held or not")
+check(heldWait(100, daemon: .running, heldUntil: 200) == .outOfTime, "the deadline is wall-clock: held throughout")
+// Not held: as before (the clock's run is the wall-clock time).
+check(heldWait(13, daemon: .running, heldUntil: 0) == .nothingLoading, "not held: a silent testmanagerd that was there is refused at 12 s")
+
 if failures == 0 { print("all checks passed") } else { print("\(failures) failed"); exit(1) }
