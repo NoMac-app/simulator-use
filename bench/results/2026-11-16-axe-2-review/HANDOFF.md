@@ -12,20 +12,20 @@
   `AccessibilityWatch` (moved to SessionWait.swift) never waits for a hung read past its limit, and an unanswered
   request gives the read in flight 0.5 s. Swift test extended; with the old behaviour put back 7 checks fail.
 - `ad4f8dd` README: engine `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` (helpers unchanged).
-- `npm test` 227 of 227 and typecheck clean (laptop and Session Mac ses_3d609c3f, Xcode 27.2). lab.sh iPhone 17 Pro
+- `npm test` 227 of 227 and typecheck clean (laptop and a Session Mac, Xcode 27.2). lab.sh iPhone 17 Pro
   27 of 27 ("set a slider" 6 s, 0 session timeouts). First read right after boot, 5 each interleaved: B11
   (a78b9322) median 14.3 s (12.0 to 15.7), new engine median 14.8 s (12.2 to 16.9), 0 timeouts either; one new-engine
   trial waited past 12 s on "No translation object" and answered at 16 s (the signal still read right).
 - Tarball (`pack.sh`, fresh clone + bundle at `ad4f8dd`): `simulator-use-0.17.0.tgz`, sha256
   `2ea55c56d3cc64818b2d8dbbca47fbdcbab6ef32ba14653dce3cc32823b737dc`, 16,778,485 bytes; engine hash as in the README
-  (same as the branch build), modes 0755, ad hoc signed, AXe v2.0.4. Supersedes `e75480f2...`. Mac stopped ($0.23).
+  (same as the branch build), modes 0755, ad hoc signed, AXe v2.0.4. Supersedes `e75480f2...`. Mac stopped.
 - Duo branch: also needs `21f2fd4` and `e4c2b39` (then its own README hash).
 
 Branch `axe-2` in `~/simtap-axe2`, committed locally (`828dbd8` tests_run cherry-pick, `0fd6624` session wait,
 `2c56c3b` lab.sh, `bda3627` slider, `683c517` README hash, then this file and round 3's logs); nothing pushed, tagged
 or published. **Round 3 below is the current state**: the open points of November 16 (sections B1 to Next steps,
 kept as they were) are settled there. The release tarball is rebuilt (`e75480f2...`, round 3's last items); the one
-made at `a3bcc3b` (`125ae93f...`) is superseded. No Session Mac is running (ses_32af729e, $1.94, stopped 09:42 UTC).
+made at `a3bcc3b` (`125ae93f...`) is superseded. No Session Mac is running (stopped 09:42 UTC).
 
 ## B1: the first session's wait (state)
 
@@ -112,7 +112,7 @@ open point above; `bc32efe` touches `native/engine/main.swift` (openSession, the
 - **Cherry-picked** `8429fae` from `tests-on-the-phone` as `828dbd8` (tests_run passes `-parallel-testing-enabled NO`:
   the root cause of phones shut down and tests run on "Clone 1 of ..." on NoMac hosts). No conflict; `npm test` 223 of
   223. It goes into the 0.17.0 tarball.
-- **B1, the signal (measured, `round3/signal.sh`, Session Mac ses_32af729e, iPhone 17 Pro, iOS 27.2):** a read
+- **B1, the signal (measured, `round3/signal.sh`, a Session Mac, iPhone 17 Pro, iOS 27.2):** a read
   without a session (`--no-bootstrap`) fails with "No translation object" from the boot until the phone's
   accessibility is readable (8.6 s after one boot, 31 s after another), then answers; after sessions closed, after a
   restart of the test daemons and with an app launched since (which reads as an empty app) it answers. So "a
@@ -123,7 +123,7 @@ open point above; `bc32efe` touches `native/engine/main.swift` (openSession, the
   refused (restart); while none answers it is loading and is waited for while it runs (its 120 s, the 100 s budget).
   Induced stuck daemon (`round3/stuck-bench.sh stuck`: the request's testmanagerd SIGSTOPped as it starts): B10
   refuses at 12.2 s ("accessibility loaded 2 ms after the request") and restarts, like 0.16.0.
-- **Measured so far (round 3, ses_32af729e, iPhone 17 Pro):** after a restart of the test daemons ("plain"), 10
+- **Measured so far (round 3, iPhone 17 Pro):** after a restart of the test daemons ("plain"), 10
   trials each: 0.16.0 1.8 to 1.9 s, B10 2.0 to 2.4 s (open 0.92 s both; B9 against B10, 5 each: 1.8 to 2.2 s both, so
   the gap is 0.17.0's, not the watch's). Stuck daemon, 10 each: 0.16.0 23.9 to 24.5 s, B10 23.9 to 25.2 s (both
   refuse at 12.0 to 12.2 s; the second open waits about 8.4 s for launchd's respawn throttle of the killed daemon);
@@ -164,7 +164,7 @@ open point above; `bc32efe` touches `native/engine/main.swift` (openSession, the
   70% showed them in every 17 Pro lab run: the outcome depends on speed as well). A shorter reveal swipe (30 to 40%)
   is the likely fix, but the same gesture pages carousels: golden.sh on each phone must pass with it first. Owner's
   call; not in 0.17.0.
-- **The 0.17.0 tarball (rebuilt at `683c517`, `pack.sh` on ses_32af729e: Xcode 27.2, Swift 6.4.2 swiftlang-6.4.2.1.9,
+- **The 0.17.0 tarball (rebuilt at `683c517`, `pack.sh` on a Session Mac: Xcode 27.2, Swift 6.4.2 swiftlang-6.4.2.1.9,
   a fresh clone of GitHub main plus this branch from a bundle):** `simulator-use-0.17.0.tgz`, sha256
   `e75480f2dcb0be8a49d65bf9c55e569d4542d224c2f307df1aa799029bd01624`, 16,776,555 bytes, in the session's scratchpad.
   Engine `a78b9322b93245133d160aa7affde486b3fbd212073f84c53c1c50698d3ca932`, pbset `fe35e375...`, skconfig
