@@ -263,11 +263,10 @@ func restartTestDaemons() {
 }
 /**
  * testmanagerd's log, streamed from the phone while a session request waits (`simctl spawn … log stream`, its own
- * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started just before the request, which never
- * waits for it: a process spawned into a phone just booted takes 3 to 4 s to start on a busy Mac, and a request held
- * back that long until the stream listened made the first read 3 s slower (November 17, 2026: sessions in 12.2 to 15.0
- * s against 8.6 to 11.4 s). testmanagerd starts for the request seconds later, so its lines come once the stream
- * listens; a load that began before (a testmanagerd already there) and is not seen leaves its request to the first
+ * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started before the request, which never
+ * waits for the stream itself (a process spawned into a phone just booted takes 3 to 4 s to start on a busy Mac; the
+ * request may wait for app accessibility's switch instead, AccessibilitySwitching). testmanagerd starts for the
+ * request seconds later, so its lines come once the stream listens; a load that began before (a testmanagerd already there) and is not seen leaves its request to the first
  * timeout, as before there was a log. Never a read of the phone, which before its accessibility is loaded poisons its
  * CoreSimulatorBridge (SessionWait.swift). nil when the stream cannot start: no load is then seen.
  */
@@ -326,18 +325,47 @@ func switchAccessibilityOn(device: AnyObject?) {
   guard let engine = Bundle.main.executableURL?.resolvingSymlinksInPath() else { return }
   let helper = engine.deletingLastPathComponent().appendingPathComponent("simulator-use-axon").path
   guard FileManager.default.isExecutableFile(atPath: helper) else { sessionLog("app accessibility not switched on: no simulator-use-axon beside the engine"); return }
-  let started = Date()
+  let started = Date(), finished = accessibilitySwitching.begin()
   if let device, spawnInPhone(device, helper, done: { status in
     sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (\(status.map { "exit \($0)" } ?? "spawn failed"))")
+    finished()
   }) { return }
   // No CoreSimulator spawn to call: simctl's.
   let process = Process()
   process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
   process.arguments = ["simctl"] + (deviceSetPath.map { ["--set", $0] } ?? []) + ["spawn", udid, helper]
   process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
-  process.terminationHandler = { p in sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (simctl, exit \(p.terminationStatus))") }
-  do { try process.run(); accessibilitySwitch = process } catch { sessionLog("app accessibility not switched on: \(error.localizedDescription)") }
+  process.terminationHandler = { p in sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (simctl, exit \(p.terminationStatus))"); finished() }
+  do { try process.run(); accessibilitySwitch = process } catch { sessionLog("app accessibility not switched on: \(error.localizedDescription)"); finished() }
 }
+/**
+ * App accessibility being switched on in the phone (switchAccessibilityOn), for a session request to wait for: at most
+ * accessibilityWaitSeconds from the switch's start, never past the request's deadline. A process spawned into a phone
+ * just booted takes 3 to 5 s to start on a busy Mac, and one sent with the request competed with testmanagerd's own
+ * start and its load: requested at once, sessions answered sooner but the phone's first reads then failed for 1 to 3
+ * s more (first read median 17.3 s); requested once the switch was in (3 to 5 s later), testmanagerd found
+ * accessibility on and the first read came at 15.9 s (November 17, 2026, 10 trials each, a Session Mac). On a phone
+ * held at background priority the switch takes 10 to 30 s: the request goes at the bound.
+ */
+final class AccessibilitySwitching: @unchecked Sendable {
+  private let lock = NSLock(), group = DispatchGroup()
+  private var startedAt: DispatchTime?
+  /** A switch begins: the closure marks its end (once, whatever calls it again). */
+  func begin() -> () -> Void {
+    lock.lock(); startedAt = .now(); group.enter(); lock.unlock()
+    let group = self.group, endLock = NSLock()
+    var ended = false
+    return { endLock.lock(); defer { endLock.unlock() }; if !ended { ended = true; group.leave() } }
+  }
+  /** Waits for the switches begun so far, within the bound: nil when none was begun, else whether they ended. */
+  func wait(deadline: DispatchTime) -> Bool? {
+    lock.lock(); let started = startedAt; lock.unlock()
+    guard let started else { return nil }
+    return group.wait(timeout: min(started + accessibilityWaitSeconds, deadline)) == .success
+  }
+}
+let accessibilitySwitching = AccessibilitySwitching()
+let accessibilityWaitSeconds = 6.0
 /**
  * Opens an automation session: the request, then its answer, waited for as sessionWait (SessionWait.swift) says,
  * never past `deadline`. The phone's testmanagerd answers once accessibility is loaded in the phone: the first request
@@ -378,6 +406,10 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   defer { load?.process.terminate() }
   // testmanagerd switches app accessibility off as it stops (its log: AXDisableAccessibilityOnTermination): on again.
   if restartingDaemons { switchAccessibilityOn(device: device) }
+  // The request goes once app accessibility is switched on (AccessibilitySwitching), the log stream starting meanwhile.
+  let switchWait = Date()
+  if accessibilitySwitching.wait(deadline: deadline) == false { sessionLog("requested before app accessibility was switched on (\(Int(accessibilityWaitSeconds)) s from its start)") }
+  if ms(switchWait) >= 100 { sessionLog("requested after \(ms(switchWait)) ms for app accessibility to be switched on") }
   // The request's time on both clocks: a process's start time is the kernel's wall-clock time (DaemonStart).
   let requested = DispatchTime.now(), requestedWall = Date()
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
