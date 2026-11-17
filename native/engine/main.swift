@@ -291,6 +291,28 @@ func startLoadLog() -> (log: LoadLog, process: Process)? {
   return (log, process)
 }
 /**
+ * App accessibility switched on inside the phone (native/axon, beside the engine, run with simctl spawn) as a session
+ * is requested. testmanagerd makes the same call as it loads accessibility for a session, but after a boot it starts
+ * 7 to 17 s after the request on a busy Mac and then waits 11 to 18 s for the phone's apps to load it; switched on at
+ * once, the load runs while testmanagerd starts, and its own load finds it done (November 17, 2026, a Session Mac:
+ * "Beginning AX loading sequence" and "Finished loading AX" in the same second; the first read 11.7 and 12.0 s from
+ * the engine's start, against 20.6 and 26.8 s without). Not a read of the phone, which before its accessibility is
+ * loaded poisons its CoreSimulatorBridge (SessionWait.swift). Not waited for: the request goes out beside it. The
+ * process is kept until it ends, its outcome written to the session log.
+ */
+var accessibilitySwitch: Process?
+func switchAccessibilityOn() {
+  guard let engine = Bundle.main.executableURL?.resolvingSymlinksInPath() else { return }
+  let helper = engine.deletingLastPathComponent().appendingPathComponent("simulator-use-axon").path
+  guard FileManager.default.isExecutableFile(atPath: helper) else { sessionLog("app accessibility not switched on: no simulator-use-axon beside the engine"); return }
+  let started = Date(), process = Process()
+  process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+  process.arguments = ["simctl"] + (deviceSetPath.map { ["--set", $0] } ?? []) + ["spawn", udid, helper]
+  process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
+  process.terminationHandler = { p in sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (exit \(p.terminationStatus))") }
+  do { try process.run(); accessibilitySwitch = process } catch { sessionLog("app accessibility not switched on: \(error.localizedDescription)") }
+}
+/**
  * Opens an automation session: the request, then its answer, waited for as sessionWait (SessionWait.swift) says,
  * never past `deadline`. The phone's testmanagerd answers once accessibility is loaded in the phone: the first request
  * after a boot has it load accessibility first, and it allows itself 120 s for that ("Waiting 120.0s for AX to finish
@@ -329,6 +351,7 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let requested = DispatchTime.now()
   let load = startLoadLog()
   defer { load?.process.terminate() }
+  switchAccessibilityOn()
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
   let timeoutNanos = UInt64(timeout * 1e9)
   // A first request (no restart yet) leaves the time for one.
