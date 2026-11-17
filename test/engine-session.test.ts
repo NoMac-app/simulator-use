@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const swiftc = process.platform === "darwin" && spawnSync("xcrun", ["--find", "swiftc"]).status === 0;
 
-test("a session request waits only for a testmanagerd it started, never for one that was there (a refusing phone)", { skip: !swiftc && "no swiftc here" }, () => {
+test("a session request is waited for while the phone loads accessibility, and refused once it is loaded and the daemon stays silent", { skip: !swiftc && "no swiftc here" }, () => {
   const engine = fileURLToPath(new URL("../native/engine/", import.meta.url));
   const dir = mkdtempSync(join(tmpdir(), "su-session-"));
   try {

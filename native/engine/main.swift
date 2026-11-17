@@ -261,16 +261,53 @@ func restartTestDaemons() {
   }
   Thread.sleep(forTimeInterval: 2)
 }
+/** The phone's frontmost app read without a session: whether it answers at all (sessionWait's signal); set by main(). */
+var readWithoutSession: (@Sendable () async -> Bool)?
 /**
- * Opens an automation session: the request, then up to `timeout` for the answer, never past `deadline`. The first
- * request after a boot (or after the phone's test daemons were restarted) starts the phone's testmanagerd, which loads
- * accessibility in the phone before it answers and allows itself 120 s for that ("Waiting 120.0s for AX to finish
- * loading", its log). Right after a boot that took 23 to 26 s (November 16, 2026, a busy 6-core virtual Mac:
- * testmanagerd took 8 s to start, then 16.6 s to load accessibility); given up at 12 s, with the daemons restarted
- * mid-load, the first read came no sooner. So when the testmanagerd running now is not the one that ran as the
- * request went out (this request started it), its answer is waited for, up to its own 120 s or the deadline. A
- * testmanagerd that was already there loads nothing long (0.3 s, measured): one that does not answer in `timeout`
- * is a phone that refuses sessions, and the hook restarts its daemons, as before.
+ * Session-free reads of the phone while a session request waits: one at a time, a second apart, from the request
+ * until the first that answers, whose time is `loadedAt` (uptime ns). Only reads: no session, no bootstrap, no
+ * remediation beyond what every read does.
+ */
+final class AccessibilityWatch: @unchecked Sendable {
+  private let lock = NSLock()
+  private var loaded: UInt64?
+  private var stopped = false
+  private let finished = DispatchSemaphore(value: 0)
+  var loadedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return loaded }
+  private var isStopped: Bool { lock.lock(); defer { lock.unlock() }; return stopped }
+  private func markLoaded() { lock.lock(); loaded = DispatchTime.now().uptimeNanoseconds; lock.unlock() }
+  private var task: Task<Void, Never>?
+  init(read: @escaping @Sendable () async -> Bool) {
+    task = Task.detached { [self] in
+      while !self.isStopped {
+        if await read() { self.markLoaded(); break }
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+      }
+      self.finished.signal()
+    }
+  }
+  /**
+   * Ends the reads (the pause between two at once: the task is cancelled); returns once the read in flight has (it
+   * must not overlap the engine's own reads), or at `deadline`.
+   */
+  func stop(until deadline: DispatchTime) {
+    lock.lock(); stopped = true; lock.unlock()
+    task?.cancel()
+    _ = finished.wait(timeout: deadline)
+  }
+}
+/**
+ * Opens an automation session: the request, then its answer, waited for as sessionWait (SessionWait.swift) says,
+ * never past `deadline`. The phone's testmanagerd answers once accessibility is loaded in the phone: the first request
+ * after a boot has it load accessibility first, and it allows itself 120 s for that ("Waiting 120.0s for AX to finish
+ * loading", its log). Right after a boot that took 23 to 26 s on a busy 6-core virtual Mac (November 16, 2026: 8 s
+ * to start, 16.6 s to load), and given up at 12 s, with the daemons restarted mid-load, the first read came no
+ * sooner. So whether accessibility is loaded is watched while the request waits, by reads without a session: while
+ * none answers, testmanagerd is loading it, and is waited for while it runs (its 120 s, the deadline); once one
+ * answers (at once, when accessibility was loaded before), it has `timeout` to answer, as a testmanagerd with nothing
+ * to load does in about a second. One that does not is a phone that refuses sessions (it was there before, or came
+ * after a restart: November 16, Mac 7, such a testmanagerd waited out its 120 s, a command, again and again), and the
+ * hook restarts its daemons.
  */
 func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, restartingDaemons: Bool = false) -> (AnyObject?, String?) {
   guard let turnMs = takeSessionTurn(deadline: deadline) else {
@@ -294,24 +331,36 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let done = DispatchSemaphore(value: 0); var session: AnyObject?; var failure: String?
   let completion: @convention(block) (AnyObject?, NSError?) -> Void = { s, e in session = s; failure = e?.localizedDescription; done.signal() }
   typealias RequestFn = @convention(c) (AnyClass, Selector, AnyObject, AnyObject) -> Void
-  let daemonBefore = phoneProcesses.pid(named: "testmanagerd")
   let requested = DispatchTime.now()
+  let watch = readWithoutSession.map { AccessibilityWatch(read: $0) }
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
-  var answered = done.wait(timeout: min(requested + timeout, deadline)) == .success
-  if !answered {
-    let daemon = phoneProcesses.pid(named: "testmanagerd")
-    switch unansweredSession(daemonBefore: daemonBefore, daemonNow: daemon) {
-    case let .loading(pid):
-      sessionLog("no answer in \(Int(timeout)) s from the testmanagerd this request started (pid \(pid), \(daemonBefore > 0 ? "after pid \(daemonBefore)" : "none before")): waiting for its accessibility load")
-      let limit = DispatchTime(uptimeNanoseconds: loadingWaitUntil(requestedAt: requested.uptimeNanoseconds, deadline: deadline.uptimeNanoseconds))
-      while !answered, DispatchTime.now() < limit, phoneProcesses.pid(named: "testmanagerd") == pid {
-        answered = done.wait(timeout: min(.now() + 1, limit)) == .success
-      }
-    case .refused:
-      sessionLog("no answer in \(Int(timeout)) s from \(daemon > 0 ? "testmanagerd pid \(daemon), there before the request" : "no testmanagerd")")
+  let timeoutNanos = UInt64(timeout * 1e9)
+  var answered = false, state = SessionWait.waiting, notedLoading = false
+  func since(_ t: UInt64) -> Int { Int((DispatchTime.now().uptimeNanoseconds - t) / 1_000_000) }
+  while true {
+    let now = DispatchTime.now().uptimeNanoseconds, loadedAt = watch?.loadedAt
+    // Whether a testmanagerd runs matters only once the first timeout has passed with accessibility not loaded.
+    let daemon = loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos ? phoneProcesses.pid(named: "testmanagerd") : 0
+    state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, daemonRunning: daemon > 0, timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds)
+    guard state == .waiting else { break }
+    if daemon > 0 && !notedLoading {
+      notedLoading = true
+      sessionLog("no answer in \(Int(timeout)) s, accessibility not loaded (no read without a session answers): waiting for testmanagerd pid \(daemon) to load it")
     }
+    if done.wait(timeout: min(.now() + 0.25, deadline)) == .success { answered = true; break }
   }
-  if !answered { outcome = "timed out"; return (nil, "timed out creating the remote automation session") }
+  let loadedAt = watch?.loadedAt
+  watch?.stop(until: deadline)
+  let loadedNote = loadedAt.map { "accessibility loaded \(Int((Int64($0) - Int64(requested.uptimeNanoseconds)) / 1_000_000)) ms after the request" } ?? "accessibility not loaded"
+  if notedLoading && answered { sessionLog("answered after the load (\(loadedNote))") }
+  if !answered {
+    switch state {
+    case .refused: sessionLog("refused: no answer \(Int(timeout)) s after accessibility was loaded (\(loadedNote))")
+    case .nothingLoading: sessionLog("no answer in \(Int(timeout)) s, accessibility not loaded and no testmanagerd running")
+    default: sessionLog("no answer in \(since(requested.uptimeNanoseconds)) ms, testmanagerd's 120 s or the deadline (\(loadedNote))")
+    }
+    outcome = "timed out"; return (nil, "timed out creating the remote automation session")
+  }
   guard let session else { return (nil, failure ?? "no session") }
   // An Objective-C NSError ** is autoreleasing: the callee hands back an object it does not own.
   typealias EnableFn = @convention(c) (AnyObject, Selector, AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool
@@ -923,6 +972,9 @@ func main() async {
     let control = try FBSimulatorControl.withConfiguration(FBSimulatorControlConfiguration(deviceSetPath: deviceSetPath, logger: logger, reporter: nil))
     guard let simulator = control.set.allSimulators.first(where: { $0.udid == udid }) else { throw EngineError(message: "no simulator \(udid)") }
     guard simulator.state == .booted else { throw EngineError(message: "simulator \(udid) is not booted") }
+    readWithoutSession = {
+      do { try await simulator.accessibilityElementForFrontmostApplication(bootstrap: false).close(); return true } catch { return false }
+    }
     let loaded = ms(started)
     let hidStart = Date()
     // How input goes is chosen before each input, not once by AXe's connectToHID (Input.swift).

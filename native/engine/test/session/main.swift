@@ -3,20 +3,35 @@ import Foundation
 var failures = 0
 func check(_ ok: Bool, _ what: String) { if !ok { failures += 1; print("FAIL: \(what)") } }
 
-// Right after a boot: no testmanagerd ran; the request started one, still loading accessibility.
-check(unansweredSession(daemonBefore: 0, daemonNow: 812) == .loading(pid: 812), "a testmanagerd the request started is waited for")
-// After the phone's daemons were restarted, the second request starts a new one.
-check(unansweredSession(daemonBefore: 640, daemonNow: 901) == .loading(pid: 901), "a new testmanagerd after a restart is waited for")
-// November 16, 2026: after an earlier engine's restart a testmanagerd 5 s old was there as the request went out and
-// never answered; waiting for it by its age cost 120 s a command. It is the refusing phone: restart at 12 s.
-check(unansweredSession(daemonBefore: 777, daemonNow: 777) == .refused, "a testmanagerd already there that does not answer is a refusal, whatever its age")
-check(unansweredSession(daemonBefore: 777, daemonNow: 0) == .refused, "no testmanagerd at all is a refusal")
-check(unansweredSession(daemonBefore: 0, daemonNow: 0) == .refused, "no testmanagerd before or after is a refusal")
-
-// The wait for a loading testmanagerd ends at its own 120 s from the request, or at the first read's deadline.
 let s: UInt64 = 1_000_000_000
-check(loadingWaitUntil(requestedAt: 10 * s, deadline: 300 * s) == 130 * s, "120 s from the request")
-check(loadingWaitUntil(requestedAt: 10 * s, deadline: 100 * s) == 100 * s, "never past the deadline")
+let timeout = 12 * s, request = 100 * s, deadline = request + 100 * s
+func at(_ seconds: UInt64, loaded: UInt64? = nil, daemon: Bool = true, deadline d: UInt64 = deadline) -> SessionWait {
+  sessionWait(now: request + seconds * s, requestedAt: request, loadedAt: loaded.map { request + $0 * s }, daemonRunning: daemon, timeout: timeout, deadline: d)
+}
+
+// Accessibility loaded before the request (a read without a session answered at once): nothing to load, so no answer
+// in the first timeout is a refusal, whatever testmanagerd it met (November 16, 2026: one 5 s old after an earlier
+// restart, waited for by its age, cost 120 s a command).
+check(at(5, loaded: 0) == .waiting, "within the first timeout of a loaded phone")
+check(at(12, loaded: 0) == .refused, "a loaded phone whose testmanagerd is silent for the first timeout refuses")
+check(at(13, loaded: 0, daemon: false) == .refused, "refused whether or not a testmanagerd runs")
+
+// Right after a boot (November 16: 8 s to start, 16.6 s to load, answered at 26.3 s): no read answers while it loads.
+check(at(12) == .waiting, "accessibility still loading at the first timeout: waited for")
+check(at(26) == .waiting, "still loading at 26 s with testmanagerd running")
+check(at(30, daemon: false) == .nothingLoading, "not loaded, past the first timeout, no testmanagerd: nothing is loading it")
+check(at(5, daemon: false) == .waiting, "before the first timeout testmanagerd may not have started yet")
+// Once the load is seen, the answer has the first timeout from then (it came 0.8 s after the load, measured).
+check(at(30, loaded: 25) == .waiting, "loaded at 25 s: still waited for at 30 s")
+check(at(37, loaded: 25) == .refused, "loaded at 25 s and silent until 37 s: refused")
+
+// Never past testmanagerd's own 120 s from the request, nor the first read's deadline.
+check(at(99) == .waiting, "loading, before the deadline")
+check(at(100) == .outOfTime, "the deadline")
+check(at(119, deadline: request + 300 * s) == .waiting, "loading, before testmanagerd's 120 s")
+check(at(120, deadline: request + 300 * s) == .outOfTime, "testmanagerd's own 120 s")
+check(at(100, loaded: 95) == .outOfTime, "loaded late: still never past the deadline")
+
 check(timeForRestart(secondsLeft: 60), "time left for a restart and a second request")
 check(!timeForRestart(secondsLeft: 20), "no restart without the time for a second request")
 
