@@ -155,6 +155,22 @@ export async function gesture(udid: string, args: string[]): Promise<void> {
   }
 }
 
+/**
+ * A finger moved from one point to another in steps, put down first unless it is already down there (down: false),
+ * and lifted at the end unless it is to stay (up: false), so the screen can be read while it holds something (a
+ * slider). Only the engine holds a finger between calls: false without it, and nothing was sent.
+ */
+export async function moveFinger(udid: string, from: { x: number; y: number }, to: { x: number; y: number }, options: { down?: boolean; up?: boolean; duration?: number } = {}): Promise<boolean> {
+  const { down = true, up = true, duration = 0.4 } = options;
+  const steps = Math.max(1, Math.round(Math.abs(to.x - from.x) + Math.abs(to.y - from.y)) / 4);
+  const answer = await engineCall(udid, { op: "drag", x1: from.x, y1: from.y, x2: to.x, y2: to.y, duration, steps: Math.ceil(steps), down, up }, 30_000, { reportLost: true });
+  if (answer === undefined) return false;
+  if (answer.ok) return true;
+  if (answer.busy) throw new ToolError("The Simulator did not take the finger's move within 30 s.");
+  sentInPart(answer, "finger's move");
+  throw new ToolError(`The Simulator did not take the finger's move: ${String(answer.error ?? "no answer")}.`);
+}
+
 /** The single element at a point, for reading back a field right after typing (about 0.15 s). */
 export async function elementAt(udid: string, x: number, y: number): Promise<AxNode | undefined> {
   const answer = await engineCall(udid, { op: "point", x: Math.round(x), y: Math.round(y) }, 3_000);

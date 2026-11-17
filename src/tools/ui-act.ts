@@ -5,7 +5,7 @@ import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
 import { describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
 import { setPasteboard } from "../engine/apps.ts";
-import { batch, elementAt, pressButton, setSlider, typeStep } from "../engine/axe.ts";
+import { batch, elementAt, moveFinger, pressButton, setSlider, typeStep } from "../engine/axe.ts";
 import { ToolError } from "../errors.ts";
 import { withLock } from "../engine/lock.ts";
 import { hasEngine } from "../engine/native.ts";
@@ -63,6 +63,60 @@ function pinned(node: AxNode | undefined, e: Element): boolean {
   if (e.label && label && e.label.includes(label)) return true;
   // A field named by its text shows that text as its value.
   return Boolean(e.label) && String(node.AXValue ?? "") === e.label;
+}
+
+/** How close to the asked percent a set slider is (74.8 for 75 is set). */
+const SLIDER_SET = 2;
+
+/**
+ * Sets a slider with a finger held on it, by the engine (false without it: nothing was sent). A slider follows a
+ * finger only once the finger has moved about 10 pt, and from then on point for point (measured November 17, 2026,
+ * iOS 27.2, EdgeLab's SwiftUI slider on an iPhone 17 Pro Max: a 9 pt drag moved it not at all, 15 pt by 4.6 pt, 25 pt
+ * by 14 pt, and long drags ended 1 to 5 points short; AXe 2.0.4's slider command stopped part way there, and our
+ * correcting drags of a few points never moved it). So the finger is put on the thumb (where its value puts it) and
+ * moved to where the asked value goes, and while it stays down the slider is read and the finger moved again by what
+ * it reads short or over, until it reads the value; then the finger is lifted, whatever happened.
+ */
+async function holdSlider(udid: string, slider: Element, from: number, to: number): Promise<boolean> {
+  const f = slider.frame;
+  const track = Math.max(1, f.width - 2 * SLIDER_THUMB_RADIUS);
+  const y = Math.round(f.y + f.height / 2);
+  // Never off the slider's ends: past them it reads its end value anyway.
+  const clamp = (x: number) => Math.round(Math.min(f.x + f.width, Math.max(f.x, x)));
+  let x = clamp(f.x + SLIDER_THUMB_RADIUS + (from / 100) * track);
+  const readOnce = async () => {
+    const node = await elementAt(udid, Math.round(f.x + f.width / 2), y);
+    return node?.AXValue !== undefined && node.AXValue !== null ? sliderPercent(String(node.AXValue)) : undefined;
+  };
+  // The app takes the finger's last moves a moment after they are sent: read until two reads agree (a read right after
+  // a move was 1 point behind, and the move made for it went 1 point over).
+  const read = async () => {
+    let last = await readOnce();
+    for (let reads = 0; reads < 20; reads++) {
+      await sleep(POLL_MS);
+      const now = await readOnce();
+      if (now === last) return now;
+      last = now;
+    }
+    return last;
+  };
+  let next = clamp(x + ((to - from) / 100) * track);
+  if (!(await moveFinger(udid, { x, y }, { x: next, y }, { up: false }))) return false;
+  try {
+    x = next;
+    // Each move after the first is point for point; one more than the first's shortfall needs is spare.
+    for (let moves = 0; moves < 3; moves++) {
+      const now = await read();
+      if (now === undefined || Math.abs(now - to) <= SLIDER_SET / 4) break;
+      next = clamp(x + ((to - now) / 100) * track);
+      if (next === x) break;
+      await moveFinger(udid, { x, y }, { x: next, y }, { down: false, up: false });
+      x = next;
+    }
+  } finally {
+    await moveFinger(udid, { x, y }, { x, y }, { down: false });
+  }
+  return true;
 }
 
 /** A slider's value as a percent: SwiftUI reports 0.75 for a 0...1 slider, others "75%" or 75. */
@@ -336,27 +390,22 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         const r = await locate(step.target);
         if (r.element?.kind !== "slider") throw new StepFailure(`${describeTarget(step.target)} is ${r.element ? `a ${r.element.kind}` : "a point"}, not a slider.`, "set takes a slider from ui_look; a stepper has Increment and Decrement buttons to tap.");
         if (!r.element.id && !r.element.label) throw new StepFailure("This slider has no id or label to set it by.", "Drag it: swipe right on it, or tap along it.");
-        // AXe drags the slider and then insists on the exact value; 74.8 for 75 is a set slider, so its verdict is
-        // replaced by our own read: within 2 points of the asked percent.
+        // Within 2 points of the asked percent is a set slider (74.8 for 75).
         const by = { id: r.element.id, label: r.element.id ? undefined : r.element.label };
         const reading = () => {
           const now = snap.elements.find((e) => e.kind === "slider" && (r.element!.id ? e.id === r.element!.id : e.label === r.element!.label));
           return { now, reached: now?.value !== undefined ? sliderPercent(now.value) : undefined };
         };
-        await setSlider(udid, by, step.percent).catch(() => undefined);
-        await settled(n);
         let { now, reached } = reading();
-        // AXe's drag missed by 3 to 4 points on an iPad's wide slider. The thumb follows a finger exactly, so drag
-        // it from where its value puts it to where the asked value goes, up to twice.
-        for (let tries = 0; tries < 2 && now && reached !== undefined && Math.abs(reached - step.percent) > 2; tries++) {
-          const f = now.frame;
-          const track = Math.max(1, f.width - 2 * SLIDER_THUMB_RADIUS);
-          const at = (percent: number) => Math.round(f.x + SLIDER_THUMB_RADIUS + (percent / 100) * track);
-          const y = Math.round(f.y + f.height / 2);
-          await settled(n, { gesture: ["drag", "--start-x", `${at(reached)}`, "--start-y", `${y}`, "--end-x", `${at(step.percent)}`, "--end-y", `${y}`, "--duration", "0.6"] });
+        if (!now || reached === undefined || Math.abs(reached - step.percent) > SLIDER_SET) {
+          // The engine holds a finger on the slider and reads it as it moves (holdSlider); without the engine, AXe's own
+          // slider command drags it, and our read has the last word (AXe insists on the exact value).
+          const held = now && reached !== undefined ? await holdSlider(udid, now, reached, step.percent) : false;
+          if (!held) await setSlider(udid, by, step.percent).catch(() => undefined);
+          await settled(n);
           ({ now, reached } = reading());
         }
-        if (reached === undefined || Math.abs(reached - step.percent) > 2) {
+        if (reached === undefined || Math.abs(reached - step.percent) > SLIDER_SET) {
           throw new StepFailure(`The slider shows ${quote(now?.value ?? "nothing")}, not ${step.percent}%.`, "Check it with ui_look; a slider with steps only takes some values.");
         }
         return;

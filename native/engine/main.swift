@@ -914,12 +914,14 @@ func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
     let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
     return .swipe(x1, yStart: y1, xEnd: x2, yEnd: y2, delta: req["delta"] as? Double ?? 10, duration: req["duration"] as? Double ?? 0.3)
   case "drag":
-    // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag.
+    // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag. up: false leaves the
+    // finger down at the end, and down: false moves a finger left down so from where it is (x1, y1): a slider is set
+    // by a finger held on it, moved while the slider is read (ui-act.ts).
     let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
     let duration = req["duration"] as? Double ?? 0.6, n = max(1, Int(req["steps"] as? Double ?? 20))
-    var events: [FBSimulatorHIDEvent] = [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)]
+    var events: [FBSimulatorHIDEvent] = (req["down"] as? Bool ?? true) ? [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)] : []
     for i in 1...n { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
-    events.append(.touch(direction: .up, x: x2, y: y2))
+    if req["up"] as? Bool ?? true { events.append(.touch(direction: .up, x: x2, y: y2)) }
     return .composite(events)
   case "steps":
     var events: [FBSimulatorHIDEvent] = []
