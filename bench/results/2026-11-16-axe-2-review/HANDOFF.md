@@ -1,4 +1,25 @@
-# Handoff: 0.17.0 ready for release (November 17, 2026, 10:00 UTC)
+# Handoff: 0.17.0 ready for release (November 17, 2026, 10:30 UTC)
+
+## Round 4 (November 17, 2026): two review findings fixed, tarball rebuilt (the current state)
+
+- `21f2fd4` set: holdSlider's try starts before the first move; after any move that may have gone out (busy,
+  partial, lost) the finger is lifted, by `liftFinger` (the engine's drag with steps 0, down false: an up alone, so
+  it taps nothing where no finger is down), and a lift's error never hides the move's. `test/hold-slider.test.ts`
+  (stand-in engine `test/fixtures/fake-engine-finger.mjs`): 4 tests, all 4 fail on the code before.
+- `e4c2b39` session wait: a first request stops waiting for a load at the deadline less 26 s
+  (`restartReserveNanos`), so a restart always fits (the load keeps 74 s); only "No translation object" counts as
+  not loaded (other errors, or a read past its 5 s limit, are no evidence: given up after the first timeout);
+  `AccessibilityWatch` (moved to SessionWait.swift) never waits for a hung read past its limit, and an unanswered
+  request gives the read in flight 0.5 s. Swift test extended; with the old behaviour put back 7 checks fail.
+- `ad4f8dd` README: engine `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` (helpers unchanged).
+- `npm test` 227 of 227 and typecheck clean (laptop and Session Mac ses_3d609c3f, Xcode 27.2). lab.sh iPhone 17 Pro
+  27 of 27 ("set a slider" 6 s, 0 session timeouts). First read right after boot, 5 each interleaved: B11
+  (a78b9322) median 14.3 s (12.0 to 15.7), new engine median 14.8 s (12.2 to 16.9), 0 timeouts either; one new-engine
+  trial waited past 12 s on "No translation object" and answered at 16 s (the signal still read right).
+- Tarball (`pack.sh`, fresh clone + bundle at `ad4f8dd`): `simulator-use-0.17.0.tgz`, sha256
+  `2ea55c56d3cc64818b2d8dbbca47fbdcbab6ef32ba14653dce3cc32823b737dc`, 16,778,485 bytes; engine hash as in the README
+  (same as the branch build), modes 0755, ad hoc signed, AXe v2.0.4. Supersedes `e75480f2...`. Mac stopped ($0.23).
+- Duo branch: also needs `21f2fd4` and `e4c2b39` (then its own README hash).
 
 Branch `axe-2` in `~/simtap-axe2`, committed locally (`828dbd8` tests_run cherry-pick, `0fd6624` session wait,
 `2c56c3b` lab.sh, `bda3627` slider, `683c517` README hash, then this file and round 3's logs); nothing pushed, tagged
