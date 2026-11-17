@@ -291,25 +291,49 @@ func startLoadLog() -> (log: LoadLog, process: Process)? {
   return (log, process)
 }
 /**
- * App accessibility switched on inside the phone (native/axon, beside the engine, run with simctl spawn) as a session
- * is requested. testmanagerd makes the same call as it loads accessibility for a session, but after a boot it starts
+ * App accessibility switched on inside the phone (native/axon, beside the engine, spawned there) as the engine
+ * starts, and again after a restart of the phone's test daemons. testmanagerd makes the same call as it loads accessibility for a session, but after a boot it starts
  * 7 to 17 s after the request on a busy Mac and then waits 11 to 18 s for the phone's apps to load it; switched on at
  * once, the load runs while testmanagerd starts, and its own load finds it done (November 17, 2026, a Session Mac:
  * "Beginning AX loading sequence" and "Finished loading AX" in the same second; the first read 11.7 and 12.0 s from
  * the engine's start, against 20.6 and 26.8 s without). Not a read of the phone, which before its accessibility is
- * loaded poisons its CoreSimulatorBridge (SessionWait.swift). Not waited for: the request goes out beside it. The
- * process is kept until it ends, its outcome written to the session log.
+ * loaded poisons its CoreSimulatorBridge (SessionWait.swift); reads that reach the bridge once it is on fail for want of a
+ * translation object until the apps' load is done, and then answer (November 17, 2026: every one of 8 trials and 3
+ * throttled phones read). Not waited for. The process is kept until it ends, its outcome written to the session log.
  */
 var accessibilitySwitch: Process?
-func switchAccessibilityOn() {
+/**
+ * Spawns `path` in the phone through CoreSimulator (SimDevice's spawnAsyncWithPath, as AXe's process launches do): no
+ * xcrun or simctl process to start first, which cost 1.8 to 4.3 s on a Session Mac right after a boot. `done` gets the
+ * exit status, or nil when the spawn failed. False when the device has no such method.
+ */
+func spawnInPhone(_ device: AnyObject, _ path: String, done: @escaping (Int32?) -> Void) -> Bool {
+  let name = "spawnAsyncWithPath:options:terminationQueue:terminationHandler:completionQueue:completionHandler:"
+  let sel = NSSelectorFromString(name)
+  guard device.responds(to: sel), let imp = objcCall(device, name) else { return false }
+  typealias SpawnFn = @convention(c) (AnyObject, Selector, NSString, NSDictionary, DispatchQueue, AnyObject, DispatchQueue, AnyObject) -> Void
+  let queue = DispatchQueue(label: "simulator-use-engine.spawn")
+  // argv[0] is the path: SimDevice does not add it (AXe's FBSimulatorProcessSpawnCommands). Through the phone's launchd.
+  let options: NSDictionary = ["arguments": [path], "environment": [String: String](), "standalone": false]
+  let terminated: @convention(block) (Int32) -> Void = { status in done(status) }
+  let completed: @convention(block) (NSError?, pid_t) -> Void = { error, _ in if error != nil { done(nil) } }
+  unsafeBitCast(imp, to: SpawnFn.self)(device, sel, path as NSString, options, queue, terminated as AnyObject, queue, completed as AnyObject)
+  return true
+}
+func switchAccessibilityOn(device: AnyObject?) {
   guard let engine = Bundle.main.executableURL?.resolvingSymlinksInPath() else { return }
   let helper = engine.deletingLastPathComponent().appendingPathComponent("simulator-use-axon").path
   guard FileManager.default.isExecutableFile(atPath: helper) else { sessionLog("app accessibility not switched on: no simulator-use-axon beside the engine"); return }
-  let started = Date(), process = Process()
+  let started = Date()
+  if let device, spawnInPhone(device, helper, done: { status in
+    sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (\(status.map { "exit \($0)" } ?? "spawn failed"))")
+  }) { return }
+  // No CoreSimulator spawn to call: simctl's.
+  let process = Process()
   process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
   process.arguments = ["simctl"] + (deviceSetPath.map { ["--set", $0] } ?? []) + ["spawn", udid, helper]
   process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
-  process.terminationHandler = { p in sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (exit \(p.terminationStatus))") }
+  process.terminationHandler = { p in sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (simctl, exit \(p.terminationStatus))") }
   do { try process.run(); accessibilitySwitch = process } catch { sessionLog("app accessibility not switched on: \(error.localizedDescription)") }
 }
 /**
@@ -351,7 +375,8 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let requested = DispatchTime.now()
   let load = startLoadLog()
   defer { load?.process.terminate() }
-  switchAccessibilityOn()
+  // testmanagerd switches app accessibility off as it stops (its log: AXDisableAccessibilityOnTermination): on again.
+  if restartingDaemons { switchAccessibilityOn(device: device) }
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
   let timeoutNanos = UInt64(timeout * 1e9)
   // A first request (no restart yet) leaves the time for one.
@@ -999,6 +1024,10 @@ func main() async {
     let control = try FBSimulatorControl.withConfiguration(FBSimulatorControlConfiguration(deviceSetPath: deviceSetPath, logger: logger, reporter: nil))
     guard let simulator = control.set.allSimulators.first(where: { $0.udid == udid }) else { throw EngineError(message: "no simulator \(udid)") }
     guard simulator.state == .booted else { throw EngineError(message: "simulator \(udid) is not booted") }
+    // App accessibility on at once: the phone's apps then load it (10 to 12 s on a busy Mac) while the engine starts
+    // and the first session is requested, as 0.17.0's reads had them do (switchAccessibilityOn). Not for an engine that
+    // never reads (--no-bootstrap: the live view's).
+    if !skipBootstrap { switchAccessibilityOn(device: simulator.device) }
     let loaded = ms(started)
     let hidStart = Date()
     // How input goes is chosen before each input, not once by AXe's connectToHID (Input.swift).
