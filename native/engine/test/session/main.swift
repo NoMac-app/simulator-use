@@ -49,11 +49,16 @@ check(loadEvent(inLogLine: launchedLine) == .launched, "\"Launched testmanagerd 
 // One started for the request is waited for while it starts (November 17, 2026, a Session Mac: launched at 10 to 12 s,
 // its load later; restarted at 12 s, the first read waited 13 s more); one that was there before and stays silent is not.
 let starting = LoadLog()
-starting.note(launchedLine, at: 10 * s)
-check(starting.loading && starting.loadedAt == nil, "launched for the request: loading")
-check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .waiting,
-      "a testmanagerd launched for the request, silent at 20 s: still waited for")
-check(starting.launchedAt == 10 * s, "the launch is kept with its time, for when the kernel's start time cannot be read")
+starting.note(launchedLine, at: request + 10 * s)
+check(!starting.loading && starting.loadedAt == nil, "a launch is not a load")
+check(starting.launchedAt == request + 10 * s, "the launch is kept with its time, for when the kernel's start time cannot be read")
+check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemon: .started(at: starting.launchedAt!), timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .waiting,
+      "a testmanagerd launched for the request (the log's time), silent at 20 s: still within its first timeout")
+check(sessionWait(now: request + 23 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemon: .started(at: starting.launchedAt!), timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .nothingLoading,
+      "launched at 10 s and silent, no load, at 23 s: nothing loading")
+let snap = LoadLog(); snap.note(began, at: 5 * s); snap.note(finished, at: 9 * s)
+let read = snap.snapshot
+check(read.loadedAt == 9 * s && !read.loading && read.launchedAt == nil, "one snapshot: loaded, no longer loading")
 check(sessionWait(now: request + 13 * s, requestedAt: request, loadedAt: nil, loading: LoadLog().loading, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .nothingLoading,
       "a testmanagerd that was there before (no launch, no load) and silent at 13 s: refused, restarted")
 let loadLog = LoadLog()
@@ -156,6 +161,13 @@ check(heldWait(53, loadedAt: 36, daemon: .running) == .waiting, "held: no answer
 check(heldWait(63, loadedAt: 36, daemon: .running) == .refused, "13 s of run after the load and no answer: refused")
 check(heldWait(74, loading: true, daemon: .started(at: request + 5 * s)) == .loadTooLong, "the restart's reserve is wall-clock: held or not")
 check(heldWait(100, daemon: .running, heldUntil: 200) == .outOfTime, "the deadline is wall-clock: held throughout")
+// Held throughout, a first request still keeps its restart's reserve: a testmanagerd that was there, silent, or one
+// whose load finished and that does not answer, is given up at loadUntil (74 s), not waited for to the deadline.
+check(heldWait(73, daemon: .running, heldUntil: 200) == .waiting, "held throughout, before the restart's reserve: waited for")
+check(heldWait(74, daemon: .running, heldUntil: 200) == .nothingLoading, "held throughout, at the restart's reserve: given up, restarted")
+check(heldWait(74, loadedAt: 30, daemon: .running, heldUntil: 200) == .refused, "held throughout, loaded at 30 s, no answer at 74 s: refused")
+check(sessionWait(now: deadline - 26 * s + s, requestedAt: deadline - 26 * s - s, loadedAt: nil, loading: false, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: firstUntil, ran: { _ in 0 }) == .waiting,
+      "a request sent just before the reserve keeps its first timeout of wall-clock time")
 // Not held: as before (the clock's run is the wall-clock time).
 check(heldWait(13, daemon: .running, heldUntil: 0) == .nothingLoading, "not held: a silent testmanagerd that was there is refused at 12 s")
 

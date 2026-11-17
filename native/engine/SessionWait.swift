@@ -40,8 +40,9 @@ let sessionPollSeconds = 0.25
 /** What a line of testmanagerd's log says about loading accessibility. */
 enum LoadEvent: Equatable {
   /**
-   * "Launched testmanagerd from …": a testmanagerd started after the request went out, so for it (7 to 17 s after a
-   * boot on a busy Mac). The kernel's start time says so first (daemonStart, main.swift); this line counts where that cannot be read.
+   * "Launched testmanagerd from …": a testmanagerd starting (7 to 17 s after the request on a busy Mac just booted).
+   * Only when the kernel's start time cannot be read (daemonStart, main.swift) is this line's time taken for its start;
+   * it never counts as a load.
    */
   case launched
   /** "Beginning AX loading sequence.": it is loading accessibility, for a session request. */
@@ -87,11 +88,13 @@ final class LoadLog: @unchecked Sendable {
   var launchedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return launched }
   /** When the load finished (nil: not yet). */
   var loadedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return finished }
-  /**
-   * Whether testmanagerd is loading accessibility, or starting to for this request: it began, or it was launched since
-   * the request; and it has not finished.
-   */
-  var loading: Bool { lock.lock(); defer { lock.unlock() }; return (began != nil || launched != nil) && finished == nil }
+  /** Whether testmanagerd is loading accessibility: it began, and it has not finished. */
+  var loading: Bool { lock.lock(); defer { lock.unlock() }; return began != nil && finished == nil }
+  /** What the log has said so far, read at once: two reads apart could miss a load that finished between them. */
+  var snapshot: (loadedAt: UInt64?, loading: Bool, launchedAt: UInt64?) {
+    lock.lock(); defer { lock.unlock() }
+    return (finished, began != nil && finished == nil, launched)
+  }
 }
 
 /** Where a session request that has not been answered yet stands. */
@@ -167,9 +170,12 @@ enum Daemon: Equatable {
  * when nil); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd).
  */
 func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil, ran: ((UInt64) -> UInt64)? = nil) -> SessionWait {
-  let ranSince = ran ?? { now > $0 ? now - $0 : 0 }
+  let wall = { (t: UInt64) in now > t ? now - t : 0 }, ranSince = ran ?? wall
+  // Silent for the first timeout of wall-clock time but not of run (the phone held): waited for, except by a first
+  // request at loadUntil, which keeps the time for a restart (a phone held throughout would otherwise never get one).
+  let silent = { (since: UInt64) in ranSince(since) >= timeout || (loadUntil.map { now >= $0 } ?? false) && wall(since) >= timeout }
   if now >= min(deadline, requestedAt + testmanagerdLoadLimitNanos) { return .outOfTime }
-  if let loadedAt { return ranSince(max(loadedAt, requestedAt)) < timeout ? .waiting : .refused }
+  if let loadedAt { return silent(max(loadedAt, requestedAt)) ? .refused : .waiting }
   // Since when testmanagerd has had the request: from the request, or from the start of one started for it; none yet,
   // it has not had it at all.
   var heardSince: UInt64? = requestedAt
@@ -182,7 +188,7 @@ func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: B
   if loading || starting, let loadUntil, now >= loadUntil { return .loadTooLong }
   if loading { return .waiting }
   guard let heardSince else { return .waiting }
-  return ranSince(heardSince) < timeout ? .waiting : .nothingLoading
+  return silent(heardSince) ? .nothingLoading : .waiting
 }
 
 /** When a request stops waiting for the load: a first one (a restart may follow) leaves restartReserveNanos. */

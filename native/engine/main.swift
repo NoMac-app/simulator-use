@@ -326,8 +326,15 @@ func switchAccessibilityOn(device: AnyObject?) {
   let helper = engine.deletingLastPathComponent().appendingPathComponent("simulator-use-axon").path
   guard FileManager.default.isExecutableFile(atPath: helper) else { sessionLog("app accessibility not switched on: no simulator-use-axon beside the engine"); return }
   let started = Date(), finished = accessibilitySwitching.begin()
+  // Off the caller's thread: CoreSimulator's spawn call itself can take a while on a busy phone, and the engine's start
+  // waits for nothing of it (a session request waits for `finished`, AccessibilitySwitching).
+  DispatchQueue.global(qos: .userInitiated).async { spawnAccessibilitySwitch(device: device, helper: helper, started: started, finished: finished) }
+}
+private func spawnAccessibilitySwitch(device: AnyObject?, helper: String, started: Date, finished: @escaping () -> Void) {
+  // The handler gets a wait status (SimDevice's terminationHandler): the exit code is its second byte.
   if let device, spawnInPhone(device, helper, done: { status in
-    sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (\(status.map { "exit \($0)" } ?? "spawn failed"))")
+    let outcome = status.map { $0 & 0x7f == 0 ? "exit \(($0 >> 8) & 0xff)" : "signal \($0 & 0x7f)" } ?? "spawn failed"
+    sessionLog("app accessibility switched on in the phone in \(ms(started)) ms (\(outcome))")
     finished()
   }) { return }
   // No CoreSimulator spawn to call: simctl's.
@@ -366,6 +373,12 @@ final class AccessibilitySwitching: @unchecked Sendable {
 }
 let accessibilitySwitching = AccessibilitySwitching()
 let accessibilityWaitSeconds = 6.0
+/**
+ * A phone up less than this is one just booted, whose first request waits for app accessibility's switch: its spawns
+ * take seconds and compete with testmanagerd's start (a pool phone's first read comes within seconds of its boot; one
+ * held at background priority takes 60 to 90 s to be read).
+ */
+let youngPhoneSeconds = 180.0
 /**
  * Opens an automation session: the request, then its answer, waited for as sessionWait (SessionWait.swift) says,
  * never past `deadline`. The phone's testmanagerd answers once accessibility is loaded in the phone: the first request
@@ -406,10 +419,14 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   defer { load?.process.terminate() }
   // testmanagerd switches app accessibility off as it stops (its log: AXDisableAccessibilityOnTermination): on again.
   if restartingDaemons { switchAccessibilityOn(device: device) }
-  // The request goes once app accessibility is switched on (AccessibilitySwitching), the log stream starting meanwhile.
-  let switchWait = Date()
-  if accessibilitySwitching.wait(deadline: deadline) == false { sessionLog("requested before app accessibility was switched on (\(Int(accessibilityWaitSeconds)) s from its start)") }
-  if ms(switchWait) >= 100 { sessionLog("requested after \(ms(switchWait)) ms for app accessibility to be switched on") }
+  // A first request on a phone just booted goes once app accessibility is switched on (AccessibilitySwitching), the
+  // log stream starting meanwhile. Not a request after a restart, whose budget (restartReserveNanos) has no room for it,
+  // nor one on a phone up for a while, where the switch is quick and nothing competes with testmanagerd's start.
+  if !restartingDaemons && phoneProcesses.youngerThan(seconds: youngPhoneSeconds) {
+    let switchWait = Date()
+    if accessibilitySwitching.wait(deadline: deadline) == false { sessionLog("requested before app accessibility was switched on (\(Int(accessibilityWaitSeconds)) s from its start)") }
+    if ms(switchWait) >= 100 { sessionLog("requested after \(ms(switchWait)) ms for app accessibility to be switched on") }
+  }
   // The request's time on both clocks: a process's start time is the kernel's wall-clock time (DaemonStart).
   let requested = DispatchTime.now(), requestedWall = Date()
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
@@ -420,14 +437,14 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let clock = RunClock(at: requested.uptimeNanoseconds)
   func since(_ t: UInt64) -> Int { Int((DispatchTime.now().uptimeNanoseconds - t) / 1_000_000) }
   while true {
-    let now = DispatchTime.now().uptimeNanoseconds, loadedAt = load?.log.loadedAt, loading = load?.log.loading ?? false
+    let now = DispatchTime.now().uptimeNanoseconds, heard = load?.log.snapshot, loadedAt = heard?.loadedAt, loading = heard?.loading ?? false
     clock.tick(at: now, clamped: phoneProcesses.clamped())
     // Which testmanagerd runs matters only once the first timeout has passed with accessibility not loaded; before,
     // the request is waited for whatever runs.
     if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
       daemon = phoneProcesses.pid(named: "testmanagerd")
       daemonState = daemon <= 0 ? .none : (daemonStart(daemon, requested: requested.uptimeNanoseconds, requestedWall: requestedWall)
-        ?? load?.log.launchedAt).map { Daemon.started(at: $0) } ?? .running
+        ?? heard?.launchedAt).map { Daemon.started(at: $0) } ?? .running
     } else { daemon = 0; daemonState = .running }
     state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, loading: loading, daemon: daemonState,
                         timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil, ran: clock.ran(since:))
@@ -495,6 +512,19 @@ final class PhoneProcesses: @unchecked Sendable {
     var info = proc_taskinfo()
     let size = Int32(MemoryLayout<proc_taskinfo>.size)
     return proc_pidinfo(launchd, PROC_PIDTASKINFO, 0, &info, size) == size && info.pti_priority <= throttledPriority
+  }
+  /**
+   * Whether the phone booted less than `seconds` ago (its launchd_sim's start, from the kernel). Unknown is young: the
+   * wait it allows is bounded.
+   */
+  func youngerThan(seconds: Double) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    guard findLaunchd() > 0 else { return true }
+    var info = proc_bsdinfo()
+    let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+    guard proc_pidinfo(launchd, PROC_PIDTBSDINFO, 0, &info, size) == size else { return true }
+    let booted = Double(info.pbi_start_tvsec) + Double(info.pbi_start_tvusec) / 1e6
+    return Date().timeIntervalSince1970 - booted < seconds
   }
   /** The phone's launchd_sim, found again when the pid known no longer is it. Under the lock. */
   private func findLaunchd() -> pid_t {
