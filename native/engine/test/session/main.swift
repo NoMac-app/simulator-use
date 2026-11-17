@@ -44,6 +44,17 @@ check(loadEvent(inLogLine: finished) == .finished, "\"Finished loading AX.\" is 
 check(loadEvent(inLogLine: "2026-11-17 13:58:25.554 Df testmanagerd[33241:8e9673] [com.apple.dt.xctest:Default] Received request to load Accessibility") == nil,
       "a request to load is not a load (testmanagerd logs it for every session, loaded or not)")
 check(loadEvent(inLogLine: "Filtering the log data using \"process == \"testmanagerd\"\"") == nil, "the stream's own first line says nothing")
+let launchedLine = "2026-11-17 16:37:55.488 Df testmanagerd[48050:aba384] [com.apple.dt.xctest:Default] Launched testmanagerd from /var/run/com.apple.security.cryptexd/mnt/com.apple.iPhoneOS.SimulatorRuntime-v24.2.8117.0/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 27.2.simruntime/Contents/Resources/RuntimeRoot/Developer/Library/PrivateFrameworks/XCTAutomationSupport.framework/testmanagerd"
+check(loadEvent(inLogLine: launchedLine) == .launched, "\"Launched testmanagerd from\" is one started for the request")
+// One started for the request is waited for while it starts (November 17, 2026, a Session Mac: launched at 10 to 12 s,
+// its load later; restarted at 12 s, the first read waited 13 s more); one that was there before and stays silent is not.
+let starting = LoadLog()
+starting.note(launchedLine, at: 10 * s)
+check(starting.loading && starting.loadedAt == nil, "launched for the request: loading")
+check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .waiting,
+      "a testmanagerd launched for the request, silent at 20 s: still waited for")
+check(sessionWait(now: request + 13 * s, requestedAt: request, loadedAt: nil, loading: LoadLog().loading, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .nothingLoading,
+      "a testmanagerd that was there before (no launch, no load) and silent at 13 s: refused, restarted")
 let loadLog = LoadLog()
 check(!loadLog.loading && loadLog.loadedAt == nil, "nothing heard: neither loading nor loaded")
 loadLog.note(began, at: 10 * s)

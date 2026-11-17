@@ -2,8 +2,9 @@
 // its test (native/engine/test/session, run by test/engine-session.test.ts) needs neither a Simulator nor AXe.
 //
 // The signal is testmanagerd's own account of loading accessibility, from the phone's log while the request waits
-// (LoadLog, below): "Beginning AX loading sequence." as it starts, "Finished loading AX." as it ends, and it answers the
-// session request about a second after that. iOS 26.5's and 27.2's testmanagerd log the same lines.
+// (LoadLog, below): "Launched testmanagerd" when one starts for the request, "Beginning AX loading sequence." as its
+// load starts, "Finished loading AX." as it ends, and it answers the session request about a second after that. iOS
+// 26.5's and 27.2's testmanagerd log the same lines.
 //
 // Never a read of the phone's accessibility: a translation request that reaches a phone before its accessibility is
 // loaded leaves the phone's CoreSimulatorBridge an unknown accessibility client ("App accessibility not enabled",
@@ -32,6 +33,12 @@ let sessionPollSeconds = 0.25
 
 /** What a line of testmanagerd's log says about loading accessibility. */
 enum LoadEvent: Equatable {
+  /**
+   * "Launched testmanagerd from …": a testmanagerd started after the request went out, so for it; it is starting, and
+   * its load comes once it has (7 to 17 s after a boot on a busy Mac: restarted at 12 s instead, 2 of 8 first reads
+   * waited 13 s more, November 17, 2026). A testmanagerd that was there before logs no such line.
+   */
+  case launched
   /** "Beginning AX loading sequence.": it is loading accessibility, for a session request. */
   case began
   /** "Finished loading AX.": accessibility is loaded; the session request it was for is answered next. */
@@ -42,6 +49,7 @@ enum LoadEvent: Equatable {
 func loadEvent(inLogLine line: String) -> LoadEvent? {
   if line.contains("Finished loading AX") { return .finished }
   if line.contains("Beginning AX loading sequence") { return .began }
+  if line.contains("Launched testmanagerd") { return .launched }
   return nil
 }
 
@@ -52,6 +60,7 @@ func loadEvent(inLogLine line: String) -> LoadEvent? {
  */
 final class LoadLog: @unchecked Sendable {
   private let lock = NSLock()
+  private var launched: UInt64?
   private var began: UInt64?
   private var finished: UInt64?
   /** A line of the log, at `now`. */
@@ -59,14 +68,18 @@ final class LoadLog: @unchecked Sendable {
     guard let event = loadEvent(inLogLine: line) else { return }
     lock.lock(); defer { lock.unlock() }
     switch event {
+    case .launched: launched = launched ?? now
     case .began: began = began ?? now
     case .finished: finished = finished ?? now
     }
   }
   /** When the load finished (nil: not yet). */
   var loadedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return finished }
-  /** Whether testmanagerd is loading accessibility: it began, and has not finished. */
-  var loading: Bool { lock.lock(); defer { lock.unlock() }; return began != nil && finished == nil }
+  /**
+   * Whether testmanagerd is loading accessibility, or starting to for this request: it began, or it was launched since
+   * the request; and it has not finished.
+   */
+  var loading: Bool { lock.lock(); defer { lock.unlock() }; return (began != nil || launched != nil) && finished == nil }
 }
 
 /** Where a session request that has not been answered yet stands. */

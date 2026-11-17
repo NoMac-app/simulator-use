@@ -392,7 +392,7 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
     guard state == .waiting else { break }
     if daemon > 0 && loading && !notedLoading {
       notedLoading = true
-      sessionLog("no answer in \(Int(timeout)) s: testmanagerd pid \(daemon) is loading accessibility (its log), waited for")
+      sessionLog("no answer in \(Int(timeout)) s: testmanagerd pid \(daemon) is loading accessibility, or starting for this request (its log), waited for")
     }
     if done.wait(timeout: min(.now() + sessionPollSeconds, deadline)) == .success { answered = true; break }
   }
