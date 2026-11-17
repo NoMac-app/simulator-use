@@ -1,9 +1,10 @@
-# Handoff: 0.17.0 on hold (November 16, 2026, 23:30 UTC)
+# Handoff: 0.17.0 ready for release (November 17, 2026, 10:00 UTC)
 
-Branch `axe-2` in `~/simtap-axe2`, all committed; nothing pushed. The tarball made at `a3bcc3b`
-(`simulator-use-0.17.0.tgz`, sha256 `125ae93f...`) is **superseded**: the engine changed since (B1, I1, I2), so the
-tarball must be rebuilt (and the README's 0.17.0 row re-hashed) after the open point below is settled. No Session Mac
-is running (the last one, ses_81f8a421..., was stopped at 23:24 UTC).
+Branch `axe-2` in `~/simtap-axe2`, committed locally (`828dbd8` tests_run cherry-pick, `0fd6624` session wait,
+`2c56c3b` lab.sh, `bda3627` slider, `683c517` README hash, then this file and round 3's logs); nothing pushed, tagged
+or published. **Round 3 below is the current state**: the open points of November 16 (sections B1 to Next steps,
+kept as they were) are settled there. The release tarball is rebuilt (`e75480f2...`, round 3's last items); the one
+made at `a3bcc3b` (`125ae93f...`) is superseded. No Session Mac is running (ses_32af729e, $1.94, stopped 09:42 UTC).
 
 ## B1: the first session's wait (state)
 
@@ -84,3 +85,82 @@ open point above; `bc32efe` touches `native/engine/main.swift` (openSession, the
    paste on that Mac (or run on another host), until only known misses remain.
 4. Rebuild the tarball on a Session Mac (`pack.sh` in the first round's folder), re-hash the README's 0.17.0 row,
    verify as before, then the Xcode 26.5 check on the laptop again.
+
+## Round 3 (November 17, 2026): the state now
+
+- **Cherry-picked** `8429fae` from `tests-on-the-phone` as `828dbd8` (tests_run passes `-parallel-testing-enabled NO`:
+  the root cause of phones shut down and tests run on "Clone 1 of ..." on NoMac hosts). No conflict; `npm test` 223 of
+  223. It goes into the 0.17.0 tarball.
+- **B1, the signal (measured, `round3/signal.sh`, Session Mac ses_32af729e, iPhone 17 Pro, iOS 27.2):** a read
+  without a session (`--no-bootstrap`) fails with "No translation object" from the boot until the phone's
+  accessibility is readable (8.6 s after one boot, 31 s after another), then answers; after sessions closed, after a
+  restart of the test daemons and with an app launched since (which reads as an empty app) it answers. So "a
+  session-free read answers" = accessibility loaded, and testmanagerd has nothing left to load.
+- **B10** (uncommitted until benchmarked): `unansweredSession`'s pid rule replaced by `sessionWait`
+  (`SessionWait.swift`): session-free reads run beside the request (`AccessibilityWatch`, main.swift); once one
+  answers (at once when accessibility was loaded before), testmanagerd has the first timeout (12 s) to answer, else
+  refused (restart); while none answers it is loading and is waited for while it runs (its 120 s, the 100 s budget).
+  Induced stuck daemon (`round3/stuck-bench.sh stuck`: the request's testmanagerd SIGSTOPped as it starts): B10
+  refuses at 12.2 s ("accessibility loaded 2 ms after the request") and restarts, like 0.16.0.
+- **Measured so far (round 3, ses_32af729e, iPhone 17 Pro):** after a restart of the test daemons ("plain"), 10
+  trials each: 0.16.0 1.8 to 1.9 s, B10 2.0 to 2.4 s (open 0.92 s both; B9 against B10, 5 each: 1.8 to 2.2 s both, so
+  the gap is 0.17.0's, not the watch's). Stuck daemon, 10 each: 0.16.0 23.9 to 24.5 s, B10 23.9 to 25.2 s (both
+  refuse at 12.0 to 12.2 s; the second open waits about 8.4 s for launchd's respawn throttle of the killed daemon);
+  B9 (bc32efe) 2 trials: read failed at 100.1 s (waited for the young stuck daemon). Committed as `0fd6624`.
+- **Lab, location prompt (lab wrong):** `run` grants every permission simctl can by default (`8fb3331`, October 23),
+  so locationd had EdgeLab "authorized when in use" (auth 4, `_CLDaemonSetAuthorizationStatusByType`) before the
+  tap, and iOS asked nothing. lab.sh now runs EdgeLab with `--permissions ask`.
+- **Lab, slider (real bug):** measured (`round3/slider-probe.mjs`, Pro Max): the SwiftUI slider follows a finger only
+  after about 10 pt of travel, then point for point (9 pt: no move; 15 pt: 4.6 pt; 25 pt: 14 pt; long drags 1 to 5
+  points short). AXe 2.0.4's slider command took 15 s and stopped part way ("Input stopped") on the Pro Max, and
+  our correcting drags of a few points could never move it: 72 for 75. Fix: the engine's drag takes `down`/`up`
+  (a finger held between calls); `set` puts a finger on the thumb, moves it, reads the slider while holding it and
+  moves again by the shortfall, then lifts (AXe's slider only without the engine).
+- **Lab, first paste (open):** on the Pro Max's first boot on this Mac, Cmd-V never pasted (Cmd-A worked; the
+  clipboard was right, set by pbcopy and by the in-phone helper; by dtuhidd and by Indigo; 0.16.0's engine and AXe's
+  CLI alike; no paste request reached `pasted`). After a reboot of that phone every paste worked, and on the 17 Pro
+  (rebooted many times by then) 5 of 5 worked, also right after AXe's slider started dtuhidd. Being narrowed down
+  (first boot of a new device, or the app's first launch).
+- Session Mac runtime loss (known, fix pending rollout) hit once at 07:45 UTC: `round3`'s `fixrt.sh` restarts
+  CoreSimulatorService and simdiskimaged when the runtime is gone.
+- **Boot benchmark (round 3, `round3/fr3.sh`, iPhone 17 Pro, 10 trials each, interleaved):** right after the boot
+  (hostd's way): 0.16.0 median 27.1 s (p90 29.1, 20.3 to 29.1; a session timeout and restart in all 10), B10 median
+  17.8 s (p90 23.0, 11.5 to 23.0; none). 20 s after the boot, demo relaunched: 0.16.0 median 13.6 s (p90 25.7, 6.3
+  to 25.7; timeouts in 4), B10 median 9.3 s (p90 11.3, 3.8 to 11.3; none).
+- **First paste:** not a first boot: a new iPhone 17 Pro's first boot pasted 3 of 3 (first launch, relaunch, after a
+  reboot; `round3/paste-first-boot.sh`). What broke the Pro Max came earlier in that sequence; the likeliest is AXe's
+  slider command failing part way through its drag by dtuhidd after 15 s (AXe's own "Input stopped. Some input may
+  have been sent"), a finger possibly left down; not reproduced after a reboot (AXe's slider failed the same way and
+  the paste after it worked). With the engine, `set` no longer runs AXe's slider.
+- **lab.sh with the fixes (B11 = `bda3627`'s engine a78b9322, dist rebuilt; `round3/lab-B11b-*.log`):** iPhone 17 Pro
+  27 of 27, iPad Pro 11-inch (M5) 27 of 27, iPhone 17 Pro Max 25 of 27. ("set a slider" 6 s.) A first B11 run with a
+  stale dist (bin/simulator-use.js runs dist/, so the old slider code ran) failed the slider on both iPhones, and the
+  iPad's two pastes after AXe's slider command had run on it; with the new `set` (no AXe slider) every paste passed.
+- **Pro Max's two misses (pre-existing, not fixed):** `swipe left "Row 3"` is a 0.3 s swipe over 70% of the row
+  (sweepIn, unchanged since 0.6.0), and on the Pro Max iOS took it as a full swipe: Row 3 deleted outright, no Delete
+  button (3 of 3; "delete it" then fails). Measured (`round3/swipe-dist.mjs`, 0.3 s swipes centred on a row): Pro Max
+  (row 400 pt) 30, 40, 50% showed the actions, 60% deleted; iPhone 17 Pro (370 pt) 30, 40% showed, 50% deleted (yet
+  70% showed them in every 17 Pro lab run: the outcome depends on speed as well). A shorter reveal swipe (30 to 40%)
+  is the likely fix, but the same gesture pages carousels: golden.sh on each phone must pass with it first. Owner's
+  call; not in 0.17.0.
+- **The 0.17.0 tarball (rebuilt at `683c517`, `pack.sh` on ses_32af729e: Xcode 27.2, Swift 6.4.2 swiftlang-6.4.2.1.9,
+  a fresh clone of GitHub main plus this branch from a bundle):** `simulator-use-0.17.0.tgz`, sha256
+  `e75480f2dcb0be8a49d65bf9c55e569d4542d224c2f307df1aa799029bd01624`, 16,776,555 bytes, in the session's scratchpad.
+  Engine `a78b9322b93245133d160aa7affde486b3fbd212073f84c53c1c50698d3ca932`, pbset `fe35e375...`, skconfig
+  `7429f83e...`: all three in the README's 0.17.0 row (the build is reproducible: the same engine hash from the
+  branch build and the clean clone). Modes 0755 (axe, the three helpers, FBSimulatorControl, bin), engine ad hoc
+  signed, AXe v2.0.4, package.json 0.17.0, dist has `-parallel-testing-enabled` (tests_run) and holdSlider. Supersedes
+  `125ae93f...`.
+- **The tarball checked:** golden.sh against the packed tarball on the Session Mac: iPhone 17 Pro 19 of 19, iPhone 17
+  Pro Max 19 of 19 (`round3/golden-tgz.log`; "the tests pass" there is tests_run with `-parallel-testing-enabled NO`).
+  On the laptop (Xcode 26.5, iOS 26.5, iPhone 17 Pro, `laptop-test.sh`): golden.sh 19 of 19, lab.sh 27 of 27
+  (`round3/laptop-xcode265-*.log`). A first laptop run hit "No space left on device" (2.9 GB free at its start) and
+  failed two golden checks on the build database; the rerun, with 5.5 GB free, passed everything.
+- **Duo branch (not touched):** needs `bc32efe` and `84ca28f` (as before) and now `0fd6624` (session wait; it replaces
+  `bc32efe`'s pid rule in SessionWait.swift and openSession), `bda3627` (slider; engine drag op and ui-act.ts) and
+  `2c56c3b` (lab.sh), then its own engine hash in its README row.
+- **Still open, owner's call:** the Pro Max full swipe (above); the alert refusals seen only on Mac 7 (no refusal after
+  an alert on this Session Mac either: round 2's `stuck.sh` with 0.16.0: with EdgeLab's location alert up, two new engines opened
+  sessions in 417 and 422 ms; the run's later steps were cut short by the runtime loss); dtuhidd also runs in a phone without Device Hub once AXe's CLI has used it (seen here: AXe's
+  `slider` started it), so "by dtuhidd while Device Hub shows the phone" in Input.swift's comment is not the only case
+  (input then goes by dtuhidd, and every lab check passed that way).

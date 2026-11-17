@@ -1,0 +1,17 @@
+getpwuid_r did not find a match for uid 502
+Timestamp               Ty Process[PID:TID]
+2026-11-17 07:47:47.279 Df launchd_sim[5818:9bf8] [user/502/com.apple.testmanagerd [5960]:] Successfully spawned testmanagerd[5960] because ipc (socket)
+2026-11-17 07:47:49.762 Df launchd_sim[5818:9bdf] [user/502:] failed activation: name = com.apple.dt.xctestd.remote.runner, flags = 0x0, requestor = testmanagerd[5960], error = 1: Operation not permitted
+2026-11-17 07:47:49.762 Df testmanagerd[5960:9ce0] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-17 07:47:50.402 Df testmanagerd[5960:9ce0] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-17 07:47:50.405 Df testmanagerd[5960:9ce0] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-17 07:47:50.409 Df testmanagerd[5960:9ce0] [com.apple.dt.xctest:Default] Finished loading AX.
+2026-11-17 07:48:42.244 Df launchd_sim[5818:a331] [user/502:] service inactive: com.apple.testmanagerd
+2026-11-17 07:49:23.561 Df launchd_sim[5818:ac75] [user/502/com.apple.testmanagerd [6368]:] Successfully spawned testmanagerd[6368] because ipc (socket)
+2026-11-17 07:49:24.013 Df launchd_sim[5818:ac75] [user/502:] failed activation: name = com.apple.dt.xctestd.remote.runner, flags = 0x0, requestor = testmanagerd[6368], error = 1: Operation not permitted
+2026-11-17 07:49:24.013 Df testmanagerd[6368:aece] [com.apple.dt.xctest:Default] IDE connected over socket 6
+2026-11-17 07:49:24.205 Df testmanagerd[6368:aece] [com.apple.dt.xctest:Default] Received request to load Accessibility
+2026-11-17 07:49:24.214 Df testmanagerd[6368:aece] [com.apple.dt.xctest:Default] Waiting 120.0s for AX to finish loading...
+2026-11-17 07:49:24.517 Df testmanagerd[6368:aed7] [com.apple.dt.xctest:Default] Received kAXAccessibilityLoaded notification
+2026-11-17 07:49:24.518 Df testmanagerd[6368:aece] [com.apple.dt.xctest:Default] Calling AXDisableAccessibilityOnTermination() inside a retry block to handle a race between kAXAccessibilityLoaded and backboardd.
+2026-11-17 07:49:24.520 Df testmanagerd[6368:aece] [com.apple.dt.xctest:Default] Finished loading AX.

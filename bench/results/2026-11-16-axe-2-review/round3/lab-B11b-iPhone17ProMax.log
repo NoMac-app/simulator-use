@@ -1,0 +1,77 @@
+Booted iPhone 17 Pro Max (iOS 27.2) in 5.9 s.
+Using iPhone 17 Pro Max (iOS 27.2, 8637D032-6A8F-4F3F-B085-8BFF94131210); the other tools use it from now on.
+PASS build, install and launch (14 s)
+PASS the engine reads on its fast path (6 s)
+PASS segments are not tabs (4 s)
+PASS stepper buttons (4 s)
+PASS set a slider (8 s)
+PASS menu pick (7 s)
+PASS alert in front, alone (6 s)
+PASS answer the alert (3 s)
+PASS sheet in front, its Done reachable (4 s)
+PASS close the sheet (3 s)
+PASS full-screen cover (4 s)
+PASS close the cover (3 s)
+PASS iOS permission prompt, named after the app (4 s)
+PASS allow it (3 s)
+PASS notifications, prompt waited for and allowed (3 s)
+PASS text in any language (6 s)
+PASS autocorrect undone by paste (6 s)
+PASS delayed content (6 s)
+PASS toast comes and goes (6 s)
+FAIL swipe a row to delete
+  1 step done in 3.7 s
+  screen:
+  EdgeLab · Lists · iPhone 17 Pro Max (iOS 27.2)
+  heading "Async" @220,188
+  text "Loaded 20 results" #loaded @220,234
+  button "Show toast" @220,286
+  heading "Carousel" @220,350
+  button "Card 1" @76,403
+  button "Card 2" @158,403
+  button "Card 3" @241,403
+  button "Card 4" @325,403
+  button "Card 5" @405,403
+  text "Picked: none" #picked @220,461
+  heading "Rows" @220,524
+  text "Row 1" @220,570
+  text "Row 2" @220,622
+  text "Row 4" @220,674
+  text "Row 5" @220,726
+  text "Row 6" @220,778
+  text "Row 7" @220,830
+  text "Row 8" @220,865
+  tabs: Controls @67,904, Dialogs @144,904, Lists (selected) @220,904, Text @296,904, More @373,904
+  scroll: 3 pages, at top; 1 below; 7 to the right
+FAIL delete it
+  Step 1 (tap Delete) failed: No "Delete" on screen.
+  Next: 1 elements are below: scroll down, or call simulator-use look.
+  0 of 1 steps done before it.
+  Screen now:
+  EdgeLab · Lists · iPhone 17 Pro Max (iOS 27.2)
+  heading "Async" @220,188
+  text "Loaded 20 results" #loaded @220,234
+  button "Show toast" @220,286
+  heading "Carousel" @220,350
+  button "Card 1" @76,403
+  button "Card 2" @158,403
+  button "Card 3" @241,403
+  button "Card 4" @325,403
+  button "Card 5" @405,403
+  text "Picked: none" #picked @220,461
+  heading "Rows" @220,524
+  text "Row 1" @220,570
+  text "Row 2" @220,622
+  text "Row 4" @220,674
+  text "Row 5" @220,726
+  text "Row 6" @220,778
+  text "Row 7" @220,830
+  text "Row 8" @220,865
+  tabs: Controls @67,904, Dialogs @144,904, Lists (selected) @220,904, Text @296,904, More @373,904
+  scroll: 3 pages, at top; 1 below; 7 to the right
+PASS long press menu (5 s)
+PASS pin from the menu (4 s)
+PASS web view called unreadable, or read (5 s)
+PASS UIKit table, real title (7 s)
+PASS deep link opened (3 s)
+PASS deep link arrives (5 s)
