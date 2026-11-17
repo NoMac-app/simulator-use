@@ -1,10 +1,15 @@
 // How long the engine waits for an automation session that has not answered, decided without any framework so that
 // its test (native/engine/test/session, run by test/engine-session.test.ts) needs neither a Simulator nor AXe.
 //
-// The signal is testmanagerd's own account of loading accessibility, from the phone's log while the request waits
-// (LoadLog, below): "Launched testmanagerd" when one starts for the request, "Beginning AX loading sequence." as its
-// load starts, "Finished loading AX." as it ends, and it answers the session request about a second after that. iOS
-// 26.5's and 27.2's testmanagerd log the same lines.
+// The signals: testmanagerd's own account of loading accessibility, from the phone's log while the request waits
+// (LoadLog, below): "Beginning AX loading sequence." as its load starts, "Finished loading AX." as it ends, and it
+// answers the session request about a second after that (iOS 26.5's and 27.2's testmanagerd log the same lines); and
+// when the phone's testmanagerd process started, from the kernel. The phone's launchd starts testmanagerd on demand,
+// for the request: none yet, or one started since the request, is one starting for it, and the first timeout counts
+// from its start; one that was there before the request and stays silent is a phone that refuses sessions. Never the
+// log's "Launched testmanagerd" line alone: on a phone booted at background priority it came after the first timeout
+// for a testmanagerd started before it, which was restarted as refusing and cost the first read 25 s (November 17,
+// 2026: launched 13 s after the request, restarted at 14 s; the next one took 15 s to start).
 //
 // Never a read of the phone's accessibility: a translation request that reaches a phone before its accessibility is
 // loaded leaves the phone's CoreSimulatorBridge an unknown accessibility client ("App accessibility not enabled",
@@ -23,9 +28,10 @@ let testmanagerdLoadLimitNanos: UInt64 = 120_000_000_000
 /**
  * What a first request leaves of the first read's budget for a restart of the phone's test daemons and a second
  * request: timeForRestart's 25 s, and a second for the request's last check (sessionPollSeconds) and the end of its
- * log. A first request stops waiting for accessibility to load that long before the deadline, so a testmanagerd stuck
- * in its first load is restarted, not waited for to the deadline command after command. That still leaves the load
- * 74 s of the 100 s budget; the longest load measured took 31 s at normal priority (23 s at background, November 17).
+ * log. A first request stops waiting for testmanagerd (to start, or to load accessibility) that long before the
+ * deadline, so a testmanagerd stuck in its first load is restarted, not waited for to the deadline command after
+ * command. That still leaves the load 74 s of the 100 s budget; the longest load measured took 31 s at normal priority
+ * (23 s at background, November 17).
  */
 let restartReserveNanos: UInt64 = 26_000_000_000
 /** How often a waiting request looks at where it stands. */
@@ -34,9 +40,8 @@ let sessionPollSeconds = 0.25
 /** What a line of testmanagerd's log says about loading accessibility. */
 enum LoadEvent: Equatable {
   /**
-   * "Launched testmanagerd from …": a testmanagerd started after the request went out, so for it; it is starting, and
-   * its load comes once it has (7 to 17 s after a boot on a busy Mac: restarted at 12 s instead, 2 of 8 first reads
-   * waited 13 s more, November 17, 2026). A testmanagerd that was there before logs no such line.
+   * "Launched testmanagerd from …": a testmanagerd started after the request went out, so for it (7 to 17 s after a
+   * boot on a busy Mac). The kernel's start time says so first (daemonStart, main.swift); this line counts where that cannot be read.
    */
   case launched
   /** "Beginning AX loading sequence.": it is loading accessibility, for a session request. */
@@ -73,6 +78,8 @@ final class LoadLog: @unchecked Sendable {
     case .finished: finished = finished ?? now
     }
   }
+  /** When the log said a testmanagerd launched (nil: not heard). */
+  var launchedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return launched }
   /** When the load finished (nil: not yet). */
   var loadedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return finished }
   /**
@@ -92,8 +99,9 @@ enum SessionWait: Equatable {
    */
   case refused
   /**
-   * The first timeout has passed and nothing is loading accessibility: no testmanagerd runs, or its log shows no load
-   * under way (one that has nothing to load answers within the first timeout).
+   * Nothing is loading accessibility: a testmanagerd that was there before the request shows no load under way past
+   * the first timeout, or one started for the request none past the first timeout from its start (one that has nothing
+   * to load answers within the first timeout).
    */
   case nothingLoading
   /** Still loading at `loadUntil`: a first request gives up with the time for a restart and a second request left. */
@@ -102,17 +110,38 @@ enum SessionWait: Equatable {
   case outOfTime
 }
 
+/** The phone's testmanagerd as a request waits. */
+enum Daemon: Equatable {
+  /** None runs yet: the phone's launchd starts one for the request (15 s after it on a phone at background priority). */
+  case none
+  /** One runs, started at that time (uptime ns; from the kernel, or when its log said it launched). */
+  case started(at: UInt64)
+  /** One runs, and when it started is not known: taken as the one that was there before the request. */
+  case running
+}
+
 /**
  * The state of a request at `now` (uptime ns): sent at `requestedAt`; `loadedAt` when testmanagerd's log said the load
- * finished (nil: not yet); `loading`, whether it says one is under way; whether a testmanagerd runs in the phone;
- * `timeout`, how long a testmanagerd with accessibility loaded may take to answer; `loadUntil`, when a request still
- * waiting for the load stops (loadWaitEnd).
+ * finished (nil: not yet); `loading`, whether it says one is under way; the phone's testmanagerd (`daemon`); `timeout`,
+ * how long a testmanagerd may stay silent with nothing to load (from the request, or from its own start when it
+ * started for the request); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd).
  */
-func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemonRunning: Bool, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil) -> SessionWait {
+func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil) -> SessionWait {
   if now >= min(deadline, requestedAt + testmanagerdLoadLimitNanos) { return .outOfTime }
   if let loadedAt { return now < max(loadedAt, requestedAt) + timeout ? .waiting : .refused }
-  if loading, let loadUntil, now >= loadUntil { return .loadTooLong }
-  return now < requestedAt + timeout || (daemonRunning && loading) ? .waiting : .nothingLoading
+  // Since when testmanagerd has had the request: from the request, or from the start of one started for it; none yet,
+  // it has not had it at all.
+  var heardSince: UInt64? = requestedAt
+  switch daemon {
+  case .none: heardSince = nil
+  case .started(let at): heardSince = max(at, requestedAt)
+  case .running: break
+  }
+  let starting = heardSince != requestedAt
+  if loading || starting, let loadUntil, now >= loadUntil { return .loadTooLong }
+  if loading { return .waiting }
+  guard let heardSince else { return .waiting }
+  return now < heardSince + timeout ? .waiting : .nothingLoading
 }
 
 /** When a request stops waiting for the load: a first one (a restart may follow) leaves restartReserveNanos. */

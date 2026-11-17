@@ -5,8 +5,8 @@ func check(_ ok: Bool, _ what: String) { if !ok { failures += 1; print("FAIL: \(
 
 let s: UInt64 = 1_000_000_000
 let timeout = 12 * s, request = 100 * s, deadline = request + 100 * s
-func at(_ seconds: UInt64, loaded: UInt64? = nil, loading: Bool = true, daemon: Bool = true, deadline d: UInt64 = deadline, loadUntil: UInt64? = nil) -> SessionWait {
-  sessionWait(now: request + seconds * s, requestedAt: request, loadedAt: loaded.map { request + $0 * s }, loading: loading, daemonRunning: daemon, timeout: timeout, deadline: d, loadUntil: loadUntil)
+func at(_ seconds: UInt64, loaded: UInt64? = nil, loading: Bool = true, daemon: Daemon = .running, deadline d: UInt64 = deadline, loadUntil: UInt64? = nil) -> SessionWait {
+  sessionWait(now: request + seconds * s, requestedAt: request, loadedAt: loaded.map { request + $0 * s }, loading: loading, daemon: daemon, timeout: timeout, deadline: d, loadUntil: loadUntil)
 }
 
 // A load testmanagerd's log says finished: nothing left to load, so no answer in the first timeout after it is a
@@ -14,14 +14,14 @@ func at(_ seconds: UInt64, loaded: UInt64? = nil, loading: Bool = true, daemon: 
 // age, cost 120 s a command).
 check(at(5, loaded: 0) == .waiting, "within the first timeout of a loaded phone")
 check(at(12, loaded: 0) == .refused, "a loaded phone whose testmanagerd is silent for the first timeout refuses")
-check(at(13, loaded: 0, daemon: false) == .refused, "refused whether or not a testmanagerd runs")
+check(at(13, loaded: 0, daemon: .none) == .refused, "refused whether or not a testmanagerd runs")
 
 // Right after a boot (November 16: 8 s to start, 16.6 s to load, answered at 26.3 s): testmanagerd's log says it is
 // loading.
 check(at(12) == .waiting, "accessibility still loading at the first timeout: waited for")
 check(at(26) == .waiting, "still loading at 26 s with testmanagerd running")
-check(at(30, daemon: false) == .nothingLoading, "not loaded, past the first timeout, no testmanagerd: nothing is loading it")
-check(at(5, daemon: false) == .waiting, "before the first timeout testmanagerd may not have started yet")
+check(at(30, loading: false, daemon: .none) == .waiting, "no testmanagerd yet past the first timeout: the phone's launchd is starting one for the request")
+check(at(5, daemon: .none) == .waiting, "before the first timeout testmanagerd may not have started yet")
 // Once the load is seen, the answer has the first timeout from then (it came 0.8 s after the load, measured).
 check(at(30, loaded: 25) == .waiting, "loaded at 25 s: still waited for at 30 s")
 check(at(37, loaded: 25) == .refused, "loaded at 25 s and silent until 37 s: refused")
@@ -51,9 +51,10 @@ check(loadEvent(inLogLine: launchedLine) == .launched, "\"Launched testmanagerd 
 let starting = LoadLog()
 starting.note(launchedLine, at: 10 * s)
 check(starting.loading && starting.loadedAt == nil, "launched for the request: loading")
-check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .waiting,
+check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: nil, loading: starting.loading, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .waiting,
       "a testmanagerd launched for the request, silent at 20 s: still waited for")
-check(sessionWait(now: request + 13 * s, requestedAt: request, loadedAt: nil, loading: LoadLog().loading, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .nothingLoading,
+check(starting.launchedAt == 10 * s, "the launch is kept with its time, for when the kernel's start time cannot be read")
+check(sessionWait(now: request + 13 * s, requestedAt: request, loadedAt: nil, loading: LoadLog().loading, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true)) == .nothingLoading,
       "a testmanagerd that was there before (no launch, no load) and silent at 13 s: refused, restarted")
 let loadLog = LoadLog()
 check(!loadLog.loading && loadLog.loadedAt == nil, "nothing heard: neither loading nor loaded")
@@ -64,13 +65,13 @@ check(!loadLog.loading && loadLog.loadedAt == 33 * s, "finished: loaded, at the 
 loadLog.note(finished, at: 40 * s)
 check(loadLog.loadedAt == 33 * s, "a later line keeps the first finish")
 check(at(5, loading: false) == .waiting, "no load heard yet, within the first timeout: waited for")
-check(at(13, loading: false) == .nothingLoading, "no load heard past the first timeout: given up (restart), even with testmanagerd running")
+check(at(13, loading: false) == .nothingLoading, "no load heard past the first timeout from a testmanagerd that was there: given up (restart)")
 
 // November 17, 2026, a phone booted at background priority beside a live one: the load began 10 s after the request
 // and ended at 33 s; testmanagerd answered 2 s later. Waited for throughout, never restarted mid-load.
 func throttled(_ t: UInt64) -> SessionWait {
   sessionWait(now: request + t * s, requestedAt: request, loadedAt: t >= 33 ? request + 33 * s : nil, loading: t >= 10 && t < 33,
-              daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true))
+              daemon: .running, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true))
 }
 check((0...44).allSatisfy { throttled(UInt64($0)) == .waiting }, "the throttled load is waited for from the request to 12 s after its end")
 check(throttled(45) == .refused, "no answer 12 s after the load: refused")
@@ -83,7 +84,7 @@ let poll = UInt64(sessionPollSeconds * 1e9)
 var waited: UInt64 = 0, end = SessionWait.waiting
 while end == .waiting && waited < 200 * s {
   waited += poll
-  end = sessionWait(now: request + waited, requestedAt: request, loadedAt: nil, loading: true, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: firstUntil)
+  end = sessionWait(now: request + waited, requestedAt: request, loadedAt: nil, loading: true, daemon: .running, timeout: timeout, deadline: deadline, loadUntil: firstUntil)
 }
 let left = Double(deadline - (request + waited)) / 1e9 - sessionPollSeconds
 check(end == .loadTooLong, "a load not done before the restart's reserve is given up: \(end) after \(Double(waited) / 1e9) s")
@@ -95,7 +96,35 @@ check(at(99, loadUntil: nil) == .waiting, "a second request waits for the load t
 // A load finished before the cut has the first timeout for its answer, as any loaded phone.
 check(at(80, loaded: 73, loadUntil: firstUntil) == .waiting, "loaded at 73 s: its answer is waited for past the cut")
 // A request sent late (a long turn) is not given up before testmanagerd has had its first timeout.
-check(sessionWait(now: deadline - 29 * s, requestedAt: deadline - 30 * s, loadedAt: nil, loading: false, daemonRunning: false, timeout: timeout, deadline: deadline, loadUntil: firstUntil) == .waiting,
+check(sessionWait(now: deadline - 29 * s, requestedAt: deadline - 30 * s, loadedAt: nil, loading: false, daemon: .none, timeout: timeout, deadline: deadline, loadUntil: firstUntil) == .waiting,
       "a late request within its first timeout is waited for")
+
+// Which testmanagerd: the kernel's start time of the phone's testmanagerd, never the log's launch line alone. November
+// 17, 2026, a phone at background priority beside a live one: the request at 0 s, a testmanagerd started for it at
+// 13 s, its "Launched" line not yet in the log at 14 s; taken for one that was there, it was restarted, and the next took
+// 15 s to start: the first read waited 25 s more.
+let launchedAt13 = Daemon.started(at: request + 13 * s)
+check(at(14, loading: false, daemon: launchedAt13, loadUntil: firstUntil) == .waiting, "started 13 s after the request, for it, no log line yet at 14 s: waited for")
+check(at(24, loading: false, daemon: launchedAt13, loadUntil: firstUntil) == .waiting, "still within the first timeout from its own start")
+check(at(25, loading: false, daemon: launchedAt13, loadUntil: firstUntil) == .nothingLoading, "silent and no load 12 s after its own start: nothing loading, restarted")
+check(at(30, loading: true, daemon: launchedAt13, loadUntil: firstUntil) == .waiting, "started for the request and loading: waited for")
+check(at(74, loading: true, daemon: launchedAt13, loadUntil: firstUntil) == .loadTooLong, "still loading at the restart's reserve: given up in time for a restart")
+// One that was there before the request (started before it) is the phone's own, refusing when silent.
+check(at(13, loading: false, daemon: .started(at: request - 5 * s), loadUntil: firstUntil) == .nothingLoading, "started before the request, silent at 13 s: refused, restarted")
+check(at(11, loading: false, daemon: .started(at: request - 5 * s), loadUntil: firstUntil) == .waiting, "started before the request: within the first timeout, waited for")
+// None yet: the phone's launchd starts one for the request; waited for up to the restart's reserve (a restart stops
+// nothing then), and on a second request to the deadline.
+check(at(40, loading: false, daemon: .none, loadUntil: firstUntil) == .waiting, "no testmanagerd yet at 40 s: launchd is starting one, waited for")
+check(at(74, loading: false, daemon: .none, loadUntil: firstUntil) == .loadTooLong, "still none at the restart's reserve: given up in time for a restart")
+check(at(99, loading: false, daemon: .none, loadUntil: nil) == .waiting, "a second request waits for one to start to the deadline")
+check(at(100, loading: false, daemon: .none, loadUntil: nil) == .outOfTime, "the deadline")
+// The whole throttled first request, stepped: started 13 s after the request, its load from 16 s to 40 s, answered at
+// 41 s; waited for throughout, never restarted.
+func throttledStart(_ t: UInt64) -> SessionWait {
+  sessionWait(now: request + t * s, requestedAt: request, loadedAt: t >= 40 ? request + 40 * s : nil, loading: t >= 16 && t < 40,
+              daemon: t >= 13 ? .started(at: request + 13 * s) : .none, timeout: timeout, deadline: deadline, loadUntil: firstUntil)
+}
+check((0...51).allSatisfy { throttledStart(UInt64($0)) == .waiting }, "a testmanagerd started late for the request is waited for from the request to 12 s after its load")
+check(throttledStart(52) == .refused, "no answer 12 s after the load: refused")
 
 if failures == 0 { print("all checks passed") } else { print("\(failures) failed"); exit(1) }

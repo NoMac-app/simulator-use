@@ -372,38 +372,51 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let done = DispatchSemaphore(value: 0); var session: AnyObject?; var failure: String?
   let completion: @convention(block) (AnyObject?, NSError?) -> Void = { s, e in session = s; failure = e?.localizedDescription; done.signal() }
   typealias RequestFn = @convention(c) (AnyClass, Selector, AnyObject, AnyObject) -> Void
-  let requested = DispatchTime.now()
   let load = startLoadLog()
   defer { load?.process.terminate() }
   // testmanagerd switches app accessibility off as it stops (its log: AXDisableAccessibilityOnTermination): on again.
   if restartingDaemons { switchAccessibilityOn(device: device) }
+  // The request's time on both clocks: a process's start time is the kernel's wall-clock time (DaemonStart).
+  let requested = DispatchTime.now(), requestedWall = Date()
   unsafeBitCast(objcCall(sessionClass, "requestSessionWithDaemonConnectionProvider:completion:"), to: RequestFn.self)(sessionClass, NSSelectorFromString("requestSessionWithDaemonConnectionProvider:completion:"), provider, completion as AnyObject)
   let timeoutNanos = UInt64(timeout * 1e9)
   // A first request (no restart yet) leaves the time for one.
   let loadUntil = loadWaitEnd(deadline: deadline.uptimeNanoseconds, restartMayFollow: !restartingDaemons)
-  var answered = false, state = SessionWait.waiting, notedLoading = false, daemon: pid_t = 0
+  var answered = false, state = SessionWait.waiting, noted = "", daemon: pid_t = 0, daemonState = Daemon.running
   func since(_ t: UInt64) -> Int { Int((DispatchTime.now().uptimeNanoseconds - t) / 1_000_000) }
   while true {
     let now = DispatchTime.now().uptimeNanoseconds, loadedAt = load?.log.loadedAt, loading = load?.log.loading ?? false
-    // Whether a testmanagerd runs matters only once the first timeout has passed with accessibility not loaded.
-    daemon = loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos ? phoneProcesses.pid(named: "testmanagerd") : 0
-    state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, loading: loading, daemonRunning: daemon > 0,
+    // Which testmanagerd runs matters only once the first timeout has passed with accessibility not loaded; before,
+    // the request is waited for whatever runs.
+    if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
+      daemon = phoneProcesses.pid(named: "testmanagerd")
+      daemonState = daemon <= 0 ? .none : (daemonStart(daemon, requested: requested.uptimeNanoseconds, requestedWall: requestedWall)
+        ?? load?.log.launchedAt).map { Daemon.started(at: $0) } ?? .running
+    } else { daemon = 0; daemonState = .running }
+    state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, loading: loading, daemon: daemonState,
                         timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil)
     guard state == .waiting else { break }
-    if daemon > 0 && loading && !notedLoading {
-      notedLoading = true
-      sessionLog("no answer in \(Int(timeout)) s: testmanagerd pid \(daemon) is loading accessibility, or starting for this request (its log), waited for")
+    if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
+      var why = ""
+      if loading { why = "testmanagerd pid \(daemon) is loading accessibility (its log)" }
+      else if case .none = daemonState { why = "no testmanagerd yet: the phone's launchd is starting one for this request" }
+      else if case .started(let at) = daemonState, at > requested.uptimeNanoseconds { why = "testmanagerd pid \(daemon) started \(Int((at - requested.uptimeNanoseconds) / 1_000_000)) ms after the request, for it" }
+      if !why.isEmpty && why != noted { noted = why; sessionLog("no answer in \(since(requested.uptimeNanoseconds) / 1000) s: \(why), waited for") }
     }
     if done.wait(timeout: min(.now() + sessionPollSeconds, deadline)) == .success { answered = true; break }
   }
   let loadedAt = load?.log.loadedAt
   let loadedNote = loadedAt.map { "accessibility loaded \(Int((Int64($0) - Int64(requested.uptimeNanoseconds)) / 1_000_000)) ms after the request" } ?? "accessibility not loaded"
-  if notedLoading && answered { sessionLog("answered after the load (\(loadedNote))") }
+  if !noted.isEmpty && answered { sessionLog("answered after the wait (\(loadedNote))") }
   if !answered {
     switch state {
     case .refused: sessionLog("refused: no answer \(Int(timeout)) s after accessibility was loaded (\(loadedNote))")
-    case .nothingLoading: sessionLog("no answer in \(Int(timeout)) s and \(daemon > 0 ? "no load under way in testmanagerd's log\(load == nil ? " (its log could not be read)" : "")" : "no testmanagerd running")")
-    case .loadTooLong: sessionLog("no answer in \(since(requested.uptimeNanoseconds)) ms, accessibility still not loaded: given up with the time for a restart left")
+    case .nothingLoading:
+      let started: String
+      if case .started(let at) = daemonState, at > requested.uptimeNanoseconds { started = ", \(Int(timeout)) s after testmanagerd pid \(daemon) started for the request" }
+      else { started = ": testmanagerd pid \(daemon) was there before it" }
+      sessionLog("no answer in \(since(requested.uptimeNanoseconds)) ms and no load under way in testmanagerd's log\(load == nil ? " (its log could not be read)" : "")\(started)")
+    case .loadTooLong: sessionLog("no answer in \(since(requested.uptimeNanoseconds)) ms, accessibility still not loaded\(daemon <= 0 ? " and no testmanagerd started" : ""): given up with the time for a restart left")
     default: sessionLog("no answer in \(since(requested.uptimeNanoseconds)) ms, testmanagerd's 120 s or the deadline (\(loadedNote))")
     }
     outcome = "timed out"; return (nil, "timed out creating the remote automation session")
@@ -438,6 +451,19 @@ final class PhoneProcesses: @unchecked Sendable {
   }
 }
 let phoneProcesses = PhoneProcesses()
+/**
+ * When a process started, on the uptime clock the session wait uses (DispatchTime): the kernel's record of its start
+ * (wall-clock time, proc_pidinfo), carried over by the request's time on both clocks. nil when it cannot be read. A
+ * process of the phone is one of the Mac's, run as this user, so it can be read.
+ */
+func daemonStart(_ pid: pid_t, requested: UInt64, requestedWall: Date) -> UInt64? {
+  var info = proc_bsdinfo()
+  let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+  guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+  let startedWall = Double(info.pbi_start_tvsec) + Double(info.pbi_start_tvusec) / 1e6
+  let at = Double(requested) + (startedWall - requestedWall.timeIntervalSince1970) * 1e9
+  return at <= 0 ? 0 : UInt64(at)
+}
 /** Ends the automation session so the phone accepts the next client's session (a session left open blocks them). */
 /**
  * A phone takes a new automation session only a while after the last one closed: a second engine started as the
