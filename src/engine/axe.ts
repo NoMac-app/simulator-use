@@ -171,6 +171,19 @@ export async function moveFinger(udid: string, from: { x: number; y: number }, t
   throw new ToolError(`The Simulator did not take the finger's move: ${String(answer.error ?? "no answer")}.`);
 }
 
+/**
+ * A finger left down by moveFinger (up: false) lifted at a point: an up alone, with no move before it (steps: 0), so
+ * where no finger is down (a first move that never went out) it touches nothing, where a move and an up would tap
+ * there. False without the engine.
+ */
+export async function liftFinger(udid: string, at: { x: number; y: number }): Promise<boolean> {
+  const answer = await engineCall(udid, { op: "drag", x1: at.x, y1: at.y, x2: at.x, y2: at.y, steps: 0, down: false, up: true }, 30_000, { reportLost: true });
+  if (answer === undefined) return false;
+  if (answer.ok) return true;
+  if (answer.busy) throw new ToolError("The Simulator did not take the finger's lift within 30 s.", "Call ui_look to see the screen before going on.");
+  throw new ToolError(`The Simulator did not take the finger's lift: ${String(answer.error ?? "no answer")}.`, "Call ui_look to see the screen before going on.");
+}
+
 /** The single element at a point, for reading back a field right after typing (about 0.15 s). */
 export async function elementAt(udid: string, x: number, y: number): Promise<AxNode | undefined> {
   const answer = await engineCall(udid, { op: "point", x: Math.round(x), y: Math.round(y) }, 3_000);

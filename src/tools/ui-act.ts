@@ -5,7 +5,7 @@ import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
 import { describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
 import { setPasteboard } from "../engine/apps.ts";
-import { batch, elementAt, moveFinger, pressButton, setSlider, typeStep } from "../engine/axe.ts";
+import { batch, elementAt, liftFinger, moveFinger, pressButton, setSlider, typeStep } from "../engine/axe.ts";
 import { ToolError } from "../errors.ts";
 import { withLock } from "../engine/lock.ts";
 import { hasEngine } from "../engine/native.ts";
@@ -76,13 +76,19 @@ const SLIDER_SET = 2;
  * correcting drags of a few points never moved it). So the finger is put on the thumb (where its value puts it) and
  * moved to where the asked value goes, and while it stays down the slider is read and the finger moved again by what
  * it reads short or over, until it reads the value; then the finger is lifted, whatever happened.
+ *
+ * Any move, the first too, may have put the finger down even when it fails: a busy answer is a move the engine still
+ * finishes, a lost or partial one may have gone out in part. So the lift is tried after every move that may have gone
+ * out, and an error of its own never hides the move's. It is an up alone (liftFinger), at the last move's end, so
+ * where the first move never went out it taps nothing.
  */
-async function holdSlider(udid: string, slider: Element, from: number, to: number): Promise<boolean> {
+export async function holdSlider(udid: string, slider: Element, from: number, to: number): Promise<boolean> {
   const f = slider.frame;
   const track = Math.max(1, f.width - 2 * SLIDER_THUMB_RADIUS);
   const y = Math.round(f.y + f.height / 2);
   // Never off the slider's ends: past them it reads its end value anyway.
   const clamp = (x: number) => Math.round(Math.min(f.x + f.width, Math.max(f.x, x)));
+  // Where the finger is, or will be once the move sent last has gone out.
   let x = clamp(f.x + SLIDER_THUMB_RADIUS + (from / 100) * track);
   const readOnce = async () => {
     const node = await elementAt(udid, Math.round(f.x + f.width / 2), y);
@@ -100,21 +106,40 @@ async function holdSlider(udid: string, slider: Element, from: number, to: numbe
     }
     return last;
   };
-  let next = clamp(x + ((to - from) / 100) * track);
-  if (!(await moveFinger(udid, { x, y }, { x: next, y }, { up: false }))) return false;
-  try {
+  // A move to `next` from where the finger is: the finger is taken to be there from the moment it is sent.
+  const move = (next: number, down: boolean) => {
+    const start = x;
     x = next;
+    return moveFinger(udid, { x: start, y }, { x: next, y }, { down, up: false });
+  };
+  let sent = true;
+  let failed = false;
+  try {
+    // false: no engine, and nothing was sent.
+    if (!(await move(clamp(x + ((to - from) / 100) * track), true))) {
+      sent = false;
+      return false;
+    }
     // Each move after the first is point for point; one more than the first's shortfall needs is spare.
     for (let moves = 0; moves < 3; moves++) {
       const now = await read();
       if (now === undefined || Math.abs(now - to) <= SLIDER_SET / 4) break;
-      next = clamp(x + ((to - now) / 100) * track);
+      const next = clamp(x + ((to - now) / 100) * track);
       if (next === x) break;
-      await moveFinger(udid, { x, y }, { x: next, y }, { down: false, up: false });
-      x = next;
+      await move(next, false);
     }
+  } catch (error) {
+    failed = true;
+    throw error;
   } finally {
-    await moveFinger(udid, { x, y }, { x, y }, { down: false });
+    if (sent) {
+      try {
+        await liftFinger(udid, { x, y });
+      } catch (error) {
+        // The move's error says more (the step fails on it either way); the lift's alone is thrown.
+        if (!failed) throw error;
+      }
+    }
   }
   return true;
 }

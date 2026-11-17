@@ -916,11 +916,14 @@ func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
   case "drag":
     // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag. up: false leaves the
     // finger down at the end, and down: false moves a finger left down so from where it is (x1, y1): a slider is set
-    // by a finger held on it, moved while the slider is read (ui-act.ts).
+    // by a finger held on it, moved while the slider is read (ui-act.ts). steps: 0 with down: false is the lift alone, an
+    // up with no move before it: where no finger is down (a first move that never went out) it touches nothing, where a
+    // move and an up would tap.
     let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
-    let duration = req["duration"] as? Double ?? 0.6, n = max(1, Int(req["steps"] as? Double ?? 20))
-    var events: [FBSimulatorHIDEvent] = (req["down"] as? Bool ?? true) ? [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)] : []
-    for i in 1...n { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
+    let down = req["down"] as? Bool ?? true
+    let duration = req["duration"] as? Double ?? 0.6, n = max(down ? 1 : 0, Int(req["steps"] as? Double ?? 20))
+    var events: [FBSimulatorHIDEvent] = down ? [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)] : []
+    for i in stride(from: 1, through: n, by: 1) { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
     if req["up"] as? Bool ?? true { events.append(.touch(direction: .up, x: x2, y: y2)) }
     return .composite(events)
   case "steps":
