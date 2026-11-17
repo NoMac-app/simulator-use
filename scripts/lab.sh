@@ -27,7 +27,10 @@ check() { # name, expected pattern, command...
 }
 act() { $DL act --device "$U" "$@"; }
 
-check "build, install and launch" 'EdgeLab · Controls' $DL run examples/edge-lab --device "$U"
+# --permissions ask: the lab checks iOS's own prompts, which run's default (grant every permission simctl can, so no
+# prompt stops an app under test) answers before they show: with it, "Ask for location" asked nothing (November 17,
+# 2026: locationd had EdgeLab authorized when in use, set at install).
+check "build, install and launch" 'EdgeLab · Controls' $DL run examples/edge-lab --device "$U" --permissions ask
 # The engine reads without opening an automation session per read (scripts/engine-check.mjs).
 check "the engine reads on its fast path" '^fast path' node scripts/engine-check.mjs "$U"
 check "segments are not tabs" '^segment "M" selected' $DL look --device "$U"
