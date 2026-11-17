@@ -9,15 +9,15 @@ func at(_ seconds: UInt64, loaded: UInt64? = nil, loading: Bool = true, daemon: 
   sessionWait(now: request + seconds * s, requestedAt: request, loadedAt: loaded.map { request + $0 * s }, loading: loading, daemonRunning: daemon, timeout: timeout, deadline: d, loadUntil: loadUntil)
 }
 
-// Accessibility loaded before the request (a read without a session answered at once): nothing to load, so no answer
-// in the first timeout is a refusal, whatever testmanagerd it met (November 16, 2026: one 5 s old after an earlier
-// restart, waited for by its age, cost 120 s a command).
+// A load testmanagerd's log says finished: nothing left to load, so no answer in the first timeout after it is a
+// refusal, whatever testmanagerd it met (November 16, 2026: one 5 s old after an earlier restart, waited for by its
+// age, cost 120 s a command).
 check(at(5, loaded: 0) == .waiting, "within the first timeout of a loaded phone")
 check(at(12, loaded: 0) == .refused, "a loaded phone whose testmanagerd is silent for the first timeout refuses")
 check(at(13, loaded: 0, daemon: false) == .refused, "refused whether or not a testmanagerd runs")
 
-// Right after a boot (November 16: 8 s to start, 16.6 s to load, answered at 26.3 s): reads fail for want of a
-// translation object while it loads.
+// Right after a boot (November 16: 8 s to start, 16.6 s to load, answered at 26.3 s): testmanagerd's log says it is
+// loading.
 check(at(12) == .waiting, "accessibility still loading at the first timeout: waited for")
 check(at(26) == .waiting, "still loading at 26 s with testmanagerd running")
 check(at(30, daemon: false) == .nothingLoading, "not loaded, past the first timeout, no testmanagerd: nothing is loading it")
@@ -36,16 +36,37 @@ check(at(100, loaded: 95) == .outOfTime, "loaded late: still never past the dead
 check(timeForRestart(secondsLeft: 60), "time left for a restart and a second request")
 check(!timeForRestart(secondsLeft: 20), "no restart without the time for a second request")
 
-// Only the not-loaded answer is evidence of loading: any other read error, or a read that hangs, says nothing.
-check(accessibilityRead(error: nil) == .loaded, "a read that answers: loaded")
-check(accessibilityRead(error: "Error Domain=com.facebook.FBControlCore Code=0 \"No translation object returned for simulator\"") == .notLoaded, "no translation object: not loaded")
-check(accessibilityRead(error: "The operation couldn’t be completed. (Mach error -308 - (ipc/mig) server died)") == .unknown, "any other error: unknown")
-check(at(5, loading: false) == .waiting, "no evidence yet, within the first timeout: waited for")
-check(at(13, loading: false) == .nothingLoading, "no evidence of loading past the first timeout: given up (restart), even with testmanagerd running")
+// The signal: testmanagerd's own log lines (compact style, from the throttled phone of November 17, 2026), never a read.
+let began = "2026-11-17 13:58:28.257 Df testmanagerd[33241:8e9673] [com.apple.dt.xctest:Default] Beginning AX loading sequence."
+let finished = "2026-11-17 13:58:51.137 Df testmanagerd[33241:8e9673] [com.apple.dt.xctest:Default] Finished loading AX."
+check(loadEvent(inLogLine: began) == .began, "\"Beginning AX loading sequence.\" is the load beginning")
+check(loadEvent(inLogLine: finished) == .finished, "\"Finished loading AX.\" is the load done")
+check(loadEvent(inLogLine: "2026-11-17 13:58:25.554 Df testmanagerd[33241:8e9673] [com.apple.dt.xctest:Default] Received request to load Accessibility") == nil,
+      "a request to load is not a load (testmanagerd logs it for every session, loaded or not)")
+check(loadEvent(inLogLine: "Filtering the log data using \"process == \"testmanagerd\"\"") == nil, "the stream's own first line says nothing")
+let loadLog = LoadLog()
+check(!loadLog.loading && loadLog.loadedAt == nil, "nothing heard: neither loading nor loaded")
+loadLog.note(began, at: 10 * s)
+check(loadLog.loading && loadLog.loadedAt == nil, "began: loading")
+loadLog.note(finished, at: 33 * s)
+check(!loadLog.loading && loadLog.loadedAt == 33 * s, "finished: loaded, at the time it was heard")
+loadLog.note(finished, at: 40 * s)
+check(loadLog.loadedAt == 33 * s, "a later line keeps the first finish")
+check(at(5, loading: false) == .waiting, "no load heard yet, within the first timeout: waited for")
+check(at(13, loading: false) == .nothingLoading, "no load heard past the first timeout: given up (restart), even with testmanagerd running")
 
-// A first request stops waiting for a load restartReserveNanos before the deadline, so a testmanagerd stuck before its
-// first load (every read finds no translation object, testmanagerd runs) is restarted in time, not waited for to the
-// deadline command after command. Stepped as the engine's loop does.
+// November 17, 2026, a phone booted at background priority beside a live one: the load began 10 s after the request
+// and ended at 33 s; testmanagerd answered 2 s later. Waited for throughout, never restarted mid-load.
+func throttled(_ t: UInt64) -> SessionWait {
+  sessionWait(now: request + t * s, requestedAt: request, loadedAt: t >= 33 ? request + 33 * s : nil, loading: t >= 10 && t < 33,
+              daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: loadWaitEnd(deadline: deadline, restartMayFollow: true))
+}
+check((0...44).allSatisfy { throttled(UInt64($0)) == .waiting }, "the throttled load is waited for from the request to 12 s after its end")
+check(throttled(45) == .refused, "no answer 12 s after the load: refused")
+
+// A first request stops waiting for a load restartReserveNanos before the deadline, so a testmanagerd stuck in its
+// first load (it began and never finished) is restarted in time, not waited for to the deadline command after
+// command. Stepped as the engine's loop does.
 let firstUntil = loadWaitEnd(deadline: deadline, restartMayFollow: true)
 let poll = UInt64(sessionPollSeconds * 1e9)
 var waited: UInt64 = 0, end = SessionWait.waiting
@@ -53,71 +74,17 @@ while end == .waiting && waited < 200 * s {
   waited += poll
   end = sessionWait(now: request + waited, requestedAt: request, loadedAt: nil, loading: true, daemonRunning: true, timeout: timeout, deadline: deadline, loadUntil: firstUntil)
 }
-let left = Double(deadline - (request + waited)) / 1e9 - sessionPollSeconds - watchStopSeconds
+let left = Double(deadline - (request + waited)) / 1e9 - sessionPollSeconds
 check(end == .loadTooLong, "a load not done before the restart's reserve is given up: \(end) after \(Double(waited) / 1e9) s")
 check(waited >= 74 * s, "the load still gets 74 s of a 100 s budget: \(Double(waited) / 1e9) s")
-check(timeForRestart(secondsLeft: left), "a restart always fits after the give-up, one poll late and with the watch's stop: \(left) s left")
+check(timeForRestart(secondsLeft: left), "a restart always fits after the give-up, one poll late: \(left) s left")
 // The second request (after the restart) has nothing after it: it waits for the load to the deadline.
 check(loadWaitEnd(deadline: deadline, restartMayFollow: false) == nil, "a second request keeps no reserve")
 check(at(99, loadUntil: nil) == .waiting, "a second request waits for the load to the deadline")
-// A load seen before the cut has the first timeout for its answer, as any loaded phone.
+// A load finished before the cut has the first timeout for its answer, as any loaded phone.
 check(at(80, loaded: 73, loadUntil: firstUntil) == .waiting, "loaded at 73 s: its answer is waited for past the cut")
-// A request sent late (a long turn) is not given up before its first read has said anything.
+// A request sent late (a long turn) is not given up before testmanagerd has had its first timeout.
 check(sessionWait(now: deadline - 29 * s, requestedAt: deadline - 30 * s, loadedAt: nil, loading: false, daemonRunning: false, timeout: timeout, deadline: deadline, loadUntil: firstUntil) == .waiting,
-      "a late request with no read back yet is waited for")
-
-// The watch: reads a little apart until one answers; a read past its limit is no evidence and is never waited for.
-final class Reads: @unchecked Sendable {
-  private let lock = NSLock()
-  private var answers: [AccessibilityRead?]
-  private(set) var count = 0
-  /** nil: a read that hangs (and ignores cancellation, as a stuck call into the phone does). */
-  init(_ answers: [AccessibilityRead?]) { self.answers = answers }
-  private func take() -> AccessibilityRead? {
-    lock.lock(); defer { lock.unlock() }
-    count += 1
-    return answers.isEmpty ? .unknown : answers.removeFirst()
-  }
-  func next() async -> AccessibilityRead {
-    if let answer = take() { return answer }
-    return await withCheckedContinuation { c in DispatchQueue.global().asyncAfter(deadline: .now() + 30) { c.resume(returning: .unknown) } }
-  }
-}
-func seconds(since t: DispatchTime) -> Double { Double(DispatchTime.now().uptimeNanoseconds - t.uptimeNanoseconds) / 1e9 }
-
-let loads = Reads([.notLoaded, .notLoaded, .loaded])
-let loadWatch = AccessibilityWatch(readLimit: 1, every: 0.05) { await loads.next() }
-Thread.sleep(forTimeInterval: 0.5)
-check(loadWatch.loadedAt != nil && loads.count == 3, "reads until one answers, then stops: \(loads.count) reads")
-loadWatch.stop(until: .now() + 5)
-
-let other = Reads([.unknown, .unknown, .unknown])
-let otherWatch = AccessibilityWatch(readLimit: 1, every: 0.05) { await other.next() }
-Thread.sleep(forTimeInterval: 0.2)
-check(!otherWatch.loading && otherWatch.loadedAt == nil, "reads failing another way: neither loaded nor loading")
-otherWatch.stop(until: .now() + 5)
-
-let hung = Reads([.notLoaded, nil])
-let hungWatch = AccessibilityWatch(readLimit: 0.3, every: 0.05) { await hung.next() }
-Thread.sleep(forTimeInterval: 0.15)
-check(hungWatch.loading, "the last read found no translation object and the one in flight is within its limit: loading")
-Thread.sleep(forTimeInterval: 0.4)
-check(!hungWatch.loading, "the read in flight is past its limit: no longer evidence of loading")
-var stopped = DispatchTime.now()
-hungWatch.stop(until: .now() + 10)
-check(seconds(since: stopped) < 0.1, "a read past its limit is not waited for by stop: \(seconds(since: stopped)) s")
-
-let stuck = Reads([nil])
-let stuckWatch = AccessibilityWatch(readLimit: 0.5, every: 0.05) { await stuck.next() }
-Thread.sleep(forTimeInterval: 0.1)
-stopped = DispatchTime.now()
-stuckWatch.stop(until: .now() + 10)
-let stuckWait = seconds(since: stopped)
-check(stuckWait > 0.2 && stuckWait < 1, "a hung read is waited for only to its limit, never to the deadline: \(stuckWait) s")
-let early = AccessibilityWatch(readLimit: 5, every: 0.05) { await Reads([nil]).next() }
-Thread.sleep(forTimeInterval: 0.05)
-stopped = DispatchTime.now()
-early.stop(until: .now() + watchStopSeconds)
-check(seconds(since: stopped) < watchStopSeconds + 0.2, "an unanswered request's stop waits at most watchStopSeconds: \(seconds(since: stopped)) s")
+      "a late request within its first timeout is waited for")
 
 if failures == 0 { print("all checks passed") } else { print("\(failures) failed"); exit(1) }
