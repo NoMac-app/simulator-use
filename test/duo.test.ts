@@ -99,7 +99,7 @@ async function withDuo(env: Record<string, string>, work: () => Promise<void>): 
   return { requests, simctl };
 }
 
-test("device_use folds an iPhone Duo and answers with the screen in use once the fold is done", async () => {
+test("device_use folds an iPhone Duo and answers with the screen in use once the fold is done", { skip: process.platform !== "darwin" }, async () => {
   const { requests } = await withDuo({ FAKE_POSTURE: "closed" }, async () => {
     const book = await deviceUse.run({ device: "iPhone Duo", fold: "book" }, { waitForJobs: true });
     assert.equal(book.isError, undefined);
@@ -111,7 +111,7 @@ test("device_use folds an iPhone Duo and answers with the screen in use once the
   assert.deepEqual(requests.filter((r) => r.op === "hinge").map((r) => r.posture), ["book", "book"]);
 });
 
-test("each typed fold error says what went wrong and what to do; a phone that does not fold is told so without asking its engine", async () => {
+test("each typed fold error says what went wrong and what to do; a phone that does not fold is told so without asking its engine", { skip: process.platform !== "darwin" }, async () => {
   for (const [code, said] of [["busy", /^The hinge is moving already\./], ["timeout", /^The fold did not finish in time\./], ["boot_changed", /^The Simulator restarted while it folded\./], ["unsupported", /^This Simulator does not fold/]] as const) {
     await withDuo({ FAKE_HINGE: code }, async () => {
       const answer = await deviceUse.run({ device: "iPhone Duo", fold: "closed" }, { waitForJobs: true });
@@ -131,7 +131,7 @@ test("each typed fold error says what went wrong and what to do; a phone that do
   assert.ok(!requests.some((r) => r.op === "hinge"));
 });
 
-test("ui_look on a Duo reads the screen in use and its posture from the engine", async () => {
+test("ui_look on a Duo reads the screen in use and its posture from the engine", { skip: process.platform !== "darwin" }, async () => {
   await withDuo({ FAKE_POSTURE: "book" }, async () => {
     const screen = await readScreen(DUO_UDID);
     assert.equal(screen.posture, "book");
@@ -139,7 +139,7 @@ test("ui_look on a Duo reads the screen in use and its posture from the engine",
   });
 });
 
-test("an input a fold refused is never sent again another way: the agent is told to read the screen in use", async () => {
+test("an input a fold refused is never sent again another way: the agent is told to read the screen in use", { skip: process.platform !== "darwin" }, async () => {
   for (const [mode, said] of [["screen_changed", /^The screen in use changed during the input \(the phone folded\), so the rest of it was not sent\.\nNext: Call ui_look/], ["screen_changing", /^The phone is folding, so the input was not sent\./], ["screen_unknown", /^Which screen is in use cannot be read .*\nNext: Call device_use with fold/]] as const) {
     const { requests, simctl } = await withDuo({ FAKE_INPUT: mode }, async () => {
       await assert.rejects(settle(DUO_UDID, "Demo", { steps: ["tap -x 201 -y 350"] }), (e: unknown) => e instanceof ToolError && said.test(e.toText()));
@@ -197,7 +197,7 @@ test("the tools offer the Duo within their budgets: device_use's fold, the cloud
   assert.ok(tokens(use) <= 300 && tokens(cloud) <= 300, `${tokens(use)}, ${tokens(cloud)}`);
 });
 
-test("without an engine (one cannot start while the display report is not steady), device_use folds with AXe's own hinge", async () => {
+test("without an engine (one cannot start while the display report is not steady), device_use folds with AXe's own hinge", { skip: process.platform !== "darwin" }, async () => {
   const dir = mkdtempSync(join(tmpdir(), "su-duo-axe-"));
   const axe = join(dir, "axe");
   writeFileSync(axe, `#!/bin/sh\necho "$*" >> "${dir}/axe.log"\necho "Hinge 90°, partially open"\n`, { mode: 0o755 });
