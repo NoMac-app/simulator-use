@@ -171,4 +171,33 @@ check(sessionWait(now: deadline - 26 * s + s, requestedAt: deadline - 26 * s - s
 // Not held: as before (the clock's run is the wall-clock time).
 check(heldWait(13, daemon: .running, heldUntil: 0) == .nothingLoading, "not held: a silent testmanagerd that was there is refused at 12 s")
 
+// The log hears a load only from when it listens (sessionWait's `listenedAt`): a testmanagerd started for the request at
+// 2 s whose load began before the log listened at 5 s is silent to it; its silence counts from 5 s.
+func lateLog(_ t: UInt64, listened: UInt64?) -> SessionWait {
+  sessionWait(now: request + t * s, requestedAt: request, loadedAt: nil, loading: false, daemon: .started(at: request + 2 * s), timeout: timeout,
+              deadline: deadline, loadUntil: firstUntil, listenedAt: listened.map { request + $0 * s })
+}
+check(lateLog(15, listened: 5) == .waiting, "started at 2 s, the log listening from 5 s: 10 s heard at 15 s, waited for")
+check(lateLog(17, listened: 5) == .nothingLoading, "12 s heard and nothing: nothing loading, restarted")
+check(lateLog(14, listened: 1) == .nothingLoading, "the log listening before it started: silence from its start")
+check(lateLog(14, listened: nil) == .nothingLoading, "no log heard: silence from its start, as before there was a log")
+check(sessionWait(now: request + 14 * s, requestedAt: request, loadedAt: nil, loading: false, daemon: .running, timeout: timeout, deadline: deadline,
+                  loadUntil: firstUntil, listenedAt: request + 3 * s) == .waiting, "one that was there, the log listening 3 s after the request: 11 s heard at 14 s")
+check(sessionWait(now: request + 20 * s, requestedAt: request, loadedAt: request + 5 * s, loading: false, daemon: .running, timeout: timeout, deadline: deadline,
+                  loadUntil: firstUntil, listenedAt: request + 4 * s) == .refused, "a load heard to its end: refused 12 s after it, as before")
+check(lateLog(74, listened: 70) == .loadTooLong, "the restart's reserve stays wall-clock: one started for the request and heard late is still given up at it")
+let ears = LoadLog()
+check(!ears.waitListening(until: .now() + 0.05), "not listening: the wait ends at its bound")
+DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) { ears.listening() }
+check(ears.waitListening(until: .now() + 2), "the wait ends as the stream listens")
+check(ears.waitListening(until: .now()) && ears.waitListening(until: .now()), "listened already: no wait, for any number of waiters")
+ears.listening(at: 1)
+check(ears.snapshot.listenedAt == ears.listeningAt && ears.listeningAt != 1, "a later line keeps the first listening")
+
+// What a request waits for before it goes (waitsBeforeRequest).
+check(waitsBeforeRequest(restarting: false, daemonThere: false, young: true), "a first request on a phone just booted, no testmanagerd yet: waits for the switch and the log")
+check(!waitsBeforeRequest(restarting: false, daemonThere: true, young: true), "a testmanagerd there (a UI test): at once")
+check(!waitsBeforeRequest(restarting: true, daemonThere: false, young: true), "a restart's request: at once")
+check(!waitsBeforeRequest(restarting: false, daemonThere: false, young: false), "a phone up for a while: at once")
+
 if failures == 0 { print("all checks passed") } else { print("\(failures) failed"); exit(1) }

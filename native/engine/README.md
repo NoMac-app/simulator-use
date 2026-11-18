@@ -39,11 +39,13 @@ What makes that possible:
   for the phone's apps to load it before it answers (it allows itself 120 s): 23 to 26 s on a busy 6-core virtual Mac
   right after the boot, 7 to 17 s of it testmanagerd's own start. So the engine switches app accessibility on itself as
   it starts (`native/axon`, the call testmanagerd makes, spawned in the phone through CoreSimulator), and the apps' load
-  runs while testmanagerd starts. While the request waits it follows testmanagerd's own log (`simctl spawn … log
-  stream`) and when the phone's testmanagerd started (the kernel's record): none yet (the phone's launchd starts one for
-  the request), one started for it, or one loading is waited for; one that was already there and does not answer in
-  12 s, or one started for the request that shows no load 12 s after its start, is a phone that refuses sessions, and
-  gets a restart of the phone's test daemons (SessionWait.swift).
+  runs while testmanagerd starts. On a phone just booted with no testmanagerd yet, the first request goes once the switch
+  is in and testmanagerd's log listens (each within 6 s); with a testmanagerd already there (a UI test, an earlier
+  session) it goes at once. While the request waits it follows testmanagerd's own log (`simctl spawn … log stream`)
+  and when the phone's testmanagerd started (the kernel's record): none yet (the phone's launchd starts one for the
+  request), one started for it, or one loading is waited for; one that was already there and does not answer in 12 s,
+  or one started for the request that shows no load 12 s after its start (or after the log listened, if later), is a
+  phone that refuses sessions, and gets a restart of the phone's test daemons (SessionWait.swift).
   It never reads the phone before its session: a read that reaches a phone before its accessibility is loaded leaves the
   phone's CoreSimulatorBridge an unknown accessibility client, and every read of that phone, from any process, then
   fails ("No translation object") until the bridge restarts (November 17, 2026, a phone booted at background priority

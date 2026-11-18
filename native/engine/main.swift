@@ -263,12 +263,14 @@ func restartTestDaemons() {
 }
 /**
  * testmanagerd's log, streamed from the phone while a session request waits (`simctl spawn … log stream`, its own
- * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started before the request, which never
- * waits for the stream itself (a process spawned into a phone just booted takes 3 to 4 s to start on a busy Mac; the
- * request may wait for app accessibility's switch instead, AccessibilitySwitching). testmanagerd starts for the
- * request seconds later, so its lines come once the stream listens; a load that began before (a testmanagerd already there) and is not seen leaves its request to the first
- * timeout, as before there was a log. Never a read of the phone, which before its accessibility is loaded poisons its
- * CoreSimulatorBridge (SessionWait.swift). nil when the stream cannot start: no load is then seen.
+ * subsystem's lines): sessionWait's signal (LoadLog, SessionWait.swift). Started before the request. A first request
+ * on a phone just booted, where a process spawned takes 3 to 5 s to start on a busy Mac, waits for it to listen
+ * (waitsBeforeRequest, logListenWaitSeconds), so the testmanagerd that starts for the request is heard from its first
+ * line; elsewhere the stream listens within a second, before testmanagerd has started. Silence counts only from when
+ * the stream listens (sessionWait's `listenedAt`); a load that began before (a testmanagerd already there) and is not
+ * seen leaves its request to the first timeout, as before there was a log. Never a read of the phone, which before its
+ * accessibility is loaded poisons its CoreSimulatorBridge (SessionWait.swift). nil when the stream cannot start: no
+ * load is then seen.
  */
 func startLoadLog() -> (log: LoadLog, process: Process)? {
   let log = LoadLog(), process = Process(), pipe = Pipe()
@@ -300,7 +302,8 @@ func startLoadLog() -> (log: LoadLog, process: Process)? {
  * the engine's start, against 20.6 and 26.8 s without). Not a read of the phone, which before its accessibility is
  * loaded poisons its CoreSimulatorBridge (SessionWait.swift); reads that reach the bridge once it is on fail for want of a
  * translation object until the apps' load is done, and then answer (November 17, 2026: every one of 8 trials and 3
- * throttled phones read). Not waited for. The process is kept until it ends, its outcome written to the session log.
+ * throttled phones read). The engine's start does not wait for it; a first request on a phone just booted does
+ * (AccessibilitySwitching, waitsBeforeRequest). The process is kept until it ends, its outcome written to the session log.
  */
 var accessibilitySwitch: Process?
 /**
@@ -352,7 +355,8 @@ private func spawnAccessibilitySwitch(device: AnyObject?, helper: String, starte
  * start and its load: requested at once, sessions answered sooner but the phone's first reads then failed for 1 to 3
  * s more (first read median 17.3 s); requested once the switch was in (3 to 5 s later), testmanagerd found
  * accessibility on and the first read came at 15.9 s (November 17, 2026, 10 trials each, a Session Mac). On a phone
- * held at background priority the switch takes 10 to 30 s: the request goes at the bound.
+ * held at background priority the switch takes 10 to 30 s: the request goes at the bound. Never when a testmanagerd
+ * already runs in the phone (a UI test, an earlier session): its load is done, and the request goes at once.
  */
 final class AccessibilitySwitching: @unchecked Sendable {
   private let lock = NSLock(), group = DispatchGroup()
@@ -373,6 +377,12 @@ final class AccessibilitySwitching: @unchecked Sendable {
 }
 let accessibilitySwitching = AccessibilitySwitching()
 let accessibilityWaitSeconds = 6.0
+/**
+ * How long a first request on a phone just booted waits for testmanagerd's log to listen, from the stream's start: a
+ * spawn into a phone just booted takes 3 to 5 s to start on a busy Mac (November 17, 2026: the stream listened 2.7 to
+ * 4.6 s after its start); on a phone held at background priority 10 to 30 s, and the request goes at the bound.
+ */
+let logListenWaitSeconds = 6.0
 /**
  * A phone up less than this is one just booted, whose first request waits for app accessibility's switch: its spawns
  * take seconds and compete with testmanagerd's start (a pool phone's first read comes within seconds of its boot; one
@@ -415,17 +425,18 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
   let done = DispatchSemaphore(value: 0); var session: AnyObject?; var failure: String?
   let completion: @convention(block) (AnyObject?, NSError?) -> Void = { s, e in session = s; failure = e?.localizedDescription; done.signal() }
   typealias RequestFn = @convention(c) (AnyClass, Selector, AnyObject, AnyObject) -> Void
-  let load = startLoadLog()
+  let load = startLoadLog(), loadStarted = DispatchTime.now()
   defer { load?.process.terminate() }
   // testmanagerd switches app accessibility off as it stops (its log: AXDisableAccessibilityOnTermination): on again.
   if restartingDaemons { switchAccessibilityOn(device: device) }
-  // A first request on a phone just booted goes once app accessibility is switched on (AccessibilitySwitching), the
-  // log stream starting meanwhile. Not a request after a restart, whose budget (restartReserveNanos) has no room for it,
-  // nor one on a phone up for a while, where the switch is quick and nothing competes with testmanagerd's start.
-  if !restartingDaemons && phoneProcesses.youngerThan(seconds: youngPhoneSeconds) {
-    let switchWait = Date()
+  // A first request on a phone just booted, with no testmanagerd there yet, goes once app accessibility is switched on
+  // and testmanagerd's log listens, each within its bound (waitsBeforeRequest, SessionWait.swift).
+  if waitsBeforeRequest(restarting: restartingDaemons, daemonThere: phoneProcesses.pid(named: "testmanagerd") > 0,
+                        young: phoneProcesses.youngerThan(seconds: youngPhoneSeconds)) {
+    let gate = Date()
     if accessibilitySwitching.wait(deadline: deadline) == false { sessionLog("requested before app accessibility was switched on (\(Int(accessibilityWaitSeconds)) s from its start)") }
-    if ms(switchWait) >= 100 { sessionLog("requested after \(ms(switchWait)) ms for app accessibility to be switched on") }
+    if let load, !load.log.waitListening(until: min(loadStarted + logListenWaitSeconds, deadline)) { sessionLog("requested before testmanagerd's log listened (\(Int(logListenWaitSeconds)) s from its start)") }
+    if ms(gate) >= 100 { sessionLog("requested after \(ms(gate)) ms for app accessibility's switch and testmanagerd's log") }
   }
   // The request's time on both clocks: a process's start time is the kernel's wall-clock time (DaemonStart).
   let requested = DispatchTime.now(), requestedWall = Date()
@@ -447,7 +458,8 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
         ?? heard?.launchedAt).map { Daemon.started(at: $0) } ?? .running
     } else { daemon = 0; daemonState = .running }
     state = sessionWait(now: now, requestedAt: requested.uptimeNanoseconds, loadedAt: loadedAt, loading: loading, daemon: daemonState,
-                        timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil, ran: clock.ran(since:))
+                        timeout: timeoutNanos, deadline: deadline.uptimeNanoseconds, loadUntil: loadUntil, ran: clock.ran(since:),
+                        listenedAt: heard?.listenedAt)
     guard state == .waiting else { break }
     if loadedAt == nil && now >= requested.uptimeNanoseconds + timeoutNanos {
       var why = ""

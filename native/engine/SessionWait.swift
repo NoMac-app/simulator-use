@@ -80,10 +80,22 @@ final class LoadLog: @unchecked Sendable {
     }
   }
   private var listened: UInt64?
+  /** Signalled once, as the stream listens (never waited below its start value: safe to free at any time). */
+  private let heard = DispatchSemaphore(value: 0)
   /** The stream says it listens (its first line), at `now`. */
-  func listening(at now: UInt64 = DispatchTime.now().uptimeNanoseconds) { lock.lock(); defer { lock.unlock() }; listened = listened ?? now }
+  func listening(at now: UInt64 = DispatchTime.now().uptimeNanoseconds) {
+    lock.lock(); let first = listened == nil; listened = listened ?? now; lock.unlock()
+    if first { heard.signal() }
+  }
   /** When the stream began listening (nil: not yet). */
   var listeningAt: UInt64? { lock.lock(); defer { lock.unlock() }; return listened }
+  /** Waits until the stream listens, at most until `until`: whether it does. */
+  func waitListening(until: DispatchTime) -> Bool {
+    if listeningAt != nil { return true }
+    guard heard.wait(timeout: until) == .success else { return listeningAt != nil }
+    heard.signal()
+    return true
+  }
   /** When the log said a testmanagerd launched (nil: not heard). */
   var launchedAt: UInt64? { lock.lock(); defer { lock.unlock() }; return launched }
   /** When the load finished (nil: not yet). */
@@ -91,9 +103,9 @@ final class LoadLog: @unchecked Sendable {
   /** Whether testmanagerd is loading accessibility: it began, and it has not finished. */
   var loading: Bool { lock.lock(); defer { lock.unlock() }; return began != nil && finished == nil }
   /** What the log has said so far, read at once: two reads apart could miss a load that finished between them. */
-  var snapshot: (loadedAt: UInt64?, loading: Bool, launchedAt: UInt64?) {
+  var snapshot: (loadedAt: UInt64?, loading: Bool, launchedAt: UInt64?, listenedAt: UInt64?) {
     lock.lock(); defer { lock.unlock() }
-    return (finished, began != nil && finished == nil, launched)
+    return (finished, began != nil && finished == nil, launched, listened)
   }
 }
 
@@ -167,9 +179,15 @@ enum Daemon: Equatable {
  * finished (nil: not yet); `loading`, whether it says one is under way; the phone's testmanagerd (`daemon`); `timeout`,
  * how long a testmanagerd may stay silent with nothing to load (from the request, or from its own start when it
  * started for the request), in time the phone ran (`ran`: its unclamped time from a moment to now, RunClock; all of it
- * when nil); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd).
+ * when nil); `loadUntil`, when a request still waiting for testmanagerd stops (loadWaitEnd); `listenedAt`, when the
+ * log began listening (nil: no log heard yet, the silence counted as before there was a log).
+ *
+ * The log hears a load only from when it listens: a load that began before is not heard (its "Beginning" line is gone,
+ * and a long one says nothing more until it finishes). So silence counts from the later of testmanagerd's turn and the
+ * log's listening: a testmanagerd started for the request before the log listened, loading unheard, is not restarted
+ * as silent.
  */
-func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil, ran: ((UInt64) -> UInt64)? = nil) -> SessionWait {
+func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: Bool, daemon: Daemon, timeout: UInt64, deadline: UInt64, loadUntil: UInt64? = nil, ran: ((UInt64) -> UInt64)? = nil, listenedAt: UInt64? = nil) -> SessionWait {
   let wall = { (t: UInt64) in now > t ? now - t : 0 }, ranSince = ran ?? wall
   // Silent for the first timeout of wall-clock time but not of run (the phone held): waited for, except by a first
   // request at loadUntil, which keeps the time for a restart (a phone held throughout would otherwise never get one).
@@ -188,8 +206,20 @@ func sessionWait(now: UInt64, requestedAt: UInt64, loadedAt: UInt64?, loading: B
   if loading || starting, let loadUntil, now >= loadUntil { return .loadTooLong }
   if loading { return .waiting }
   guard let heardSince else { return .waiting }
-  return silent(heardSince) ? .nothingLoading : .waiting
+  return silent(max(heardSince, listenedAt ?? heardSince)) ? .nothingLoading : .waiting
 }
+
+/**
+ * Whether a session request first waits for the phone to be ready for the testmanagerd that will start for it: a first
+ * request (not a restart's, whose budget, restartReserveNanos, has no room for it) on a phone just booted
+ * (`young`), where no testmanagerd runs yet. It then waits, each within its own bound, for app accessibility's switch
+ * (so testmanagerd's load finds it done and its start does not compete with the switch's spawn) and for testmanagerd's
+ * log to listen (so the load is heard from its first line: a spawn into a phone just booted takes 3 to 5 s to start).
+ * With a testmanagerd already there (a UI test, an earlier session), nothing is to start or to load: the request goes
+ * at once (November 18, 2026, a Session Mac: a fresh engine during a UI test waited 4.7 s for the switch, where 0.16.0
+ * opened its session in 0.1 s). On a phone up for a while, spawns are quick and nothing competes: at once too.
+ */
+func waitsBeforeRequest(restarting: Bool, daemonThere: Bool, young: Bool) -> Bool { !restarting && !daemonThere && young }
 
 /** When a request stops waiting for the load: a first one (a restart may follow) leaves restartReserveNanos. */
 func loadWaitEnd(deadline: UInt64, restartMayFollow: Bool) -> UInt64? {
