@@ -290,16 +290,17 @@ npm run build      # dist/ for the npm package
 node bin/simulator-use.js look
 ```
 
-The engine builds only with the Swift that built AXe's frameworks: for AXe 2.0.4, Swift 6.4.2 (swiftlang-6.4.2.1.9), which is Xcode 27.2 (build 27B52), the Xcode releases are built with (up to 0.16.0, on AXe 1.8.0: Swift 6.3.2, Xcode 26.5, build 17F42). `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 27.2's `Contents/Developer`. It compiles against idb's private headers, which since AXe 2.0 live in AXe's own repository (`Packages/IDBKit/PrivateHeaders`); `npm run native` fetches them once, from the commit of the pinned release's tag. The build is reproducible: from a fresh clone of a release tag, in any folder, with that release's Xcode, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026 (November 16 for AXe 2.0.4):
+The engine builds only with the Swift that built AXe's frameworks: for AXe 2.0.4, Swift 6.4.2 (swiftlang-6.4.2.1.9), which is Xcode 27.2 (build 27B52), the Xcode releases are built with (up to 0.16.0, on AXe 1.8.0: Swift 6.3.2, Xcode 26.5, build 17F42). `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 27.2's `Contents/Developer`. It compiles against idb's private headers, which since AXe 2.0 live in AXe's own repository (`Packages/IDBKit/PrivateHeaders`); `npm run native` fetches them once, from the commit of the pinned release's tag. The build is reproducible: from a fresh clone of a release tag, in any folder, with that release's Xcode, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026 (November 16 for AXe 2.0.4, November 18 for 0.17.1):
 
-| Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` |
-|---|---|---|---|
-| 0.17.0, on AXe 2.0.4 (Xcode 27.2) | `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` |
-| 0.15.1 to 0.16.0 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
-| 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
-| 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` |
-| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
-| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none |
+| Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` | `simulator-use-axon` |
+|---|---|---|---|---|
+| 0.17.1, on AXe 2.0.4 (Xcode 27.2) | `d42a025d61f9a4728d3017d2c0b1a15f5db9e96b171867d1f034db512dc3249c` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` |
+| 0.17.0, on AXe 2.0.4 (Xcode 27.2) | `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | none |
+| 0.15.1 to 0.16.0 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
+| 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
+| 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
+| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none |
+| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none |
 
 `examples/swiftui-demo` is the sample app the tests' screens come from. `scripts/golden.sh` builds it, runs it on a Simulator and checks 19 golden tasks: build and launch in one call, sign in, toggle, open an item, back and scroll, the app's logs, a crash, a build error and a failing test as `file:line`, a video, and a wrong password that must fail loudly.
 
