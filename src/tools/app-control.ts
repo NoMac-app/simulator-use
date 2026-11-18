@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { dirname, isAbsolute, resolve as resolvePath } from "node:path";
 
-import { appInfo, BUNDLE_ID, bundleIdOf, install, launchWords, pushPayload, simctlAction, stopLogStream } from "../engine/apps.ts";
+import { appInfo, BUNDLE_ID, bundleIdOf, install, launchWords, sendPush, simctlAction, stopLogStream } from "../engine/apps.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
 import { engineCall } from "../engine/native.ts";
 import { currentApp, heldDevice, setCurrentApp, setDeviceTimeZone } from "../engine/state.ts";
@@ -195,7 +195,7 @@ export const appControl: Tool = {
         return { text: `Location set to ${match[1]},${match[2]}.` };
       }
       case "push":
-        await pushPayload(device.udid, bundleId!, pushJson(value!));
+        await sendPush(device.udid, bundleId!, pushJson(value!));
         return { text: `Sent a push to ${bundleId}.` };
       case "storekit": {
         if (value!.trim() === "clear") {

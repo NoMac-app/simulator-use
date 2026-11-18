@@ -215,6 +215,26 @@ export async function simctlAction(args: string[], what: string, timeoutMs = 30_
   }
 }
 
+/**
+ * A push to an app. iOS refuses one (UNErrorDomain 2003) to an app that is not installed, or has no notification
+ * permission: it never asked for it, or the person said no. Measured on iOS 27.2 (November 18, 2026): an app that asked
+ * and was allowed gets it shown; one that was refused still gets it through its notification delegate while it is in
+ * front, though iOS shows nothing. The refusal says which of these it is, and what to do.
+ */
+export async function sendPush(udid: string, bundleId: string, payload: string): Promise<void> {
+  try {
+    await pushPayload(udid, bundleId, payload);
+  } catch (error) {
+    if (!(error instanceof ToolError) || !/domain=UNErrorDomain, code=2003\b/.test(error.message)) throw error;
+    const installed = await simctl(["get_app_container", udid, bundleId], 15_000).then(() => true, () => false);
+    if (!installed) throw new ToolError(`${bundleId} is not installed on this Simulator, so iOS refused the push.`, "Install it first (app_run builds and installs it), then push again.");
+    throw new ToolError(
+      `iOS refused the push: ${bundleId} has no notification permission (it never asked for it, or it was refused). iOS shows nothing; an app in front may still get it through its notification delegate.`,
+      'Make the app ask (UNUserNotificationCenter requestAuthorization) and allow it: app_run answers iOS\'s prompt unless permissions is "ask". Then push again.',
+    );
+  }
+}
+
 export async function pushPayload(udid: string, bundleId: string, payload: string): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const child = spawn("xcrun", ["simctl", "push", udid, bundleId, "-"], { stdio: ["pipe", "ignore", "pipe"] });

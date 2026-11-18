@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { parseArgs } from "../src/cli.ts";
-import { freshFile, install, pasteHelper, plistValue, setPasteboard } from "../src/engine/apps.ts";
+import { freshFile, install, pasteHelper, plistValue, sendPush, setPasteboard } from "../src/engine/apps.ts";
 import { cleanConsole, crashReports, parseSystemLog, summarizeIps } from "../src/engine/logs.ts";
 import { appControl, openUrl, pushJson } from "../src/tools/app-control.ts";
 import { parseSince } from "../src/tools/app-logs.ts";
@@ -69,6 +69,29 @@ test("a push from plain text, or the agent's JSON checked the way simctl will", 
   assert.throws(() => pushJson('{"alert":"Hi"}'), (e: unknown) => e instanceof ToolError && /needs an "aps" object/.test(e.message));
   assert.throws(() => pushJson("{nope"), (e: unknown) => e instanceof ToolError && /not valid JSON/.test(e.message));
   assert.throws(() => pushJson(JSON.stringify({ aps: { alert: "x".repeat(5000) } })), /over 4 KB/);
+});
+
+test("a push iOS refuses (UNErrorDomain 2003) says whether the app is missing or has no notification permission", async () => {
+  const bin = mkdtempSync(join(tmpdir(), "su-push-"));
+  const record = join(bin, "calls");
+  // A stand-in xcrun: simctl push refuses as iOS 27.2 does; get_app_container answers by INSTALLED; anything else fails.
+  writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nprintf '%s\\n' "$*" >> "${record}"\ncase "$2" in\n  push) cat > /dev/null; echo "An error was encountered processing the command (domain=UNErrorDomain, code=2003):" >&2; exit 1 ;;\n  get_app_container) [ "$INSTALLED" = 1 ] && echo /path && exit 0; exit 2 ;;\nesac\nexit 1\n`, { mode: 0o755 });
+  const saved = { PATH: process.env.PATH, INSTALLED: process.env.INSTALLED };
+  process.env.PATH = `${bin}:${saved.PATH}`;
+  try {
+    process.env.INSTALLED = "1";
+    await assert.rejects(sendPush("UDID", "dev.example.app", pushJson("Hi")), (error: ToolError) => {
+      assert.match(error.message, /^iOS refused the push: dev\.example\.app has no notification permission/);
+      assert.match(error.next ?? "", /requestAuthorization/);
+      return true;
+    });
+    process.env.INSTALLED = "0";
+    await assert.rejects(sendPush("UDID", "dev.example.app", pushJson("Hi")), (error: ToolError) => error.message === "dev.example.app is not installed on this Simulator, so iOS refused the push." && /app_run/.test(error.next ?? ""));
+    assert.match(readFileSync(record, "utf8"), /simctl push UDID dev\.example\.app -\nsimctl get_app_container UDID dev\.example\.app/);
+  } finally {
+    process.env.PATH = saved.PATH;
+    if (saved.INSTALLED === undefined) delete process.env.INSTALLED; else process.env.INSTALLED = saved.INSTALLED;
+  }
 });
 
 test("simctl appinfo's plist reads by key", () => {
