@@ -6,7 +6,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { isOurs } from "../engine/exec.ts";
 import { flattenFmp4, NoFramesError } from "../engine/fmp4.ts";
-import { enginePath } from "../engine/native.ts";
+import { engineCall, enginePath } from "../engine/native.ts";
 import { type Device, listDevices, pickDevice } from "../engine/simctl.ts";
 import { deviceDir, heldDevice } from "../engine/state.ts";
 import { ToolError } from "../errors.ts";
@@ -48,6 +48,13 @@ async function notStarted(device: Device, output: string): Promise<ToolError> {
     return new ToolError(`The recording did not start: simctl says "${said}". Another recorder holds ${device.name}'s screen, which takes one recording at a time.`, "Stop that recording (a screen_record started elsewhere, xcrun simctl io recordVideo, or the Simulator's File > Record Screen), then start again.");
   }
   return new ToolError(said ? `The recording did not start: simctl says "${said}".` : "The recording did not start: simctl ended without saying why.");
+}
+
+/** A foldable's screen in use, as its engine names it (simctl needs --display on a phone with two screens). */
+async function displayInUse(device: Device): Promise<{ id: number; role: string } | undefined> {
+  if (!device.foldable) return undefined;
+  const screen = (await engineCall(device.udid, { op: "screen" }, 10_000))?.screen as { id?: number; role?: string } | undefined;
+  return typeof screen?.id === "number" ? { id: screen.id, role: screen.role ?? "" } : undefined;
 }
 
 // ---- On a NoMac phone ---------------------------------------------------------------------------------------
@@ -191,7 +198,9 @@ export const screenRecord: Tool = {
       const log = join(dir, "recording.log");
       const said = openSync(log, "w");
       let failed = "";
-      const child = spawn("xcrun", ["simctl", "io", device.udid, "recordVideo", "--codec=h264", "--force", file], { detached: true, stdio: ["ignore", "ignore", said] });
+      // simctl records one screen: on an iPhone Duo the one in use now (a fold later is not followed).
+      const display = await displayInUse(device);
+      const child = spawn("xcrun", ["simctl", "io", device.udid, "recordVideo", "--codec=h264", ...(display ? [`--display=${display.id}`] : []), "--force", file], { detached: true, stdio: ["ignore", "ignore", said] });
       closeSync(said);
       child.on("error", (error) => (failed = error.message));
       child.unref();
@@ -202,7 +211,8 @@ export const screenRecord: Tool = {
       const watchdog = spawn("sh", ["-c", `sleep ${MAX_SECONDS}; ps -p ${child.pid} -o command= | grep -q recordVideo && kill -INT ${child.pid}`], { detached: true, stdio: "ignore" });
       watchdog.unref();
       await writeFile(state, JSON.stringify({ pid: child.pid, file, started: Date.now(), watchdog: watchdog.pid } satisfies Recording));
-      return { text: `Recording ${device.name} (it stops by itself after ${MAX_SECONDS / 60} minutes). Do the work, then screen_record {action: "stop"} for the file.` };
+      const which = display ? `${device.name}'s ${display.role} screen (a fold is not followed)` : device.name;
+      return { text: `Recording ${which} (it stops by itself after ${MAX_SECONDS / 60} minutes). Do the work, then screen_record {action: "stop"} for the file.` };
     }
 
     if (current?.engine) {

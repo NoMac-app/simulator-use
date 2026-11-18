@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
+import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
 
 /**
@@ -159,6 +160,17 @@ export async function engineCall(udid: string, request: Record<string, unknown>,
   }
 }
 
+/**
+ * An input a foldable's engine refused because the screen in use changed while it was sent, or was changing (an
+ * iPhone Duo folding): what was not sent is never sent another way, and the agent reads the screen again first.
+ */
+export function screenRefusal(answer: Answer | undefined): ToolError | undefined {
+  if (answer?.code === "screen_changed") return new ToolError("The screen in use changed during the input (the phone folded), so the rest of it was not sent.", "Call ui_look to read the screen in use, then act again.");
+  if (answer?.code === "screen_changing") return new ToolError("The phone is folding, so the input was not sent.", "Call ui_look in a few seconds to read the screen in use, then act again.");
+  if (answer?.code === "screen_unknown") return new ToolError("Which screen is in use cannot be read (the phone's display report is not steady, as after a fold cut off midway), so the input was not sent.", "Call device_use with fold (closed, book or open) to settle it, then act again.");
+  return undefined;
+}
+
 /** Whether the phone has a working engine (one is started if needed): a request that sends input goes to it only then. */
 export async function hasEngine(udid: string): Promise<boolean> {
   return Boolean(await engineFor(udid));
@@ -182,6 +194,11 @@ let folder: string | undefined;
 function sessionFolder(): string {
   folder ??= process.env.TMPDIR || execFileSync("getconf", ["DARWIN_USER_TEMP_DIR"], { encoding: "utf8" }).trim() || tmpdir();
   return folder;
+}
+
+/** Lets the next call start an engine for this phone at once (it would not start, and what kept it from starting changed). */
+export function forgetUnavailable(udid: string): void {
+  unavailable.delete(udid);
 }
 
 /** Ends this process's engines (tests, and a phone that was shut down). */

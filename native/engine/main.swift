@@ -224,6 +224,15 @@ var readPathName: String { hookInstalled ? readPath.rawValue : "per-call" }
 /** The frontmost app's element. reload: load accessibility first (a read that came back empty, or failed). */
 @MainActor
 func frontmostElement(_ simulator: FBSimulator, reload: Bool) async throws -> FBAccessibilityElement {
+  // A foldable's screen in use, read by its display (the default query reads another screen). That read skips the
+  // framework's bootstrap, so the hook is asked first, as the framework would: the kept session, or a reload on it.
+  if let slot = foldSlot() {
+    if !skipBootstrap && (readPath == .session || reload) {
+      if reload { forceBootstrap = true }
+      try? FBSimulatorControlFrameworkLoader.bootstrapAccessibility(forSimulatorDevice: simulator.device, timeout: 10, logger: logger)
+    }
+    return try await simulator.accessibilityElementForFrontmostApplication(displayID: slot.id, displayContext: try displayContext(slot.geometry, id: slot.id))
+  }
   switch readPath {
   case .session:
     // The framework calls its bootstrap before the read; the hook answers it from the kept session.
@@ -236,6 +245,11 @@ func frontmostElement(_ simulator: FBSimulator, reload: Bool) async throws -> FB
 /** The element at a screen point, as frontmostElement. */
 @MainActor
 func pointElement(_ simulator: FBSimulator, _ point: CGPoint, reload: Bool = false) async throws -> FBAccessibilityElement {
+  // A foldable: the point on the screen in use's own (unturned) points, by its display.
+  if let slot = foldSlot() {
+    if reload { forceBootstrap = true }
+    return try await simulator.accessibilityElement(atNativePoint: slot.geometry.nativePoint(point), displayID: slot.id)
+  }
   switch readPath {
   case .session:
     if reload { forceBootstrap = true }
@@ -252,6 +266,7 @@ func objcCall(_ target: AnyObject, _ name: String) -> IMP? {
 var sessionTurnMs = 0, sessionRecoveries = 0
 /** The phone's XCTest daemons stopped inside it (launchd starts them again on the next request). */
 func restartTestDaemons() {
+  closeOnExecAll()
   for label in ["com.apple.testmanagerd", "com.apple.dt.automationmode-writer", "com.apple.dt.AutomationModeUI"] {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
@@ -600,7 +615,7 @@ let sessionBudget: TimeInterval = 100
 /** The lock for one open or close, waited for until the deadline; whether it was taken. */
 @discardableResult
 func lockSessionTurn(until deadline: DispatchTime) -> Bool {
-  if sessionLockFD < 0 { sessionLockFD = open(sessionLockPath(), O_CREAT | O_RDWR, 0o600) }
+  if sessionLockFD < 0 { sessionLockFD = open(sessionLockPath(), O_CREAT | O_RDWR | O_CLOEXEC, 0o600) }
   guard sessionLockFD >= 0 else { return true }
   while flock(sessionLockFD, LOCK_EX | LOCK_NB) != 0 {
     if DispatchTime.now() >= deadline { return false }
@@ -748,10 +763,17 @@ struct Placement: Equatable {
   var isIdentity: Bool { abs(x) < 1.5 && abs(y) < 1.5 && abs(scale - 1) < 0.01 }
   func rect(_ r: CGRect) -> CGRect { CGRect(x: x + r.minX * scale, y: y + r.minY * scale, width: r.width * scale, height: r.height * scale) }
 }
-/** The screen in points (the screen buffer's pixels over its scale), set at start. */
+/** The screen in use in points, as its interface is drawn (Screens.swift's activate sets these three). */
 var display = CGSize.zero
 /** Pixels per point of the screen buffer. */
 var pixelScale: CGFloat = 1
+/** The screen in use: its buffer's pixels, scale and the guest's turn of it. */
+var screenGeometry = ScreenGeometry(native: .zero, scale: 1, rotation: 0)
+/** A box of the screen buffer's pixels in the interface's points (turned with it on a foldable's turned screen). */
+func pointsBox(_ box: CGRect) -> CGRect {
+  screenGeometry.rotation == 0 ? CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale)
+    : screenGeometry.logicalRect(nativePixels: box)
+}
 /** The last measurement: the app (pid) whose root had this frame, where it was (nil: not found), and when. */
 var lastPlacement: (pid: Int, app: CGRect, placement: Placement?, at: Date)? = nil
 /** A window that could not be measured is not measured again for this long (each try costs about a second). */
@@ -862,9 +884,23 @@ func stillPlaced(_ simulator: FBSimulator, _ p: Placement, pid: Int, app: CGRect
   let m = p.rect(app)
   return intValue(await rawHit(simulator, Double(m.midX), Double(m.midY))?["pid"]) == pid
 }
+/**
+ * On a screen the guest turns (a Duo's inner screen), the app's root element reports the panel's own, unturned size
+ * (669x951 against the 951x669 its windows and every element below them use, measured on iOS 27.2): it fills the
+ * screen, and is given the screen's size as drawn.
+ */
+func turnedRoot(_ tree: Any) -> Any {
+  guard screenGeometry.turned, var roots = tree as? [[String: Any]], let root = roots.first, let app = frameOf(root),
+        abs(app.minX) < 1, abs(app.minY) < 1, abs(app.width - display.height) < 1, abs(app.height - display.width) < 1 else { return tree }
+  let drawn = CGRect(origin: .zero, size: display)
+  if root["frame"] != nil { roots[0]["frame"] = ["x": 0.0, "y": 0.0, "width": Double(drawn.width), "height": Double(drawn.height)] }
+  if root["AXFrame"] != nil { roots[0]["AXFrame"] = NSStringFromRect(drawn) }
+  return roots
+}
 /** The tree in screen points (see Placement). An app that fills the screen, as every app on an iPhone does, is as read. */
 @MainActor
-func onScreen(_ simulator: FBSimulator, _ tree: Any) async -> Any {
+func onScreen(_ simulator: FBSimulator, _ given: Any) async -> Any {
+  let tree = turnedRoot(given)
   guard var roots = tree as? [[String: Any]], let root = roots.first, let app = frameOf(root), let pid = intValue(root["pid"]), display.width > 0,
         !(abs(app.minX) < 1 && abs(app.minY) < 1 && abs(app.width - display.width) < 1 && abs(app.height - display.height) < 1) else { return tree }
   var placement: Placement? = nil
@@ -1036,6 +1072,21 @@ func remoteOptions(_ value: Any?) -> FBAccessibilityRemoteContentOptions? {
 }
 @MainActor
 func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool = true) async throws -> Any {
+  // A foldable whose screen in use changed while it was read: that read was of the screen that went dark, so the
+  // screen in use is read instead (twice at most).
+  for attempt in 0..<3 {
+    let seen = screens?.generation ?? 0
+    let tree = try await readFrontmostOnce(simulator, keys: keys, nested: nested)
+    guard let screens, screens.foldable, attempt < 2 else { return tree }
+    if screens.changing { await screens.waitUntilSteady() }
+    guard screens.generation != seen else { return tree }
+    screens.apply()
+    lastReadReport["screen_changed"] = true
+  }
+  return []
+}
+@MainActor
+func readFrontmostOnce(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool = true) async throws -> Any {
   var reloaded = false, reloadedAfterError = false
   lastSerializeMs = []
   for attempt in 0..<2 {
@@ -1072,17 +1123,27 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
   return []
 }
 /**
+ * A coordinate of an input request: in points (key), or as a fraction of the screen in use (nkey, 0 to 1, clamped),
+ * so a caller needs no size (the live view's taps).
+ */
+func coordinate(_ req: [String: Any], _ key: String, _ normalized: String, along size: CGFloat) -> Double {
+  if let n = number(req[normalized]) { return min(max(n, 0), 1) * Double(size) }
+  return number(req[key]) ?? 0
+}
+/**
  * An input as one HID event: {"op": "tap", x, y}, {"op": "swipe", x1, y1, x2, y2, delta, duration}, {"op": "drag",
  * x1, y1, x2, y2, duration, steps, hold}, or {"op": "steps", steps: [...]}, simulator-use's input batch as one
  * composite: [{"tap":[x,y]}, {"sleep":s}, {"key":code}, {"combo":{"mods":[codes],"key":code}}, {"type":"text"},
- * {"touch":[x,y],"hold":s}].
+ * {"touch":[x,y],"hold":s}]. tap takes nx, ny and swipe and drag nx1, ny1, nx2, ny2 instead: fractions of the screen
+ * in use (the ready line's "input": ["points", "normalized"]).
  */
 func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
+  let w = display.width, h = display.height
   switch req["op"] as? String ?? "" {
   case "tap":
-    return .tapAt(x: req["x"] as? Double ?? 0, y: req["y"] as? Double ?? 0)
+    return .tapAt(x: coordinate(req, "x", "nx", along: w), y: coordinate(req, "y", "ny", along: h))
   case "swipe":
-    let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
+    let x1 = coordinate(req, "x1", "nx1", along: w), y1 = coordinate(req, "y1", "ny1", along: h), x2 = coordinate(req, "x2", "nx2", along: w), y2 = coordinate(req, "y2", "ny2", along: h)
     return .swipe(x1, yStart: y1, xEnd: x2, yEnd: y2, delta: req["delta"] as? Double ?? 10, duration: req["duration"] as? Double ?? 0.3)
   case "drag":
     // A finger put down, moved in steps and lifted (sliders, reordering); a swipe is a quick drag. up: false leaves the
@@ -1090,7 +1151,7 @@ func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
     // by a finger held on it, moved while the slider is read (ui-act.ts). steps: 0 with down: false is the lift alone, an
     // up with no move before it: where no finger is down (a first move that never went out) it touches nothing, where a
     // move and an up would tap.
-    let x1 = req["x1"] as? Double ?? 0, y1 = req["y1"] as? Double ?? 0, x2 = req["x2"] as? Double ?? 0, y2 = req["y2"] as? Double ?? 0
+    let x1 = coordinate(req, "x1", "nx1", along: w), y1 = coordinate(req, "y1", "ny1", along: h), x2 = coordinate(req, "x2", "nx2", along: w), y2 = coordinate(req, "y2", "ny2", along: h)
     let down = req["down"] as? Bool ?? true
     let duration = req["duration"] as? Double ?? 0.6, n = max(down ? 1 : 0, Int(req["steps"] as? Double ?? 20))
     var events: [FBSimulatorHIDEvent] = down ? [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)] : []
@@ -1137,7 +1198,229 @@ func requestLines() -> AsyncStream<String> {
 }
 
 /** Requests that send input to the phone: after one, the kept read (Settle.swift) is the past. */
-let inputOps: Set<String> = ["tap", "swipe", "type", "steps", "drag", "lock", "home", "open_url", "tap_settle_describe", "tap_trace"]
+let inputOps: Set<String> = ["tap", "swipe", "type", "steps", "drag", "lock", "home", "open_url", "tap_settle_describe", "tap_trace", "hinge"]
+
+// MARK: Screens and input
+
+/** The phone's screens (Screens.swift), from the start: one on a phone, two on a foldable. */
+var screens: Screens!
+/** A foldable's screen in use (nil on a one-screen phone): reads and input go to it by its display. */
+@MainActor func foldSlot() -> ScreenSlot? { (screens?.foldable ?? false) ? screens.applied : nil }
+
+/** The measured context a screen-targeted touch connection and a read by display take. */
+func displayContext(_ g: ScreenGeometry, id: UInt32) throws -> FBSimulatorHIDDisplayContext {
+  let rotation: FBSimulatorHIDDisplayRotation = g.rotation == 90 ? .rot90 : g.rotation == 180 ? .rot180 : g.rotation == 270 ? .rot270 : .rot0
+  return try FBSimulatorHIDDisplayContext(hidTarget: UInt64(id), nativePixelSize: g.native, scale: Double(g.scale), rotation: rotation)
+}
+
+/** A one-screen phone's input (Input.swift): Indigo, and dtuhidd for keys while it runs. */
+var phoneInput: PhoneInput!
+/** A foldable: the screen an input request aims at, and the screens' generation when it started. */
+var inputAim: (slot: ScreenSlot, generation: Int)?
+/** Whether the request's input went out (a failure after it must not make the caller send it again). */
+var inputSent = false
+
+/** Every piece of an event in order, composites opened. */
+func primitives(_ event: FBSimulatorHIDEvent) -> [FBSimulatorHIDEvent] {
+  if case let .composite(events) = event { return events.flatMap(primitives) }
+  return [event]
+}
+
+/**
+ * A foldable's touch connection to one screen (AXe 2.0's DTUHID transport aimed at the screen: a tap in the
+ * interface's points, turned to the panel's own as the guest draws it), made once per screen and geometry and kept.
+ */
+@MainActor
+func touchConnection(_ slot: ScreenSlot) async throws -> FBSimulatorHID {
+  if let made = slot.hid, made.geometry == slot.geometry { return made.connection }
+  // One being made already (the warm-up at start or after a fold): that one.
+  if let making = slot.making, making.geometry == slot.geometry { return try await making.task.value }
+  slot.hid?.connection.disconnect()
+  slot.hid = nil
+  let geometry = slot.geometry
+  let task = Task { @MainActor in try await openTouchConnection(slot, geometry) }
+  slot.making = (geometry, task)
+  defer { if slot.making?.geometry == geometry { slot.making = nil } }
+  return try await task.value
+}
+
+/**
+ * Makes a screen's touch connection. Nothing is sent on it here: the guest serves a new connection when its first
+ * input arrives (measured by AXe 2.0 at under a second on a healthy phone), so the first input to each screen in an
+ * engine's life takes that long, and a guest that does not answer within the transport's own limit fails that input,
+ * said as such, its connection dropped for the next input to make a new one.
+ */
+@MainActor
+func openTouchConnection(_ slot: ScreenSlot, _ geometry: ScreenGeometry) async throws -> FBSimulatorHID {
+  let connection = try FBSimulatorHID(for: screens.simulator, displayContext: displayContext(geometry, id: slot.id))
+  if slot.geometry == geometry { slot.hid = (geometry, connection) }
+  return connection
+}
+
+/**
+ * Sends an input. A one-screen phone: by PhoneInput (Input.swift). A foldable: each piece to the screen the request
+ * aimed at, one at a time on that screen's kept dtuhidd connection (without AXe's drain after a gesture, as
+ * PhoneInput sends), checked before each that the screen in use is still that one; when it changed, the rest is
+ * refused (screen_changed) after a finger still down is lifted. Keys are paced as AXe paces them on this transport.
+ */
+@MainActor
+func send(_ event: FBSimulatorHIDEvent) async throws {
+  guard let aim = inputAim, screens.foldable else {
+    try await phoneInput.send(event)
+    inputSent = true
+    return
+  }
+  let connection = try await touchConnection(aim.slot)
+  // A connection that failed is closed for good (AXe's transport): the next input makes a new one.
+  do { try await sendPieces(event, aim, connection) } catch { if !(error is ScreenError) { aim.slot.hid?.connection.disconnect(); aim.slot.hid = nil }; throw error }
+}
+
+@MainActor
+func sendPieces(_ event: FBSimulatorHIDEvent, _ aim: (slot: ScreenSlot, generation: Int), _ connection: FBSimulatorHID) async throws {
+  let size = aim.slot.geometry.points
+  let clamp = { (x: Double, y: Double) in (min(max(x, 0), Double(size.width)), min(max(y, 0), Double(size.height))) }
+  var down: (Double, Double)? = nil
+  // Keys in a row (with the pauses between them) go as one input, paced as AXe paces keys on this transport
+  // (PhoneInput.pacedForDtuhid); anything else goes one piece at a time, the screen in use checked before each.
+  var runs: [(keys: Bool, pieces: [FBSimulatorHIDEvent])] = []
+  for piece in primitives(event) {
+    let isKey: Bool = { if case .keyboard = piece { return true }; if case .delay = piece { return runs.last?.keys == true }; return false }()
+    if runs.last?.keys == isKey && isKey { runs[runs.count - 1].pieces.append(piece) } else { runs.append((isKey, [piece])) }
+  }
+  for run in runs {
+    if case let .delay(seconds) = run.pieces[0], !run.keys {
+      try await Task.sleep(nanoseconds: UInt64(max(0, seconds) * 1_000_000_000))
+      continue
+    }
+    if let refusal = screens.inputAllowed(aimedAt: aim.slot, generation: aim.generation), refusal.code == "screen_changed" {
+      if let (x, y) = down { try? await FBSimulatorHIDEvent.touch(direction: .up, x: x, y: y).sendAsync(on: connection) }
+      throw refusal
+    }
+    // Handed to the transport, input may reach the phone even when its reply then fails: from here it counts as
+    // sent, so the caller never sends it again another way.
+    inputSent = true
+    if run.keys {
+      try await PhoneInput.pacedForDtuhid(.composite(run.pieces)).sendAsync(on: connection)
+      continue
+    }
+    switch run.pieces[0] {
+    case let .touch(direction, x, y):
+      let (cx, cy) = clamp(x, y)
+      try await FBSimulatorHIDEvent.touch(direction: direction, x: cx, y: cy).sendAsync(on: connection)
+      down = direction == .down ? (cx, cy) : nil
+    case let .twoFingerTouch(direction, a, b):
+      let (ax, ay) = clamp(Double(a.x), Double(a.y)), (bx, by) = clamp(Double(b.x), Double(b.y))
+      try await FBSimulatorHIDEvent.twoFingerTouch(direction: direction, finger1: CGPoint(x: ax, y: ay), finger2: CGPoint(x: bx, y: by)).sendAsync(on: connection)
+    default:
+      try await run.pieces[0].sendAsync(on: connection)
+    }
+  }
+}
+
+/** Something that happens once, and the waits for it (a stream's end). */
+@MainActor
+final class Once {
+  private var fired = false
+  private var waiting: [CheckedContinuation<Void, Never>] = []
+  nonisolated func fire() { Task { @MainActor in self.fireNow() } }
+  private func fireNow() { guard !fired else { return }; fired = true; for w in waiting { w.resume() }; waiting = [] }
+  func wait() async { if fired { return }; await withCheckedContinuation { waiting.append($0) } }
+}
+
+/**
+ * The highest QoS the engine's own work runs at: what it was started at (hostd may start an engine for the live view's
+ * stills at utility, which its main thread inherits), or --qos NAME (utility, background, ...), whichever is lower.
+ * The main thread takes it at start, and every queue the engine makes is made at most at it.
+ */
+let qosCeiling: qos_class_t = {
+  // Only a deliberately low start counts (utility or background); a process started the ordinary way runs at default.
+  let inherited = qos_class_self()
+  var ceiling = inherited.rawValue <= QOS_CLASS_UTILITY.rawValue && inherited != QOS_CLASS_UNSPECIFIED ? inherited : QOS_CLASS_USER_INTERACTIVE
+  if let i = args.firstIndex(of: "--qos"), i + 1 < args.count, let raw = qosNamed(args[i + 1]), raw < ceiling.rawValue { ceiling = qos_class_t(rawValue: raw) }
+  return ceiling
+}()
+/** A QoS for one of the engine's queues: the one wanted, or the ceiling when that is lower. */
+func capped(_ wanted: DispatchQoS.QoSClass) -> DispatchQoS {
+  let ceiling = DispatchQoS.QoSClass(rawValue: qosCeiling) ?? .utility
+  return DispatchQoS(qosClass: wanted.rawValue.rawValue > qosCeiling.rawValue ? ceiling : wanted, relativePriority: 0)
+}
+
+/** Stills (the still op): the counter the live view's still mode holds. */
+var stillTracker = StillTracker()
+
+/**
+ * {"op": "still", "since": N, "scale": 0..1, "quality": 0..1}: the screen in use as a JPEG, for a live view that
+ * cannot play H.264. seed is the engine's still counter, which moves whenever the screen in use, its turn, its buffer
+ * or anything written to the buffer changed; when it is since, the answer is {"unchanged": true, "seed"} and nothing is
+ * captured. The JPEG is the screen as drawn at scale (default 0.5), within stillMaxBytes (the quality halved until it
+ * fits).
+ */
+@MainActor
+func still(_ req: [String: Any], _ answer: inout [String: Any]) throws {
+  let slot = screens.applied
+  guard let surface = slot.watcher.currentSurface() else { throw EngineError(message: "the \(slot.role) screen has no picture yet") }
+  let seed = stillTracker.counter(for: StillKey(screen: slot.id, rotation: slot.geometry.rotation, surface: surfaceID(surface), seed: surfaceSeed(surface)))
+  answer["seed"] = seed
+  if let since = intValue(req["since"]), since == seed { answer["unchanged"] = true; return }
+  let scale = stillScale(number(req["scale"])), drawn = slot.geometry.drawnPixels
+  let size = CGSize(width: max(1, (drawn.width * scale).rounded()), height: max(1, (drawn.height * scale).rounded()))
+  let picture = try drawnPicture(surface, slot.geometry, size: size)
+  for quality in stillQualities(from: stillQuality(number(req["quality"]))) {
+    let jpg = try encodeImage(picture, as: .jpeg, quality: quality)
+    if jpg.count <= stillMaxBytes {
+      answer["jpeg_base64"] = jpg.base64EncodedString(); answer["bytes"] = jpg.count; answer["quality"] = quality
+      answer["width"] = picture.width; answer["height"] = picture.height
+      return
+    }
+  }
+  throw EngineError(message: "the still is larger than \(stillMaxBytes) bytes at the lowest quality: ask a smaller scale")
+}
+
+/**
+ * AXe 2.0's live freshness provider for the screen in use, kept for its motion feed: the count of hinge samples it
+ * received tells a stream the hinge moved. Made again for each screen in use (the provider is bound to one).
+ */
+final class MotionFollower: @unchecked Sendable {
+  private let lock = NSLock()
+  private var provider: FBSimulatorHIDNativeFreshnessProvider?
+  private var base: UInt64 = 0
+  /** Samples seen across every provider so far (a new provider counts from zero). */
+  func count() -> UInt64? {
+    lock.lock(); defer { lock.unlock() }
+    guard let provider else { return nil }
+    return base + provider.status().motionSampleCount
+  }
+  @MainActor
+  func follow(_ simulator: FBSimulator, _ slot: ScreenSlot) async {
+    guard let uuid = UUID(uuidString: slot.uniqueID) else { return }
+    let made = try? await FBSimulatorHIDNativeFreshnessProvider.start(for: simulator, screenID: slot.id, screenUniqueID: uuid)
+    replace(with: made)
+    screens.noteResolve(made == nil ? "motion feed not started for screen \(slot.id)" : "motion feed for screen \(slot.id)")
+  }
+  private func replace(with made: FBSimulatorHIDNativeFreshnessProvider?) {
+    lock.lock(); defer { lock.unlock() }
+    if let old = provider { base += old.status().motionSampleCount + 1; old.close() }
+    provider = made
+  }
+  func close() { replace(with: nil) }
+}
+
+/** Called before the engine exits on a signal (a recording's last frame and index). */
+var exitFinishers: [() -> Void] = []
+
+/**
+ * Every descriptor past stderr closed in any process the engine starts (the session's daemons restarted, a framework's
+ * helper): whatever the engine was handed or opened stays its own. Run at start and before each process it starts.
+ */
+func closeOnExecAll() {
+  let limit = min(Int(getdtablesize()), 4096)
+  for fd in 3..<Int32(limit) {
+    let flags = fcntl(fd, F_GETFD)
+    if flags >= 0 && flags & FD_CLOEXEC == 0 { _ = fcntl(fd, F_SETFD, flags | FD_CLOEXEC) }
+  }
+}
+/** The screen event the ready line stood for: a stream tells a change from it. */
+var readyEvent: String?
 
 @MainActor
 func main() async {
@@ -1153,57 +1436,88 @@ func main() async {
     // never reads (--no-bootstrap: the live view's).
     if !skipBootstrap { switchAccessibilityOn(device: simulator.device) }
     let loaded = ms(started)
-    let hidStart = Date()
-    // How input goes is chosen before each input, not once by AXe's connectToHID (Input.swift).
-    let input = PhoneInput(simulator, choice: PhoneInput.choiceFromArguments(), logger: logger)
-    try await input.start()
-    let hidMs = ms(hidStart)
-    let watcher = DamageWatcher()
-    screenWatcher = watcher
-    let fbStart = Date()
-    let framebuffer: FBFramebuffer? = try? await withCheckedThrowingContinuation { (cont: CheckedContinuation<FBFramebuffer, Error>) in
-      DispatchQueue.global().async { do { cont.resume(returning: try simulator.connectToFramebuffer().block()) } catch { cont.resume(throwing: error) } }
+    // A foldable (the device type declares two integrated touch screens and a hinge) is followed screen by screen;
+    // any other phone exactly as before.
+    let capability = try? FBSimulatorNativeContextReader.capability(for: simulator)
+    let foldIDs = capability?.hinge == .supported ? (capability?.integratedDigitizerIDs ?? []) : []
+    // The main thread at the QoS ceiling (--qos lower than what the engine was started at).
+    if qosCeiling.rawValue < qos_class_self().rawValue { pthread_set_qos_class_self_np(qosCeiling, 0) }
+    var ready: [String: Any] = ["ready": true, "load_ms": loaded, "name": simulator.name, "reads": readPathName, "input": ["points", "normalized"],
+                                "stills": ["since"], "qos": qosCeiling == QOS_CLASS_USER_INTERACTIVE ? "unbounded" : String(format: "0x%x", qosCeiling.rawValue)]
+    if foldIDs.count >= 2 {
+      let screensStart = Date()
+      screens = try await Screens.foldable(simulator, ids: foldIDs)
+      ready["screens_ms"] = ms(screensStart); ready["hid"] = "dtuhid"; ready["foldable"] = true
+      ready["surface"] = screens.applied.watcher.currentSurface() != nil
+    } else {
+      let hidStart = Date()
+      // How input goes is chosen before each input, not once by AXe's connectToHID (Input.swift).
+      phoneInput = PhoneInput(simulator, choice: PhoneInput.choiceFromArguments(), logger: logger)
+      try await phoneInput.start()
+      ready["hid_ms"] = ms(hidStart)
+      for (key, value) in phoneInput.describe() { ready[key] = value }
+      let watcher = DamageWatcher()
+      let fbStart = Date()
+      let framebuffer: FBFramebuffer? = try? await withCheckedThrowingContinuation { (cont: CheckedContinuation<FBFramebuffer, Error>) in
+        DispatchQueue.global().async { do { cont.resume(returning: try simulator.connectToFramebuffer().block()) } catch { cont.resume(throwing: error) } }
+      }
+      let surface = framebuffer?.attach(watcher, on: DispatchQueue(label: "damage", qos: capped(.default)))
+      watcher.surface = surface
+      ready["framebuffer_ms"] = ms(fbStart); ready["framebuffer"] = framebuffer != nil; ready["surface"] = surface != nil
+      // The screen in pixels and its scale (points = pixels / scale), so a live view maps a click to a tap.
+      var native = CGSize.zero, scale: CGFloat = 1
+      if let surface {
+        let ref = unsafeBitCast(surface, to: IOSurfaceRef.self)
+        native = CGSize(width: IOSurfaceGetWidth(ref), height: IOSurfaceGetHeight(ref))
+      }
+      if let s = (simulator as AnyObject).value(forKeyPath: "device.deviceType.mainScreenScale") as? NSNumber, s.doubleValue > 0 { scale = CGFloat(s.doubleValue) }
+      let slot = ScreenSlot(id: capability?.integratedDigitizerIDs.first ?? 1, uniqueID: "", role: "main", geometry: ScreenGeometry(native: native, scale: scale, rotation: 0), watcher: watcher)
+      screens = Screens(simulator: simulator, single: slot)
+      activate(slot)
     }
-    let surface = framebuffer?.attach(watcher, on: DispatchQueue(label: "damage"))
-    watcher.surface = surface
-
-    // The screen in pixels and its scale (points = pixels / scale), so a live view maps a click to a tap.
-    var screen: [String: Any] = [:]
-    if let surface {
-      let ref = unsafeBitCast(surface, to: IOSurfaceRef.self)
-      screen["width"] = IOSurfaceGetWidth(ref); screen["height"] = IOSurfaceGetHeight(ref)
-    }
-    if let scale = (simulator as AnyObject).value(forKeyPath: "device.deviceType.mainScreenScale") as? NSNumber { screen["scale"] = scale.doubleValue }
-    if let w = screen["width"] as? Int, let h = screen["height"] as? Int, let scale = screen["scale"] as? Double, scale > 0 { display = CGSize(width: Double(w) / scale, height: Double(h) / scale); pixelScale = scale }
-    // The seed clock: when the screen last changed, known at any moment (a seed read every 8 ms costs nothing). Started
-    // once the screen's scale is known: it tells a caret's blink by its size in points.
-    let seedClock = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "seed", qos: .utility))
+    // The seed clock: when the screen in use last changed, known at any moment (a seed read every 8 ms costs nothing).
+    // Started once the screen's scale is known: it tells a caret's blink by its size in points.
+    let seedClock = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "seed", qos: capped(.utility)))
     seedClock.schedule(deadline: .now(), repeating: .milliseconds(8), leeway: .milliseconds(2))
-    let clock = WriteClock()
-    writeClock = clock
-    seedClock.setEventHandler { watcher.pollSeed(); clock.tick(watcher.currentSurface()) }
+    seedClock.setEventHandler { if let slot = activeWatcherBox.slot { slot.watcher.pollSeed(); slot.clock.tick(slot.watcher.currentSurface()) } }
     seedClock.resume()
     seedClocks.append(seedClock)
-    var ready: [String: Any] = ["ready": true, "load_ms": loaded, "hid_ms": hidMs, "framebuffer_ms": ms(fbStart), "framebuffer": framebuffer != nil, "surface": surface != nil,
-                                "name": simulator.name, "screen": screen, "reads": readPathName]
-    for (key, value) in input.describe() { ready[key] = value }
+    for (key, value) in screens.answerFields() { ready[key] = value }
+    readyEvent = screens.applied.eventLine(posture: screens.posture)
+    closeOnExecAll()
     emit(ready)
 
     for sig in [SIGTERM, SIGINT, SIGHUP] {
       signal(sig, SIG_IGN)
       let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
-      source.setEventHandler { closeSession(); exit(0) }
+      source.setEventHandler { for finish in exitFinishers { finish() }; closeSession(); exit(0) }
       source.resume(); signalSources.append(source)
     }
     for await line in requestLines() {
       let t0 = Date()
       guard let data = line.data(using: .utf8), let req = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let op = req["op"] as? String else { emit(["ok": false, "error": "bad request"]); continue }
       let id = req["id"] ?? NSNull()
-      if inputOps.contains(op) || (op == "watch" && req["tap"] != nil) { keptRead = nil }
-      input.beginRequest()
+      let clearsKept = inputOps.contains(op) || (op == "watch" && req["tap"] != nil)
+      if clearsKept { keptRead = nil }
+      // settle_read keeps the kept read for its baseline (Settle.swift) and lets it go itself.
+      let sendsInput = clearsKept || (op == "settle_read" && req["input"] != nil)
+      phoneInput?.beginRequest()
       // settle_read's input went out: a failure after it (the read) must not be answered by sending it again.
-      var inputSent = false
+      inputSent = false
+      inputAim = nil
       do {
+        // A foldable: the screen in use as last read becomes the engine's; an input waits (up to 3 s) for a change
+        // in progress to finish, and is aimed at the screen in use then.
+        if screens.foldable {
+          if sendsInput && op != "hinge" {
+            await screens.waitUntilSteady()
+            if screens.changing { throw ScreenError(code: "screen_changing", message: "The screens are still changing (a fold): nothing was sent. Read the screen again in a moment.") }
+            if let refusal = screens.inputAllowed(aimedAt: screens.applied, generation: screens.generation) { throw refusal }
+            inputAim = (screens.applied, screens.generation)
+          } else {
+            screens.apply()
+          }
+        }
         var answer: [String: Any] = ["id": id, "ok": true]
         switch op {
         case "methods":
@@ -1218,6 +1532,32 @@ func main() async {
           answer["instance"] = list(cls)
           if let meta = object_getClass(cls) { answer["class_methods"] = list(meta) }
           answer["superclass"] = class_getSuperclass(cls).map { NSStringFromClass($0) } ?? ""
+        case "screen":
+          // The screen in use (every answer carries it; this one does nothing else).
+          break
+        case "still":
+          try still(req, &answer)
+        case "screens":
+          // Every screen, the one in use as last read from the phone, and what the callbacks said (diagnostics).
+          if screens.foldable { await screens.refreshNow(hinge: true); screens.apply() }
+          answer["screens"] = screens.slots.map { slot -> [String: Any] in
+            var s = slot.json
+            s["native"] = [Int(slot.geometry.native.width), Int(slot.geometry.native.height)]; s["rotation"] = slot.geometry.rotation
+            if let surface = slot.watcher.currentSurface() {
+              let ref = unsafeBitCast(surface, to: IOSurfaceRef.self)
+              s["surface"] = [IOSurfaceGetWidth(ref), IOSurfaceGetHeight(ref), Int(IOSurfaceGetPixelFormat(ref)), Int(IOSurfaceGetSeed(ref))]
+            }
+            return s
+          }
+          answer["foldable"] = screens.foldable; answer["generation"] = screens.generation; answer["changing"] = screens.changing
+          // The host's own view of each screen (CoreSimulator's properties), beside the guest's report above.
+          if let host = try? await FBSimulatorDisplayDiscovery.displays(for: simulator) {
+            answer["host"] = host.map { ["id": Int($0.screenID), "power": Int($0.rawPowerState), "backlight": $0.rawBacklightState.map { Int($0) } ?? -1, "brightness": $0.backlightBrightnessFactor ?? -1, "orientation": Int($0.rawUIOrientation)] as [String: Any] }
+          }
+          answer["resolved"] = screens.lastResolve; answer["callbacks"] = screens.callbackCounts; answer["log"] = screens.callbackLog
+          answer["touch_connections"] = screens.slots.filter { $0.hid != nil }.map { Int($0.id) }
+        case "hinge":
+          try await fold(simulator, req, &answer)
         case "describe":
           var keys = outputKeys
           if let names = req["keys"] as? [String] {
@@ -1249,7 +1589,7 @@ func main() async {
           if sessionRecoveries > 0 { answer["session_recoveries"] = sessionRecoveries }
           for (key, value) in lastReadReport { answer[key] = value }
         case "point":
-          let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
+          let x = coordinate(req, "x", "nx", along: display.width), y = coordinate(req, "y", "ny", along: display.height)
           for attempt in 0..<2 {
             do {
               let element = try await pointElement(simulator, CGPoint(x: x, y: y), reload: attempt > 0)
@@ -1263,29 +1603,29 @@ func main() async {
             }
           }
         case "tap", "swipe":
-          var request = req; request["op"] = op
-          try await input.send(try inputEvent(request))
+          var input = req; input["op"] = op
+          try await send(try inputEvent(input))
         case "type":
           let text = req["text"] as? String ?? ""
-          try await input.send(.composite(try TextToHIDEvents.convertTextToHIDEvents(text)))
+          try await send(.composite(try TextToHIDEvents.convertTextToHIDEvents(text)))
         case "steps", "drag":
-          try await input.send(try inputEvent(req))
+          try await send(try inputEvent(req))
         case "lock":
-          try await input.send(.shortButtonPress(.lock))
+          try await send(.shortButtonPress(.lock))
         case "open_url":
           // The link comes on the engine's input, never in an argument (simctl openurl's), which every user of a Mac can read.
           guard let text = req["url"] as? String, let url = URL(string: text), url.scheme != nil else { throw EngineError(message: "url: a link with a scheme") }
           let target = simulator
           try await blocking { _ = try target.open(url).block() }
         case "settle":
-          let (waited, updates, settled) = await settle(watcher, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 0)
+          let (waited, updates, settled) = await settle(screenWatcher!, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 0)
           answer["waited_ms"] = waited; answer["updates"] = updates; answer["settled"] = settled
         case "settle_read":
           // An input (optional), the wait until the screen holds still, and the read: one request (Settle.swift).
           let event = try (req["input"] as? [String: Any]).map(inputEvent)
           lastReadReport = [:]
           lastSerializeMs = []
-          let result = try await settleRead(simulator, input: event.map { e in { try await input.send(e); inputSent = true } },
+          let result = try await settleRead(simulator, input: event.map { e in { try await send(e) } },
             firstChangeMs: req["first_change_ms"] as? Double ?? 800, quietMs: req["quiet_ms"] as? Double ?? 150, startMs: req["start_ms"] as? Double ?? 50,
             guardMs: req["guard_ms"] as? Double ?? 35, timeoutMs: req["timeout_ms"] as? Double ?? 4000, keys: (req["lean"] as? Bool) == true ? leanKeys : outputKeys,
             fromKept: (req["baseline"] as? String) == "kept")
@@ -1293,10 +1633,10 @@ func main() async {
           if let scan = lastReadReport["web_scan"] { answer["web_scan"] = scan }
         case "tap_settle_describe":
           // One call for an act: the tap, the wait until the screen stops changing, then the new tree.
-          let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0
+          let x = coordinate(req, "x", "nx", along: display.width), y = coordinate(req, "y", "ny", along: display.height)
           lastReadReport = [:]
-          try await input.send(.tapAt(x: x, y: y))
-          let (waited, updates, settled) = await settle(watcher, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 800)
+          try await send(.tapAt(x: x, y: y))
+          let (waited, updates, settled) = await settle(screenWatcher!, quietMs: req["quiet_ms"] as? Double ?? 150, timeoutMs: req["timeout_ms"] as? Double ?? 4000, firstChangeMs: req["first_change_ms"] as? Double ?? 800)
           let readStart = Date()
           // An app still launching reads as an application with nothing in it: wait for content, up to 3 s.
           var tree: Any = []; var reads = 0
@@ -1306,7 +1646,7 @@ func main() async {
             // The screen moved but reads as before: the change (an app opening) is not in the tree yet.
             let unchanged = updates > 0 && signature(tree) == before
             if (!isEmptyApp(tree) && !unchanged) || Date().timeIntervalSince(readStart) > 2.5 { break }
-            _ = await settle(watcher, quietMs: 150, timeoutMs: 1000, firstChangeMs: 0)
+            _ = await settle(screenWatcher!, quietMs: 150, timeoutMs: 1000, firstChangeMs: 0)
           }
           answer["tree"] = tree; answer["settle_ms"] = waited; answer["updates"] = updates; answer["settled"] = settled; answer["read_ms"] = ms(readStart); answer["reads"] = reads
           if let scan = lastReadReport["web_scan"] { answer["web_scan"] = scan }
@@ -1315,11 +1655,11 @@ func main() async {
           // around what changed since the frame before; [ms] alone: the seed moved but no pixel did). An optional
           // tap [x, y] first.
           let windowMs = req["window_ms"] as? Double ?? 2000
-          guard let surface = watcher.currentSurface() else { throw EngineError(message: "no screen buffer") }
+          guard let watcher = screenWatcher, let surface = watcher.currentSurface() else { throw EngineError(message: "no screen buffer") }
           let reference = PixelReference()
           guard reference.capture(surface) else { throw EngineError(message: "the screen buffer can't be read") }
           var lastSeed = reference.seed
-          if let p = req["tap"] as? [Double], p.count == 2 { try await input.send(.tapAt(x: p[0], y: p[1])) }
+          if let p = req["tap"] as? [Double], p.count == 2 { try await send(.tapAt(x: p[0], y: p[1])) }
           let start = Date(); var changes: [[Double]] = []; var diffMs = 0.0, diffs = 0
           while Date().timeIntervalSince(start) * 1000 < windowMs {
             try? await Task.sleep(nanoseconds: 4_000_000)
@@ -1329,14 +1669,17 @@ func main() async {
             let (readable, box) = reference.diff(surface, update: true)
             diffMs += Date().timeIntervalSince(d0) * 1000; diffs += 1
             if !readable { changes.append([at, -1]); _ = reference.capture(surface); continue }
-            if let box { changes.append([at] + rectArray(CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale))) }
+            if let box { changes.append([at] + rectArray(pointsBox(box))) }
             else { changes.append([at]) }
           }
           answer["changes"] = changes; answer["diff_ms_avg"] = diffs > 0 ? diffMs / Double(diffs) : 0
         case "tap_trace":
           // When the screen changes after a tap: one timestamp (ms after the tap) per surface change.
-          let x = req["x"] as? Double ?? 0, y = req["y"] as? Double ?? 0, windowMs = req["window_ms"] as? Double ?? 3000
-          try await input.send(.tapAt(x: x, y: y))
+          let x = coordinate(req, "x", "nx", along: display.width), y = coordinate(req, "y", "ny", along: display.height), windowMs = req["window_ms"] as? Double ?? 3000
+          guard let watcher = screenWatcher else { throw EngineError(message: "no screen buffer") }
+          let sendStart = Date()
+          try await send(.tapAt(x: x, y: y))
+          answer["send_ms"] = Date().timeIntervalSince(sendStart) * 1000
           let start = Date(); var changes: [Int] = []; var last = watcher.snapshot().1
           while Date().timeIntervalSince(start) * 1000 < windowMs {
             try? await Task.sleep(nanoseconds: 5_000_000); watcher.pollSeed()
@@ -1346,86 +1689,275 @@ func main() async {
         case "home":
           // A press, held briefly; if the screen did not change, once more (a press during an app's launch is dropped).
           // With "wait": false only the press (the caller waits for the screen itself).
+          let press = FBSimulatorHIDEvent.composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)])
           for attempt in 0..<((req["wait"] as? Bool) == false ? 1 : 2) {
             if (req["wait"] as? Bool) == false {
-              try await input.send(.composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]))
+              try await send(press)
               break
             }
-            try await input.send(.composite([.button(direction: .down, button: .homeButton), .delay(0.06), .button(direction: .up, button: .homeButton)]))
-            let (_, updates, _) = await settle(watcher, quietMs: 150, timeoutMs: 3000, firstChangeMs: 600)
+            try await send(press)
+            let (_, updates, _) = await settle(screenWatcher!, quietMs: 150, timeoutMs: 3000, firstChangeMs: 600)
             answer["attempts"] = attempt + 1; answer["updates"] = updates
             if updates > 0 { break }
           }
         case "screenshot":
-          let png = try await simulator.takeScreenshot(format: .png)
-          let shotMs = ms(t0)
-          // The screen at full size to a file (png_path), alone or beside the JPEG.
-          if let file = req["png_path"] as? String {
-            let opaque = try opaquePNG(png)
-            try opaque.write(to: URL(fileURLWithPath: file))
-            answer["png_bytes"] = opaque.count
-          }
-          if (req["format"] as? String) == "png" { answer["bytes"] = png.count }
-          else if req["png_path"] == nil || req["path"] != nil || req["inline"] as? Bool == true {
-            var size: (Double, Double)? = nil
-            if let w = req["width"] as? Double, let h = req["height"] as? Double { size = (w, h) }
-            let jpg = try jpeg(fromPNG: png, maxPoints: size, quality: req["quality"] as? Double ?? 0.7)
-            answer["bytes"] = jpg.count
-            if req["path"] as? String != nil { try jpg.write(to: URL(fileURLWithPath: req["path"] as! String)) }
-            if req["inline"] as? Bool == true { answer["jpeg_base64"] = jpg.base64EncodedString() }
-          }
-          answer["capture_ms"] = shotMs
+          try await screenshot(simulator, req, t0, &answer)
         case "stream":
-          // Hardware-encoded video of the screen for N seconds into a file, or into a descriptor the parent holds
-          // (fd; the live view's pipe, the engine's stdout once it said ready). seconds 0: until the reader goes or
-          // the engine is ended (a write to a closed pipe ends it).
-          let seconds = req["seconds"] as? Double ?? 10, fps = req["fps"] as? Double ?? 30
-          let codec: FBVideoStreamCodec = (req["codec"] as? String) == "hevc" ? .hevc : .h264
-          let transportName = req["transport"] as? String ?? "annexb"
-          let transport: FBVideoStreamTransport = transportName == "fmp4" ? .fmp4 : (transportName == "mpegts" ? .mpegts : .annexB)
-          let config = FBVideoStreamConfiguration(format: .compressedVideo(withCodec: codec, transport: transport), framesPerSecond: NSNumber(value: fps),
-            rateControl: .bitrate(NSNumber(value: req["bitrate"] as? Double ?? 2_000_000)), scaleFactor: NSNumber(value: req["scale"] as? Double ?? 0.5), keyFrameRate: NSNumber(value: req["keyframe_s"] as? Double ?? 2))
-          let stream = try await simulator.createStream(configuration: config)
-          let fh: FileHandle
-          if let fd = req["fd"] as? Int {
-            guard fd >= 1, fcntl(Int32(fd), F_GETFD) != -1 else { throw EngineError(message: "fd \(fd) is not open") }
-            fh = FileHandle(fileDescriptor: Int32(fd), closeOnDealloc: false)
-          } else {
-            let path = req["path"] as? String ?? "/tmp/sue-stream.bin"
-            FileManager.default.createFile(atPath: path, contents: nil)
-            guard let file = FileHandle(forWritingAtPath: path) else { throw EngineError(message: "cannot write \(path)") }
-            fh = file
-          }
-          let counter = StreamCounter(start: t0)
-          let consumer = FBBlockDataConsumer.synchronousDataConsumer { data in fh.write(data); counter.add(data.count) }
-          _ = cpuMs()
-          try await blocking { try stream.startStreaming(consumer).block() }
-          if seconds <= 0 { while true { try await Task.sleep(nanoseconds: 3_600_000_000_000) } }
-          try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-          try await blocking { try stream.stopStreaming().block() }
-          fh.closeFile()
-          answer["bytes"] = counter.bytes; answer["chunks"] = counter.chunks; answer["first_chunk_ms"] = counter.first
-          answer["kbit_s"] = Int(Double(counter.bytes) * 8 / 1000 / seconds); answer["engine_cpu_pct"] = Int(Double(cpuMs()) / (seconds * 10))
+          if screens.foldable { try await streamScreens(req, t0, &answer) } else { try await streamMain(simulator, req, t0, &answer) }
         default:
           throw EngineError(message: "unknown op \(op)")
         }
-        for (key, value) in input.report() { answer[key] = value }
+        for (key, value) in phoneInput?.report() ?? [:] { answer[key] = value }
         answer["ms"] = ms(t0); answer["bootstraps"] = bootstrapCount; answer["sessions"] = sessionsOpened
+        for (key, value) in screens.answerFields() where answer[key] == nil { answer[key] = value }
         if let failure = lastBootstrapError { answer["bootstrap_error"] = failure; lastBootstrapError = nil }
         emit(answer)
       } catch {
         // input_sent: any of the request's input may have reached the phone; it must not be sent again another way.
-        var failed: [String: Any] = ["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? String(describing: error), "input_sent": inputSent || input.sent]
-        for (key, value) in input.report() { failed[key] = value }
+        var failed: [String: Any] = ["id": id, "ok": false, "ms": ms(t0), "error": (error as? EngineError)?.message ?? (error as? ScreenError)?.message ?? String(describing: error), "input_sent": inputSent || (phoneInput?.sent ?? false)]
+        if let typed = error as? ScreenError { failed["code"] = typed.code }
+        for (key, value) in screens?.answerFields() ?? [:] { failed[key] = value }
+        for (key, value) in phoneInput?.report() ?? [:] { failed[key] = value }
         emit(failed)
       }
     }
+    for finish in exitFinishers { finish() }
     closeSession()
     exit(0)
   } catch {
     emit(["ready": false, "error": (error as? EngineError)?.message ?? String(describing: error)])
     exit(1)
   }
+}
+
+// MARK: Screenshots
+
+/** The screen in use: a PNG at its full size to png_path, and or a JPEG sized to points (width, height) inline or to path. */
+@MainActor
+func screenshot(_ simulator: FBSimulator, _ req: [String: Any], _ t0: Date, _ answer: inout [String: Any]) async throws {
+  var size: (Double, Double)? = nil
+  if let w = req["width"] as? Double, let h = req["height"] as? Double { size = (w, h) }
+  if let slot = foldSlot() {
+    // A foldable: the screen in use's own buffer, turned as drawn; no other process.
+    guard let surface = slot.watcher.currentSurface() else { throw EngineError(message: "the \(slot.role) screen has no picture yet") }
+    let full = try drawnPicture(surface, slot.geometry)
+    answer["capture_ms"] = ms(t0)
+    if let file = req["png_path"] as? String {
+      let png = try encodeImage(full, as: .png)
+      try png.write(to: URL(fileURLWithPath: file))
+      answer["png_bytes"] = png.count
+    }
+    if (req["format"] as? String) == "png" { answer["bytes"] = try encodeImage(full, as: .png).count }
+    else if req["png_path"] == nil || req["path"] != nil || req["inline"] as? Bool == true {
+      let picture = size.map { s in (try? drawnPicture(surface, slot.geometry, size: CGSize(width: s.0, height: s.1))) ?? full } ?? full
+      let jpg = try encodeImage(picture, as: .jpeg, quality: req["quality"] as? Double ?? 0.7)
+      answer["bytes"] = jpg.count
+      if let path = req["path"] as? String { try jpg.write(to: URL(fileURLWithPath: path)) }
+      if req["inline"] as? Bool == true { answer["jpeg_base64"] = jpg.base64EncodedString() }
+    }
+    answer["width"] = full.width; answer["height"] = full.height
+    return
+  }
+  let png = try await simulator.takeScreenshot(format: .png)
+  let shotMs = ms(t0)
+  // The screen at full size to a file (png_path), alone or beside the JPEG.
+  if let file = req["png_path"] as? String {
+    let opaque = try opaquePNG(png)
+    try opaque.write(to: URL(fileURLWithPath: file))
+    answer["png_bytes"] = opaque.count
+  }
+  if (req["format"] as? String) == "png" { answer["bytes"] = png.count }
+  else if req["png_path"] == nil || req["path"] != nil || req["inline"] as? Bool == true {
+    let jpg = try jpeg(fromPNG: png, maxPoints: size, quality: req["quality"] as? Double ?? 0.7)
+    answer["bytes"] = jpg.count
+    if req["path"] as? String != nil { try jpg.write(to: URL(fileURLWithPath: req["path"] as! String)) }
+    if req["inline"] as? Bool == true { answer["jpeg_base64"] = jpg.base64EncodedString() }
+  }
+  answer["capture_ms"] = shotMs
+}
+
+// MARK: Streams
+
+/** Where a stream goes: a descriptor the parent holds (fd; the live view's pipe), or a file (path). */
+func streamOutput(_ req: [String: Any]) throws -> FileHandle {
+  if let fd = req["fd"] as? Int {
+    guard fd >= 1, fcntl(Int32(fd), F_GETFD) != -1 else { throw EngineError(message: "fd \(fd) is not open") }
+    return FileHandle(fileDescriptor: Int32(fd), closeOnDealloc: false)
+  }
+  let path = req["path"] as? String ?? "/tmp/sue-stream.bin"
+  FileManager.default.createFile(atPath: path, contents: nil)
+  guard let file = FileHandle(forWritingAtPath: path) else { throw EngineError(message: "cannot write \(path)") }
+  _ = fcntl(file.fileDescriptor, F_SETFD, FD_CLOEXEC)
+  return file
+}
+
+/**
+ * Hardware-encoded video of the screen for N seconds into a file, or into a descriptor the parent holds (fd; the live
+ * view's pipe, the engine's stdout once it said ready). seconds 0: until the reader goes or the engine is ended (a
+ * write to a closed pipe ends it). A one-screen phone: FBSimulatorControl's stream of its screen, as always.
+ */
+@MainActor
+func streamMain(_ simulator: FBSimulator, _ req: [String: Any], _ t0: Date, _ answer: inout [String: Any]) async throws {
+  let seconds = req["seconds"] as? Double ?? 10, fps = req["fps"] as? Double ?? 30
+  let codec: FBVideoStreamCodec = (req["codec"] as? String) == "hevc" ? .hevc : .h264
+  let transportName = req["transport"] as? String ?? "annexb"
+  let transport: FBVideoStreamTransport = transportName == "fmp4" ? .fmp4 : (transportName == "mpegts" ? .mpegts : .annexB)
+  let config = FBVideoStreamConfiguration(format: .compressedVideo(withCodec: codec, transport: transport), framesPerSecond: NSNumber(value: fps),
+    rateControl: .bitrate(NSNumber(value: req["bitrate"] as? Double ?? 2_000_000)), scaleFactor: NSNumber(value: req["scale"] as? Double ?? 0.5), keyFrameRate: NSNumber(value: req["keyframe_s"] as? Double ?? 2))
+  let stream = try await simulator.createStream(configuration: config)
+  let fh = try streamOutput(req)
+  let counter = StreamCounter(start: t0)
+  let consumer = FBBlockDataConsumer.synchronousDataConsumer { data in fh.write(data); counter.add(data.count) }
+  _ = cpuMs()
+  try await blocking { try stream.startStreaming(consumer).block() }
+  if seconds <= 0 { while true { try await Task.sleep(nanoseconds: 3_600_000_000_000) } }
+  try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+  try await blocking { try stream.stopStreaming().block() }
+  fh.closeFile()
+  answer["bytes"] = counter.bytes; answer["chunks"] = counter.chunks; answer["first_chunk_ms"] = counter.first
+  answer["kbit_s"] = Int(Double(counter.bytes) * 8 / 1000 / seconds); answer["engine_cpu_pct"] = Int(Double(cpuMs()) / (seconds * 10))
+}
+
+/**
+ * A foldable's stream (Video.swift): H.264 of the screen in use, Annex B or fragmented MP4. Annex B (the live view)
+ * follows the screen in use, its encoder restarted at each change, and tells each screen on fd 3 when that is open;
+ * fragmented MP4 (a recording) is drawn on a canvas that holds every screen (canvas: true or false overrides).
+ */
+@MainActor
+func streamScreens(_ req: [String: Any], _ t0: Date, _ answer: inout [String: Any]) async throws {
+  let seconds = req["seconds"] as? Double ?? 10, fps = req["fps"] as? Double ?? 30
+  guard (req["codec"] as? String ?? "h264") == "h264" else { throw EngineError(message: "a foldable's stream is H.264 only") }
+  let transport = req["transport"] as? String ?? "annexb"
+  guard transport == "annexb" || transport == "fmp4" else { throw EngineError(message: "a foldable's stream is Annex B or fragmented MP4") }
+  let scale = CGFloat(req["scale"] as? Double ?? 0.5)
+  let canvasMode = (req["canvas"] as? Bool) ?? (transport == "fmp4")
+  let fh = try streamOutput(req)
+  let counter = StreamCounter(start: t0)
+  let mp4 = transport == "fmp4" ? FragmentedMP4(file: fh) : nil
+  let canvas = canvasMode ? recordingCanvas(screens.slots.map(\.geometry), scale: scale, turns: true) : nil
+  let stream = ScreenStream(qos: capped(.userInteractive), fps: fps, bitrate: req["bitrate"] as? Double ?? 2_000_000, keyframeSeconds: req["keyframe_s"] as? Double ?? 2, scale: scale, canvas: canvas,
+    sink: { sample in
+      if let mp4 { mp4.add(sample); counter.add(mp4.bytes - counter.bytes) }
+      else if let data = annexB(sample) { fh.write(data); counter.add(data.count) }
+    },
+    announce: { line in writeEvent(line) })
+  // A line only when the screen in use or the posture changes from what the ready line said.
+  stream.told = readyEvent
+  stream.target.set(screens.applied, line: screens.applied.eventLine(posture: screens.posture))
+  screens.onChange.append { [weak stream] slot in stream?.target.set(slot, line: slot.eventLine(posture: screens.posture)) }
+  screens.onPosture.append { [weak stream] in stream?.target.set(screens.applied, line: screens.applied.eventLine(posture: screens.posture)) }
+  // The stream follows the screen in use: each change the screens' callbacks set off becomes the engine's at once.
+  screens.follows = true
+  screens.apply()
+  // The posture between open and book changes no screen and calls back for none (measured): a live view's stream
+  // follows the hinge itself through AXe 2.0's motion feed (its live freshness provider, a subscription to the hinge's
+  // samples), read on each tick, the hinge read again when it moved.
+  let motion = MotionFollower()
+  if screens.foldable && !canvasMode {
+    stream.motionCount = { motion.count() }
+    stream.onMotion = { Task { @MainActor in screens.noteChange(hinge: true) } }
+    await motion.follow(screens.simulator, screens.applied)
+    screens.onChange.append { slot in Task { @MainActor in await motion.follow(screens.simulator, slot) } }
+  }
+  exitFinishers.append { motion.close() }
+  _ = cpuMs()
+  let ended = Once()
+  stream.onFailure = { ended.fire() }
+  stream.start()
+  let finish = { stream.stop(); mp4?.finish(lastDuration: 1 / fps) }
+  exitFinishers.append(finish)
+  // Until seconds pass (0: until the reader goes or the engine is ended), or the encoder fails.
+  if seconds > 0 { Task { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)); ended.fire() } }
+  await ended.wait()
+  finish()
+  motion.close()
+  exitFinishers.removeAll()
+  screens.follows = false
+  if let failure = stream.failure { throw EngineError(message: failure) }
+  if transport == "fmp4" || req["path"] != nil { fh.closeFile() }
+  answer["bytes"] = counter.bytes; answer["chunks"] = counter.chunks; answer["first_chunk_ms"] = counter.first
+  answer["kbit_s"] = Int(Double(counter.bytes) * 8 / 1000 / max(seconds, 0.001)); answer["engine_cpu_pct"] = Int(Double(cpuMs()) / (max(seconds, 0.001) * 10))
+  answer["restarts"] = stream.restarts; answer["frames"] = stream.framesIn
+  if let canvas { answer["canvas"] = [Int(canvas.width), Int(canvas.height)] }
+}
+
+// MARK: The fold
+
+/**
+ * Folds the phone: {"op": "hinge", "posture": "closed" | "book" | "open"}. The hinge is moved host side (AXe 2.0's
+ * FBSimulatorHingeNative, for the boot the screens were read in, its receipt the angle reached: closed 0, book 90,
+ * open 180 degrees). The answer then waits for the screen that goes with the posture (closed: the outer, book and open:
+ * the inner) to be in use, as the guest's display report says it (Apple's 27.2 Duo moves its interface about 15 to 17 s
+ * after a close or an open; see Screens.followSwitch), for the next read of the report to say the same, and for the
+ * screen's picture to settle. Input in this engine waits meanwhile (its requests run one at a time); other engines
+ * refuse it while the screens change. Typed errors: unsupported, busy, boot_changed, timeout, unavailable.
+ */
+@MainActor
+func fold(_ simulator: FBSimulator, _ req: [String: Any], _ answer: inout [String: Any]) async throws {
+  guard screens.foldable else { throw ScreenError(code: "unsupported", message: "This phone has one screen: it does not fold.") }
+  guard let posture = req["posture"] as? String, postureDegrees[posture] != nil else { throw EngineError(message: "posture: closed, book or open") }
+  let timeout = (req["timeout_ms"] as? Double ?? 40_000) / 1000
+  let started = Date()
+  await screens.refreshNow(hinge: true); screens.apply()
+  // Half open straight from closed, Apple's 27.2 Duo shows the inner screen but CoreDevice's display report keeps
+  // flagging the outer one for a minute or more (measured 3 of 3, AXe's own CLI as well; AXe 2.0's display policy
+  // describes such stale reports), so no screen in use can be known and no input sent. By way of open it settles
+  // every time (3 of 3): closed to book goes to open first, and the answer says so.
+  if posture == "book" && screens.posture == "closed" {
+    var first: [String: Any] = [:]
+    try await foldStep(simulator, "open", deadline: Date().addingTimeInterval(timeout), &first)
+    answer["via"] = "open"; answer["via_ms"] = ms(started)
+  }
+  try await foldStep(simulator, posture, deadline: Date().addingTimeInterval(timeout), &answer)
+}
+
+@MainActor
+func foldStep(_ simulator: FBSimulator, _ posture: String, deadline: Date, _ answer: inout [String: Any]) async throws {
+  let degrees = postureDegrees[posture]!
+  let started = Date(), timeout = deadline.timeIntervalSince(started)
+  await screens.refreshNow(hinge: true); screens.apply()
+  guard let boot = screens.bootIdentity else { throw ScreenError(code: "unavailable", message: "The phone's boot could not be read.") }
+  let want = posture == "closed" ? "outer" : "inner"
+  guard let target = screens.slots.first(where: { $0.role == want }) else {
+    throw ScreenError(code: "unavailable", message: "The phone's \(want) screen is not known.")
+  }
+  func typed(_ code: String?) -> String {
+    switch code { case "busy", "closed": return "busy"; case "bootChanged": return "boot_changed"; case "unsupported": return "unsupported"; case "timeout", "deadline", "attemptLimit": return "timeout"; default: return "unavailable" }
+  }
+  let receipt: FBSimulatorHingeReceipt
+  do {
+    receipt = try await FBSimulatorHingeNative.operation(for: simulator).set(try FBSimulatorHingeRequest(degrees: degrees, expectedBootIdentity: boot, toleranceDegrees: 0.5, timeoutSeconds: 8))
+  } catch let failure as FBSimulatorHingeFailure {
+    if failure.delivery == .uncertain { inputSent = true }
+    throw ScreenError(code: typed(failure.reason.rawValue), message: "The hinge did not reach \(posture): \(failure.detail)")
+  }
+  inputSent = !receipt.wasAlreadyWithinTolerance
+  keptRead = nil
+  let hingeMs = ms(started)
+  // A first read of the guest after the move (the hinge settles a moment past the angle asked: 94.6 degrees for book,
+  // during which the report reads as changing), then the screen that goes with the posture in use, woken by each read
+  // the screens' callbacks, or a switch the posture calls for, set off.
+  await screens.refreshNow(hinge: true)
+  guard await screens.waitFor(deadline: deadline, until: { slot, _ in slot.id == target.id }) else {
+    screens.apply()
+    throw ScreenError(code: "timeout", message: "The hinge reached \(posture) but the \(want) screen did not come into use within \(Int(timeout)) s; the \(screens.applied.role) screen is in use.")
+  }
+  let switchMs = ms(started)
+  // Held: the next read of the guest's report (its own steadiness by AXe's ActivePanelReader) says the same screen and
+  // turn. AXe's hinge readiness observer was not used for this: its attempts are counted, not paced, and each compares
+  // the hinge's samples before and after, which keep moving slightly half open, so at book it ran out of attempts while
+  // the report itself held (measured).
+  let held = (screens.resolvedSlot?.id, screens.resolvedTurn)
+  await screens.refreshNow(hinge: true)
+  guard !screens.unsteady, screens.resolvedSlot?.id == held.0, screens.resolvedTurn == held.1 else {
+    screens.apply()
+    throw ScreenError(code: "timeout", message: "The \(want) screen came into use but did not hold: the next read of the phone's display report \(screens.unsteady ? "could not be taken steadily" : "named the \(screens.resolvedSlot?.role ?? "other") screen").")
+  }
+  screens.apply()
+  let settleStart = Date()
+  let (_, _, settled) = await settle(screenWatcher!, quietMs: 300, timeoutMs: 5000, firstChangeMs: 0)
+  answer["hinge_ms"] = hingeMs; answer["switch_ms"] = switchMs
+  answer["settle_ms"] = ms(settleStart); answer["settled"] = settled; answer["already"] = receipt.wasAlreadyWithinTolerance
 }
 Task { await main() }
 RunLoop.main.run()

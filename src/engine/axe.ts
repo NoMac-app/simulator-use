@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { ToolError } from "../errors.ts";
 import type { AxNode, Frame } from "../look/snapshot.ts";
 import { run } from "./exec.ts";
-import { type Answer, engineCall, noteSessionClosed, engineGesture, engineSteps } from "./native.ts";
+import { type Answer, engineCall, noteSessionClosed, screenRefusal, engineGesture, engineSteps } from "./native.ts";
 import { setting } from "../settings.ts";
 
 /**
@@ -34,6 +34,9 @@ export async function describeUi(udid: string, options: { full?: boolean } = {})
   return (await describeScreen(udid, options)).tree;
 }
 
+/** The screen in use as the engine names it (every answer carries it): role main, or a foldable's outer or inner. */
+export type EngineScreen = { id?: number; role?: string; width?: number; height?: number; scale?: number; orientation?: string };
+
 /** How long a read is given again while the screen's pixels stay as they were (native/engine/Settle.swift). */
 const REUSE_MAX_AGE_MS = 30_000;
 
@@ -41,7 +44,7 @@ const REUSE_MAX_AGE_MS = 30_000;
  * The screen's tree. With reuse, the engine may give its last read again (reused says why: the screen's buffer is
  * unchanged, its pixels are, or only a caret blinked), once a few of its elements read again one point each agree.
  */
-export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string; notReused?: string }> {
+export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
   // A web page's first read can take half a minute (Safari, iOS 27): the engine gets a minute.
   const reuse = options.reuse && setting("REUSE") !== "off";
   // lean: only the attributes the screen's text uses; full: every one (ui_look's full tree, for the agent to open).
@@ -52,6 +55,8 @@ export async function describeScreen(udid: string, options: { reuse?: boolean; f
       tree: Array.isArray(tree) ? tree : [tree],
       ...(typeof answer.reused === "string" ? { reused: answer.reused } : {}),
       ...(typeof answer.not_reused === "string" ? { notReused: answer.not_reused } : {}),
+      ...(answer.screen && typeof answer.screen === "object" ? { screen: answer.screen as EngineScreen } : {}),
+      ...(typeof answer.posture === "string" ? { posture: answer.posture } : {}),
     };
   }
   if (answer?.busy) throw new ToolError("Reading the screen took more than a minute.", "Call ui_look again: the phone is still working on the last read.");
@@ -130,6 +135,8 @@ export async function batch(udid: string, steps: string[]): Promise<void> {
     const answer = await engineCall(udid, { op: "steps", steps: native }, 60_000, { reportLost: true });
     if (answer?.ok) return;
     if (answer?.busy) throw new ToolError("The Simulator did not take the input within a minute.");
+    const refused = screenRefusal(answer);
+    if (refused) throw refused;
     sentInPart(answer, "input");
   }
   try {
@@ -146,6 +153,8 @@ export async function gesture(udid: string, args: string[]): Promise<void> {
     const answer = await engineCall(udid, native, 30_000, { reportLost: true });
     if (answer?.ok) return;
     if (answer?.busy) throw new ToolError("The Simulator did not take the gesture within 30 s.");
+    const refused = screenRefusal(answer);
+    if (refused) throw refused;
     sentInPart(answer, "gesture");
   }
   try {
@@ -167,6 +176,8 @@ export async function moveFinger(udid: string, from: { x: number; y: number }, t
   if (answer === undefined) return false;
   if (answer.ok) return true;
   if (answer.busy) throw new ToolError("The Simulator did not take the finger's move within 30 s.");
+  const refused = screenRefusal(answer);
+  if (refused) throw refused;
   sentInPart(answer, "finger's move");
   throw new ToolError(`The Simulator did not take the finger's move: ${String(answer.error ?? "no answer")}.`);
 }
@@ -214,6 +225,8 @@ export async function pressButton(udid: string, button: "home" | "lock"): Promis
   const answer = await engineCall(udid, { op: button, wait: false }, 30_000, { reportLost: true });
   if (answer?.ok) return;
   if (answer?.busy) throw new ToolError(`The ${button} button press was not answered within 30 s.`);
+  const refused = screenRefusal(answer);
+  if (refused) throw refused;
   sentInPart(answer, `${button} button press`);
   await axe(udid, ["button", button]);
 }

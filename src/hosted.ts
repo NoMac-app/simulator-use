@@ -14,7 +14,8 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import { run } from "./engine/exec.ts";
-import { closeEngines, engineCall } from "./engine/native.ts";
+import { closeEngines, engineCall, enginePath } from "./engine/native.ts";
+import { flattenFmp4, NoFramesError } from "./engine/fmp4.ts";
 import { cancelAllJobs } from "./engine/jobs.ts";
 import { listDevices, pickDevice } from "./engine/simctl.ts";
 import { heldDevice, stateDir } from "./engine/state.ts";
@@ -708,7 +709,7 @@ async function appIn(root: string): Promise<string | undefined> {
 /** One tool call of the session, as the replay lists it: never what was typed. */
 type Logged = { at_ms: number; tool: string; what: string; ms: number; ok: boolean; said: string };
 // The replay's own recorder, the file it records and the calls so far.
-let replay: { recorder: ChildProcess; file: string; started: number; log: Logged[] } | undefined;
+let replay: { recorder: ChildProcess; file: string; started: number; log: Logged[]; fragmented?: boolean } | undefined;
 const REPLAY_CALLS = 2000;
 
 /** A ui_act step as the replay lists it, from the parsed step: what it acted on, never what it typed or a line it could not read. */
@@ -775,6 +776,15 @@ export function noteCall(tool: string, args: Record<string, unknown>, started: n
 // keeps the wall clock, so the list's times are its times. Tests replace it.
 let recordScreen = async (file: string): Promise<ChildProcess> => {
   const device = pickDevice(await listDevices(true), undefined, await heldDevice());
+  // An iPhone Duo: simctl records one screen, so the engine records, every screen on one canvas (native/engine
+  // Video.swift), a fragmented MP4 made plain at stop. It ends on SIGINT with every frame written.
+  const engine = device.foldable ? enginePath() : undefined;
+  if (engine) {
+    const child = spawn(engine, ["--udid", device.udid, "--no-bootstrap", "--recording", "replay"], { stdio: ["pipe", "ignore", "ignore"] });
+    child.on("error", () => undefined);
+    child.stdin!.end(`${JSON.stringify({ id: 1, op: "stream", codec: "h264", transport: "fmp4", canvas: true, fps: 30, scale: 1, bitrate: 2_000_000, keyframe_s: 2, seconds: 0, path: file })}\n`);
+    return Object.assign(child, { fragmented: true });
+  }
   return spawn("xcrun", ["simctl", "io", device.udid, "recordVideo", "--codec=h264", "--force", file], { stdio: "ignore" });
 };
 export function setReplayRecorder(record: (file: string) => Promise<ChildProcess>) {
@@ -793,7 +803,8 @@ async function replayOp(params: Record<string, unknown>): Promise<Record<string,
   if (params.op === "start") {
     if (replay) return { recording: true };
     const file = join(stateDir(), `replay-${Date.now()}.mp4`);
-    replay = { recorder: await recordScreen(file), file, started: Date.now(), log: [] };
+    const recorder = await recordScreen(file);
+    replay = { recorder, file, started: Date.now(), log: [], ...((recorder as { fragmented?: boolean }).fragmented ? { fragmented: true } : {}) };
     return { recording: true };
   }
   if (params.op !== "stop") throw invalid("op is start or stop");
@@ -810,8 +821,17 @@ async function replayOp(params: Record<string, unknown>): Promise<Record<string,
   const seconds = Math.round((Date.now() - ending.started) / 1000);
   const dir = replayDir();
   await mkdir(dir, { recursive: true });
-  const video = existsSync(ending.file);
-  if (video) await rename(ending.file, join(dir, "video.mp4"));
+  let video = existsSync(ending.file);
+  if (video && ending.fragmented) {
+    // A foldable's replay: the engine's fragmented MP4 (one canvas across folds) made a plain one every player opens.
+    try {
+      await flattenFmp4(ending.file, join(dir, "video.mp4"));
+      await rm(ending.file, { force: true });
+    } catch (error) {
+      if (error instanceof NoFramesError) { video = false; await rm(ending.file, { force: true }); }
+      else await rename(ending.file, join(dir, "video.mp4"));
+    }
+  } else if (video) await rename(ending.file, join(dir, "video.mp4"));
   await writeFile(join(dir, "log.json"), JSON.stringify({ started_at: new Date(ending.started).toISOString(), seconds, video, calls: ending.log }));
   return { recording: false, calls: ending.log.length, seconds, video };
 }

@@ -13,9 +13,71 @@ automation sessions opened (`sessions`), and an input's answer says what carried
 
 Ops: `describe` (whole screen, AXe's JSON), `point` {x,y}, `tap` {x,y}, `swipe`, `type` {text}, `home`,
 `screenshot` {width,height,quality,path|inline; png_path: the full-size PNG, alpha removed}, `settle` {quiet_ms,first_change_ms}, `tap_settle_describe`,
-`tap_trace`, `stream` {codec h264|hevc, transport annexb|fmp4|mpegts, fps, scale, bitrate, seconds, path or fd}. With `fd`,
-the video goes to a descriptor the parent holds (a live view starts a `--no-bootstrap` engine and reads its stdout after
-the ready line); `seconds: 0` streams until the reader goes, and the engine then ends.
+`tap_trace`, `stream` {codec h264|hevc, transport annexb|fmp4|mpegts, fps, scale, bitrate, seconds, path or fd}, `hinge`
+{posture: closed|book|open}, `screen`, `screens`, `still` {since, scale, quality}. `still` is the live view's picture for
+a browser that cannot play H.264: `seed`, the engine's still counter, moves whenever the screen in use, its turn, its
+buffer or anything written to it changed; asked with `since` equal to it, the answer is `{"unchanged": true}` and nothing
+is captured; otherwise a JPEG of the screen as drawn at `scale` (default 0.5), at most 600 KB (the quality halved until it
+fits). The ready line says `"stills": ["since"]`. `--qos utility` (or a start at utility QoS, which the engine keeps)
+caps every thread and queue the engine makes. With `fd`, the video goes to a descriptor the parent holds (a live view
+starts a `--no-bootstrap` engine and reads its stdout after the ready line); `seconds: 0` streams until the reader goes,
+and the engine then ends. Taps take `nx, ny` and swipes and drags `nx1, ny1, nx2, ny2` instead of points: fractions of
+the screen in use (the ready line's `"input": ["points", "normalized"]`).
+
+Every answer and the ready line carry the screen in use, `screen: {id, role, width, height, scale, orientation}`
+(`role` main on a one-screen phone, outer or inner on a foldable; `width` and `height` its pixels as drawn), and on a
+foldable `posture` (closed, book, open) and `hinge_degrees`.
+
+## A phone with two screens (the iPhone Duo)
+
+A one-screen phone runs exactly as before. A foldable, a device type that declares two integrated touch screens and a
+hinge (`FBSimulatorNativeContextReader.capability`), is followed screen by screen (`Screens.swift`): each screen's
+buffer and changes from CoreSimulator's screen callbacks (as AXe 2.0's display feed registers them), which screen is
+in use and how the guest turns it from the guest's own display report (AXe 2.0's `ActivePanelReader`). Every engine of a
+phone (the agent's, the live view's input and stream engines, a recorder) learns a fold this way itself. The state kept
+for one screen (caret zones, the window's place, the web scan, the kept read) is the screen's and comes back with it.
+
+- **When it reads the report:** whenever a screen's properties change or a screen gives a new buffer; with the hinge's
+  angle when the properties change (they do when the hinge moves: both screens, measured about 4.8 s after a close).
+  Apple's 27.2 Duo moves its interface to the screen a posture calls for 15 to 17 s after the hinge gets there, and
+  CoreSimulator calls back for the move but not for the switch (measured), so while the posture and the screen in use
+  disagree the engine reads the report again every 0.25 s until they agree (at most 30 s). Between open and book no
+  screen changes and none calls back (measured), so a live view's stream also follows AXe 2.0's motion feed (its live
+  freshness provider for the screen in use, a subscription to the hinge's samples), read on each frame, and reads the
+  hinge again when it moved. A report taken mid-change
+  (AXe's `changedDuringRead`, or no single panel active) is read again within AXe's own steadiness bound; any other
+  failure is not retried.
+- **Reads** go to the screen in use by its display (`accessibilityElementForFrontmostApplication(displayID:)`), after
+  the kept automation session is asked for explicitly (that read skips the framework's bootstrap). A read the screen
+  changed under is read again on the screen in use. On a turned screen the app's root element reports the panel's own,
+  unturned size (669x951 against its windows' 951x669): it is given the screen's size as drawn.
+- **Input** goes to the screen in use on a connection aimed at it (AXe 2.0's DTUHID transport with the screen's
+  display context; a tap in the interface's points, turned to the panel's): touches one piece at a time without the
+  transport's 380 ms drain after a gesture (the connection stays open for the engine's life), keys paced as AXe paces
+  them on this transport (`PhoneInput.pacedForDtuhid`, as a one-screen phone's keys by dtuhidd). Before each piece the screen in use is checked: when it changed, the rest is
+  refused (`code: screen_changed`, after lifting a finger still down); an input that arrives while the screens change
+  waits for the report (AXe's steadiness bound) and is then refused (`screen_changing`); while the report cannot be read
+  steadily (a fold cut off midway leaves it so until the hinge moves again) input is refused (`screen_unknown`). The
+  first input to each screen in an engine's life waits for the guest to serve the new connection (about 0.25 s
+  measured); a piece handed to the transport counts as sent, so it is never sent again another way.
+- **The fold**, `hinge`, moves the hinge host side (`FBSimulatorHingeNative`, for the boot the screens were read in;
+  closed 0, book 90, open 180 degrees), waits for the screen that goes with the posture (closed: outer; book, open:
+  inner) to be in use, for the next read of the guest's report to say the same, then for its picture to settle. (AXe
+  2.0's hinge readiness observer was tried and dropped: its attempts are counted, not paced, and each compares the
+  hinge's samples before and after, which keep moving slightly half open, so at book it ran out of attempts while the
+  report held.) Typed errors: `unsupported`, `busy`,
+  `boot_changed`, `timeout`, `unavailable`. An engine does not start while the report cannot be read steadily;
+  simulator-use's `device_use` then folds with AXe's own `hinge set`, which settles it. **Book from closed goes by way
+  of open** (the answer says `via: "open"`): half opened straight from closed, Apple's 27.2 Duo draws on the inner
+  screen while CoreDevice's display report keeps flagging the outer one for a minute or more (3 of 3 on November 16,
+  2026, AXe's own CLI as well; AXe 2.0's display policy describes such stale reports), so no screen in use could be
+  known and no input sent; closed, open, then book settled 3 of 3.
+- **The picture** is the screen in use's own buffer (`Video.swift`): screenshots turned as drawn, no `simctl` process;
+  the stream (H.264, the Mac's encoder) follows the screen in use and restarts its encoder at each change (a new SPS),
+  writing before the first frame after the screen in use or the posture changed one line on stderr,
+  `@nomac {"screen":{...},"posture":"..."}`, in one write; a recording (`transport: fmp4`, or `canvas: true`) draws every
+  screen on one canvas that holds any of them (2852x2852 on a Duo at full size), centered, with one encoder from start
+  to end, so the file is one movie. Every descriptor past stderr is closed in any process the engine starts.
 
 Measured October 21, 2026 on an Apple M6 Mac mini (iOS 27.0 runtime), against AXe 1.8.0 with one process per call:
 

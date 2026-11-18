@@ -94,7 +94,7 @@ func textFieldFrames(_ tree: Any) -> [CGRect] {
 
 /** A changed box (pixels) that is only a caret: a thin upright band inside a text field. */
 func caretOnly(_ box: CGRect, zones: [CGRect]) -> Bool {
-  let p = CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale)
+  let p = pointsBox(box)
   guard p.width <= caretMaxWidth, p.height <= caretMaxHeight else { return false }
   return zones.contains { $0.insetBy(dx: -4, dy: -4).contains(p) }
 }
@@ -144,7 +144,7 @@ final class ChangeTracker {
     // The same pixels written again right after a change: a transition completing (see transitionTail).
     guard let box else { return Date().timeIntervalSince(lastPixels) < transitionTail }
     if caretOnly(box, zones: zones) { return false }
-    lastBox = CGRect(x: box.minX / pixelScale, y: box.minY / pixelScale, width: box.width / pixelScale, height: box.height / pixelScale)
+    lastBox = pointsBox(box)
     lastPixels = Date()
     return true
   }
@@ -245,7 +245,7 @@ func reusableRead(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, m
     guard readable else { return (nil, "unreadable buffer") }
     if box == nil { why = "pixels" }
     else if let box, caretOnly(box, zones: kept.zones) { why = "caret" }
-    else { return (nil, "changed \(box.map { rectArray(CGRect(x: $0.minX / pixelScale, y: $0.minY / pixelScale, width: $0.width / pixelScale, height: $0.height / pixelScale)) } ?? [])") }
+    else { return (nil, "changed \(box.map { rectArray(pointsBox($0)) } ?? [])") }
   }
   if let failed = await spotCheck(simulator, kept.tree) { keptRead = nil; return (nil, "spot check: \(failed)") }
   return (kept.tree, why)

@@ -13,19 +13,37 @@ export type Device = {
   /** For example "iOS 26.5". */
   runtime: string;
   booted: boolean;
+  /** simctl's device type, for example "com.apple.CoreSimulator.SimDeviceType.iPhone-Duo". */
+  deviceType?: string;
+  /** A phone that folds (the iPhone Duo): two screens, one in use; never the default iPhone. */
+  foldable?: boolean;
+  /** Its runtime is made for some devices only (the Duo's iOS-27-2-iPhone19-4): never picked as the newest for others. */
+  dedicatedRuntime?: boolean;
 };
 
 const NO_SIMULATOR = "This computer can't run the iOS Simulator: it needs macOS with Xcode and a Simulator runtime.";
 
-/** "com.apple.CoreSimulator.SimRuntime.iOS-26-5" becomes "iOS 26.5". */
+/**
+ * "com.apple.CoreSimulator.SimRuntime.iOS-26-5" becomes "iOS 26.5", and a runtime made for one device, as Apple's
+ * for the iPhone Duo ("iOS-27-2-iPhone19-4"), the same "iOS 27.2".
+ */
 export function runtimeName(identifier: string): string {
-  const match = /SimRuntime\.([A-Za-z]+)-(\d+)-(\d+)(?:-(\d+))?$/.exec(identifier);
+  const match = /SimRuntime\.([A-Za-z]+)-(\d+)-(\d+)(?:-(\d+))?(?:-[A-Za-z][\w-]*)?$/.exec(identifier);
   if (!match) return identifier;
   const [, os, major, minor, patch] = match;
   return `${os === "xrOS" ? "visionOS" : os} ${major}.${minor}${patch ? `.${patch}` : ""}`;
 }
 
-type SimctlDevice = { udid: string; name: string; state: string; isAvailable?: boolean };
+type SimctlDevice = { udid: string; name: string; state: string; isAvailable?: boolean; deviceTypeIdentifier?: string };
+
+/** A runtime identifier with something after its version: a runtime made for some devices only. */
+export const dedicatedRuntime = (identifier: string) => /SimRuntime\.[A-Za-z]+-\d+-\d+(?:-\d+)?-[A-Za-z]/.test(identifier);
+
+/** A phone that folds: the iPhone Duo (by its device type, else by its name). */
+export const foldable = (deviceType: string | undefined, name: string) => /iPhone-Duo|Fold/i.test(deviceType ?? "") || /^iPhone (Duo|Fold)\b/.test(name);
+
+/** The phone simulator-use boots when none is named: an iPhone that does not fold, on a runtime for every device. */
+export const defaultPhone = (d: Device) => d.name.startsWith("iPhone") && !d.foldable && !d.dedicatedRuntime;
 
 /** Parses `simctl list devices --json`: available devices only, booted first, then by runtime and name. */
 export function parseDevices(json: string): Device[] {
@@ -34,18 +52,25 @@ export function parseDevices(json: string): Device[] {
   for (const [runtime, list] of Object.entries(parsed.devices ?? {})) {
     for (const d of list) {
       if (d.isAvailable === false) continue;
-      devices.push({ udid: d.udid, name: d.name, state: d.state, runtime: runtimeName(runtime), booted: d.state === "Booted" });
+      const isFoldable = foldable(d.deviceTypeIdentifier, d.name), dedicated = dedicatedRuntime(runtime);
+      devices.push({
+        udid: d.udid, name: d.name, state: d.state, runtime: runtimeName(runtime), booted: d.state === "Booted",
+        ...(d.deviceTypeIdentifier ? { deviceType: d.deviceTypeIdentifier } : {}), ...(isFoldable ? { foldable: true } : {}), ...(dedicated ? { dedicatedRuntime: true } : {}),
+      });
     }
   }
   // iOS before watchOS, tvOS and visionOS (by name, "watchOS 26" would sort first); the newest iOS first;
-  // iPhones before iPads: most agents want a phone.
+  // iPhones before iPads: most agents want a phone. A phone that folds, or one on a runtime made for it alone (the
+  // Duo's own, which can be newer than the general one), comes after every other phone: never the default iPhone.
   const platform = (d: Device) => (d.runtime.startsWith("iOS ") ? 0 : 1);
+  const special = (d: Device) => Number(Boolean(d.foldable || d.dedicatedRuntime));
   const version = (d: Device) => d.runtime.replace(/^\S+\s/, "");
   const family = (d: Device) => ["iPhone", "iPad"].findIndex((p) => d.name.startsWith(p)) >>> 0;
   return devices.sort(
     (a, b) =>
       Number(b.booted) - Number(a.booted) ||
       platform(a) - platform(b) ||
+      special(a) - special(b) ||
       version(b).localeCompare(version(a), undefined, { numeric: true }) ||
       family(a) - family(b) ||
       a.name.localeCompare(b.name, undefined, { numeric: true }),
@@ -143,7 +168,7 @@ export function pickDevice(devices: Device[], wanted?: string, held?: string): D
   if (gone) throw new ToolError(`${gone.name} (${gone.runtime}), the Simulator this agent was using, is no longer booted.`, `Call device_use {device: "${gone.udid}"} to boot it again, or device_use another.`);
   if (booted.length === 1) return booted[0]!;
   if (!booted.length) {
-    const suggestion = devices.find((d) => d.name.startsWith("iPhone")) ?? devices[0];
+    const suggestion = devices.find(defaultPhone) ?? devices.find((d) => d.name.startsWith("iPhone")) ?? devices[0];
     throw new ToolError("No Simulator is booted.", suggestion ? `Call device_use {device: "${suggestion.name}"} to boot ${suggestion.name} (${suggestion.runtime}).` : "Call devices to see what this Mac has.");
   }
   throw new ToolError(`${booted.length} Simulators are booted: ${booted.map((d) => `${d.name} (${d.udid})`).join(", ")}.`, "Call device_use with the one to use, or pass device.");

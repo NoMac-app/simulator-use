@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { AccessibilityStarting, batch, describeScreen, describeUi, gesture } from "../engine/axe.ts";
-import { engineCall, engineGesture, engineSteps, hasEngine } from "../engine/native.ts";
+import { AccessibilityStarting, batch, describeScreen, describeUi, type EngineScreen, gesture } from "../engine/axe.ts";
+import { engineCall, engineGesture, engineSteps, hasEngine, screenRefusal } from "../engine/native.ts";
 import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
 import { type AxNode, render, type Snapshot, snapshot } from "./snapshot.ts";
@@ -23,13 +23,13 @@ const QUIET_MS = 150;
 const READ_START_MS = 50;
 const READ_GUARD_MS = 35;
 
-export type Screen = { tree: AxNode[]; snap: Snapshot; reused?: string; notReused?: string };
+export type Screen = { tree: AxNode[]; snap: Snapshot; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string };
 
 /** How long a call keeps trying while accessibility starts, leaving room in the 45 s a call may take. */
 const STARTING_BUDGET_MS = 35_000;
 
 /** Reads the tree, waiting out a starting accessibility service for up to 35 s before giving up. */
-async function describeWhenReady(udid: string, options: ReadOptions): Promise<{ tree: AxNode[]; reused?: string; notReused?: string }> {
+async function describeWhenReady(udid: string, options: ReadOptions): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
   const deadline = Date.now() + STARTING_BUDGET_MS;
   for (;;) {
     try {
@@ -61,7 +61,10 @@ export async function readScreen(udid: string, waitUntilReady = true, options: R
     tree = await describeUi(udid, { full: options.full });
     snap = snapshot(tree);
   }
-  return { tree, snap, ...(first.reused && tree === first.tree ? { reused: first.reused } : {}), ...(first.notReused ? { notReused: first.notReused } : {}) };
+  return {
+    tree, snap, ...(first.reused && tree === first.tree ? { reused: first.reused } : {}), ...(first.notReused ? { notReused: first.notReused } : {}),
+    ...(first.screen ? { screen: first.screen } : {}), ...(first.posture ? { posture: first.posture } : {}),
+  };
 }
 
 /** An app that just came to the front shows its frame before its contents: mostly unreadable, almost nothing listed. */
@@ -143,6 +146,9 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
       }
       return { snap, settled: answer.settled !== false };
     }
+    // A foldable's engine refused it: the screen in use changed (a fold). Never sent another way.
+    const refused = screenRefusal(answer);
+    if (refused) throw refused;
     // The engine is still at it after a minute (busy): the input went out, or will; it is never sent again.
     if (answer?.busy) {
       if (input) throw new ToolError("The Simulator did not finish the input and the wait after it within a minute.", "Call ui_look to see the screen: the phone may still be busy with it.");

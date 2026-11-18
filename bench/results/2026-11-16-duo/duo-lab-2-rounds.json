@@ -1,0 +1,750 @@
+{
+ "udid": "1B93E1AD-85FB-4B2E-85F8-C227143BFAFA",
+ "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-2-iPhone19-4",
+ "rounds": 2,
+ "failed": 1,
+ "results": [
+  {
+   "name": "boots with device_use",
+   "ok": true,
+   "detail": "Using duo-lab-1794866082776 (iOS 27.2, 1B93E1AD-85FB-4B2E-85F8-C227143BFAFA); the other tools use it from now on."
+  },
+  {
+   "name": "the first look names the closed posture and the outer screen",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "builds, installs and launches the lab app on the Duo",
+   "ok": true,
+   "detail": "Built DuoLab in 1.0 s (generated DuoLab.xcodeproj with XcodeGen first), installed dev.simtap.duolab. | Launched DuoLab in 17.0 s."
+  },
+  {
+   "name": "the engine's ready line names the screen, posture and normalized input",
+   "ok": true,
+   "detail": "{\"screen\":{\"orientation\":\"portrait\",\"id\":1,\"role\":\"outer\",\"width\":1398,\"height\":2034,\"scale\":3},\"posture\":\"closed\",\"input\":[\"points\",\"normalized\"],\"screens_ms\":34}"
+  },
+  {
+   "name": "round 1, closed to book: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded book by way of open in 15.0 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, closed to book: ui_look's first line names book and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 1, closed to book: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"split-vertical\"],\"window\":[951,669],\"text\":\"4 steps done in 9.0 s\"}"
+  },
+  {
+   "name": "round 1, closed to book: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo book 1\",\"said\":\"2 steps done in 9.9 s | screen:\"}"
+  },
+  {
+   "name": "round 1, closed to book: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":444.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.3 s\"}"
+  },
+  {
+   "name": "round 1, closed to book: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 1, closed to book: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 1, closed to book: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57484 bytes in 20 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, book to open: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded open in 1.3 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, book to open: the live stream follows the fold (166 frames, 1 event(s), SPS 1426x1002)",
+   "ok": true,
+   "detail": "{\"events\":[{\"screen\":{\"id\":3,\"role\":\"inner\",\"width\":2853,\"height\":2007,\"scale\":3,\"orientation\":\"landscape\"},\"posture\":\"open\"}],\"sizes\":[\"1426x1002\"],\"other_stderr\":0}"
+  },
+  {
+   "name": "round 1, book to open: ui_look's first line names open and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 1, book to open: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[951,669],\"text\":\"4 steps done in 9.6 s\"}"
+  },
+  {
+   "name": "round 1, book to open: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo open 1\",\"said\":\"2 steps done in 10.7 s | screen:\"}"
+  },
+  {
+   "name": "round 1, book to open: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":446,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.5 s\"}"
+  },
+  {
+   "name": "round 1, book to open: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 1, book to open: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 1, book to open: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57328 bytes in 19 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, book to open: a local recording is of the inner screen and plays (2006x2852)",
+   "ok": true,
+   "detail": "{\"height\":2852,\"width\":2006,\"seconds\":3.865,\"playable\":true,\"frames\":[{\"height\":2852,\"width\":2006,\"brightness\":243.63671875,\"at\":0.07833333333333334},{\"at\":0.07833333333333334,\"width\":2006,\"height\":2852,\"brightness\":243.63671875},{\"brightness\":243.63671875,\"at\":0.07833333333333334,\"width\":2006,\"heig"
+  },
+  {
+   "name": "round 1, open to closed: device_use folds and names the screen (outer 466x678)",
+   "ok": true,
+   "detail": "Folded closed in 14.4 s: the outer screen 466x678 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, open to closed: ui_look's first line names closed and the outer screen (466x678)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 1, open to closed: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[466,678],\"text\":\"4 steps done in 9.5 s\"}"
+  },
+  {
+   "name": "round 1, open to closed: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo closed 1\",\"said\":\"2 steps done in 7.6 s | screen:\"}"
+  },
+  {
+   "name": "round 1, open to closed: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":452.6666666666667,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.3 s\"}"
+  },
+  {
+   "name": "round 1, open to closed: the screenshot is the outer screen at 1398x2034 and matches simctl's of display 1 (1398x2034, difference 0.9)",
+   "ok": true,
+   "detail": "ours 1398x2034"
+  },
+  {
+   "name": "round 1, open to closed: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 1, open to closed: stills of the outer screen",
+   "ok": true,
+   "detail": "stills ok: still 699x1017 of the outer screen, 40885 bytes in 9 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, open to closed: a local recording is of the outer screen and plays (1398x2034)",
+   "ok": true,
+   "detail": "{\"playable\":true,\"frames_per_second\":15,\"file\":\"/tmp/simulator-use/1B93E1AD-85FB-4B2E-85F8-C227143BFAFA/recording-2026-11-16T22-21-16-930Z.mp4\",\"frames\":[{\"brightness\":241.70572916666666,\"width\":1398,\"at\":0,\"height\":2034},{\"at\":0,\"brightness\":241.70572916666666,\"height\":2034,\"width\":1398},{\"height\":"
+  },
+  {
+   "name": "round 1, closed to open: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded open in 12.9 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, closed to open: a drag the fold interrupted is refused (screen_changed), its finger lifted",
+   "ok": true,
+   "detail": "{\"ok\":false,\"code\":\"screen_changed\",\"error\":\"The screen in use changed (now the inner screen): no more input was sent. Read the screen again.\",\"input_sent\":true,\"screen\":\"outer\"}"
+  },
+  {
+   "name": "round 1, closed to open: every read during the fold is of the screen its answer names (26 reads)",
+   "ok": true,
+   "detail": "outer outer outer outer outer outer outer outer outer outer outer outer outer outer outer outer inner* inner inner inner inner inner inner inner inner inner"
+  },
+  {
+   "name": "round 1, closed to open: ui_look's first line names open and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 1, closed to open: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[951,669],\"text\":\"4 steps done in 9.0 s\"}"
+  },
+  {
+   "name": "round 1, closed to open: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo open 1\",\"said\":\"2 steps done in 7.7 s | screen:\"}"
+  },
+  {
+   "name": "round 1, closed to open: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":446.6666666666667,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.2 s\"}"
+  },
+  {
+   "name": "round 1, closed to open: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 1, closed to open: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 1, closed to open: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57359 bytes in 20 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, closed to open: a local recording is of the inner screen and plays (2006x2852)",
+   "ok": true,
+   "detail": "{\"frames_per_second\":15,\"width\":2006,\"file\":\"/tmp/simulator-use/1B93E1AD-85FB-4B2E-85F8-C227143BFAFA/recording-2026-11-16T22-22-34-115Z.mp4\",\"seconds\":3.8633333333333333,\"video_tracks\":1,\"height\":2852,\"playable\":true,\"frames\":[{\"width\":2006,\"height\":2852,\"at\":0,\"brightness\":243.63509114583334},{\"hei"
+  },
+  {
+   "name": "round 1, open to book: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded book in 2.0 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, open to book: ui_look's first line names book and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 1, open to book: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"split-vertical\"],\"window\":[951,669],\"text\":\"4 steps done in 9.6 s\"}"
+  },
+  {
+   "name": "round 1, open to book: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo book 1\",\"said\":\"2 steps done in 11.7 s | screen:\"}"
+  },
+  {
+   "name": "round 1, open to book: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":446.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 1, open to book: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 1, open to book: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 1, open to book: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57534 bytes in 19 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, book to closed: device_use folds and names the screen (outer 466x678)",
+   "ok": true,
+   "detail": "Folded closed in 14.4 s: the outer screen 466x678 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 1, book to closed: ui_look's first line names closed and the outer screen (466x678)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 1, book to closed: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[466,678],\"text\":\"4 steps done in 9.3 s\"}"
+  },
+  {
+   "name": "round 1, book to closed: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo closed 1\",\"said\":\"2 steps done in 7.5 s | screen:\"}"
+  },
+  {
+   "name": "round 1, book to closed: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":454.6666666666667,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 1, book to closed: the screenshot is the outer screen at 1398x2034 and matches simctl's of display 1 (1398x2034, difference 0.9)",
+   "ok": true,
+   "detail": "ours 1398x2034"
+  },
+  {
+   "name": "round 1, book to closed: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 1, book to closed: stills of the outer screen",
+   "ok": true,
+   "detail": "stills ok: still 699x1017 of the outer screen, 41018 bytes in 13 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 1, book to closed: a local recording is of the outer screen and plays (1398x2034)",
+   "ok": true,
+   "detail": "{\"seconds\":3.8666666666666667,\"height\":2034,\"playable\":true,\"frames\":[{\"brightness\":241.68912760416666,\"width\":1398,\"at\":0,\"height\":2034},{\"height\":2034,\"at\":0,\"width\":1398,\"brightness\":241.68912760416666},{\"at\":0,\"width\":1398,\"brightness\":241.68912760416666,\"height\":2034}],\"frames_per_second\":15,\"f"
+  },
+  {
+   "name": "a recording across every move is one movie that plays, on one canvas",
+   "ok": false,
+   "detail": "{\"made\":{\"seconds\":458.0055888888889,\"frames\":13741},\"played\":{\"playable\":true,\"width\":2852,\"seconds\":458.0055888888889,\"file\":\"~/duo-dev/lab/r4/across-folds.mp4\",\"height\":2852,\"frames_per_second\":30.00181770324707,\"frames\":[{\"width\":2852,\"at\":0.16943333333333332,\"brightness\":79.748046875,\"height\":2852},{\"width\":2852,\"height\":2852,\"at\":228.97173333333333,\"brightness\":0.0009765625},{\"at\":457.67345555555556,\"height\":2852,\"brightness\":79.83333333333333,\"width\":2852}],\"video_tracks\":1}}"
+  },
+  {
+   "name": "round 2, closed to book: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded book by way of open in 17.7 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, closed to book: ui_look's first line names book and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 2, closed to book: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"split-vertical\"],\"window\":[951,669],\"text\":\"4 steps done in 8.5 s\"}"
+  },
+  {
+   "name": "round 2, closed to book: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo book 2\",\"said\":\"2 steps done in 11.3 s | screen:\"}"
+  },
+  {
+   "name": "round 2, closed to book: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":447.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 2, closed to book: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 2, closed to book: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 2, closed to book: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57545 bytes in 27 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 2, book to open: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded open in 1.7 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, book to open: ui_look's first line names open and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 2, book to open: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[951,669],\"text\":\"4 steps done in 8.7 s\"}"
+  },
+  {
+   "name": "round 2, book to open: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo open 2\",\"said\":\"2 steps done in 11.0 s | screen:\"}"
+  },
+  {
+   "name": "round 2, book to open: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":443.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 10.7 s\"}"
+  },
+  {
+   "name": "round 2, book to open: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 2, book to open: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 2, book to open: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57310 bytes in 24 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 2, open to closed: device_use folds and names the screen (outer 466x678)",
+   "ok": true,
+   "detail": "Folded closed in 15.5 s: the outer screen 466x678 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, open to closed: the live stream follows the fold (592 frames, 3 event(s), SPS 1426x1002, 698x1016)",
+   "ok": true,
+   "detail": "{\"events\":[{\"screen\":{\"id\":3,\"role\":\"inner\",\"width\":2853,\"height\":2007,\"scale\":3,\"orientation\":\"landscape\"},\"posture\":\"book\"},{\"screen\":{\"id\":3,\"role\":\"inner\",\"width\":2853,\"height\":2007,\"scale\":3,\"orientation\":\"landscape\"},\"posture\":\"closed\"},{\"screen\":{\"id\":1,\"role\":\"outer\",\"width\":1398,\"height\":2034,\"scale\":3,\"orientation\":\"portrait\"},\"posture\":\"closed\"}],\"sizes\":[\"1426x1002\",\"698x1016\"],\"other_stderr\":0}"
+  },
+  {
+   "name": "round 2, open to closed: ui_look's first line names closed and the outer screen (466x678)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 2, open to closed: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[466,678],\"text\":\"4 steps done in 9.0 s\"}"
+  },
+  {
+   "name": "round 2, open to closed: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo closed 2\",\"said\":\"2 steps done in 7.7 s | screen:\"}"
+  },
+  {
+   "name": "round 2, open to closed: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":452.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 2, open to closed: the screenshot is the outer screen at 1398x2034 and matches simctl's of display 1 (1398x2034, difference 0.9)",
+   "ok": true,
+   "detail": "ours 1398x2034"
+  },
+  {
+   "name": "round 2, open to closed: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 2, open to closed: stills of the outer screen",
+   "ok": true,
+   "detail": "stills ok: still 699x1017 of the outer screen, 41019 bytes in 8 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 2, closed to open: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded open in 13.7 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, closed to open: ui_look's first line names open and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 2, closed to open: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[951,669],\"text\":\"4 steps done in 9.6 s\"}"
+  },
+  {
+   "name": "round 2, closed to open: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo open 2\",\"said\":\"2 steps done in 7.7 s | screen:\"}"
+  },
+  {
+   "name": "round 2, closed to open: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":446,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 2, closed to open: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 2, closed to open: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), open: inner screen 951x669"
+  },
+  {
+   "name": "round 2, closed to open: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57736 bytes in 19 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 2, open to book: device_use folds and names the screen (inner 951x669)",
+   "ok": true,
+   "detail": "Folded book in 2.2 s: the inner screen 951x669 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, open to book: ui_look's first line names book and the inner screen (951x669)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 2, open to book: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"split-vertical\"],\"window\":[951,669],\"text\":\"4 steps done in 9.6 s\"}"
+  },
+  {
+   "name": "round 2, open to book: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo book 2\",\"said\":\"2 steps done in 11.7 s | screen:\"}"
+  },
+  {
+   "name": "round 2, open to book: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":446,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 2, open to book: the screenshot is the inner screen at 2853x2007 and matches simctl's of display 3 (2853x2007, difference 0.0)",
+   "ok": true,
+   "detail": "ours 2853x2007"
+  },
+  {
+   "name": "round 2, open to book: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), book: inner screen 951x669"
+  },
+  {
+   "name": "round 2, open to book: stills of the inner screen",
+   "ok": true,
+   "detail": "stills ok: still 1427x1004 of the inner screen, 57403 bytes in 19 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "round 2, book to closed: device_use folds and names the screen (outer 466x678)",
+   "ok": true,
+   "detail": "Folded closed in 15.1 s: the outer screen 466x678 is in use; earlier positions no longer hold."
+  },
+  {
+   "name": "round 2, book to closed: ui_look's first line names closed and the outer screen (466x678)",
+   "ok": true,
+   "detail": "DuoLab · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 2, book to closed: taps by label land where the app says, on both halves and beside the fold",
+   "ok": true,
+   "detail": "{\"ids\":[\"cell-A1\",\"cell-C2\",\"nearFold\"],\"modes\":[\"single\"],\"window\":[466,678],\"text\":\"4 steps done in 9.6 s\"}"
+  },
+  {
+   "name": "round 2, book to closed: typing with the keyboard up reaches the app",
+   "ok": true,
+   "detail": "{\"app\":\"duo closed 2\",\"said\":\"2 steps done in 7.5 s | screen:\"}"
+  },
+  {
+   "name": "round 2, book to closed: scroll, swipe and long press reach the app",
+   "ok": true,
+   "detail": "{\"scrollY\":450.3333333333333,\"swipes\":[\"left\"],\"held\":1,\"said\":\"4 steps done in 9.4 s\"}"
+  },
+  {
+   "name": "round 2, book to closed: the screenshot is the outer screen at 1398x2034 and matches simctl's of display 1 (1398x2034, difference 0.9)",
+   "ok": true,
+   "detail": "ours 1398x2034"
+  },
+  {
+   "name": "round 2, book to closed: home leaves the app",
+   "ok": true,
+   "detail": "Home screen · duo-lab-1794866082776 (iOS 27.2), closed: outer screen 466x678"
+  },
+  {
+   "name": "round 2, book to closed: stills of the outer screen",
+   "ok": true,
+   "detail": "stills ok: still 699x1017 of the outer screen, 41021 bytes in 9 ms; unchanged answered in 0 ms"
+  },
+  {
+   "name": "taps on the outer screen change it fast (median send 0.4 ms, first change 7 ms, read 63 ms)",
+   "ok": true,
+   "detail": "{\"sends\":[6.796002388000488,0.5059242248535156,0.33295154571533203,0.23305416107177734,0.25594234466552734,0.2570152282714844,0.28502941131591797,0.492095947265625,0.2919435501098633,0.4730224609375,0.3470182418823242,0.4620552062988281,0.2760887145996094,0.36597251892089844,0.4050731658935547,0.4960298538208008,0.2859830856323242,0.3809928894042969,0.28002262115478516,0.4870891571044922],\"firsts\":[154,6,20,6,7,7,12,5,11,6,13,7,6,12,7,15,14,7,14,7]}"
+  },
+  {
+   "name": "taps on the inner screen change it fast (median send 0.3 ms, first change 7 ms, read 61 ms)",
+   "ok": true,
+   "detail": "{\"sends\":[258.2589387893677,0.5289316177368164,0.247955322265625,0.46002864837646484,0.26404857635498047,0.3401041030883789,0.2779960632324219,0.4830360412597656,0.26094913482666016,0.4820823669433594,0.27501583099365234,0.46002864837646484,0.24998188018798828,0.5179643630981445,0.2919435501098633,0.4609823226928711,0.25403499603271484,0.4800558090209961,0.247955322265625,0.2579689025878906],\"firsts\":[201,13,15,7,7,7,15,7,7,7,7,7,6,5,7,7,15,7,15,7]}"
+  }
+ ],
+ "timings": {
+  "boot_ms": [
+   122
+  ],
+  "first_look_after_boot_ms": [
+   2966
+  ],
+  "real_picture_after_boot_ms": [
+   4125
+  ],
+  "app_run_ms": [
+   19321
+  ],
+  "engine_ready_ms": [
+   34
+  ],
+  "fold_closed_to_book_ms": [
+   15259,
+   18096
+  ],
+  "look_ms": [
+   1414,
+   1396,
+   1409,
+   1395,
+   1404,
+   1417,
+   1319,
+   1320,
+   1478,
+   1412,
+   1408,
+   1404
+  ],
+  "fold_book_to_open_ms": [
+   1568,
+   2124
+  ],
+  "fold_open_to_closed_ms": [
+   14632,
+   15785
+  ],
+  "fold_closed_to_open_ms": [
+   13092,
+   14001
+  ],
+  "fold_open_to_book_ms": [
+   2216,
+   2522
+  ],
+  "fold_book_to_closed_ms": [
+   14689,
+   15423
+  ],
+  "tap_send_ms_outer": [
+   6.796002388000488,
+   0.5059242248535156,
+   0.33295154571533203,
+   0.23305416107177734,
+   0.25594234466552734,
+   0.2570152282714844,
+   0.28502941131591797,
+   0.492095947265625,
+   0.2919435501098633,
+   0.4730224609375,
+   0.3470182418823242,
+   0.4620552062988281,
+   0.2760887145996094,
+   0.36597251892089844,
+   0.4050731658935547,
+   0.4960298538208008,
+   0.2859830856323242,
+   0.3809928894042969,
+   0.28002262115478516,
+   0.4870891571044922
+  ],
+  "tap_first_change_ms_outer": [
+   154,
+   6,
+   20,
+   6,
+   7,
+   7,
+   12,
+   5,
+   11,
+   6,
+   13,
+   7,
+   6,
+   12,
+   7,
+   15,
+   14,
+   7,
+   14,
+   7
+  ],
+  "read_ms_outer": [
+   48,
+   128,
+   37,
+   76,
+   44,
+   67,
+   45,
+   101,
+   46,
+   102,
+   53,
+   95,
+   46,
+   99,
+   45,
+   89,
+   44,
+   91,
+   41,
+   63
+  ],
+  "tap_send_ms_inner": [
+   258.2589387893677,
+   0.5289316177368164,
+   0.247955322265625,
+   0.46002864837646484,
+   0.26404857635498047,
+   0.3401041030883789,
+   0.2779960632324219,
+   0.4830360412597656,
+   0.26094913482666016,
+   0.4820823669433594,
+   0.27501583099365234,
+   0.46002864837646484,
+   0.24998188018798828,
+   0.5179643630981445,
+   0.2919435501098633,
+   0.4609823226928711,
+   0.25403499603271484,
+   0.4800558090209961,
+   0.247955322265625,
+   0.2579689025878906
+  ],
+  "tap_first_change_ms_inner": [
+   201,
+   13,
+   15,
+   7,
+   7,
+   7,
+   15,
+   7,
+   7,
+   7,
+   7,
+   7,
+   6,
+   5,
+   7,
+   7,
+   15,
+   7,
+   15,
+   7
+  ],
+  "read_ms_inner": [
+   54,
+   107,
+   43,
+   96,
+   40,
+   95,
+   44,
+   92,
+   48,
+   93,
+   45,
+   73,
+   44,
+   93,
+   48,
+   91,
+   44,
+   61,
+   33,
+   94
+  ]
+ }
+}

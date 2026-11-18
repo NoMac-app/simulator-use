@@ -8,6 +8,9 @@ import { heldDevice, stateDir } from "../engine/state.ts";
 import { readScreen } from "../look/read.ts";
 import { render, type Frame } from "../look/snapshot.ts";
 import type { Tool } from "./types.ts";
+import type { EngineScreen } from "../engine/axe.ts";
+import type { Device } from "../engine/simctl.ts";
+import { screenWords } from "./device-use.ts";
 import { setting } from "../settings.ts";
 
 /** A screenshot waits up to this long for the screen to hold still, comparing frames this far apart. */
@@ -54,8 +57,8 @@ export const uiLook: Tool = {
     const device = pickDevice(await listDevices(), args.device as string | undefined, heldDevice());
     // A look reads the screen afresh. SIMULATOR_USE_LOOK_REUSE=on lets it take the engine's last read while the
     // screen's pixels are unchanged, as ui_act's first read does (off by default: a look is the agent's ground truth).
-    const { tree, snap } = await readScreen(device.udid, true, { full: Boolean(args.full), reuse: !args.full && setting("LOOK_REUSE") === "on" });
-    let text = render(snap, { device: `${device.name} (${device.runtime})`, find: args.find as string | undefined });
+    const { tree, snap, screen, posture } = await readScreen(device.udid, true, { full: Boolean(args.full), reuse: !args.full && setting("LOOK_REUSE") === "on" });
+    let text = render(snap, { device: deviceLine(device, screen, posture), find: args.find as string | undefined });
     const dir = stateDir();
     if (args.full || args.screenshot_file) await mkdir(dir, { recursive: true });
     if (args.full) {
@@ -76,3 +79,13 @@ export const uiLook: Tool = {
     return args.screenshot ? { text, image: { data: jpeg, mimeType: "image/jpeg" } } : { text };
   },
 };
+
+/**
+ * How the first line names the phone: "iPhone 17 Pro (iOS 27.2)", and on a foldable its posture and the screen in use
+ * ("iPhone Duo (iOS 27.2), open: inner screen 669x951"), which every position on the screen belongs to.
+ */
+export function deviceLine(device: Device, screen?: EngineScreen, posture?: string): string {
+  const base = `${device.name} (${device.runtime})`;
+  const words = screenWords(screen);
+  return posture && words ? `${base}, ${posture}: ${words}` : base;
+}
