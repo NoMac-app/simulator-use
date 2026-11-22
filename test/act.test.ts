@@ -24,7 +24,23 @@ test("steps read the way ui_look prints elements", () => {
   assert.deepEqual(parseStep("scroll down"), { op: "scroll", direction: "down" });
   assert.deepEqual(parseStep("swipe Left"), { op: "swipe", direction: "left" });
   assert.deepEqual(parseStep('wait "Welcome"'), { op: "wait", target: { by: "label", label: "Welcome" }, seconds: 5 });
-  assert.deepEqual(parseStep("wait Welcome back 10"), { op: "wait", target: { by: "label", label: "Welcome back" }, seconds: 10 });
+  // Unquoted, a label that ends in a number reads two ways: the step keeps both, and the screen says which.
+  assert.deepEqual(parseStep("wait Welcome back 10"), { op: "wait", target: { by: "label", label: "Welcome back" }, seconds: 10, whole: { by: "label", label: "Welcome back 10" } });
+  assert.deepEqual(parseStep('wait "Welcome back" 10'), { op: "wait", target: { by: "label", label: "Welcome back" }, seconds: 10 });
+  assert.deepEqual(parseStep("wait Welcome back"), { op: "wait", target: { by: "label", label: "Welcome back" }, seconds: 5 });
+  // A number alone is a pause, never a wait for an element named by it.
+  assert.deepEqual(parseStep("wait 2"), { op: "pause", seconds: 2 });
+  assert.deepEqual(parseStep("pause 1.5s"), { op: "pause", seconds: 1.5 });
+  assert.deepEqual(parseStep("wait 60"), { op: "pause", seconds: 10 });
+  assert.deepEqual(parseStep('wait "2"'), { op: "wait", target: { by: "label", label: "2" }, seconds: 5 });
+  assert.equal(parseStep("pause"), "pause takes seconds: pause 2");
+  // Scroll until something shows.
+  assert.deepEqual(parseStep('scroll down until "Row 40"'), { op: "scroll", direction: "down", until: { by: "label", label: "Row 40" } });
+  assert.deepEqual(parseStep("scroll down until Row 40"), { op: "scroll", direction: "down", until: { by: "label", label: "Row 40" } });
+  assert.deepEqual(parseStep("scroll up to #first"), { op: "scroll", direction: "up", until: { by: "id", id: "first" } });
+  assert.deepEqual(parseStep('scroll down until button "Save"'), { op: "scroll", direction: "down", until: { by: "label", label: "Save", kind: "button" } });
+  assert.equal(parseStep("scroll down until @1,2"), "scroll until takes a label or an #id, not a point.");
+  assert.deepEqual(parseStep('scroll down "Until"'), { op: "scroll", direction: "down", target: { by: "label", label: "Until" } });
   assert.deepEqual(parseStep("wait #status 99"), { op: "wait", target: { by: "id", id: "status" }, seconds: 30 });
   assert.deepEqual(parseStep('gone "Loading"'), { op: "gone", target: { by: "label", label: "Loading" }, seconds: 5 });
   assert.deepEqual(parseStep("key return"), { op: "key", key: "return" });
@@ -92,7 +108,14 @@ test("a partial label is words of its own, never the opposite: tap Allow is not 
 test("a target hidden below points to scrolling", () => {
   const r = resolve(screen("items"), { by: "label", label: "Item 13" });
   assert.ok(!isResolved(r));
-  assert.match(r.next, /^2 elements are below: scroll down/);
+  // One of the rows just off screen: which way it is, for the step to scroll there itself.
+  assert.equal(r.scroll, "down");
+  assert.equal(r.error, '"Item 13" is off screen, below.');
+  // A row the screen knows nothing of: both ways named when there are both, and the step that looks for it.
+  const far = resolve(screen("items"), { by: "label", label: "Item 39" });
+  assert.ok(!isResolved(far));
+  assert.equal(far.scroll, undefined);
+  assert.match(far.next, /^2 more below \(scroll down\)\. scroll down until "Item 39" looks for it down the list\. Or call ui_look\.$/);
 });
 
 test("the diff after signing in names only what changed", () => {
@@ -155,4 +178,17 @@ test("a step an answer repeats leaves out what a fill or type typed", () => {
   assert.equal(maskedStep("type hunter2 more"), "type …");
   assert.equal(maskedStep("Fill"), "fill …");
   assert.equal(maskedStep(' tap "Sign in" '), 'tap "Sign in"');
+});
+
+test("a long label is found by what ui_look printed of it, and an alert coming up is a new screen", () => {
+  const long = "Terms and conditions apply to every purchase made in this app, including subscriptions and renewals of them";
+  const frame = { x: 0, y: 0, width: 100, height: 40 };
+  const base = { app: "Demo", tabs: [], keyboard: false, hidden: { above: 0, below: 0, left: 0, right: 0 }, unreadable: [], screen: { x: 0, y: 0, width: 402, height: 874 } };
+  const snap = { ...base, elements: [{ kind: "button", label: long, x: 50, y: 20, frame }] };
+  const printed = `${long.slice(0, 79)}…`;
+  const r = resolve(snap, { by: "label", label: printed });
+  assert.ok(isResolved(r) && r.element?.label === long);
+  const behind = { ...base, elements: [{ kind: "text", label: "Item", x: 200, y: 300, frame }, { kind: "button", label: "Delete", x: 270, y: 500, frame }] };
+  const alert = { ...base, modal: "alert" as const, elements: [{ kind: "alert", label: "Delete item?", x: 200, y: 425, frame }, { kind: "button", label: "Cancel", x: 130, y: 472, frame }, { kind: "button", label: "Delete", x: 270, y: 472, frame }] };
+  assert.match(diff(behind, alert), /^screen:\n[\s\S]*An alert is in front/);
 });

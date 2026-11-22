@@ -1,7 +1,8 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { appInfo, launch, startLogStream } from "../engine/apps.ts";
+import { appInfo, launch, plainKeyboard, startLogStream } from "../engine/apps.ts";
 import { AccessibilityStarting } from "../engine/axe.ts";
+import { hasEngine } from "../engine/native.ts";
 import { alertTitle, permissionMode, permissionPrompt } from "../engine/prompts.ts";
 import type { Device } from "../engine/simctl.ts";
 import { setCurrentApp } from "../engine/state.ts";
@@ -26,8 +27,10 @@ export async function launchAndLook(device: Device, bundleId: string, args: stri
   const info = await appInfo(device.udid, bundleId);
   if (!info) throw new ToolError(`${bundleId} is not installed on ${label}.`, 'Install it with app_control {action: "install", app: "path/to/App.app"}.');
   const started = Date.now();
+  // The keyboard set plain while the app starts, so the first fill does not wait for it (engine/apps.ts).
+  void plainKeyboard(device.udid);
   if (info.executable) await startLogStream(device.udid, bundleId, info.executable);
-  let running = await launch(device.udid, bundleId, args);
+  let running = await launch(device.udid, bundleId, args, info.executable);
   await setCurrentApp(device.udid, { bundleId, executable: info.executable, launchedAt: started });
   const name = info.name ?? info.executable ?? bundleId;
   // In front: the app itself, or the app under one of iOS's prompts ("Name · system alert"). Not "Name · system
@@ -35,14 +38,28 @@ export async function launchAndLook(device: Device, bundleId: string, args: stri
   const front = (app: string) => app === name || app === `${name} · system alert`;
   const withArgs = args.length ? ` with ${args.length} argument${args.length === 1 ? "" : "s"}` : "";
   const launched = () => `Launched ${name}${withArgs} in ${((Date.now() - started) / 1000).toFixed(1)} s`;
+  const watched = await hasEngine(device.udid);
+  /**
+   * The screen once the app is in front. With the engine, each look waits for the screen to hold still first (iOS's
+   * launch animation, the app's first frames) and no longer: the app in front is read as soon as it has drawn, where
+   * a look every 0.5 s found it up to that much late.
+   */
   const inFront = async (until: number) => {
-    let { snap } = await readScreen(device.udid);
+    const look = async () => {
+      if (!watched) return (await readScreen(device.udid)).snap;
+      const s = await settle(device.udid, undefined, undefined, { firstChangeMs: 300, timeoutMs: 2_500, startMs: 200, wholeStill: true });
+      still = s.settled;
+      return s.snap;
+    };
+    let snap = await look();
     while (!front(snap.app) && Date.now() < until) {
-      await sleep(500);
-      snap = (await readScreen(device.udid)).snap;
+      if (!watched) await sleep(500);
+      snap = await look();
     }
     return snap;
   };
+  /** Whether the last look was of a screen that held still through it (the engine's word): then it is the first screen. */
+  let still = false;
   // Not in front and its process gone: it quit right after launch, which is a crash (launching it again would too).
   const quit = () => new ToolError(`${name} quit right after it launched (its process ended within ${((Date.now() - started) / 1000).toFixed(0)} s): most likely a crash.`, "app_logs {crashes: true} shows where it crashed (file and line), and app_logs its print output.");
   try {
@@ -51,13 +68,21 @@ export async function launchAndLook(device: Device, bundleId: string, args: stri
     let again = "";
     // Only while the call has time for it: a cold Simulator's first read alone can take 35 s.
     if (!front(snap.app) && Date.now() - started < LAUNCH_BUDGET_MS - RELAUNCH_WAIT_MS) {
-      running = await launch(device.udid, bundleId, args);
+      running = await launch(device.udid, bundleId, args, info.executable);
       snap = await inFront(Date.now() + RELAUNCH_WAIT_MS);
       if (!front(snap.app) && running.ended()) throw quit();
       again = " (launched twice: it was not in front after the first)";
     }
     // In front is not finished: right after launch a SwiftUI stepper's buttons joined the tree a read later.
-    for (let i = 0; i < 3 && front(snap.app); i++) {
+    // With the engine: the screen is read again only if it changes in the next moment, and then once it is still.
+    for (let i = 0; i < 3 && front(snap.app) && !(still && snap.elements.length + snap.tabs.length > 0); i++) {
+      if (watched) {
+        const s = await settle(device.udid, snap.app, undefined, { firstChangeMs: 250, timeoutMs: 1_500 });
+        const same = render(s.snap) === render(snap);
+        snap = s.snap;
+        if (s.changed === false || same) break;
+        continue;
+      }
       await sleep(400);
       const next = (await readScreen(device.udid, false)).snap;
       if (render(next) === render(snap)) break;

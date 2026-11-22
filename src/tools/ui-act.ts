@@ -2,17 +2,18 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { diff } from "../act/diff.ts";
 import { fieldAt, isResolved, resolve, type Resolved } from "../act/resolve.ts";
-import { describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
+import { DEFAULT_HOLD_SECONDS, DEFAULT_WAIT_SECONDS, describeTarget, KEYS, maskedStep, parseStep, type Direction, type Step, type Target } from "../act/steps.ts";
 import type { Frame } from "../look/snapshot.ts";
-import { setPasteboard } from "../engine/apps.ts";
+import { appPids, plainKeyboard, setPasteboard } from "../engine/apps.ts";
+import { permissionMode, permissionPrompt } from "../engine/prompts.ts";
 import { batch, elementAt, liftFinger, moveFinger, pressButton, setSlider, typeStep } from "../engine/axe.ts";
 import { ToolError } from "../errors.ts";
 import { withLock } from "../engine/lock.ts";
 import { hasEngine } from "../engine/native.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
-import { heldDevice } from "../engine/state.ts";
+import { currentApp, heldDevice } from "../engine/state.ts";
 import { type Input, readScreen, readWhenStill, settle, type SettleOptions } from "../look/read.ts";
-import { type AxNode, quote, render, type Element, type Snapshot } from "../look/snapshot.ts";
+import { type AxNode, line, quote, render, type Element, type Snapshot } from "../look/snapshot.ts";
 import type { Tool, ToolResult } from "./types.ts";
 import { setting } from "../settings.ts";
 
@@ -21,6 +22,21 @@ const FIELDS = new Set(["textfield", "securefield", "searchfield", "textview"]);
 const BUDGET_MS = 45_000;
 /** A target not on screen yet (a screen still appearing) gets this long to show up. */
 const FIND_WAIT_MS = 2_000;
+/**
+ * On a screen this call has done nothing to yet, a missing target is waited for only while the screen is changing:
+ * still for this long, it is not coming. A missing target cost 2.4 to 3.0 s before (November 22, 2026), and agents
+ * answer one with another act two times in three.
+ */
+const FIND_STILL_MS = 350;
+/**
+ * After a step of this call, what it started may arrive late with nothing drawn meanwhile: a missing target is given
+ * up once the screen has been still this long (something loading that shows it is, a spinner, keeps the full wait).
+ */
+const FIND_STILL_AFTER_ACT_MS = 1_000;
+/** How many scrolls a step makes on its own to reach a target that is just off screen. */
+const REACH_SCROLLS = 3;
+/** How many scrolls `scroll down until "Row 40"` makes at most. */
+const UNTIL_SCROLLS = 20;
 /** Typed text reaches the app a moment after the keys do; this is how long the read-back waits for it. */
 const READ_BACK_MS = 2_500;
 const READ_BACK_MAX_MS = 8_000;
@@ -162,16 +178,33 @@ export function readBackVerdict(kind: string | undefined, shown: string, typed: 
 }
 
 /**
- * A finger drag across the content, clear of the navigation and tab bars. Scrolls move slowly (1.2 s) so the
- * content follows the finger, about 0.8 of a screen, without flinging past: measured on a 40-row list, a 0.3 s
- * swipe of the same length scrolled 20 rows, this drag 10. Swipes are quick, for carousels and dismissals.
+ * How a scroll's finger moves: 0.3 s, slowing to a stop (the engine's ease), then held still for 0.06 s before it
+ * lifts. The content then stops where the finger put it: measured November 22, 2026 on a 40-row list (iOS 27.2), a
+ * finger lifted while moving left the list coasting for 1.7 s after a 1.2 s drag (3.5 s a scroll), and by a
+ * different distance each time (a scroll down and one up did not come back to the same row); this one takes 1.0 s
+ * and comes back to the row it left. AXe's own drag (the fallback) has no ease and no rest, so there it stays the
+ * slow drag of before (see gesture in engine/axe.ts).
+ */
+/** What a bottom bar holds. */
+const BAR_KINDS = new Set(["button", "back", "textfield", "searchfield", "popup", "menu"]);
+const SCROLL_DRAG = ["--duration", "0.3", "--rest", "0.06", "--steps", "18", "--ease-out"];
+const SWIPE = ["--duration", "0.3"];
+
+/**
+ * A finger drag across the content, clear of the navigation and tab bars and of the keyboard when it is up (a drag
+ * that starts on its keys types). A scroll moves the content by the finger's way, most of what shows, so the last
+ * row or two of one screen are the first of the next. Swipes are quick, for carousels and dismissals.
  */
 const sweep = (snap: Snapshot, direction: Direction, slow: boolean) => {
   const { screen } = snap;
-  const floor = snap.tabs.length ? Math.min(...snap.tabs.map((t) => t.frame.y)) - 20 : screen.y + screen.height - 60;
-  const top = screen.y + screen.height * 0.25;
+  // A bar of buttons at the bottom that is not a tab bar (Safari's toolbar, an app's own): a drag that starts or ends
+  // on it is the bar's gesture, not the content's (on Safari's, a swipe up opened its tabs).
+  const low = snap.elements.filter((e) => BAR_KINDS.has(e.kind) && e.frame.y >= screen.y + screen.height * 0.86 && e.frame.height <= 70);
+  const bars = Math.min(snap.tabs.length ? Math.min(...snap.tabs.map((t) => t.frame.y)) - 20 : screen.y + screen.height - 60, low.length >= 2 ? Math.min(...low.map((e) => e.frame.y)) - 14 : Infinity);
+  const floor = snap.keyboard && snap.keyboardTop !== undefined ? Math.min(bars, snap.keyboardTop - 12) : bars;
+  const top = Math.min(screen.y + screen.height * 0.2, floor - 80);
   const middle = (top + floor) / 2;
-  const half = ((floor - top) * 0.75) / 2;
+  const half = ((floor - top) * (slow ? 0.92 : 0.75)) / 2;
   const cx = screen.x + screen.width / 2;
   const [x1, y1, x2, y2] = {
     up: [cx, middle + half, cx, middle - half],
@@ -179,7 +212,7 @@ const sweep = (snap: Snapshot, direction: Direction, slow: boolean) => {
     left: [screen.x + screen.width * 0.85, middle, screen.x + screen.width * 0.15, middle],
     right: [screen.x + screen.width * 0.15, middle, screen.x + screen.width * 0.85, middle],
   }[direction].map(Math.round) as [number, number, number, number];
-  return [slow ? "drag" : "swipe", "--start-x", `${x1}`, "--start-y", `${y1}`, "--end-x", `${x2}`, "--end-y", `${y2}`, "--duration", slow ? "1.2" : "0.3"];
+  return [slow ? "drag" : "swipe", "--start-x", `${x1}`, "--start-y", `${y1}`, "--end-x", `${x2}`, "--end-y", `${y2}`, ...(slow ? SCROLL_DRAG : SWIPE)];
 };
 
 /** A swipe or drag inside one element's box: across a list row to delete it, along a carousel to page it. */
@@ -192,7 +225,7 @@ const sweepIn = (f: Frame, direction: Direction, slow: boolean) => {
     left: [f.x + f.width * 0.85, cy, f.x + f.width * 0.15, cy],
     right: [f.x + f.width * 0.15, cy, f.x + f.width * 0.85, cy],
   }[direction].map(Math.round) as [number, number, number, number];
-  return [slow ? "drag" : "swipe", "--start-x", `${x1}`, "--start-y", `${y1}`, "--end-x", `${x2}`, "--end-y", `${y2}`, "--duration", slow ? "1.2" : "0.3"];
+  return [slow ? "drag" : "swipe", "--start-x", `${x1}`, "--start-y", `${y1}`, "--end-x", `${x2}`, "--end-y", `${y2}`, ...(slow ? SCROLL_DRAG : SWIPE)];
 };
 
 /**
@@ -200,6 +233,7 @@ const sweepIn = (f: Frame, direction: Direction, slow: boolean) => {
  * goes through the Simulator's clipboard and a paste, which iOS takes from a keyboard shortcut without asking.
  */
 async function typing(udid: string, text: string, paste = false): Promise<string[]> {
+  await plainKeyboard(udid);
   // Long text pastes too: typing runs about 55 characters a second, and a call has 45 s.
   if (!paste && text.length <= 200 && /^[\x20-\x7E]*$/.test(text)) return [typeStep(text)];
   await setPasteboard(udid, text);
@@ -246,24 +280,87 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   };
   /** The elements of the screen the last target was found on: which field of its kind it was. */
   let located: Element[] = [];
+  /** Whether a step of this call has sent anything to the phone yet. */
+  let acted = false;
+  /** The step being run, for notes made while a target is found. */
+  let current = 0;
+  const fail = (r: { error: string; next: string; ambiguous?: boolean }): never => {
+    // The usual reason a target is missing: an alert or sheet came up in front of it.
+    if (snap.modal && !r.ambiguous) {
+      const answers = snap.elements.filter((e) => e.kind === "button" || e.kind === "back").map((e) => quote(e.label ?? e.id ?? "")).slice(0, 4);
+      throw new StepFailure(`${r.error.replace(/\.$/, "")}: ${snap.modal === "alert" ? "an alert" : "a sheet or menu"} is in front of the screen.`, answers.length ? `Answer it first: tap ${answers.join(" or ")}.` : "Close it first; ui_look shows it.");
+    }
+    throw new StepFailure(r.error, r.next);
+  };
+  /**
+   * A point of the element that reaches it. Another element may lie over its middle (a floating search field or bar
+   * over a row: iOS 27 Settings' "StandBy" and "Search" had the same point): when the read has another element at
+   * the point, the phone says which one a touch there reaches, and a point of the element that reaches it is used,
+   * else the step fails and names what covers it.
+   */
+  const reachable = async (r: Resolved, target: Target): Promise<Resolved> => {
+    const e = r.element;
+    if (!e || !(await hasEngine(udid))) return r;
+    const over = (x: number, y: number) => [...snap.elements, ...snap.tabs].filter((o) => o !== e && x >= o.frame.x && x <= o.frame.x + o.frame.width && y >= o.frame.y && y <= o.frame.y + o.frame.height
+      // What holds the element (a cell around its button) is not over it, nor is what it holds.
+      && !(o.frame.x <= e.frame.x && o.frame.y <= e.frame.y && o.frame.x + o.frame.width >= e.frame.x + e.frame.width && o.frame.y + o.frame.height >= e.frame.y + e.frame.height)
+      && !(e.frame.x <= o.frame.x && e.frame.y <= o.frame.y && e.frame.x + e.frame.width >= o.frame.x + o.frame.width && e.frame.y + e.frame.height >= o.frame.y + o.frame.height));
+    const others = over(r.x, r.y);
+    if (!others.length) return r;
+    if (pinned(await elementAt(udid, r.x, r.y), e)) return r;
+    // The part of it on screen, away from its middle: a quarter in from each side.
+    const f = e.frame, { screen } = snap;
+    const left = Math.max(f.x, screen.x), right = Math.min(f.x + f.width, screen.x + screen.width), top = Math.max(f.y, screen.y), bottom = Math.min(f.y + f.height, screen.y + screen.height);
+    const tries = [[0.5, 0.2], [0.5, 0.8], [0.2, 0.5], [0.8, 0.5], [0.15, 0.2], [0.85, 0.8]].map(([fx, fy]) => ({ x: Math.round(left + (right - left) * fx!), y: Math.round(top + (bottom - top) * fy!) }));
+    for (const p of tries) {
+      if (over(p.x, p.y).length) continue;
+      if (pinned(await elementAt(udid, p.x, p.y), e)) return { element: e, x: p.x, y: p.y };
+    }
+    const cover = others[0]!;
+    throw new StepFailure(`${describeTarget(target)} is covered by ${line(cover)}: a touch on it reaches that instead.`, "Scroll it clear of what covers it (scroll down or scroll up), or close what is over it.");
+  };
   const locate = async (target: Target): Promise<Resolved> => {
     let r = resolve(snap, target);
     if (stale && isResolved(r) && r.element && !pinned(await elementAt(udid, r.x, r.y), r.element)) r = resolve(await fresh(), target);
+    // An alert or sheet in front, read just now: what is behind it is not coming while it is there.
+    if (!isResolved(r) && !r.ambiguous && snap.modal && !stale) fail(r);
     const deadline = Date.now() + FIND_WAIT_MS;
+    const watched = await hasEngine(udid);
+    const stillMs = acted ? FIND_STILL_AFTER_ACT_MS : FIND_STILL_MS;
+    // Since when the screen has been as it is, a control easing out aside (it was read still just now).
+    let calmSince = Date.now();
+    let reached = 0;
     while (!isResolved(r) && !r.ambiguous && Date.now() < deadline) {
-      await sleep(250);
-      r = resolve(await fresh(), target);
-    }
-    if (!isResolved(r)) {
-      // The usual reason a target is missing: an alert or sheet came up in front of it.
-      if (snap.modal && !r.ambiguous) {
-        const answers = snap.elements.filter((e) => e.kind === "button" || e.kind === "back").map((e) => quote(e.label ?? e.id ?? "")).slice(0, 4);
-        throw new StepFailure(`${r.error.replace(/\.$/, "")}: ${snap.modal === "alert" ? "an alert" : "a sheet or menu"} is in front of the screen.`, answers.length ? `Answer it first: tap ${answers.join(" or ")}.` : "Close it first; ui_look shows it.");
+      // Just off screen (a row under a bar, the next rows of a list): scrolled to, a few times at most.
+      if (r.scroll && reached < REACH_SCROLLS && !snap.modal) {
+        reached++;
+        const way = r.scroll;
+        await settled(current, { gesture: sweep(snap, OPPOSITE[way], true) });
+        acted = true;
+        const next = resolve(snap, target);
+        if (isResolved(next) && !notes.some((n) => n.startsWith(`step ${current}: scrolled`))) notes.push(`step ${current}: scrolled ${way} to reach ${describeTarget(target)}`);
+        r = next;
+        continue;
       }
-      throw new StepFailure(r.error, r.next);
+      if (watched) {
+        // The engine watches the screen: the target is waited for only while the screen changes. Still for stillMs,
+        // or with only a control easing out (a tab bar's glass after a tap on a tab), it is not coming.
+        const s = await settle(udid, snap.app, undefined, { firstChangeMs: Math.max(50, stillMs - (Date.now() - calmSince)), timeoutMs: Math.max(500, deadline - Date.now()) });
+        snap = s.snap;
+        stale = false;
+        r = resolve(snap, target);
+        if (s.changed === false) break;
+        // A control easing out is not the screen changing: the still time runs on through it.
+        if (!s.animating) calmSince = Date.now();
+        else if (Date.now() - calmSince >= stillMs) break;
+      } else {
+        await sleep(250);
+        r = resolve(await fresh(), target);
+      }
     }
+    if (!isResolved(r)) return fail(r);
     located = snap.elements;
-    return r;
+    return reachable(r, target);
   };
   /**
    * What a field shows now: the one element under its point, or, when that read fails, the field in a full read.
@@ -302,6 +399,23 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   };
 
   const run = async (step: Step, n: number) => {
+    current = n;
+    try {
+      await runStep(step, n);
+    } finally {
+      // Every step but a wait or a pause sends something (a failed one may have, too).
+      if (step.op !== "wait" && step.op !== "gone" && step.op !== "pause") acted = true;
+    }
+  };
+  /** A label that ends in a number, unquoted (`hold Row 3`): the element of that whole name when the screen has one. */
+  const named = (step: { target: Target; whole?: Target }): { target: Target; whole: boolean } => {
+    if (step.whole) {
+      const r = resolve(snap, step.whole);
+      if (isResolved(r) || r.ambiguous || r.scroll) return { target: step.whole, whole: true };
+    }
+    return { target: step.target, whole: false };
+  };
+  const runStep = async (step: Step, n: number) => {
     switch (step.op) {
       case "tap": {
         const r = await locate(step.target);
@@ -344,13 +458,23 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
         const kind = r.element?.kind ?? (step.target.by === "point" ? fieldAt(snap.elements, r)?.kind : undefined);
         // Typing at something that isn't a field sends the keys to whichever field still has focus.
         if (kind && !FIELDS.has(kind)) throw new StepFailure(`${describeTarget(step.target)} is a ${kind}, not a text field, so nothing was typed.`, "Fill a textfield, securefield, searchfield or textview from ui_look.");
-        // Focus, select all, delete, type: one AXe process, so nothing else lands in between.
-        await batch(udid, [`tap -x ${r.x} -y ${r.y}`, "sleep 0.15", "key-combo --modifiers 227 --key 4", `key ${KEYS.delete}`, ...(step.text ? await typing(udid, step.text) : [])]);
+        // Focus, select all, delete, type: one AXe process, so nothing else lands in between. A web page's field
+        // takes the text as a paste: iOS corrects what is typed into one as it goes ("web" became "Webb", and its
+        // suggestion stayed up over the page), and a paste goes in as it is.
+        // And it takes its focus late (the page zooms to it, the keyboard comes up): keys sent 0.15 s after the tap
+        // were lost on it (a paste that never landed, November 22, 2026), so the tap is let settle first.
+        if (r.element?.web) {
+          await settled(n, { steps: [`tap -x ${r.x} -y ${r.y}`] });
+          await batch(udid, ["key-combo --modifiers 227 --key 4", `key ${KEYS.delete}`, ...(step.text ? await typing(udid, step.text, kind !== "securefield") : [])]);
+        } else {
+          await batch(udid, [`tap -x ${r.x} -y ${r.y}`, "sleep 0.15", "key-combo --modifiers 227 --key 4", `key ${KEYS.delete}`, ...(step.text ? await typing(udid, step.text) : [])]);
+        }
         field = r.element;
         stale = true;
         if (!step.text) return;
         let shown = await readBack(r, step.text, kind, (s) => readBackVerdict(kind, s, step.text) === "exact");
         let verdict = readBackVerdict(kind, shown, step.text);
+        if (setting("DEBUG")) process.stderr.write(`simulator-use:   fill: ${r.element?.web ? "pasted (a web page's field)" : "typed"}, read back ${verdict}${verdict === "exact" ? "" : ` (${JSON.stringify(shown.slice(0, 60))})`}\n`);
         // iOS's autocorrect and smart punctuation change typed keys ("--udid" became "—used", ' became ’).
         // A paste is taken as is: try once more that way before calling the text changed or wrong.
         if (verdict !== "exact" && kind !== "securefield") {
@@ -390,6 +514,27 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       }
       case "scroll":
       case "swipe": {
+        if (step.op === "scroll" && step.until) {
+          // Scroll that way until the target is on screen (it is not tapped), the end of the list, or the call's time.
+          const target = step.until;
+          const found = () => { const r = resolve(snap, target); return isResolved(r) || Boolean(r.ambiguous); };
+          let scrolls = 0;
+          while (!found()) {
+            if (scrolls >= UNTIL_SCROLLS || Date.now() - started > BUDGET_MS - 6_000) {
+              throw new StepFailure(`${describeTarget(target)} did not show after ${scrolls} scroll${scrolls === 1 ? "" : "s"} ${step.direction}.`, `The screen is below. Call it again to go on from here, or look for it another way (a search field, another tab).`);
+            }
+            const was = render(snap);
+            await settled(n, { gesture: sweep(snap, OPPOSITE[step.direction], true) });
+            scrolls++;
+            if (render(snap) === was) {
+              // A list that loads more as its end shows gets a moment to do so, once.
+              await settled(n, undefined, { firstChangeMs: 600 });
+              if (render(snap) === was && !found()) throw new StepFailure(`${describeTarget(target)} is not ${step.direction === "down" ? "below" : step.direction === "up" ? "above" : `to the ${step.direction}`}: the end was reached after ${scrolls - 1} scroll${scrolls === 2 ? "" : "s"}.`, `The screen is below.${step.direction === "down" ? " scroll up until … looks the other way." : ""}`);
+            }
+          }
+          if (scrolls) notes.push(`step ${n}: ${describeTarget(target)} showed after ${scrolls} scroll${scrolls === 1 ? "" : "s"} ${step.direction}`);
+          return;
+        }
         const was = render(snap);
         const slow = step.op === "scroll";
         const direction = slow ? OPPOSITE[step.direction] : step.direction;
@@ -405,10 +550,12 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       }
       case "hold": {
         // A long press: context menus, drag handles, "press and hold to record".
-        const r = await locate(step.target);
+        const which = named(step);
+        const r = await locate(which.target);
         const was = render(snap);
-        await settled(n, { steps: [`touch -x ${r.x} -y ${r.y} --down --up --delay ${step.seconds}`] });
-        if (render(snap) === was) notes.push(`step ${n} (hold ${describeTarget(step.target)}): no visible change`);
+        const held = which.whole ? DEFAULT_HOLD_SECONDS : step.seconds;
+        await settled(n, { steps: [`touch -x ${r.x} -y ${r.y} --down --up --delay ${held}`] });
+        if (render(snap) === was) notes.push(`step ${n} (hold ${describeTarget(which.target)}): no visible change`);
         return;
       }
       case "set": {
@@ -454,31 +601,65 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
       case "key":
         await settled(n, { steps: [`key ${KEYS[step.key]}`] });
         return;
+      case "pause":
+        await sleep(step.seconds * 1000);
+        await fresh();
+        return;
       case "wait":
       case "gone": {
+        // `wait Step 2`, unquoted: "Step 2" when the screen has it (then with the usual time), else "Step" for 2 s; a
+        // wait takes either as it comes.
+        const which = named(step);
+        const target = which.target;
+        const waitSeconds = which.whole ? DEFAULT_WAIT_SECONDS : step.seconds;
         // Within what is left of the call's 45 s, so two long waits can't run past it.
-        const deadline = Math.min(Date.now() + step.seconds * 1000, started + BUDGET_MS - 2_000);
+        const deadline = Math.min(Date.now() + waitSeconds * 1000, started + BUDGET_MS - 2_000);
+        const there = (t: Target) => { const r = resolve(snap, t); return isResolved(r) || Boolean(r.ambiguous); };
         const met = () => {
-          const r = resolve(snap, step.target);
           // Text that matches more than one element is there all the same.
-          const present = isResolved(r) || Boolean(r.ambiguous);
+          const present = there(target) || (step.op === "wait" && step.whole !== undefined && there(step.whole));
           return step.op === "wait" ? present : !present;
         };
+        const watching = await hasEngine(udid);
         while (!met()) {
           if (Date.now() >= deadline) {
             // What the on-screen keyboard covers is not listed: on a phone without a hardware keyboard (a cloud
             // phone) a label under a field just filled is hidden that way.
             const covered = step.op === "wait" && snap.keyboard ? ` It may be under the keyboard (covering y ${snap.keyboardTop ?? "?"} and below), which is not listed: key return or a tap outside the field hides it.` : "";
             throw new StepFailure(
-              `${describeTarget(step.target)} ${step.op === "wait" ? "did not appear" : "was still there"} after ${step.seconds} s.`,
-              `The screen is below. Wait longer with ${step.op} ${describeTarget(step.target)} 15, or act on what is there.${covered}`,
+              `${describeTarget(target)} ${step.op === "wait" ? "did not appear" : "was still there"} after ${waitSeconds} s.`,
+              `The screen is below. Wait longer with ${step.op} ${describeTarget(target)} 15, or act on what is there.${covered}`,
             );
           }
-          await sleep(250);
-          await fresh();
+          if (watching) {
+            // The engine watches the screen's pixels: a read only once something on it changed (and held still), or
+            // after a second of nothing (what changes without a pixel: nothing an agent could see either).
+            const s = await settle(udid, snap.app, undefined, { firstChangeMs: Math.max(50, Math.min(1_000, deadline - Date.now())), timeoutMs: Math.max(300, Math.min(2_000, deadline - Date.now())) });
+            snap = s.snap;
+            stale = false;
+          } else {
+            await sleep(250);
+            await fresh();
+          }
         }
         return;
       }
+    }
+  };
+
+  // The app the tools last launched, when it was run with its permissions granted (app_run's default): iOS's
+  // permission prompts that a step brings up are answered as its launch's are, so the next step finds the app.
+  const launched = await currentApp(udid);
+  const granting = launched && (await permissionMode(udid, launched.bundleId)) === "grant";
+  let answered = 0;
+  const answerPrompts = async (n: number) => {
+    while (granting && answered < 3 && snap.modal === "alert" && snap.app.endsWith(" · system alert")) {
+      const prompt = permissionPrompt(snap, snap.app.slice(0, -" · system alert".length));
+      const allow = prompt && snap.elements.find((e) => e.kind === "button" && e.label === prompt.allow);
+      if (!prompt || !allow) return;
+      answered++;
+      await settled(n, { steps: [`tap -x ${allow.x} -y ${allow.y}`] });
+      notes.push(`step ${n}: answered iOS's prompt ${quote(prompt.title)} (${prompt.allow}); app_run with permissions: "ask" keeps them`);
     }
   };
 
@@ -489,6 +670,7 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
     try {
       const stepStarted = Date.now();
       await run(steps[i] as Step, i + 1);
+      if (!stale) await answerPrompts(i + 1);
       if (setting("DEBUG")) process.stderr.write(`simulator-use: step ${i + 1} ${maskedStep(lines[i]!)} ${Date.now() - stepStarted} ms\n`);
     } catch (error) {
       if (!(error instanceof ToolError) && !(error instanceof StepFailure)) throw error;
@@ -502,6 +684,10 @@ async function act(udid: string, deviceLabel: string, lines: string[], called: n
   }
   // After typing (or a tap on a field): the screen once the text is drawn, which the next call can take as it is.
   if (stale) snap = await readWhenStill(udid);
+  // The app went and the Home screen shows: it quit, which after a tap is most often a crash. Said, with where to look.
+  if (launched?.executable && before.app !== snap.app && snap.app === "Home screen" && before.app.split(" · ")[0] !== "Home screen" && !(await appPids(udid, launched.executable)).length) {
+    notes.push(`${before.app.split(" · ")[0]} is no longer running: it quit or crashed. app_logs {crashes: true} shows a crash's file and line, app_logs its last output.`);
+  }
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   const changes = diff(before, snap, deviceLabel);
   const quiet = changes === "no visible change" && notes.some((note) => note.endsWith("no visible change") || note.includes("can't be read"));
@@ -512,7 +698,7 @@ export const uiAct: Tool = {
   name: "ui_act",
   title: "Use the screen",
   description:
-    'Do steps on the Simulator in order and get back what changed. Steps: tap #id | tap "label" | tap @x,y | fill #id text | type text | scroll down | swipe left ["row"] | hold "label" [seconds] | set #slider 0-100 | back | home | key return | wait "text" [seconds] | gone "text". Text in any language can be typed and is read back; a tap that changes nothing is reported; the first failing step stops the rest.',
+    'Do steps on the Simulator in order and get back what changed. Steps: tap #id | tap "label" | tap @x,y | fill #id text | type text | scroll down | scroll down until "label" | swipe left ["row"] | hold "label" [seconds] | set #slider 0-100 | back | home | key return | wait "text" [seconds] | gone "text" | wait 2. Typed text is read back; a tap that changes nothing is reported; the first failing step stops the rest.',
   inputSchema: {
     type: "object",
     properties: {

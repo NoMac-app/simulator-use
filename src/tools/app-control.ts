@@ -3,11 +3,11 @@ import { dirname, isAbsolute, resolve as resolvePath } from "node:path";
 
 import { appInfo, BUNDLE_ID, bundleIdOf, install, launchWords, sendPush, simctlAction, stopLogStream } from "../engine/apps.ts";
 import { listDevices, pickDevice } from "../engine/simctl.ts";
-import { engineCall } from "../engine/native.ts";
+import { engineCall, hasEngine } from "../engine/native.ts";
 import { currentApp, heldDevice, setCurrentApp, setDeviceTimeZone } from "../engine/state.ts";
 import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
-import { readScreen } from "../look/read.ts";
+import { readScreen, settle } from "../look/read.ts";
 import { render } from "../look/snapshot.ts";
 import { grantAll, openInPrompt, setPermissionMode } from "../engine/prompts.ts";
 import { applyStoreKit, removeStoreKit } from "../engine/storekit.ts";
@@ -166,8 +166,30 @@ export const appControl: Tool = {
         await simctlAction(["uninstall", device.udid, bundleId!], `remove ${bundleId}`);
         return { text: `Removed ${bundleId} and its data from ${label}.` };
       case "open_url": {
+        // The screen before, to know when the link has shown: it opens in a moment or in seconds (Safari started cold
+        // on a phone took over 2.5 s, and the answer was the app that was in front, as if nothing had opened).
+        const before = (await hasEngine(device.udid)) ? render((await readScreen(device.udid, false, { reuse: true })).snap) : undefined;
         await openUrl(device.udid, value!);
         let snap = (await readScreen(device.udid)).snap;
+        // A web link opens Safari (or the app that claims it), which on a phone that has just booted can take 10 to
+        // 40 s to start the first time: it is waited for up to 20 s, and said when nothing has shown by then. A link
+        // of an app's own scheme may change nothing at all: 2.5 s without a change is its answer.
+        const web = /^https?:/i.test(value!.trim());
+        let shown = before === undefined;
+        if (before !== undefined) {
+          for (const until = Date.now() + (web ? 20_000 : 8_000); Date.now() < until; ) {
+            const s = await settle(device.udid, undefined, undefined, { firstChangeMs: Math.min(2_500, Math.max(200, until - Date.now())), timeoutMs: 3_000 });
+            snap = s.snap;
+            const changed = render(snap) !== before;
+            // What opened is there and still.
+            if (changed && s.settled && !snap.app.endsWith(" · system screen")) { shown = true; break; }
+            if (s.changed === false && !web) { shown = true; break; }
+          }
+          if (!shown && render(snap) !== before) shown = true;
+        }
+        if (!shown) {
+          return { text: `Sent the link, but nothing has opened yet${web ? " (Safari can take up to half a minute to start the first time on a phone that has just booted)" : ""}.\nNext: ui_look in a few seconds; the link is not to be sent again.\n${render(snap, { device: label })}` };
+        }
         // A link that opens another app makes iOS ask "Open in “App”?": the agent asked for exactly that.
         const asked = openInPrompt(snap);
         if (asked) snap = await tapPrompt(device, "Open");

@@ -1,0 +1,8 @@
+# Prompts a step brings up, and an app that crashes under a tap.
+app_control {"action":"launch","app":"dev.simtap.edgelab"}
+ui_act	tap "Dialogs"	tap "Ask for photos"
+ui_act	tap "Ask for notifications"
+ui_act	tap "Ask for contacts"
+ui_look {}
+app_control {"action":"launch","app":"dev.simtap.demo"}
+ui_act	tap "Items"	tap #crash

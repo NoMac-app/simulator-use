@@ -32,7 +32,7 @@ export const INSTRUCTIONS = [
   "app_run builds the Xcode project here, installs and launches it, and answers with its first screen (a long build becomes a job for job_status); device_use picks and boots a Simulator; app_control installs, launches and sets permissions; ui_look reads the screen; ui_act taps, types, scrolls and waits, and answers with what changed, so no extra ui_look is needed; app_logs reads the app's output and crashes; tests_run runs the tests; screen_record makes a video for a person.",
   "Target elements by #id when they have one, else by their quoted label, else @x,y.",
   "When an alert or sheet is in front (iOS permission prompts too), ui_look lists only it: answer it with ui_act first.",
-  "Web views, maps and games have nothing to read: use ui_look with screenshot, then tap @x,y. Coordinates are points, the same as in the screenshot.",
+  "Web pages read like any screen (Safari, an app's web view). Maps and games have nothing to read: use ui_look with screenshot, then tap @x,y. Coordinates are points, the same as in the screenshot.",
   'Any screen without tapping through: app_control launch with value "-Key value" (launch arguments, read as UserDefaults), then ui_look; its screenshot waits for the screen to hold still.',
   "In-app purchases: app_control storekit with the app's .storekit file makes them local (no Apple Account); the App Store's sandbox cannot buy in a Simulator, only on a device.",
   "An iPhone app on an iPad runs in a window: positions are still the screen's, as ui_look says.",

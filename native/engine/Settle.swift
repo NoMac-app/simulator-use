@@ -110,6 +110,13 @@ final class ChangeTracker {
   private var seed: UInt32
   /** The last change that counted, as a box in points (for the caller's report). */
   private(set) var lastBox: CGRect?
+  /** What the last change that counted was: a box of pixels, the same pixels written again (see transitionTail), or the whole screen (another buffer, or one that could not be compared). */
+  enum Kind { case box, again, whole }
+  private(set) var lastKind = Kind.whole
+  /** The last change that counted as bands in points (Frames.swift): how much of the screen it was, and where. */
+  private(set) var lastBands: [CGRect] = []
+  /** How much of the screen the last change that counted was, in square points: its rows, each from its first changed point to its last. */
+  private(set) var lastArea = 0.0
 
   /** The last change of pixels this tracker saw: none yet when it starts. */
   private var lastPixels = Date.distantPast
@@ -133,19 +140,26 @@ final class ChangeTracker {
     if let now = screenWatcher?.currentSurface(), now !== surface {
       surface = now
       _ = reference.capture(now); seed = reference.seed
-      lastBox = nil; lastPixels = Date()
+      lastBox = nil; lastPixels = Date(); lastKind = .whole
       return true
     }
     let now = surfaceSeed(surface)
     if now == seed { return false }
-    let (readable, box) = reference.diff(surface, update: true)
+    let (readable, box, bands, changedPixels) = reference.diffBands(surface, update: true)
     seed = reference.seed
-    guard readable else { _ = reference.capture(surface); seed = reference.seed; lastPixels = Date(); return true }
+    guard readable else { _ = reference.capture(surface); seed = reference.seed; lastPixels = Date(); lastKind = .whole; return true }
     // The same pixels written again right after a change: a transition completing (see transitionTail).
-    guard let box else { return Date().timeIntervalSince(lastPixels) < transitionTail }
+    guard let box else {
+      guard Date().timeIntervalSince(lastPixels) < transitionTail else { return false }
+      lastKind = .again
+      return true
+    }
     if caretOnly(box, zones: zones) { return false }
     lastBox = pointsBox(box)
+    lastBands = bands.map(pointsBox)
+    lastArea = Double(changedPixels) / Double(max(1, pixelScale * pixelScale))
     lastPixels = Date()
+    lastKind = .box
     return true
   }
 }
@@ -158,12 +172,111 @@ struct KeptRead {
   let surface: IOSurface
   let zones: [CGRect]
   let options: String
+  /** Where small parts of the screen were still changing as it was read (settleRead): changes there are the same motion ending. */
+  var animating: [CGRect] = []
 }
 var keptRead: KeptRead?
 
 /** What a read was asked with: a kept read is given again only for the same request. */
 func readOptions(keys: Set<FBAXKeys>, nested: Bool) -> String {
   "\(keys.map(\.rawValue).sorted().joined(separator: ","))|\(nested)|\(webScanOn)|\(webBudget)|\(readRemote != nil)|\(readProfile)"
+}
+
+/**
+ * How much of the screen a change may be and still be a small one, counted as its rows from each one's first changed
+ * point to its last (Frames.swift): a control's highlight, a bar's glass, a scroll indicator, a switch, a toast.
+ * Measured November 22, 2026 on an iPhone 17 Pro (402 x 874 points, iOS 27.2), each as a share of the screen:
+ * - the tab bar's pill settling after a tap on a tab, for 1.7 s: 1.3 to 2.4%;
+ * - a navigation bar's button or title easing in after a push or a pop, for 0.5 s: 0.4 to 1%;
+ * - a navigation bar's glass adjusting to what scrolled under it: up to 7.4%;
+ * - the last 0.3 s of a push, the new screen sliding its last points: 12 to 18%; a list coming to rest: 18 to 20%;
+ *   a push, a pop, a sheet or a keyboard on its way: 30 to 100%.
+ */
+let smallChangeShare = 0.1
+
+/** Parts that touch or overlap (within 4 points) joined into one, until none do. */
+func mergedParts(_ parts: [CGRect]) -> [CGRect] {
+  var out: [CGRect] = []
+  for part in parts {
+    var joined = part
+    var again = true
+    while again {
+      again = false
+      for (i, other) in out.enumerated() where other.insetBy(dx: -4, dy: -4).intersects(joined) {
+        joined = joined.union(other); out.remove(at: i); again = true
+        break
+      }
+    }
+    out.append(joined)
+  }
+  return out
+}
+
+/**
+ * Whether two reads of an element agree: its label, value, id, role and app, and its frame to 1.5 points; or, with
+ * easing (a control that is still easing into place: iOS 27's glass buttons report their frame as it is drawn, a few
+ * points off until they rest), frames that mostly cover each other.
+ */
+func sameElement(_ a: [String: Any], _ b: [String: Any], easing: Bool = false) -> Bool {
+  let text = { (n: [String: Any], key: String) in n[key].map { "\($0)" } ?? "" }
+  // pid too: the same screen drawn again by a relaunched app is another app's tree.
+  guard ["AXLabel", "AXValue", "AXUniqueId", "role", "pid"].allSatisfy({ text(a, $0) == text(b, $0) }), let fa = frameOf(a), let fb = frameOf(b) else { return false }
+  if abs(fa.minX - fb.minX) <= 1.5 && abs(fa.minY - fb.minY) <= 1.5 && abs(fa.width - fb.width) <= 1.5 && abs(fa.height - fb.height) <= 1.5 { return true }
+  guard easing else { return false }
+  let shared = fa.intersection(fb)
+  return !shared.isNull && shared.width * shared.height >= 0.6 * max(fa.width * fa.height, fb.width * fb.height)
+}
+
+/** Roles that say something is loading: a part of the screen that animates there is waited for, as the screen is. */
+let loadingRoles: Set<String> = ["AXProgressIndicator", "AXBusyIndicator"]
+
+/**
+ * Whether the part of the screen that is still animating reads as the tree has it: each of the tree's elements there
+ * (up to eight, the smallest first: the ones the motion is on), hit at its middle, must answer an element the tree
+ * has at that point with the same label, value, id, role and frame. False too when one of them is something loading
+ * (a progress indicator: what it waits for is what the caller wants to read), or when there is nothing to check.
+ */
+/** Why the last regionHolds said no (for a trace). */
+var regionFailure: String? = nil
+
+@MainActor
+func regionHolds(_ simulator: FBSimulator, _ tree: Any, _ regions: [CGRect]) async -> Bool {
+  var all: [[String: Any]] = []
+  func walk(_ node: Any) {
+    if let list = node as? [Any] { list.forEach(walk); return }
+    guard let n = node as? [String: Any] else { return }
+    all.append(n)
+    (n["children"] as? [Any])?.forEach(walk)
+  }
+  walk(tree)
+  let onDisplay = { (f: CGRect) in f.width >= 4 && f.height >= 4 && f.midX > 0 && f.midY > 0 && (display.width == 0 || (f.midX < display.width && f.midY < display.height)) }
+  // A sliver (a line of pixels at the screen's edge, under the home indicator) has no element of its own to ask.
+  let regions = regions.filter { $0.width >= 3 && $0.height >= 3 }
+  let there = all.filter { n in frameOf(n).map { f in onDisplay(f) && regions.contains { $0.intersects(f) } } == true }
+  regionFailure = nil
+  if there.contains(where: { loadingRoles.contains($0["role"] as? String ?? "") }) { regionFailure = "something loading"; return false }
+  let screen = Double(display.width * display.height)
+  // Elements with something to compare (a label, a value or an id): the leaves, which a hit at their middle answers
+  // (a container's middle answers whatever of its own is nearest), else the containers smaller than half the screen.
+  let comparable = there.filter { n in ["AXLabel", "AXValue", "AXUniqueId"].contains { !((n[$0] as? String) ?? "").isEmpty } }
+  let leaves = comparable.filter { (($0["children"] as? [Any]) ?? []).isEmpty }
+  let chosen = !leaves.isEmpty ? leaves : comparable.filter { n in frameOf(n).map { screen == 0 || Double($0.width * $0.height) < screen * 0.5 } == true }
+  let probes = chosen.sorted { a, b in (frameOf(a).map { $0.width * $0.height } ?? 0) < (frameOf(b).map { $0.width * $0.height } ?? 0) }.prefix(8)
+  // Nothing readable where the motion is (a drawing, a picture): there is nothing it could have changed in the tree.
+  for probe in probes {
+    guard let f = frameOf(probe) else { return false }
+    let point = CGPoint(x: f.midX, y: f.midY)
+    // Nothing answers at its middle (a row that runs off the screen's end, an element under a bar): it says nothing
+    // either way. An element that went leaves another in its place, which is then not one the read has.
+    guard let hit = (await rawHit(simulator, Double(point.x), Double(point.y))).map({ onScreen($0, at: point) }) as? [String: Any] else { continue }
+    // What answers there is in the read as it answers now (a hit answers the element that takes a touch there, which
+    // may be a neighbour of the one probed: it must be one the read has, with the text it has).
+    if !all.contains(where: { sameElement($0, hit, easing: true) }) {
+      regionFailure = "\(hit["role"] ?? "") \("\(hit["AXLabel"] ?? "")".prefix(30)) =\("\(hit["AXValue"] ?? "")".prefix(20)) \(frameOf(hit).map { rectArray($0) } ?? []) at \(Int(point.x)),\(Int(point.y))"
+      return false
+    }
+  }
+  return true
 }
 
 /**
@@ -245,6 +358,11 @@ func reusableRead(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, m
     guard readable else { return (nil, "unreadable buffer") }
     if box == nil { why = "pixels" }
     else if let box, caretOnly(box, zones: kept.zones) { why = "caret" }
+    // The small motion the read was taken beside has ended since: its elements are checked again, as then.
+    else if !kept.animating.isEmpty, kept.pixels.diffBands(kept.surface, update: false).bands.map(pointsBox).allSatisfy({ band in kept.animating.contains { $0.insetBy(dx: -6, dy: -6).contains(band) } }) {
+      guard await regionHolds(simulator, kept.tree, kept.animating) else { keptRead = nil; return (nil, "the part that was animating reads otherwise") }
+      why = "animation ended"
+    }
     else { return (nil, "changed \(box.map { rectArray(pointsBox($0)) } ?? [])") }
   }
   if let failed = await spotCheck(simulator, kept.tree) { keptRead = nil; return (nil, "spot check: \(failed)") }
@@ -261,9 +379,11 @@ func reusableRead(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool, m
  */
 @MainActor
 func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, firstChangeMs: Double, quietMs: Double, startMs: Double, guardMs: Double,
-                timeoutMs: Double, keys: Set<FBAXKeys>, fromKept: Bool) async throws -> [String: Any] {
+                timeoutMs: Double, keys: Set<FBAXKeys>, fromKept: Bool, traced: Bool = false, wholeStill: Bool = false) async throws -> [String: Any] {
   let t0 = Date()
   func elapsed() -> Double { Date().timeIntervalSince(t0) * 1000 }
+  // For a look at where the time goes (traced): each change that counted, as [ms, x, y, width, height] in points.
+  var trace: [[Int]] = []
   // Any input makes the kept read the past; as the baseline, its pixels are the screen the caller last saw.
   let kept = keptRead
   keptRead = nil
@@ -277,34 +397,74 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
     caretZones = textFieldFrames(tree)
     return ["tree": tree, "settled": settled, "changed": true, "waited_ms": Int(elapsed()), "reads": 1, "dropped": 0, "watched": false]
   }
+  // What changed at each look: nothing, a small part of the screen, or the screen.
+  enum Change { case none, small, screen }
+  // A small change: one whose rows span at most smallChangeShare of the screen. Once the screen itself has stopped
+  // changing, small ones alone do not hold the read back, and where they are is checked against it.
+  let smallArea = Double(display.width * display.height) * smallChangeShare
+  // The elements where the small changes were did not read as the read has them: from then on every change counts.
+  // wholeStill asks for that from the start: a launch's first frames are small (an icon growing), and a read of an
+  // app that is still launching waits on the app (1 to 2 s), so its screen is read only once all of it is still.
+  var strict = wholeStill
+  // The last change of the screen itself (the first change counts as one, whatever its size), and where the small
+  // changes since have been.
+  var lastScreen = 0.0
+  var smallParts: [CGRect] = []
+  var lastWasSmall = false
+  func changedNow() -> Change {
+    guard tracker.changed() else { return .none }
+    if traced, trace.count < 600 {
+      let b = tracker.lastBox ?? .zero
+      trace.append([Int(elapsed()), Int(b.minX), Int(b.minY), Int(b.width), Int(b.height), tracker.lastKind == .box ? Int(tracker.lastArea) : -1])
+    }
+    var small = false
+    switch tracker.lastKind {
+    case .box:
+      if !strict, smallArea > 0, tracker.lastArea <= smallArea {
+        // With the small changes before it: parts that touch are one.
+        small = true; smallParts = mergedParts(smallParts + tracker.lastBands)
+      }
+    // The same pixels written again right after a change (a transition completing) is as its change was.
+    case .again: small = lastWasSmall && !strict
+    case .whole: small = false
+    }
+    lastWasSmall = small
+    if !small { lastScreen = elapsed(); smallParts = [] }
+    return small ? .small : .screen
+  }
   // The waits count from the end of the input: a hold or a slow drag takes a second or more to send.
   try await input?()
   let inputEnd = elapsed()
   var lastChange: Double? = nil
   var firstChangeAt = -1.0
+  /** The first change, whatever its size, is the screen starting to change. */
+  func began() { lastChange = elapsed(); firstChangeAt = lastChange!; lastScreen = lastChange!; smallParts = []; lastWasSmall = false }
   if firstChangeMs <= 0 {
     // Taken as changing already: still for as long as the seed clock has seen no write that counts (a caret's blink
     // does not), up to quietMs.
     let still = (writeClock?.sinceSignificantWrite() ?? 0) * 1000
     lastChange = inputEnd - min(max(0, still), quietMs)
-  } else if tracker.changed() {
-    lastChange = elapsed(); firstChangeAt = lastChange!
+    lastScreen = lastChange!
+  } else if changedNow() != .none {
+    began()
   }
   while lastChange == nil && elapsed() - inputEnd < firstChangeMs {
     try? await Task.sleep(nanoseconds: 4_000_000)
-    if tracker.changed() { lastChange = elapsed(); firstChangeAt = lastChange! }
+    if changedNow() != .none { began() }
   }
-  var reads = 0, dropped = 0, readMs: [Int] = []
-  func finish(_ tree: Any, settled: Bool, changed: Bool, kept: Bool) -> [String: Any] {
+  var reads = 0, dropped = 0, readMs: [Int] = [], checks = 0, failures: [String] = []
+  func finish(_ tree: Any, settled: Bool, changed: Bool, kept: Bool, animating: [CGRect] = []) -> [String: Any] {
     caretZones = textFieldFrames(tree)
     if kept && !isEmptyApp(tree) && lastReadStable {
-      keptRead = KeptRead(tree: tree, at: Date(), pixels: tracker.reference, surface: tracker.surface, zones: caretZones, options: readOptions(keys: keys, nested: true))
+      keptRead = KeptRead(tree: tree, at: Date(), pixels: tracker.reference, surface: tracker.surface, zones: caretZones, options: readOptions(keys: keys, nested: true), animating: animating)
     } else {
       keptRead = nil
     }
     var answer: [String: Any] = ["tree": tree, "settled": settled, "changed": changed, "waited_ms": Int(elapsed()), "reads": reads, "dropped": dropped, "read_ms": readMs,
                                  "first_change_ms": Int(firstChangeAt), "kept": kept, "watched": true]
     if let box = tracker.lastBox { answer["last_change"] = rectArray(box) }
+    if !animating.isEmpty { answer["animating"] = animating.map(rectArray); answer["checks"] = checks }
+    if traced { answer["trace"] = trace; answer["input_ms"] = Int(inputEnd); if !failures.isEmpty { answer["region_failures"] = failures } }
     return answer
   }
   var last: Double
@@ -317,15 +477,15 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
     tracker.zones = textFieldFrames(tree)
     // Still through the read and guardMs after (what changed during it is drawn a frame or two later). Kept only
     // after a wait long enough to know the screen was still (a late check's last few milliseconds are not).
-    var moved = tracker.changed()
+    var moved = changedNow() != .none
     let readEnd = elapsed()
     while !moved && elapsed() - readEnd < guardMs {
       try? await Task.sleep(nanoseconds: 4_000_000)
-      moved = tracker.changed()
+      moved = changedNow() != .none
     }
     if !moved { return finish(tree, settled: true, changed: false, kept: elapsed() - inputEnd >= 100) }
     // The change came as the screen was read (a late answer): wait for it to hold still, as for any change.
-    last = elapsed(); firstChangeAt = last; dropped += 1
+    last = elapsed(); firstChangeAt = last; lastScreen = last; smallParts = []; lastWasSmall = false; dropped += 1
   }
   // The last read dropped and when it ended: at the timeout, one that just ended is the screen as it is.
   var dropRead: (tree: Any, end: Double)? = nil
@@ -337,22 +497,51 @@ func settleRead(_ simulator: FBSimulator, input: (() async throws -> Void)?, fir
       return finish(tree, settled: false, changed: true, kept: false)
     }
     try? await Task.sleep(nanoseconds: 4_000_000)
-    if tracker.changed() { last = elapsed(); continue }
-    // A screen that keeps changing just after each read starts (a fast ticker) is read only after a full quiet period.
-    guard elapsed() - last >= (dropped >= 2 ? quietMs : startMs) else { continue }
-    // Still for startMs: read, and keep the read only if the screen stays still through it and guardMs after.
+    if changedNow() != .none { last = elapsed(); continue }
+    // Read once the screen is still for startMs (a screen that keeps changing just after each read starts, a fast
+    // ticker, only after a full quiet period), or once only a small part of it has changed for quietMs.
+    let still = elapsed() - last >= (dropped >= 2 ? quietMs : startMs)
+    let calm = !smallParts.isEmpty && elapsed() - lastScreen >= quietMs
+    guard still || calm else { continue }
     let start = Date()
+    let readBegan = elapsed()
     let tree = try await readFrontmost(simulator, keys: keys); reads += 1; readMs.append(ms(start))
     // The fields of the screen as just read: a caret blinking in one (on a screen come back to) is no change.
     tracker.zones = textFieldFrames(tree)
-    if tracker.changed() { last = elapsed(); dropped += 1; dropRead = (tree, last); continue }
-    let readEnd = elapsed()
+    // The read is kept only if the screen itself did not change through it and guardMs after, and has not for
+    // quietMs in all. Small changes meanwhile are left to the check below.
     var moved = false
-    while elapsed() - readEnd < guardMs || elapsed() - last < quietMs {
-      try? await Task.sleep(nanoseconds: 4_000_000)
-      if tracker.changed() { moved = true; break }
+    switch changedNow() {
+    case .screen: moved = true
+    case .small: last = elapsed()
+    case .none: break
     }
-    if moved { last = elapsed(); dropped += 1; dropRead = (tree, last); continue }
-    return finish(tree, settled: true, changed: true, kept: true)
+    let readEnd = elapsed()
+    while !moved && (elapsed() - readEnd < guardMs || elapsed() - lastScreen < quietMs || (smallParts.isEmpty && elapsed() - last < quietMs)) {
+      try? await Task.sleep(nanoseconds: 4_000_000)
+      switch changedNow() {
+      case .screen: moved = true
+      case .small: last = elapsed()
+      case .none: break
+      }
+    }
+    if moved {
+      // The screen is still since its last write that counted, which the seed clock saw as it happened (a change
+      // early in a long read is not one at the read's end: the next read need not wait the stillness out again).
+      let now = elapsed()
+      let since = (writeClock?.sinceSignificantWrite() ?? 0) * 1000
+      last = min(now, max(readBegan, now - since)); lastScreen = last
+      dropped += 1; dropRead = (tree, now)
+      continue
+    }
+    if smallParts.isEmpty { return finish(tree, settled: true, changed: true, kept: true) }
+    let animating = smallParts
+    // A small part of the screen is still changing (a control's highlight easing out, a scroll indicator fading, a
+    // bar's glass settling: 1.7 s after a tap on a tab, November 22, 2026). The read stands if the elements there
+    // read, one point each, as it has them, and none of them is something loading.
+    checks += 1
+    if await regionHolds(simulator, tree, animating) { return finish(tree, settled: true, changed: true, kept: true, animating: animating) }
+    failures.append("\(Int(elapsed())): \(regionFailure ?? "?") in \(animating.map(rectArray))")
+    strict = true; smallParts = []; lastScreen = elapsed(); last = lastScreen; dropped += 1; dropRead = (tree, last)
   }
 }

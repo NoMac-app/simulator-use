@@ -1,0 +1,18 @@
+# Targets that are missing, off screen, behind an alert, and the new steps.
+app_control {"action":"launch","app":"dev.simtap.demo"}
+ui_look {}
+ui_act	tap "Nonexistent"
+ui_act	tap "Items"
+ui_act	tap "Nonexistent"
+ui_act	tap "Item 16"
+ui_act	back
+ui_act	scroll down until "Item 38"
+ui_act	scroll up until "Item 2"
+ui_act	scroll down until "Item 99"
+ui_act	tap "Login"	tap "Nonexistent"
+ui_act	wait 1
+ui_act	wait "Nonexistent" 2
+app_control {"action":"launch","app":"dev.simtap.edgelab"}
+ui_act	tap "Dialogs"	tap "Show alert"
+ui_act	tap "Show sheet"
+ui_act	tap "Cancel"

@@ -40,15 +40,40 @@ final class PixelReference {
    * With update, the copy takes the surface's changed rows, so the next call compares with now.
    */
   func diff(_ surface: IOSurface, update: Bool) -> (readable: Bool, box: CGRect?) {
-    guard let buffer else { return (false, nil) }
+    let (readable, box, _, _) = diffBands(surface, update: update)
+    return (readable, box)
+  }
+
+  /** Rows that did not change between two runs of changed rows, up to this many, do not part them into two bands. */
+  static let bandGap = 12
+  /** More bands than this are one change of the screen: the box alone. */
+  static let maxBands = 12
+
+  /**
+   * As diff, and the changed rows as bands: each run of changed rows (runs up to bandGap unchanged rows apart are
+   * one) with the columns that changed in it. Two bars changing at the top and the bottom of the screen are one box
+   * as tall as the screen, and two bands that say how little of it changed. changed is how many pixels the changed
+   * rows span, each from its first changed pixel to its last: a scroll indicator fading down the screen's edge makes
+   * a band as tall as the screen that is a few pixels of each row.
+   */
+  func diffBands(_ surface: IOSurface, update: Bool) -> (readable: Bool, box: CGRect?, bands: [CGRect], changed: Int) {
+    guard let buffer else { return (false, nil, [], 0) }
     let ref = unsafeBitCast(surface, to: IOSurfaceRef.self)
     var lockSeed: UInt32 = 0
-    guard IOSurfaceLock(ref, .readOnly, &lockSeed) == KERN_SUCCESS else { return (false, nil) }
+    guard IOSurfaceLock(ref, .readOnly, &lockSeed) == KERN_SUCCESS else { return (false, nil, [], 0) }
     defer { IOSurfaceUnlock(ref, .readOnly, &lockSeed) }
-    guard IOSurfaceGetBytesPerRow(ref) == bytesPerRow, IOSurfaceGetHeight(ref) == height, IOSurfaceGetWidth(ref) == width else { return (false, nil) }
+    guard IOSurfaceGetBytesPerRow(ref) == bytesPerRow, IOSurfaceGetHeight(ref) == height, IOSurfaceGetWidth(ref) == width else { return (false, nil, [], 0) }
     let base = IOSurfaceGetBaseAddress(ref)
     let rowBytes = width * bytesPerElement
     var top = -1, bottom = -1, left = Int.max, right = -1
+    var bands: [CGRect] = []
+    var changed = 0
+    // The band being gathered: its first and last changed rows and its columns.
+    var bandTop = -1, bandBottom = -1, bandLeft = Int.max, bandRight = -1
+    func closeBand() {
+      if bandTop >= 0 { bands.append(CGRect(x: bandLeft, y: bandTop, width: bandRight - bandLeft + 1, height: bandBottom - bandTop + 1)) }
+      bandTop = -1; bandLeft = Int.max; bandRight = -1
+    }
     for y in 0..<height {
       let a = buffer + y * bytesPerRow, b = base + y * bytesPerRow
       if memcmp(a, b, rowBytes) == 0 { continue }
@@ -59,11 +84,18 @@ final class PixelReference {
       while l < rowBytes && a.load(fromByteOffset: l, as: UInt8.self) == b.load(fromByteOffset: l, as: UInt8.self) { l += 1 }
       var r = rowBytes - 1
       while r > l && a.load(fromByteOffset: r, as: UInt8.self) == b.load(fromByteOffset: r, as: UInt8.self) { r -= 1 }
-      left = min(left, l / bytesPerElement); right = max(right, r / bytesPerElement)
+      let rowLeft = l / bytesPerElement, rowRight = r / bytesPerElement
+      left = min(left, rowLeft); right = max(right, rowRight)
+      changed += rowRight - rowLeft + 1
+      if bandTop >= 0 && y - bandBottom > Self.bandGap { closeBand() }
+      if bandTop < 0 { bandTop = y }
+      bandBottom = y; bandLeft = min(bandLeft, rowLeft); bandRight = max(bandRight, rowRight)
       if update { memcpy(a, b, rowBytes) }
     }
+    closeBand()
     if update { seed = lockSeed }
-    guard top >= 0 else { return (true, nil) }
-    return (true, CGRect(x: left, y: top, width: right - left + 1, height: bottom - top + 1))
+    guard top >= 0 else { return (true, nil, [], 0) }
+    let box = CGRect(x: left, y: top, width: right - left + 1, height: bottom - top + 1)
+    return (true, box, bands.count > Self.maxBands ? [box] : bands, changed)
   }
 }

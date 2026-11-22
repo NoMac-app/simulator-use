@@ -1,0 +1,10 @@
+# Safari on a real page: read, tap a link, go back, scroll.
+app_control {"action":"open_url","value":"https://news.ycombinator.com"}
+sleep 2500
+ui_look {}
+ui_look {}
+ui_act	tap "past"
+ui_look {}
+ui_act	scroll down
+ui_act	tap "Hacker News"
+ui_look {"find":"login"}

@@ -16,7 +16,9 @@ export type PermissionMode = "grant" | "ask";
 
 const OPEN_IN = /^Open in “.+”\?$/;
 // "Would Like to Access the Camera", "would like full access to your Photo Library" (iOS 26), "to use your location".
-const PERMISSION = /would like (to )?(send you notifications|access|full access|use|find and connect)|to use your location|to track your activity/i;
+// iOS 27 words several of them "Allow “App” to access your photo library?" (seen November 22, 2026, with the buttons
+// Select Photos, Allow Full Access and Don’t Allow).
+const PERMISSION = /would like (to )?(send you notifications|access|full access|use|find and connect)|to use your location|to track your activity|^Allow “.+” to (access|use|find|track|send|connect)/i;
 /** The button that gives the app what it asks, in the order iOS words it. */
 const ALLOWING = ["Allow", "Allow While Using App", "Allow Full Access", "OK"];
 

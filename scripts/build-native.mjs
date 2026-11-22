@@ -1,6 +1,7 @@
 // Builds simulator-use's native parts into vendor/axe, beside AXe's frameworks, and checks them: the engine
 // (native/engine, a persistent Simulator driver), the clipboard helper (native/pbset), the StoreKit helper
-// (native/skconfig) and the accessibility helper (native/axon), the three built for the Simulator.
+// (native/skconfig), the accessibility helper (native/axon) and the web view library (native/webopen), the four built
+// for the Simulator.
 // Run by prepack after fetch-axe.mjs, on a Mac with Xcode: a release without the engine would quietly fall back to
 // AXe everywhere, so a failed build stops the pack. SIMULATOR_USE_SKIP_NATIVE=1 packs without them (CI's check of
 // the package, a local tarball for testing AXe alone).
@@ -41,7 +42,8 @@ execFileSync("mv", [join(root, "native", "engine", "simulator-use-engine"), join
 sh(join(root, "native", "pbset", "build.sh"));
 sh(join(root, "native", "skconfig", "build.sh"));
 sh(join(root, "native", "axon", "build.sh"));
-for (const [name, platform] of [["simulator-use-engine", "macOS"], ["simulator-use-pbset", "iOS Simulator"], ["simulator-use-skconfig", "iOS Simulator"], ["simulator-use-axon", "iOS Simulator"]]) {
+sh(join(root, "native", "webopen", "build.sh"));
+for (const [name, platform] of [["simulator-use-engine", "macOS"], ["simulator-use-pbset", "iOS Simulator"], ["simulator-use-skconfig", "iOS Simulator"], ["simulator-use-axon", "iOS Simulator"], ["simulator-use-webopen.dylib", "iOS Simulator"]]) {
   const path = join(vendor, name);
   const info = execFileSync("file", [path], { encoding: "utf8" });
   if (!/Mach-O/.test(info) || !/arm64/.test(info)) throw new Error(`${name} is not an arm64 Mach-O binary: ${info.trim()}`);

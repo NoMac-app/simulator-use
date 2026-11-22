@@ -1,0 +1,18 @@
+# The demo app: launch, sign in, a list, scrolls, a missing target, back.
+app_control {"action":"launch","app":"dev.simtap.demo"}
+ui_look {}
+ui_act	fill #email a@b.co
+ui_act	fill #password secret12
+ui_act	tap #signIn
+ui_act	tap "Items"
+ui_act	scroll down
+ui_act	scroll down
+ui_act	scroll up
+ui_act	tap "Item 5"
+ui_act	tap "Item 14"
+ui_act	back
+ui_act	tap "Login"
+ui_act	tap "Nonexistent"
+ui_act	tap "Items"	tap "Login"	tap "Items"	tap "Login"
+ui_look {}
+app_control {"action":"terminate","app":"dev.simtap.demo"}

@@ -1,0 +1,9 @@
+app_control {"action":"launch","app":"dev.simtap.edgelab"}
+ui_act	tap "More"	tap "Web page"
+ui_look {}
+ui_act	fill "Web field" hello web	tap "Web button"
+ui_look {}
+app_control {"action":"open_url","value":"https://news.ycombinator.com/front"}
+sleep 2500
+ui_act	scroll down until "More"	tap "More"
+ui_look {"find":"Go"}

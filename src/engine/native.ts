@@ -99,10 +99,22 @@ class Engine {
     return Promise.race([answer, late]).finally(() => clearTimeout(timer));
   }
 
+  /**
+   * Ends the engine: its requests end (it closes its session and exits), a signal after 2 s (which it takes even
+   * while a read holds it), and, for one that a hung phone holds for good, the kernel's own end after 5 s more. An
+   * engine ended that way has not closed its session: the lock file still names it as the holder, so the next
+   * engine keeps the full gap before it opens one (native/engine, lastSessionClose).
+   */
   kill(): void {
     this.dead = true;
     this.child.stdin?.end();
-    setTimeout(() => this.child.kill(), 2_000).unref();
+    setTimeout(() => {
+      if (this.child.exitCode !== null || this.child.signalCode !== null) return;
+      this.child.kill();
+      setTimeout(() => {
+        if (this.child.exitCode === null && this.child.signalCode === null) this.child.kill("SIGKILL");
+      }, 5_000).unref();
+    }, 2_000).unref();
   }
 }
 
@@ -240,5 +252,6 @@ export function engineGesture(args: string[]): Step | undefined {
   const [x1, y1, x2, y2] = ["--start-x", "--start-y", "--end-x", "--end-y"].map(value);
   const duration = value("--duration");
   if ([x1, y1, x2, y2].some((n) => !Number.isFinite(n))) return undefined;
-  return { op: kind, x1, y1, x2, y2, duration: Number.isFinite(duration) ? duration : kind === "drag" ? 0.6 : 0.3 };
+  const still = value("--rest"), steps = value("--steps");
+  return { op: kind, x1, y1, x2, y2, duration: Number.isFinite(duration) ? duration : kind === "drag" ? 0.6 : 0.3, ...(kind === "drag" && still > 0 ? { rest: still } : {}), ...(kind === "drag" && steps > 0 ? { steps } : {}), ...(kind === "drag" && rest.includes("--ease-out") ? { ease: "out" } : {}) };
 }

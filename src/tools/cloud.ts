@@ -425,7 +425,7 @@ export const cloud: Tool = {
       }
       throw new ToolError(`Unknown action "${String(args.action)}".`, `Actions: ${ACTIONS.join(", ")}.`);
     } catch (error) {
-      if (error instanceof CloudError) throw new ToolError(`NoMac: ${error.message}`, error.code === "insufficient_credit" ? "Add credit at https://nomac.app/dashboard, then cloud start again." : "Call cloud status, or try again in a minute.");
+      if (error instanceof CloudError) throw new ToolError(`NoMac: ${error.message}`, error.code === "insufficient_credit" ? "Add credit at https://nomac.app/dash, then cloud start again." : "Call cloud status, or try again in a minute.");
       throw error;
     }
   },

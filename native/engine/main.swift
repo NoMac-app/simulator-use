@@ -12,10 +12,26 @@ import UniformTypeIdentifiers
 
 let started = Date()
 func ms(_ since: Date) -> Int { Int(Date().timeIntervalSince(since) * 1000) }
+/** Whoever read the engine's answers is gone (its end of the pipe closed): the engine closes its session and ends. */
+var outputGone = false
 func emit(_ object: [String: Any]) {
-  let data = try! JSONSerialization.data(withJSONObject: object)
-  FileHandle.standardOutput.write(data); FileHandle.standardOutput.write(Data([0x0A]))
+  var data = try! JSONSerialization.data(withJSONObject: object)
+  data.append(0x0A)
+  // write(2), with SIGPIPE ignored (below): a reader that went away is an error here (EPIPE), not the engine's end
+  // by a signal with its session left open and no close time written, which let the next engine open one too soon
+  // and left the phone refusing sessions.
+  data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
+    var sent = 0
+    while sent < buffer.count {
+      let n = write(STDOUT_FILENO, buffer.baseAddress! + sent, buffer.count - sent)
+      if n > 0 { sent += n; continue }
+      if n < 0 && errno == EINTR { continue }
+      outputGone = true
+      return
+    }
+  }
 }
+signal(SIGPIPE, SIG_IGN)
 struct EngineError: Error { let message: String }
 
 let args = CommandLine.arguments
@@ -511,6 +527,7 @@ func openSession(device: AnyObject, timeout: Double, deadline: DispatchTime, res
     if !unsafeBitCast(objcCall(session, "enableAutomationModeWithError:"), to: EnableFn.self)(session, NSSelectorFromString("enableAutomationModeWithError:"), &error) { return (nil, "automation mode: \(error?.localizedDescription ?? "refused")") }
   }
   outcome = "ok"; sessionsOpened += 1
+  markSessionOpen()
   return (session, nil)
 }
 /**
@@ -601,10 +618,26 @@ func sessionLog(_ event: String) {
   if let handle = FileHandle(forWritingAtPath: path) { handle.seekToEndOfFile(); handle.write(line.data(using: .utf8)!); handle.closeFile() }
   else { FileManager.default.createFile(atPath: path, contents: line.data(using: .utf8), attributes: [.posixPermissions: 0o600]) }
 }
+/**
+ * When the last session on this phone closed. The lock file holds that time, or, while an engine has a session open,
+ * "open <pid>": an engine that ended without closing (killed, crashed) leaves that line, and its session then ended
+ * with it at a time nobody wrote, so it is taken as just now and the full gap is waited. (Before, such an end left
+ * the last clean close's time, the next engine opened at once, and the phone refused sessions from then on.)
+ */
 func lastSessionClose() -> Double {
   guard let text = try? String(contentsOfFile: sessionLockPath(), encoding: .utf8) else { return 0 }
-  return Double(text.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+  let line = text.trimmingCharacters(in: .whitespacesAndNewlines)
+  if line.hasPrefix("open ") {
+    let holder = pid_t(line.dropFirst(5).trimmingCharacters(in: .whitespaces)) ?? 0
+    // Another engine that still runs holds its session open: nothing closed, so there is no gap to keep.
+    if holder > 0 && holder != getpid() && kill(holder, 0) == 0 { return 0 }
+    if holder == getpid() { return 0 }
+    return Date().timeIntervalSince1970
+  }
+  return Double(line) ?? 0
 }
+/** Marks this engine as the holder of an open session (the turn's lock held). */
+func markSessionOpen() { try? "open \(getpid())".write(toFile: sessionLockPath(), atomically: false, encoding: .utf8) }
 /**
  * How long the engine's first read may spend on its session, from the request that needed it: the lock, the open,
  * a restart of the phone's test daemons and a second open, and loading accessibility. Below the 120 s after which
@@ -639,11 +672,14 @@ func closeSession() {
   lockSessionTurn(until: .now() + sessionBudget)
   sessionLog("close")
   if session.responds(to: NSSelectorFromString("invalidate")) { _ = session.perform(NSSelectorFromString("invalidate")) }
-  // The invalidation is a message to the phone's testmanagerd: give it time to arrive before the process ends.
-  RunLoop.current.run(until: Date().addingTimeInterval(0.8))
+  // The invalidation is a message to the phone's testmanagerd: give it time to arrive before the process ends. Off
+  // the main thread (a signal while a read holds it) there is no run loop to turn: the time alone.
+  if Thread.isMainThread { RunLoop.current.run(until: Date().addingTimeInterval(0.8)) } else { Thread.sleep(forTimeInterval: 0.8) }
   try? String(Date().timeIntervalSince1970).write(toFile: sessionLockPath(), atomically: false, encoding: .utf8)
   unlockSessionTurn()
 }
+/** Sessions opened again in place of one that had died (its phone's test daemon restarted, or was ended for memory). */
+var sessionsReopened = 0
 func loadAccessibility(_ session: AnyObject, timeout: Double) -> String? {
   let done = DispatchSemaphore(value: 0); var ok = false; var failure: String?
   let reply: @convention(block) (Bool, NSError?) -> Void = { loaded, e in ok = loaded; failure = e?.localizedDescription; done.signal() }
@@ -684,8 +720,14 @@ func installPersistentBootstrap() {
     if let session = automationSession {
       if !forceBootstrap { return true }
       bootstrapCount += 1; forceBootstrap = false
-      if let failure = loadAccessibility(session, timeout: 10) { lastBootstrapError = failure; return true }
-      return true
+      guard let failure = loadAccessibility(session, timeout: 10) else { return true }
+      // The kept session does not load accessibility any more: its test daemon in the phone went (restarted by
+      // another engine's recovery, ended for memory, a UI test run). Kept, it stays dead for the engine's life, and
+      // every app launched from then on reads empty until the phone is rebooted. So it is closed (its close time
+      // written, the gap kept) and a new one opened below, in this same request.
+      sessionLog("the kept session no longer loads accessibility (\(failure)): closing it and opening another")
+      closeSession()
+      sessionsReopened += 1
     }
     // The first time: the framework's own bootstrap loads the XCTest frameworks; then our session stays open. All of
     // it within sessionBudget of now.
@@ -1085,10 +1127,14 @@ func readFrontmost(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool =
   }
   return []
 }
+/** Where a traced request's reads spent their time: each read's serializes in ms, "r" before one that reloaded accessibility, and what followed. */
+var readPhases: [String] = []
 @MainActor
 func readFrontmostOnce(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bool = true) async throws -> Any {
   var reloaded = false, reloadedAfterError = false
   lastSerializeMs = []
+  let readStart = Date()
+  defer { if readPhases.count < 40 { readPhases.append("\(lastSerializeMs.map(String.init).joined(separator: "+"))\(reloaded ? " reloaded" : "")\(reloadedAfterError ? " reloaded-after-error" : "") =\(ms(readStart))") } }
   for attempt in 0..<2 {
     do {
       // The second attempt loads accessibility first (an app launched since the last load reads empty).
@@ -1102,12 +1148,15 @@ func readFrontmostOnce(_ simulator: FBSimulator, keys: Set<FBAXKeys>, nested: Bo
       if reloaded {
         let start = Date()
         while Date().timeIntervalSince(start) < 2 {
-          try? await Task.sleep(nanoseconds: 250_000_000)
+          try? await Task.sleep(nanoseconds: 100_000_000)
           let next = try await serializeFrontmost(simulator, keys: keys, nested: nested)
           let same = signature(next) == signature(tree)
           tree = next
-          // Two equal reads of a nearly empty app are its shell before the content: not settled yet.
-          if same && !isEmptyApp(tree) && nodeCount(tree) >= 12 { lastReadStable = true; break }
+          // Two equal reads of a nearly empty app may be its shell before the content. They are the app once it has
+          // some size (12 elements), or once the screen itself has held still for 0.2 s: what is still to come would
+          // be drawn. (A screen of under 12 elements, a sign-in form, waited the whole 2 s on every launch before.)
+          let still = (writeClock?.sinceSignificantWrite() ?? 0) >= 0.2
+          if same && !isEmptyApp(tree) && (nodeCount(tree) >= 12 || still) { lastReadStable = true; break }
         }
       }
       lastFrontPid = intValue((tree as? [[String: Any]])?.first?["pid"]) ?? -1
@@ -1155,8 +1204,23 @@ func inputEvent(_ req: [String: Any]) throws -> FBSimulatorHIDEvent {
     let down = req["down"] as? Bool ?? true
     let duration = req["duration"] as? Double ?? 0.6, n = max(down ? 1 : 0, Int(req["steps"] as? Double ?? 20))
     var events: [FBSimulatorHIDEvent] = down ? [.touch(direction: .down, x: x1, y: y1), .delay(req["hold"] as? Double ?? 0.05)] : []
-    for i in stride(from: 1, through: n, by: 1) { let f = Double(i) / Double(n); events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)] }
-    if req["up"] as? Bool ?? true { events.append(.touch(direction: .up, x: x2, y: y2)) }
+    // ease "out": the finger slows to a stop over the way (a cubic), as a hand does that places content, where an even
+    // pace ends at full speed.
+    let easeOut = (req["ease"] as? String) == "out"
+    for i in stride(from: 1, through: n, by: 1) {
+      let t = Double(i) / Double(n), f = easeOut ? 1 - pow(1 - t, 3) : t
+      events += [.delay(duration / Double(n)), .touch(direction: .down, x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f)]
+    }
+    if req["up"] as? Bool ?? true {
+      // rest: the finger held where it stopped before it lifts, so the content stops with it. A finger lifted while
+      // moving flings the content, which then coasts on its own (1.7 s after a 1.2 s drag of a list, November 22,
+      // 2026); the same point sent again after the rest is the sample that tells iOS the finger stood still.
+      if let rest = req["rest"] as? Double, rest > 0 {
+        for _ in 0..<max(1, Int((rest / 0.03).rounded())) { events += [.delay(0.03), .touch(direction: .down, x: x2, y: y2)] }
+        events.append(.delay(0.016))
+      }
+      events.append(.touch(direction: .up, x: x2, y: y2))
+    }
     return .composite(events)
   case "steps":
     var events: [FBSimulatorHIDEvent] = []
@@ -1487,13 +1551,19 @@ func main() async {
     closeOnExecAll()
     emit(ready)
 
+    // On a queue of their own: a signal must end the engine also while a read holds the main thread (a read of a
+    // hung phone never returns, and on the main queue the signal then never ran: the engine stayed for ever with its
+    // session open). The session is closed first either way, so the next engine keeps the gap.
+    let signalQueue = DispatchQueue(label: "simulator-use-engine.signals")
     for sig in [SIGTERM, SIGINT, SIGHUP] {
       signal(sig, SIG_IGN)
-      let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
+      let source = DispatchSource.makeSignalSource(signal: sig, queue: signalQueue)
       source.setEventHandler { for finish in exitFinishers { finish() }; closeSession(); exit(0) }
       source.resume(); signalSources.append(source)
     }
     for await line in requestLines() {
+      // Nobody reads the answers any more: as at the end of the requests, the session is closed below.
+      if outputGone { break }
       let t0 = Date()
       guard let data = line.data(using: .utf8), let req = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let op = req["op"] as? String else { emit(["ok": false, "error": "bad request"]); continue }
       let id = req["id"] ?? NSNull()
@@ -1587,6 +1657,7 @@ func main() async {
           answer["cpu_ms"] = cpuMs(); answer["serialize_ms"] = lastSerializeMs
           if sessionTurnMs > 0 { answer["session_wait_ms"] = sessionTurnMs; sessionTurnMs = 0 }
           if sessionRecoveries > 0 { answer["session_recoveries"] = sessionRecoveries }
+          if sessionsReopened > 0 { answer["sessions_reopened"] = sessionsReopened }
           for (key, value) in lastReadReport { answer[key] = value }
         case "point":
           let x = coordinate(req, "x", "nx", along: display.width), y = coordinate(req, "y", "ny", along: display.height)
@@ -1625,11 +1696,16 @@ func main() async {
           let event = try (req["input"] as? [String: Any]).map(inputEvent)
           lastReadReport = [:]
           lastSerializeMs = []
+          readPhases = []
+          // web false: no point scan of a web page (simulator-use has the page's own word for it, src/web).
+          webScanOn = (req["web"] as? Bool) ?? true
+          defer { webScanOn = true }
           let result = try await settleRead(simulator, input: event.map { e in { try await send(e) } },
             firstChangeMs: req["first_change_ms"] as? Double ?? 800, quietMs: req["quiet_ms"] as? Double ?? 150, startMs: req["start_ms"] as? Double ?? 50,
             guardMs: req["guard_ms"] as? Double ?? 35, timeoutMs: req["timeout_ms"] as? Double ?? 4000, keys: (req["lean"] as? Bool) == true ? leanKeys : outputKeys,
-            fromKept: (req["baseline"] as? String) == "kept")
+            fromKept: (req["baseline"] as? String) == "kept", traced: (req["trace"] as? Bool) == true, wholeStill: (req["whole_still"] as? Bool) == true)
           for (key, value) in result { answer[key] = value }
+          if (req["trace"] as? Bool) == true { answer["read_phases"] = readPhases }
           if let scan = lastReadReport["web_scan"] { answer["web_scan"] = scan }
         case "tap_settle_describe":
           // One call for an act: the tap, the wait until the screen stops changing, then the new tree.

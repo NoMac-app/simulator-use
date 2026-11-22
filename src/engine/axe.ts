@@ -30,7 +30,7 @@ export class AccessibilityStarting extends ToolError {}
 // Also right after a boot: "No translation object returned for simulator" (iPhone 17e, 5 s after booting).
 const STARTING = /remote automation session|No translation object returned/i;
 
-export async function describeUi(udid: string, options: { full?: boolean } = {}): Promise<AxNode[]> {
+export async function describeUi(udid: string, options: { full?: boolean; noWebScan?: boolean } = {}): Promise<AxNode[]> {
   return (await describeScreen(udid, options)).tree;
 }
 
@@ -44,11 +44,11 @@ const REUSE_MAX_AGE_MS = 30_000;
  * The screen's tree. With reuse, the engine may give its last read again (reused says why: the screen's buffer is
  * unchanged, its pixels are, or only a caret blinked), once a few of its elements read again one point each agree.
  */
-export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
+export async function describeScreen(udid: string, options: { reuse?: boolean; full?: boolean; noWebScan?: boolean } = {}): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
   // A web page's first read can take half a minute (Safari, iOS 27): the engine gets a minute.
   const reuse = options.reuse && setting("REUSE") !== "off";
   // lean: only the attributes the screen's text uses; full: every one (ui_look's full tree, for the agent to open).
-  const answer = await engineCall(udid, { op: "describe", ...(options.full ? {} : { lean: true }), ...(reuse ? { reuse: true, max_age_ms: REUSE_MAX_AGE_MS } : {}) }, 60_000);
+  const answer = await engineCall(udid, { op: "describe", ...(options.full ? {} : { lean: true }), ...(reuse ? { reuse: true, max_age_ms: REUSE_MAX_AGE_MS } : {}), ...(options.noWebScan ? { web: false } : {}) }, 60_000);
   if (answer?.ok) {
     const tree = answer.tree as AxNode | AxNode[];
     return {
@@ -146,6 +146,24 @@ export async function batch(udid: string, steps: string[]): Promise<void> {
   }
 }
 
+/**
+ * A gesture's arguments as AXe's own command takes them: without the engine's rest, steps and ease, and a drag that
+ * asked for a rest (a scroll) at the slow pace that keeps the content from flinging far (1.2 s; see SCROLL_DRAG in
+ * tools/ui-act.ts).
+ */
+export function axeGesture(args: string[]): string[] {
+  const out: string[] = [];
+  const rested = args.includes("--rest");
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
+    if (arg === "--ease-out") continue;
+    if (arg === "--rest" || arg === "--steps") { i++; continue; }
+    if (arg === "--duration" && rested) { out.push(arg, "1.2"); i++; continue; }
+    out.push(arg);
+  }
+  return out;
+}
+
 /** A drag or swipe on its own: AXe's batch takes swipe but not drag. */
 export async function gesture(udid: string, args: string[]): Promise<void> {
   const native = engineGesture(args);
@@ -158,7 +176,7 @@ export async function gesture(udid: string, args: string[]): Promise<void> {
     sentInPart(answer, "gesture");
   }
   try {
-    await axe(udid, args, 30_000);
+    await axe(udid, axeGesture(args), 30_000);
   } catch (error) {
     throw new ToolError(`The Simulator did not take the gesture: ${(error as Error).message}`);
   }
@@ -214,6 +232,17 @@ export async function elementAt(udid: string, x: number, y: number): Promise<AxN
     noteSessionClosed(udid);
     return undefined;
   }
+}
+
+/**
+ * The element at a point by the engine alone, in a few milliseconds, or undefined: for looks that are only worth
+ * their answer when it is quick (where a web page's corner is), never AXe's own command (0.3 to 0.6 s each).
+ */
+export async function enginePoint(udid: string, x: number, y: number): Promise<AxNode | undefined> {
+  const answer = await engineCall(udid, { op: "point", x: Math.round(x), y: Math.round(y) }, 1_500);
+  if (!answer?.ok) return undefined;
+  const element = answer.element as AxNode | AxNode[] | undefined;
+  return Array.isArray(element) ? element[0] : element;
 }
 
 /** A step string for AXe batch: text goes in single quotes, with any single quote escaped the shell way. */

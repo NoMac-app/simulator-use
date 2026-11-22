@@ -1,0 +1,10 @@
+# A web view inside an app, and Safari scrolled.
+app_control {"action":"open_url","value":"https://news.ycombinator.com/front"}
+sleep 2500
+ui_look {"find":"Go back"}
+ui_act	scroll down
+ui_act	scroll down until "More"
+ui_act	tap "More"
+app_control {"action":"launch","app":"dev.simtap.edgelab"}
+ui_act	tap "More"
+ui_look {}

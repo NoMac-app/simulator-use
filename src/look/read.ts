@@ -1,10 +1,11 @@
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { AccessibilityStarting, batch, describeScreen, describeUi, type EngineScreen, gesture } from "../engine/axe.ts";
+import { AccessibilityStarting, batch, describeScreen, describeUi, enginePoint, type EngineScreen, gesture } from "../engine/axe.ts";
 import { engineCall, engineGesture, engineSteps, hasEngine, screenRefusal } from "../engine/native.ts";
 import { ToolError } from "../errors.ts";
 import { setting } from "../settings.ts";
-import { type AxNode, render, type Snapshot, snapshot } from "./snapshot.ts";
+import { pagesListedNow, webAreas, withWebPages } from "../web/read.ts";
+import { type AxNode, type Frame, render, type Snapshot, snapshot } from "./snapshot.ts";
 
 /** Right after a launch the app's accessibility tree is empty for a moment (seen on Xcode 27). */
 const NOT_READY_RETRIES = 4;
@@ -29,7 +30,7 @@ export type Screen = { tree: AxNode[]; snap: Snapshot; reused?: string; notReuse
 const STARTING_BUDGET_MS = 35_000;
 
 /** Reads the tree, waiting out a starting accessibility service for up to 35 s before giving up. */
-async function describeWhenReady(udid: string, options: ReadOptions): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
+async function describeWhenReady(udid: string, options: ReadOptions & { noWebScan?: boolean }): Promise<{ tree: AxNode[]; reused?: string; notReused?: string; screen?: EngineScreen; posture?: string }> {
   const deadline = Date.now() + STARTING_BUDGET_MS;
   for (;;) {
     try {
@@ -52,17 +53,34 @@ export type ReadOptions = {
   full?: boolean;
 };
 
+/**
+ * A tree as it goes to the snapshot: its web views filled from their pages (web/read.ts). skipped: the engine was
+ * asked to leave its own page scan out, since the Web Inspector listed a page; when the screen's web view then
+ * turns out not to be one of those pages (another app's, one that does not let itself be inspected), the screen is
+ * read once more with the scan.
+ */
+async function withPages(udid: string, tree: AxNode[], skipped: boolean, again: () => Promise<AxNode[]>): Promise<AxNode[]> {
+  const started = Date.now();
+  const filled = await withWebPages(udid, tree, (x, y) => enginePoint(udid, x, y));
+  if (setting("DEBUG") && filled.merged) process.stderr.write(`simulator-use:   web: ${filled.merged.pages} page(s), ${filled.merged.items} element(s) in ${Date.now() - started} ms${filled.merged.placed ? ` (${filled.merged.placed})` : ""}${filled.merged.note ? ` (${filled.merged.note})` : ""}\n`);
+  if (skipped && !filled.merged?.pages && webAreas(tree).length) return (await withWebPages(udid, await again())).tree;
+  return filled.tree;
+}
+
 export async function readScreen(udid: string, waitUntilReady = true, options: ReadOptions = {}): Promise<Screen> {
-  const first = await describeWhenReady(udid, options);
-  let tree = first.tree;
+  const noWebScan = pagesListedNow(udid);
+  const first = await describeWhenReady(udid, { ...options, ...(noWebScan ? { noWebScan } : {}) });
+  let tree = await withPages(udid, first.tree, noWebScan, async () => (await describeWhenReady(udid, { full: options.full })).tree);
+  const given = tree;
   let snap = snapshot(tree);
   for (let i = 0; waitUntilReady && i < NOT_READY_RETRIES && !snap.elements.length && !snap.tabs.length; i++) {
     await sleep(NOT_READY_WAIT_MS);
-    tree = await describeUi(udid, { full: options.full });
+    const skip = pagesListedNow(udid);
+    tree = await withPages(udid, await describeUi(udid, { full: options.full, ...(skip ? { noWebScan: skip } : {}) }), skip, () => describeUi(udid, { full: options.full }));
     snap = snapshot(tree);
   }
   return {
-    tree, snap, ...(first.reused && tree === first.tree ? { reused: first.reused } : {}), ...(first.notReused ? { notReused: first.notReused } : {}),
+    tree, snap, ...(first.reused && tree === given ? { reused: first.reused } : {}), ...(first.notReused ? { notReused: first.notReused } : {}),
     ...(first.screen ? { screen: first.screen } : {}), ...(first.posture ? { posture: first.posture } : {}),
   };
 }
@@ -98,6 +116,14 @@ export type SettleOptions = {
   baseline?: "kept";
   /** How long the screen may keep changing before it is read as it is (default 4 s). */
   timeoutMs?: number;
+  /**
+   * How long the screen must have been still before a read of it starts (default 50 ms). A read of an app that is
+   * still launching waits on the app itself (1.7 to 2.5 s measured, against 0.1 to 0.3 s once it has drawn), so a
+   * launch asks for a longer stillness than a gap between two frames of iOS's launch animation.
+   */
+  startMs?: number;
+  /** Every change counts, a small one too (a launch: its first frames are small, an icon growing). */
+  wholeStill?: boolean;
 };
 
 /**
@@ -109,10 +135,11 @@ export type SettleOptions = {
  * that is kept only if the screen held still through it. A newly opened app's shell is read again until its contents
  * arrive (up to 2.5 s).
  */
-export async function settle(udid: string, fromApp?: string, input?: Input, options: SettleOptions = {}): Promise<{ snap: Snapshot; settled: boolean }> {
+export async function settle(udid: string, fromApp?: string, input?: Input, options: SettleOptions = {}): Promise<{ snap: Snapshot; settled: boolean; changed?: boolean; animating?: Frame[] }> {
   const started = Date.now();
   const request = input && engineInput(input);
   let sent = false;
+  const noWebScan = pagesListedNow(udid);
   if ((!input || request) && (await hasEngine(udid))) {
     const answer = await engineCall(
       udid,
@@ -121,11 +148,14 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
         lean: true,
         ...(request ? { input: request } : {}),
         first_change_ms: options.firstChangeMs ?? FIRST_CHANGE_MS,
-        quiet_ms: QUIET_MS,
-        start_ms: READ_START_MS,
+        quiet_ms: Math.max(QUIET_MS, options.startMs ?? 0),
+        start_ms: options.startMs ?? READ_START_MS,
         guard_ms: READ_GUARD_MS,
         timeout_ms: options.timeoutMs ?? SETTLE_TIMEOUT_MS,
         ...(options.baseline ? { baseline: options.baseline } : {}),
+        ...(options.wholeStill ? { whole_still: true } : {}),
+        ...(noWebScan ? { web: false } : {}),
+        ...(setting("DEBUG") === "trace" ? { trace: true } : {}),
       },
       // The wait, then a read, which can take long on a web page.
       (options.firstChangeMs ?? FIRST_CHANGE_MS) + (options.timeoutMs ?? SETTLE_TIMEOUT_MS) + 60_000,
@@ -133,7 +163,7 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
     );
     if (answer?.ok && answer.tree) {
       const tree = answer.tree as AxNode | AxNode[];
-      let snap = snapshot(Array.isArray(tree) ? tree : [tree]);
+      let snap = snapshot(await withPages(udid, Array.isArray(tree) ? tree : [tree], noWebScan, async () => (await describeWhenReady(udid, {})).tree));
       const quiet = Date.now();
       let reads = 0;
       for (const deadline = Date.now() + 2_500; opening(snap, fromApp) && Date.now() < deadline; reads++) {
@@ -142,9 +172,15 @@ export async function settle(udid: string, fromApp?: string, input?: Input, opti
       }
       if (setting("DEBUG")) {
         const readMs = (answer.read_ms as number[] | undefined)?.join("+") ?? "?";
-        process.stderr.write(`simulator-use:   settle ${quiet - started} ms${answer.settled === false ? " (still changing)" : ""}${answer.changed === false ? " (no change)" : ""}: first change ${answer.first_change_ms} ms, ${answer.reads} read(s) ${readMs} ms, ${answer.dropped} dropped${reads ? `, ${reads} more read(s) ${Date.now() - quiet} ms` : ""}\n`);
+        process.stderr.write(`simulator-use:   settle ${quiet - started} ms${answer.settled === false ? " (still changing)" : ""}${answer.changed === false ? " (no change)" : ""}: first change ${answer.first_change_ms} ms, ${answer.reads} read(s) ${readMs} ms, ${answer.dropped} dropped${reads ? `, ${reads} more read(s) ${Date.now() - quiet} ms` : ""}${answer.animating ? `, still animating ${JSON.stringify(answer.animating)}` : ""}\n`);
+        if (Array.isArray(answer.read_phases) && (answer.read_phases as string[]).some((p) => /reloaded|\+/.test(p))) process.stderr.write(`simulator-use:   read phases: ${(answer.read_phases as string[]).join(" | ")}\n`);
+        if (Array.isArray(answer.region_failures)) process.stderr.write(`simulator-use:   region checks failed: ${(answer.region_failures as string[]).join(" | ")}\n`);
+        if (Array.isArray(answer.trace)) process.stderr.write(`simulator-use:   trace (input ${answer.input_ms} ms): ${(answer.trace as number[][]).map(([t, x, y, w, h, area]) => `${t}:${x},${y},${w}x${h}=${area}`).join(" ")}\n`);
       }
-      return { snap, settled: answer.settled !== false };
+      // changed false: the engine watched the screen and nothing on it changed in the time given. animating: small
+      // parts of it that were still moving as it was read (a control easing out), each [x, y, width, height].
+      const animating = Array.isArray(answer.animating) ? (answer.animating as number[][]).map(([x, y, width, height]) => ({ x: x!, y: y!, width: width!, height: height! })) : undefined;
+      return { snap, settled: answer.settled !== false, ...(answer.watched === true ? { changed: answer.changed !== false } : {}), ...(animating?.length ? { animating } : {}) };
     }
     // A foldable's engine refused it: the screen in use changed (a fold). Never sent another way.
     const refused = screenRefusal(answer);
@@ -172,11 +208,12 @@ const STILL_READ_MS = 400;
  */
 export async function readWhenStill(udid: string): Promise<Snapshot> {
   if (await hasEngine(udid)) {
-    const answer = await engineCall(udid, { op: "settle_read", lean: true, first_change_ms: 0, quiet_ms: QUIET_MS, start_ms: READ_START_MS, guard_ms: READ_GUARD_MS, timeout_ms: STILL_READ_MS }, STILL_READ_MS + 60_000);
+    const noWebScan = pagesListedNow(udid);
+    const answer = await engineCall(udid, { op: "settle_read", lean: true, first_change_ms: 0, quiet_ms: QUIET_MS, start_ms: READ_START_MS, guard_ms: READ_GUARD_MS, timeout_ms: STILL_READ_MS, ...(noWebScan ? { web: false } : {}) }, STILL_READ_MS + 60_000);
     if (answer?.ok && answer.tree) {
-      const tree = answer.tree as AxNode | AxNode[];
+      const tree = await withPages(udid, Array.isArray(answer.tree) ? (answer.tree as AxNode[]) : [answer.tree as AxNode], noWebScan, async () => (await describeWhenReady(udid, {})).tree);
       if (setting("DEBUG")) process.stderr.write(`simulator-use:   read when still: ${answer.waited_ms} ms, ${answer.reads} read(s) ${(answer.read_ms as number[] | undefined)?.join("+") ?? "?"} ms, ${answer.dropped} dropped${answer.settled === false ? " (still changing)" : ""}\n`);
-      return snapshot(Array.isArray(tree) ? tree : [tree]);
+      return snapshot(tree);
     }
   }
   return (await readScreen(udid, false)).snap;

@@ -41,6 +41,8 @@ export type Element = {
   x: number;
   y: number;
   frame: Frame;
+  /** In a web page (read from the page itself, src/web). */
+  web?: true;
 };
 
 export type Snapshot = {
@@ -54,6 +56,8 @@ export type Snapshot = {
   scroll?: string;
   /** Elements that exist but are off screen, or under a bar or the keyboard. */
   hidden: { above: number; below: number; left: number; right: number };
+  /** Those elements by name, and which way each is: a step that names one scrolls to it (up to 60 of them). */
+  offscreen?: { label?: string; id?: string; where: "above" | "below" | "left" | "right" }[];
   /** Large areas with nothing readable inside: web views, maps, games, custom drawing. */
   unreadable: Frame[];
   /** A sheet, cover or alert in front: what is listed is only what it shows. */
@@ -292,6 +296,8 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
   const app = roots.find((n) => n.role === "AXApplication") ?? roots[0] ?? {};
   const screen = app.frame ?? { x: 0, y: 0, width: 0, height: 0 };
   const front = frontLayer(roots, screen);
+  // SpringBoard (the Home screen, iOS's own alerts) has no name of its own; only its tree holds the status bar.
+  const springBoard = !text(app.AXLabel);
   const result: Snapshot = {
     app: appName(app, roots, front.modal),
     elements: [],
@@ -338,12 +344,12 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
   // An alert's own scrolling text is not the screen's.
   if (mainScroll && mainScroll.pages > 1 && front.modal !== "alert") result.scroll = `${mainScroll.pages} pages, at ${mainScroll.at === "0%" ? "top" : mainScroll.at === "100%" ? "bottom" : mainScroll.at}`;
 
-  const hide = (f: Frame) => {
+  const hide = (f: Frame, label: string, id: string) => {
     const c = center(f);
-    if (c.x < screen.x) result.hidden.left++;
-    else if (c.x > screen.x + screen.width) result.hidden.right++;
-    else if (c.y < (ceiling + floor) / 2) result.hidden.above++;
-    else result.hidden.below++;
+    const where = c.x < screen.x ? "left" : c.x > screen.x + screen.width ? "right" : c.y < (ceiling + floor) / 2 ? "above" : "below";
+    result.hidden[where]++;
+    const offscreen = (result.offscreen ??= []);
+    if (offscreen.length < 60) offscreen.push({ ...(label ? { label } : {}), ...(id ? { id } : {}), where });
   };
 
   const listed = new Set<string>();
@@ -379,7 +385,7 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
       if (keyboard && (!shown || inside(center(node.frame), keyboard))) return;
       const covered = point && !onBar && tabBar && inside(point, tabBar);
       if (!shown || covered) {
-        if (label || id) hide(node.frame);
+        if (label || id) hide(node.frame, label, id);
         return;
       }
       let value = tidy(text(node.AXValue));
@@ -402,7 +408,8 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
         (kind === "button" && node.enabled === false && /^chevron/.test(name)) ||
         (!name && !id && !CONTROLS.has(kind)) ||
         // The status bar (time, signal, battery) only appears in SpringBoard's tree; it is noise there.
-        (owner === null && (kind === "text" || kind === "element") && node.frame.y + node.frame.height <= STATUS_BAR_BOTTOM);
+        // An app's own text at its top (a custom header, a score in a landscape game) is the app's, and stays.
+        (owner === null && springBoard && (kind === "text" || kind === "element") && node.frame.y + node.frame.height <= STATUS_BAR_BOTTOM);
       if (!skip) {
         element = { kind, x: point!.x, y: point!.y, frame: node.frame };
         if (name) element.label = name;
@@ -410,6 +417,7 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
         if (value) element.value = value;
         const state = stateOf(kind, node);
         if (state) element.state = state;
+        if (node.found_by === "web_page") element.web = true;
         // The same element twice (iPad Settings' pages are in its tree twice, in two orders) is listed once.
         if (kind === "tab") result.tabs.push(element);
         else if (!listed.has(line(element))) {

@@ -46,7 +46,11 @@ export function diff(before: Snapshot, after: Snapshot, device?: string): string
   // The same element somewhere else: the content moved (a scroll, a banner pushing rows down).
   const moved = pairs.filter(([a, b]) => says(a) === says(b) && (a.x !== b.x || a.y !== b.y)).map(([, b]) => b);
   const size = all(after).length;
-  const newScreen = before.app !== after.app || before.title !== after.title || added.length + gone.length > Math.max(4, size / 2) || moved.length > 3;
+  // An alert or sheet that came up, or went, is a new screen whatever it shares with the one behind it (an alert's
+  // Delete was reported as the screen's own Delete "moved", with no word of the alert); so is a part of the screen
+  // that became unreadable, or readable.
+  const front = before.modal !== after.modal || before.unreadable.length !== after.unreadable.length;
+  const newScreen = front || before.app !== after.app || before.title !== after.title || added.length + gone.length > Math.max(4, size / 2) || moved.length > 3;
   if (newScreen) return `screen:\n${render(after, { device })}`;
 
   const out: string[] = [];

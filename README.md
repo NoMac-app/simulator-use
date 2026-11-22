@@ -26,7 +26,7 @@ tabs: Login (selected) @158,822, Items @244,822
 - One line per element: kind, label, `#id` (the app's accessibility identifier), state and `@x,y`, the center in points.
 - Groups, icons inside buttons, scroll bars, the status bar and the keyboard's keys are folded away. The tab bar, scrolling and the keyboard are one line each.
 - Only what can be tapped is listed. An alert, a sheet, a menu or a full-screen view in front hides the screen behind it, and iOS's own permission prompts read as alerts over the app. Rows under the navigation bar, the tab bar or the keyboard are counted as hidden (above, below, to the left or right), not listed.
-- A web view in UIKit (Capacitor, React Native's WebView, a sign-in page inside most apps) is read point by point, and its headings, texts, fields, checkboxes, buttons and links are listed like the rest. Web views hosted by SwiftUI, Safari's own pages, in-app browsers, maps, games and iOS's out-of-process pickers have nothing for accessibility to read. They come back as one `unreadable` line with their place, so the agent knows to take a screenshot and tap by point.
+- A web page is read from the page itself: Safari's pages, and the web views of the apps simulator-use launches (Capacitor, React Native's WebView, a WKWebView hosted by UIKit or by SwiftUI). The page says what it shows, its links, buttons, fields, checkboxes, headings and text, each with its place and state, in a few milliseconds, through the Simulator's own Web Inspector; they are listed like the rest, and tapped and filled the same way (`tap "Sign in"`, `fill #email a@b.co`, a page's element ids work as `#id`). Maps, games, custom drawing and iOS's out-of-process pickers have nothing to read: they come back as one `unreadable` line with their place, so the agent knows to take a screenshot and tap by point. `SIMULATOR_USE_WEB=off` goes back to reading a page point by point through accessibility.
 - A screenshot, when asked for, is sized to points, so a point in the picture is a point to tap. `screenshot_file` saves the screen at full resolution as a PNG for a person, a report or the App Store; in cloud mode it is saved on your machine too. Either waits for the screen to hold still (up to 2 s), so it shows the screen, not an animation into it.
 - The sign-in screen above is about 70 tokens. The full accessibility tree it comes from is about 40,000.
 
@@ -48,19 +48,23 @@ Steps:
 | `tap #id`, `tap "label"`, `tap button "label"`, `tap @x,y` | Taps; a switch gets a real touch |
 | `fill #id text` | Focuses the field, clears it, types, and reads the text back |
 | `type text` | Types into the field that has focus |
-| `scroll down`, `scroll right @201,402` | Scrolls the screen, or one carousel |
+| `scroll down`, `scroll right @201,402` | Scrolls the screen, or one carousel: the content stops where the finger does, most of a screen further |
+| `scroll down until "Row 40"` | Scrolls that way until it is on screen, the list ends, or the call's time is up |
 | `swipe left`, `swipe left "Row 3"` | Swipes the screen, or one row (to reveal Delete) |
 | `hold "Row 5" [seconds]` | Long press, for context menus |
 | `set #volume 75` | Sets a slider to a percent |
 | `back`, `home`, `key return` | The back button (or edge swipe), the home button, a key |
 | `wait "Welcome" [seconds]`, `gone "Loading"` | Waits for something to appear or go |
+| `wait 2` | A pause of two seconds (an element named "2" is `wait "2"`) |
 
 Every step is checked, so nothing succeeds silently:
 - Typed text is read back from the field. When iOS's autocorrect or smart punctuation changes it (`--` to `—`, `'` to `’`), the text is pasted instead, which iOS takes as is. A field that still shows something else stops the call and says what it shows.
 - Text in any language (Café, 日本語, emoji) can be typed: what a US keyboard lacks goes through the Simulator's clipboard.
 - `fill` refuses anything that isn't a text field, so keys never land in whichever field still has focus.
 - A tap that changes nothing is reported, after waiting 2.5 s for late answers such as a permission prompt. A tap inside an area that can't be read says it can't be checked.
-- A target that isn't on screen yet gets two seconds to appear, then fails with the next step: "2 elements are below: scroll down", or, when an alert came up in front, "Answer it first: tap "Cancel" or "Open"".
+- A target that isn't on screen is waited for only while the screen is changing (up to two seconds), then fails with the next step: "scroll down until "Item 39" looks for it down the list", or, when an alert came up in front, at once: "Answer it first: tap "Cancel" or "Open"". One that is just off screen (the next rows of a list, a row under a bar) is scrolled to and the step goes on. One that another element covers is tapped where it shows, or the step says what covers it.
+- An unquoted label that ends in a number reads two ways (`hold Row 3`): it is the element of that whole name when the screen has one, else the label and the number. Quotes say which: `hold "Row 3"`, `hold "Row" 3`.
+- Text is typed as given: the Simulator's keyboard has its autocorrection, predictions and smart punctuation switched off the first time simulator-use types on it (`SIMULATOR_USE_KEYBOARD=ios` keeps iOS's own).
 - The first failing step stops the rest and returns the screen as it is now.
 - A new screen comes back whole; otherwise only what changed.
 
@@ -195,7 +199,7 @@ $ simulator-use call ui_look '{"find":"Sign In"}'
 
 ## What it can't do yet
 
-- Read web views hosted by SwiftUI, Safari's pages, in-app browsers, Flutter or game canvases: it says so, and a screenshot plus tap by point works.
+- Read in-app browsers (`SFSafariViewController`), another site's frame inside a page, Flutter or game canvases: it says so, and a screenshot plus tap by point works. A web view in an app that something other than simulator-use launched is read point by point, as before.
 - Real devices, Android, rotating to landscape, pinch and multi-touch.
 - Reading text an app hides from accessibility: some React Native apps set a test id as the label, and the read says when labels look like that.
 
@@ -277,7 +281,7 @@ simulator-use sends nothing unless cloud mode is on. There is no telemetry and n
 
 ## How it works
 
-simulator-use reads the Simulator through a small native engine (`native/engine`), one process per Simulator, built on the frameworks of [AXe](https://github.com/cameroncooke/AXe) (MIT), which is bundled at a pinned version with its checksum checked at packaging, and through `xcrun simctl`. The engine keeps the Simulator's input, its accessibility session and its screen buffer open, so a tap takes a millisecond, a whole screen a few hundred, and a step waits until the pixels stop changing instead of a fixed time. It reads web views point by point. When the engine can't run, AXe does the same work one process per call. There is no test runner to build, so the first call is as fast as the rest.
+simulator-use reads the Simulator through a small native engine (`native/engine`), one process per Simulator, built on the frameworks of [AXe](https://github.com/cameroncooke/AXe) (MIT), which is bundled at a pinned version with its checksum checked at packaging, and through `xcrun simctl`. The engine keeps the Simulator's input, its accessibility session and its screen buffer open, so a tap takes a millisecond, a whole screen a few hundred, and a step waits until the pixels stop changing instead of a fixed time. Web pages are read through the Simulator's Web Inspector (`src/web`), a page's own word for what it shows; a library loaded into the apps simulator-use launches (`native/webopen`) lets their web views be inspected, as a debug build of Capacitor does. When the engine can't run, AXe does the same work one process per call. There is no test runner to build, so the first call is as fast as the rest.
 
 ## Develop
 
@@ -292,17 +296,18 @@ node bin/simulator-use.js look
 
 The engine builds only with the Swift that built AXe's frameworks: for AXe 2.0.4, Swift 6.4.2 (swiftlang-6.4.2.1.9), which is Xcode 27.2 (build 27B52), the Xcode releases are built with (up to 0.16.0, on AXe 1.8.0: Swift 6.3.2, Xcode 26.5, build 17F42). `npm run native` checks the compiler first; with another Xcode selected, set `DEVELOPER_DIR` to Xcode 27.2's `Contents/Developer`. It compiles against idb's private headers, which since AXe 2.0 live in AXe's own repository (`Packages/IDBKit/PrivateHeaders`); `npm run native` fetches them once, from the commit of the pinned release's tag. The build is reproducible: from a fresh clone of a release tag, in any folder, with that release's Xcode, the binaries match the published package byte for byte, signature included. sha256, checked October 30, 2026 (November 16 for AXe 2.0.4, November 18 for 0.17.1 and 0.18.0 and 0.18.1):
 
-| Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` | `simulator-use-axon` |
-|---|---|---|---|---|
-| 0.18.1, on AXe 2.0.4 (Xcode 27.2) | `d3655732b323441a94cbe6ef4f604c86a13aee1ef9b28e01a4af56c1f1c1b777` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` |
-| 0.18.0, on AXe 2.0.4 (Xcode 27.2) | `d3655732b323441a94cbe6ef4f604c86a13aee1ef9b28e01a4af56c1f1c1b777` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` |
-| 0.17.1, on AXe 2.0.4 (Xcode 27.2) | `d42a025d61f9a4728d3017d2c0b1a15f5db9e96b171867d1f034db512dc3249c` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` |
-| 0.17.0, on AXe 2.0.4 (Xcode 27.2) | `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | none |
-| 0.15.1 to 0.16.0 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
-| 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
-| 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none |
-| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none |
-| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none |
+| Release | `simulator-use-engine` | `simulator-use-pbset` | `simulator-use-skconfig` | `simulator-use-axon` | `simulator-use-webopen.dylib` |
+|---|---|---|---|---|---|
+| 0.19.0, on AXe 2.0.4 (Xcode 27.2) | `3b4c1e1fb1656f62887ec51c9139f0ac37580f3910d6bb1817e8106a009a72fa` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` | `430588333fe79c4b8206b29de6851d41d8cd529c1c1455f0fd94f82d4c327838` |
+| 0.18.1, on AXe 2.0.4 (Xcode 27.2) | `d3655732b323441a94cbe6ef4f604c86a13aee1ef9b28e01a4af56c1f1c1b777` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` | none |
+| 0.18.0, on AXe 2.0.4 (Xcode 27.2) | `d3655732b323441a94cbe6ef4f604c86a13aee1ef9b28e01a4af56c1f1c1b777` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` | none |
+| 0.17.1, on AXe 2.0.4 (Xcode 27.2) | `d42a025d61f9a4728d3017d2c0b1a15f5db9e96b171867d1f034db512dc3249c` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | `d552def32e32be0ed6d49b9b641ec6767d7bf7010d0a56648d486bf02d60dd75` | none |
+| 0.17.0, on AXe 2.0.4 (Xcode 27.2) | `06b2da40a3aeae5ae4d778587b1191d73a4479a2b5aff1c499dae19f5d78574e` | `fe35e375bb0364c9e92100fd19ac1b80f566aacd94314d3af3cf33b077e5e2f5` | `7429f83e60427c4c6af9f331c5bccc2308f238b291d7e54617bddaf99bd3dca0` | none | none |
+| 0.15.1 to 0.16.0 | `a95ad0aa79d93b167a8674c67252ab15c324f57cfdb804532a20279ed994def1` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none | none |
+| 0.15.0 | `0364e7b23bb2dacc296eb3fb1302d6d01f0847966ce545dd787550c0602169d9` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none | none |
+| 0.13.0 to 0.14.1 | `c4e9c29d85a3458435ed79c6d501e934814815e76fa5d6d1d245648b2b222b4c` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | `1a6b7bd71cb210e410499e0e9c491f724ecfa53c31245394c4a2b2edfa7d0ab7` | none | none |
+| 0.12.0 to 0.12.3 | `2bc4891ec8a2a92b26bd970066df46d55553ff1fdd682f3637a7645a1d9184ea` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none | none |
+| 0.11.0 | `f65ccd92d5eadcfa9dc9065c66c0f71e9acd3f22282f94be5f977a7c919c7cc0` | `903d589b5d9b1a7763447472bc60a0f2dc971384a0ded6cd77782896d2da3f22` | none | none | none |
 
 `examples/swiftui-demo` is the sample app the tests' screens come from. `scripts/golden.sh` builds it, runs it on a Simulator and checks 19 golden tasks: build and launch in one call, sign in, toggle, open an item, back and scroll, the app's logs, a crash, a build error and a failing test as `file:line`, a video, and a wrong password that must fail loudly.
 

@@ -71,7 +71,10 @@ test("text in any language, quotes and new lines, read as written", () => {
 
 test("the new steps: hold, set, and swipe or scroll on one element", () => {
   assert.deepEqual(parseStep('hold "Row 5"'), { op: "hold", target: { by: "label", label: "Row 5" }, seconds: 1 });
-  assert.deepEqual(parseStep("hold Row 5 2"), { op: "hold", target: { by: "label", label: "Row 5" }, seconds: 2 });
+  // Unquoted, with a number at its end: "Row 5" for 2 s, or the element "Row 5 2" when the screen has one (whole).
+  assert.deepEqual(parseStep("hold Row 5 2"), { op: "hold", target: { by: "label", label: "Row 5" }, seconds: 2, whole: { by: "label", label: "Row 5 2" } });
+  assert.deepEqual(parseStep("hold Row 3"), { op: "hold", target: { by: "label", label: "Row" }, seconds: 3, whole: { by: "label", label: "Row 3" } });
+  assert.deepEqual(parseStep('hold "Row 5" 2'), { op: "hold", target: { by: "label", label: "Row 5" }, seconds: 2 });
   assert.deepEqual(parseStep("hold #photo 30"), { op: "hold", target: { by: "id", id: "photo" }, seconds: 10 });
   assert.deepEqual(parseStep("set #volume 75"), { op: "set", target: { by: "id", id: "volume" }, percent: 75 });
   assert.deepEqual(parseStep("set Volume 40%"), { op: "set", target: { by: "label", label: "Volume" }, percent: 40 });

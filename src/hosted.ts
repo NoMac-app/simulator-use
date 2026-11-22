@@ -723,7 +723,9 @@ function stepSummary(line: string): string {
       return "type …";
     case "scroll":
     case "swipe":
-      return [step.op, step.direction, ...(step.target ? [describeTarget(step.target)] : [])].join(" ");
+      return [step.op, step.direction, ...(step.target ? [describeTarget(step.target)] : []), ...(step.op === "scroll" && step.until ? ["until", describeTarget(step.until)] : [])].join(" ");
+    case "pause":
+      return `wait ${step.seconds}`;
     case "key":
       return `key ${step.key}`;
     case "back":

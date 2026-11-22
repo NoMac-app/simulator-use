@@ -4,6 +4,7 @@
  * 2026-07-28 protocol (server/discover, with the version in every request's _meta).
  */
 
+import { keepWebInspectorWarm } from "./web/read.ts";
 import { createInterface } from "node:readline";
 
 import { cancelAllJobs } from "./engine/jobs.ts";
@@ -83,6 +84,8 @@ export async function handle(message: Request): Promise<Response | null> {
 }
 
 export function serve(input: NodeJS.ReadableStream = process.stdin, output: NodeJS.WritableStream = process.stdout): Promise<void> {
+  // A server that stays: the Simulator's Web Inspector is connected ahead of the first web page (src/web/read.ts).
+  keepWebInspectorWarm();
   const write = (response: Response) => output.write(`${JSON.stringify(response)}\n`);
   // NoMac Simulator's host logs what a phone's workspace had cleared to make room: sizes and counts only (src/space.ts).
   if (setting("HOSTED")) setNotifier((report) => output.write(`${JSON.stringify({ jsonrpc: "2.0", method: "notifications/simulator-use/space", params: report })}\n`));

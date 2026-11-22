@@ -9,21 +9,30 @@ const NEGATED = /(?:^|[^\p{L}\p{N}])(?:don['’]?t|do not|not|never|no)\s+$/iu;
 
 /**
  * Whether a label holds the target as words of its own, not negated: "Allow" is in "Allow While Using App" and
- * "Count: 2, Increment" holds "Increment", but "Don’t Allow" and "Disallow" do not hold "Allow" (an agent's
+ * "Count: 2, Increment" holds "Increment", but "Don’t Allow" and "Disallow" do not hold "Allow", nor "Item 27" "Item 2" (an agent's
  * "tap Allow" on a prompt whose buttons are "Don’t Allow" and "Continue" tapped Don’t Allow, October 23).
  */
 function holds(label: string, want: string): boolean {
   const word = /^[\p{L}\p{N}]/u.test(want);
+  // A target that ends in a digit ends a number of the label too: "Item 2" is not in "Item 27".
+  const numberEnd = /\p{N}$/u.test(want);
   for (let at = label.indexOf(want); at >= 0; at = label.indexOf(want, at + 1)) {
     const before = label.slice(0, at);
     if ((word && /[\p{L}\p{N}]$/u.test(before)) || NEGATED.test(before)) continue;
+    if (numberEnd && /^\p{N}/u.test(label.slice(at + want.length))) continue;
     return true;
   }
   return false;
 }
 
 export type Resolved = { element?: Element; x: number; y: number };
-export type Unresolved = { error: string; next: string; ambiguous?: boolean };
+export type Unresolved = {
+  error: string;
+  next: string;
+  ambiguous?: boolean;
+  /** The target is one of the elements just off screen: scrolling this way shows it. */
+  scroll?: "up" | "down" | "left" | "right";
+};
 
 /**
  * Finds a target on the screen: by #id exactly; by label exactly (any case), then by a unique partial match (the
@@ -40,6 +49,8 @@ export function resolve(snap: Snapshot, target: Target): Resolved | Unresolved {
     const want = target.label.toLowerCase();
     const ofKind = target.kind ? all.filter((e) => e.kind === target.kind) : all;
     found = ofKind.filter((e) => e.label?.toLowerCase() === want);
+    // A long label as ui_look prints it, cut with "…": the label that starts with what was printed.
+    if (!found.length && want.endsWith("…") && want.length > 20) found = ofKind.filter((e) => e.label?.toLowerCase().startsWith(want.slice(0, -1)));
     if (!found.length) found = ofKind.filter((e) => (e.label !== undefined && holds(e.label.toLowerCase(), want)) || e.value?.toLowerCase() === want);
   }
   if (found.length > 1) {
@@ -59,10 +70,20 @@ export function resolve(snap: Snapshot, target: Target): Resolved | Unresolved {
       ambiguous: true,
     };
   }
-  const hidden = snap.hidden.below + snap.hidden.above;
+  // An element just off screen (a row under a bar, the next rows of a list): which way it is.
+  const want = target.by === "label" ? target.label.toLowerCase() : "";
+  const off = (snap.offscreen ?? []).find((e) => (target.by === "id" ? e.id === target.id : e.label !== undefined && (e.label.toLowerCase() === want || holds(e.label.toLowerCase(), want))));
+  if (off) {
+    const scroll = ({ above: "up", below: "down", left: "left", right: "right" } as const)[off.where];
+    return { error: `${describeTarget(target)} is off screen, ${off.where === "above" || off.where === "below" ? off.where : `to the ${off.where}`}.`, next: `scroll ${scroll}, then try again.`, scroll };
+  }
+  // Which way more elements are, both ways named when there are both: where the target is, if anywhere, is not known.
+  const { above, below } = snap.hidden;
+  const ways = [above ? `${above} more above (scroll up)` : "", below ? `${below} more below (scroll down)` : ""].filter(Boolean);
+  const until = ` scroll down until ${describeTarget(target)} looks for it down the list.`;
   return {
     error: `No ${describeTarget(target)} on screen.`,
-    next: hidden ? `${snap.hidden.below ? `${snap.hidden.below} elements are below: scroll down` : `${snap.hidden.above} elements are above: scroll up`}, or call ui_look.` : "Call ui_look to see what is on screen.",
+    next: ways.length || snap.scroll ? `${ways.length ? `${ways.join(", ")}.` : "The screen scrolls."}${until} Or call ui_look.` : "Call ui_look to see what is on screen.",
   };
 }
 

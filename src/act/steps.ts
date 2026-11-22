@@ -6,6 +6,7 @@
  *   scroll down            swipe left              swipe left "Row 3"       scroll right @201,402
  *   hold "Row 3"           hold #photo 2           set #volume 75           back        home
  *   wait "Welcome"         wait #status 10         gone "Loading"           key return
+ *   scroll down until "Row 40"                     wait 2 (a pause)
  */
 
 export type Target =
@@ -19,12 +20,13 @@ export type Step =
   | { op: "tap"; target: Target }
   | { op: "fill"; target: Target; text: string }
   | { op: "type"; text: string }
-  | { op: "scroll"; direction: Direction; target?: Target }
+  | { op: "scroll"; direction: Direction; target?: Target; until?: Target }
   | { op: "swipe"; direction: Direction; target?: Target }
-  | { op: "hold"; target: Target; seconds: number }
+  | { op: "hold"; target: Target; seconds: number; whole?: Target }
   | { op: "set"; target: Target; percent: number }
-  | { op: "wait"; target: Target; seconds: number }
-  | { op: "gone"; target: Target; seconds: number }
+  | { op: "wait"; target: Target; seconds: number; whole?: Target }
+  | { op: "gone"; target: Target; seconds: number; whole?: Target }
+  | { op: "pause"; seconds: number }
   | { op: "key"; key: keyof typeof KEYS }
   | { op: "back" }
   | { op: "home" };
@@ -36,6 +38,7 @@ export const DEFAULT_WAIT_SECONDS = 5;
 export const MAX_WAIT_SECONDS = 30;
 export const DEFAULT_HOLD_SECONDS = 1;
 export const MAX_HOLD_SECONDS = 10;
+export const MAX_PAUSE_SECONDS = 10;
 const DIRECTIONS = new Set(["up", "down", "left", "right"]);
 
 /** Reads a target from the start of `rest`. Returns it and what follows, or an error message. */
@@ -106,10 +109,14 @@ function seconds(rest: string, fallback = DEFAULT_WAIT_SECONDS, max = MAX_WAIT_S
   return Math.min(n, max);
 }
 
-/** A target, then an optional number: `wait Welcome back 10`, `hold "Row 3" 2`. An unquoted label may have spaces. */
-function targetThenNumber(rest: string): { target: Target; number: string } | string {
+/**
+ * A target, then an optional number: `wait Welcome back 10`, `hold "Row 3" 2`. An unquoted label may have spaces, so
+ * one that ends in a number reads two ways (`hold Row 3`: the row "Row 3", or "Row" for 3 s): whole is the label
+ * with its number, which the step takes when the screen has an element of that name (quotes say which is meant).
+ */
+function targetThenNumber(rest: string): { target: Target; number: string; whole?: Target } | string {
   const bare = /^(?![#"@])(.+?)(?:\s+(\d+(?:\.\d+)?)(?:s|%)?)?$/.exec(rest.trim());
-  if (bare?.[1]) return { target: { by: "label", label: bare[1] }, number: bare[2] ?? "" };
+  if (bare?.[1]) return { target: { by: "label", label: bare[1] }, number: bare[2] ?? "", ...(bare[2] ? { whole: { by: "label" as const, label: rest.trim() } } : {}) };
   const t = parseTarget(rest);
   if (typeof t === "string") return t;
   return { target: t.target, number: t.after.trim().replace(/(s|%)$/, "") };
@@ -143,23 +150,38 @@ export function parseStep(line: string): Step | string {
       if (!DIRECTIONS.has(direction)) return `${verb} needs a direction: up, down, left or right.`;
       const op = verb.toLowerCase() as "scroll" | "swipe";
       if (!on.trim()) return { op, direction: direction as Direction };
+      // `scroll down until "Row 40"` (or `to`): scroll that way until it is on screen.
+      const until = op === "scroll" ? /^(?:until|to)\s+([\s\S]+)$/i.exec(on.trim())?.[1] : undefined;
+      if (until !== undefined) {
+        const u = parseTarget(/^["#@]/.test(until.trim()) || /^[a-z]+\s+"/.test(until.trim()) ? until : `"${until.trim()}"`);
+        if (typeof u === "string") return u;
+        if (u.target.by === "point") return "scroll until takes a label or an #id, not a point.";
+        if (u.after.trim()) return `Unexpected "${u.after.trim()}" after the target.`;
+        return { op: "scroll", direction: direction as Direction, until: u.target };
+      }
       const t = parseTarget(on.trim().startsWith('"') || on.trim().startsWith("#") || on.trim().startsWith("@") ? on : `"${on.trim()}"`);
       if (typeof t === "string") return t;
       return { op, direction: direction as Direction, target: t.target };
     }
+    case "pause":
     case "wait":
     case "gone":
     case "hold": {
+      // A number alone is a pause: `wait 2` waits two seconds (an element named "2" is `wait "2"`).
+      const alone = /^(\d+(?:\.\d+)?)\s*s?$/.exec(rest.trim());
+      if (alone && verb.toLowerCase() !== "hold" && verb.toLowerCase() !== "gone") return { op: "pause", seconds: Math.min(Number(alone[1]), MAX_PAUSE_SECONDS) };
+      if (verb.toLowerCase() === "pause") return "pause takes seconds: pause 2";
       const t = targetThenNumber(rest);
       if (typeof t === "string") return t;
+      const whole = t.whole ? { whole: t.whole } : {};
       if (verb.toLowerCase() === "hold") {
         const s = seconds(t.number, DEFAULT_HOLD_SECONDS, MAX_HOLD_SECONDS);
         if (typeof s === "string") return s;
-        return { op: "hold", target: t.target, seconds: s };
+        return { op: "hold", target: t.target, seconds: s, ...whole };
       }
       const s = seconds(t.number);
       if (typeof s === "string") return s;
-      return { op: verb.toLowerCase() as "wait" | "gone", target: t.target, seconds: s };
+      return { op: verb.toLowerCase() as "wait" | "gone", target: t.target, seconds: s, ...whole };
     }
     case "set": {
       const t = targetThenNumber(rest);
@@ -178,7 +200,7 @@ export function parseStep(line: string): Step | string {
       if (rest.trim()) return `${verb} takes nothing after it.`;
       return { op: verb.toLowerCase() as "back" | "home" };
     default:
-      return `Unknown step "${verb}". Steps: tap, fill, type, scroll, swipe, hold, set, wait, gone, key, back, home.`;
+      return `Unknown step "${verb}". Steps: tap, fill, type, scroll, swipe, hold, set, wait, gone, pause, key, back, home.`;
   }
 }
 
