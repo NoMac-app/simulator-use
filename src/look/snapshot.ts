@@ -363,6 +363,9 @@ export function snapshot(tree: AxNode | AxNode[]): Snapshot {
     if (SCROLL_BAR.test(label)) return;
     // A large area with nothing readable inside: a web view, a map, a game, custom drawing.
     if ((node.role === "AXScrollArea" || node.role === "AXWebArea") && node.frame && area(node.frame) >= area(screen) * 0.15 && !readable(node)) {
+      // An empty area that a web page read from the page itself lies over (Safari's tree holds its page's area
+      // twice) is that page, which is listed: nothing unreadable there.
+      if (node.found_by === "web_page_under") return;
       const shown = visible(node.frame, screen, floor, ceiling);
       if (shown) result.unreadable.push(shown);
       return;
@@ -538,7 +541,9 @@ export function render(snap: Snapshot, options: RenderOptions = {}): string {
     lines.push(`unreadable @${c.x},${c.y} (${Math.round(f.width)}x${Math.round(f.height)}): a web view, custom drawing or an iOS system screen; ui_look with screenshot shows it, then tap @x,y`);
   }
   // React Native apps often set a test id as the accessibility label: the screen then shows other text.
-  const idLike = elements.filter((e) => e.kind === "text" && e.label && /^[a-z0-9]+(?:[-_][a-z0-9]+)+$/.test(e.label)).map((e) => e.label!);
+  // A web page's text is what the page shows (a date, a slug), never a test id; and a text made only of digits and
+  // dashes is a date or a number.
+  const idLike = elements.filter((e) => e.kind === "text" && !e.web && e.label && /^[a-z0-9]+(?:[-_][a-z0-9]+)+$/.test(e.label) && /[a-z]/.test(e.label)).map((e) => e.label!);
   if (idLike.length) lines.push(`note: ${idLike.slice(0, 3).map((l) => quote(l)).join(", ")} ${idLike.length === 1 ? "is a test id the app set as its label" : "are test ids the app set as labels"}; the text on screen differs, and ui_look with screenshot shows it`);
   if (snap.tabs.length) lines.push(`tabs: ${snap.tabs.map((t) => `${oneLine(t.label ?? t.id ?? "")}${t.state ? ` (${t.state})` : ""} @${t.x},${t.y}`).join(", ")}`);
   const { above, below, left, right } = snap.hidden;

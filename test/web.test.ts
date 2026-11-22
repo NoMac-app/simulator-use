@@ -109,3 +109,15 @@ test("texts lose the separators at their ends, and a link without words is named
   assert.equal(linkName("https://example.com/docs/getting%20started/"), "getting started");
   assert.equal(linkName("not a link"), "");
 });
+
+test("a page's own area under its elements is not called unreadable, and a web page's date is not taken for a test id", () => {
+  const at = { x: 0, y: 62, scale: 1, how: "test" };
+  const nested: AxNode = { role: "AXWebArea", frame: { x: 0, y: 62, width: 402, height: 714 }, found_by: "web_page_under", children: [] };
+  const view: AxNode = { role: "AXScrollArea", frame: { x: 0, y: 0, width: 402, height: 874 }, children: [nested, pageNode({ k: "link", n: "past", x: 69, y: 25, w: 26, h: 16 }, at)!, pageNode({ k: "text", n: "2026-11-21", x: 140, y: 30, w: 60, h: 16 }, at)!, pageNode({ k: "text", n: "my-test-id", x: 140, y: 60, w: 60, h: 16 }, at)!] };
+  const twin: AxNode = { role: "AXScrollArea", frame: { x: 0, y: 0, width: 402, height: 874 }, found_by: "web_page_under", children: [] };
+  const app: AxNode = { role: "AXApplication", AXLabel: "Safari", frame: screen, children: [view, twin] };
+  const snap = snapshot([app]);
+  assert.equal(snap.unreadable.length, 0);
+  // Without the mark, such an area is unreadable, as before.
+  assert.equal(snapshot([{ role: "AXApplication", AXLabel: "Safari", frame: screen, children: [{ role: "AXScrollArea", frame: { x: 0, y: 0, width: 402, height: 874 }, children: [] }] }]).unreadable.length, 1);
+});

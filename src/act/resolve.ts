@@ -80,7 +80,11 @@ export function resolve(snap: Snapshot, target: Target): Resolved | Unresolved {
   // Which way more elements are, both ways named when there are both: where the target is, if anywhere, is not known.
   const { above, below } = snap.hidden;
   const ways = [above ? `${above} more above (scroll up)` : "", below ? `${below} more below (scroll down)` : ""].filter(Boolean);
-  const until = ` scroll down until ${describeTarget(target)} looks for it down the list.`;
+  // Which way there is more of the screen: down from its top, up from its bottom, either way from between.
+  const atTop = !snap.scroll || / at top$/.test(snap.scroll), atBottom = Boolean(snap.scroll && / at bottom$/.test(snap.scroll));
+  const until = atBottom ? ` scroll up until ${describeTarget(target)} looks for it up the list.`
+    : atTop ? ` scroll down until ${describeTarget(target)} looks for it down the list.`
+    : ` scroll down until ${describeTarget(target)} (or scroll up until) looks for it.`;
   return {
     error: `No ${describeTarget(target)} on screen.`,
     next: ways.length || snap.scroll ? `${ways.length ? `${ways.join(", ")}.` : "The screen scrolls."}${until} Or call ui_look.` : "Call ui_look to see what is on screen.",

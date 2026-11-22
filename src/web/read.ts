@@ -279,6 +279,7 @@ export async function withWebPages(udid: string, roots: AxNode[], pointRead?: Po
   // Each web view takes the page whose size fits it best (one view and one page nearly always).
   const free = [...shown];
   let items = 0, pages = 0, placed = "";
+  const filled: Frame[] = [];
   for (const view of views.sort((a, b) => area(b.frame!) - area(a.frame!))) {
     if (!free.length) break;
     const f = view.frame!;
@@ -291,10 +292,28 @@ export async function withWebPages(udid: string, roots: AxNode[], pointRead?: Po
     // What the app's own tree had there stays (its scroll bars); what the engine's point scan found is the page's,
     // said better by the page.
     const own = (view.children ?? []).filter((child) => child.found_by !== "point_scan");
+    // The page's area again inside the web view (the app's tree nests it): the page is listed, so it is not unreadable.
+    const under = (node: AxNode) => {
+      if ((node.role === "AXScrollArea" || node.role === "AXWebArea") && node.frame && !node.found_by) node.found_by = "web_page_under";
+      for (const child of node.children ?? []) under(child);
+    };
+    for (const child of own) under(child);
     const bar = scrollBar(page, f, own);
     view.children = [...own, ...(bar ? [bar] : []), ...nodes];
     items += nodes.length;
     pages++;
+    filled.push(f);
+  }
+  // A web view left without a page that a filled one lies over (the same page's area a second time in the tree) is
+  // marked, so the snapshot does not call it unreadable beside the page's own elements.
+  for (const view of views) {
+    const f = view.frame!;
+    if (filled.includes(f) || (view.children ?? []).some((child) => child.found_by === "web_page")) continue;
+    const covered = filled.some((g) => {
+      const w = Math.min(f.x + f.width, g.x + g.width) - Math.max(f.x, g.x), h = Math.min(f.y + f.height, g.y + g.height) - Math.max(f.y, g.y);
+      return w > 0 && h > 0 && w * h >= 0.6 * Math.min(area(f), area(g));
+    });
+    if (covered) view.found_by = "web_page_under";
   }
   return { tree: roots, merged: { pages, items, ms: Date.now() - started, placed } };
 }
