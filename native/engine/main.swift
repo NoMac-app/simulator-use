@@ -208,6 +208,8 @@ func blocking(_ work: @escaping @Sendable () throws -> Void) async throws {
  */
 var bootstrapCount = 0
 var signalSources: [DispatchSourceSignal] = []
+/** The watch on the process that started the engine: kept for the engine's life (a source let go stops watching). */
+var parentWatch: DispatchSourceProcess?
 var seedClocks: [DispatchSourceTimer] = []
 var forceBootstrap = false
 var automationSession: AnyObject?
@@ -665,7 +667,15 @@ func takeSessionTurn(deadline: DispatchTime) -> Int? {
   if wait > 0 { usleep(UInt32(min(wait, sessionGapSeconds) * 1_000_000)) }
   return ms(start)
 }
+/**
+ * One close at a time. The end of the requests (main thread), a signal and the end of the engine's parent (the signal queue)
+ * can all close the session at once, and the parent's end always brings the input's end with it: a second caller that found
+ * no session left and ended the engine cut the first's close short, before its invalidation reached the phone and its close
+ * time was written (measured November 23, 2026: the lock file kept "open <pid>"). The second now waits for the first.
+ */
+let closeLock = NSLock()
 func closeSession() {
+  closeLock.lock(); defer { closeLock.unlock() }
   guard let session = automationSession else { return }
   automationSession = nil
   // Another engine may hold the turn for a whole open (sessionBudget); the close goes ahead only after it.
@@ -1561,6 +1571,16 @@ func main() async {
       source.setEventHandler { for finish in exitFinishers { finish() }; closeSession(); exit(0) }
       source.resume(); signalSources.append(source)
     }
+    // The process that started the engine (simulator-use) ended: a command that finished, or one its harness killed, while
+    // a read held the engine. The end of its input is not seen then, and no signal comes (the timers that would send one
+    // ended with it), so the engine stayed for ever with its session open and the phone's next engine waited on it. Its
+    // end is watched on the same queue: the session is closed, as for a signal, and the engine ends. One whose parent
+    // ended before the watch began (it was handed to launchd) ends at once.
+    let parent = getppid()
+    parentWatch = DispatchSource.makeProcessSource(identifier: parent, eventMask: .exit, queue: signalQueue)
+    parentWatch?.setEventHandler { for finish in exitFinishers { finish() }; closeSession(); exit(0) }
+    parentWatch?.resume()
+    if parent <= 1 || getppid() != parent { signalQueue.async { for finish in exitFinishers { finish() }; closeSession(); exit(0) } }
     for await line in requestLines() {
       // Nobody reads the answers any more: as at the end of the requests, the session is closed below.
       if outputGone { break }
