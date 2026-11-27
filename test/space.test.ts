@@ -387,3 +387,65 @@ test("a save kept in NoMac's storage marks its copy as a cache; one only here, o
     setAnswerWithin(8_000);
   }
 });
+
+// The same phone's side, as a customer's agent meets it: a state saved on one phone and kept in NoMac's storage,
+// restored on a phone whose workspace never saved one, so it has no folder for states yet.
+test("a restore NoMac sends into a workspace that never saved a state fetches it, makes the states' folder and marks the copy", { skip: process.platform !== "darwin" }, async () => {
+  volume();
+  const saved = mkdtempSync(join(tmpdir(), "su-space-"));
+  await mounted(saved);
+  const phone = mkdtempSync(join(tmpdir(), "su-space-phone-"));
+  file(join(phone, "Library", "Preferences", "app.plist"), 60);
+  const bin = mkdtempSync(join(tmpdir(), "su-space-xcrun-"));
+  const devices = JSON.stringify({ devices: { "com.apple.CoreSimulator.SimRuntime.iOS-27-0": [{ udid: "5E55E550-0000-4000-8000-000000000002", name: "iPhone 17 Pro", state: "Booted", isAvailable: true, dataPath: phone }] } });
+  writeFileSync(join(bin, "devices.json"), devices);
+  writeFileSync(join(bin, "xcrun"), `#!/bin/sh\nif [ "$2" = list ]; then cat "${join(bin, "devices.json")}"; fi\nexit 0\n`);
+  chmodSync(join(bin, "xcrun"), 0o755);
+  let stored: Buffer | undefined;
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async (_url: string | URL, init?: RequestInit) => {
+    if (init?.method === "PUT") {
+      stored = Buffer.from(await new Response(init.body as ReadableStream).arrayBuffer());
+      return new Response("", { status: 200 });
+    }
+    return stored ? new Response(new Uint8Array(stored), { headers: { "content-length": String(stored.length) } }) : new Response("", { status: 404 });
+  }) as typeof fetch;
+  const savedPath = process.env.PATH;
+  process.env.PATH = `${bin}:${process.env.PATH}`;
+  setFirstRead(async () => ({ ok: true }));
+  setAnswerWithin(50);
+  const dataKey = Buffer.alloc(32, 9).toString("base64url");
+  let n = 0;
+  const state = async (params: Record<string, unknown>) => {
+    const id = `state_${(0xf000 + ++n).toString(16).padStart(40, "0")}`;
+    let answer: Record<string, unknown>;
+    do answer = (await hosted("simulator-use/state", { id, ...params })) as Record<string, unknown>;
+    while (answer.state === "running");
+    return answer;
+  };
+  try {
+    const kept = await state({ action: "save", name: "signed-in", url: "https://r2.example.test/put/signed-in", data_key: dataKey });
+    assert.equal(kept.state, "done", String(kept.error));
+    assert.equal(kept.uploaded, true);
+    // The next phone: its own data, and a workspace with nothing in it.
+    writeFileSync(join(phone, "Library", "Preferences", "app.plist"), "the next phone's own");
+    const fresh = mkdtempSync(join(tmpdir(), "su-space-"));
+    await mounted(fresh);
+    assert.equal(existsSync(join(fresh, "phone-states")), false);
+    assert.deepEqual(await state({ action: "list" }), { state: "done", states: [] });
+    assert.deepEqual(await state({ action: "delete", name: "signed-in" }), { state: "done", states: [] }, "deleting what is not there is done, and makes nothing");
+    assert.equal(existsSync(join(fresh, "phone-states")), false);
+    const back = await state({ action: "restore", name: "signed-in", url: "https://r2.example.test/get/signed-in", data_key: dataKey, saved_at: kept.saved_at });
+    assert.equal(back.state, "done", String(back.error));
+    assert.equal(back.fetched, true);
+    assert.equal(readFileSync(join(phone, "Library", "Preferences", "app.plist")).length, 60, "the saved state is on the phone");
+    assert.deepEqual(readdirSync(join(fresh, "phone-states")), ["signed-in"], "the state alone, no download left half done");
+    assert.equal((JSON.parse(readFileSync(join(fresh, "phone-states", "signed-in", STORED), "utf8")) as { saved_at: string }).saved_at, kept.saved_at);
+    assert.deepEqual(((await state({ action: "list" })) as { states: Array<{ name: string }> }).states.map((s) => s.name), ["signed-in"]);
+  } finally {
+    globalThis.fetch = realFetch;
+    process.env.PATH = savedPath;
+    setFirstRead(undefined);
+    setAnswerWithin(8_000);
+  }
+});

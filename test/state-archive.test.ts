@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -68,6 +68,15 @@ test("a state goes to its link sealed and comes back from it into place, a bad o
     assert.match(readFileSync(join(to, "signed-in", "state.json"), "utf8"), /2026-10-25T10:00:00/);
     assert.deepEqual(existsSync(join(to, ".signed-in.fetching")), false);
     await assert.rejects(fetchState(to, "signed-in", `${base}/missing`, k), /answered 404/);
+
+    // A workspace that never saved a state has no folder for them yet: a download that fails makes none, one that
+    // opens makes it and leaves only the state there.
+    const fresh = join(mkdtempSync(join(tmpdir(), "su-ws-")), "phone-states");
+    await assert.rejects(fetchState(fresh, "signed-in", `${base}/missing`, k), /answered 404/);
+    assert.equal(existsSync(fresh), false);
+    await fetchState(fresh, "signed-in", `${base}/state`, k);
+    assert.deepEqual(readdirSync(fresh), ["signed-in"]);
+    assert.ok(readFileSync(join(fresh, "signed-in", "data", "Library", "app.db")).equals(readFileSync(join(from, "signed-in", "data", "Library", "app.db"))));
   } finally {
     server.close();
   }
